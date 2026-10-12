@@ -3,137 +3,167 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Милки — Моя страница (расписание выбираю сама)</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Милки — Моя страница</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--c:#12c2f0;--c2:#e9f9fe;--ink:#1f2a37;--mut:#8b95a1;--line:#eef1f4;--ok:#3a8f2f}
+:root{--cy:#0ad1f8;--hd:#2ccbea;--tx:#34404e;--mu:#9aa1a9;--ln:#eef1f5;--pl:#f1fcff;--sq:#eef7fc;--bt:#17b3e6;--ok:#3b8f2f}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-body{font-family:'Nunito',system-ui,sans-serif;background:#fafafa;color:var(--ink);display:flex;min-height:100vh}
+body{font-family:'Montserrat',system-ui,sans-serif;background:#f9f9f9;color:var(--tx);display:flex;min-height:100vh;font-size:13px}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-button:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+button:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+svg{display:block;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 
-/* боковая панель */
-.rail{position:sticky;top:0;align-self:flex-start;height:100vh;width:76px;flex:none;background:#fff;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 0;border-radius:0 0 24px 0;box-shadow:0 0 24px rgba(0,0,0,.04);z-index:5}
-.logo{font-weight:800;font-size:30px;color:#1d5fa8;height:44px}
-.ava{width:44px;height:44px;border-radius:50%;background:#fde4e4;display:grid;place-items:center;font-size:22px;flex:none}
-.rail hr{width:46px;border:0;border-top:1px solid var(--line);margin:10px 0}
-.ri{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#6b7683}
-.ri.act{background:var(--c2);color:var(--c)}
-.shade{position:fixed;inset:0;background:rgba(20,30,40,.25);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
-.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:86vw;background:#fff;z-index:11;transform:translateX(-102%);transition:transform .25s;overflow-y:auto;padding:22px 20px 30px;border-radius:0 24px 24px 0;box-shadow:8px 0 40px rgba(0,0,0,.08)}
+/* ---------- боковая панель ---------- */
+.rail{position:sticky;top:0;align-self:flex-start;height:100vh;width:72px;flex:none;background:#fff;display:flex;flex-direction:column;align-items:center;padding-top:34px;border-radius:0 19px 19px 0;box-shadow:0 0 30px rgba(0,0,0,.05);z-index:5}
+.logo{height:32px;font-weight:800;font-size:23px;line-height:32px;color:#2d6a9f}
+.ava{width:30px;height:30px;border-radius:50%;background:#fde4e4;display:grid;place-items:center;font-size:15px;flex:none}
+.rail .ava{margin-top:36px}
+.rail hr{width:30px;border:0;border-top:1px solid #ebedf0}
+.rail hr.h1{margin-top:133px}
+.rail hr.h2{margin-top:14px}
+.ri{width:48px;height:48px;display:grid;place-items:center;color:#777}
+.ri svg{width:17px;height:17px}
+.rail .first{margin-top:9px}
+.shade{position:fixed;inset:0;background:rgba(15,25,35,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:287px;max-width:88vw;background:#fff;z-index:11;transform:translateX(-102%);transition:transform .25s;overflow-y:auto;padding:36px 0 30px;border-radius:0 19px 19px 0;box-shadow:8px 0 40px rgba(0,0,0,.08);text-align:center}
 .menu .shade{opacity:1;pointer-events:auto}
 .menu .drawer{transform:none}
-.brand{font-weight:800;font-size:28px;color:#1d5fa8;text-align:center;letter-spacing:1px;line-height:1}
-.brand small{display:block;font-size:9px;letter-spacing:0;margin-top:2px}
-.dp{display:flex;flex-direction:column;align-items:center;gap:6px;margin:14px 0 8px}
-.dp .ava{width:60px;height:60px;font-size:30px}
-.nm{font-size:14px;text-align:center}
-.coins{display:flex;gap:14px;justify-content:center;align-items:center;font-size:20px;margin-top:4px}
-.coin{display:inline-block;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f0a500);margin-right:6px;vertical-align:-3px}
-.bell{position:relative;font-size:18px}
-.bell i{position:absolute;top:-6px;right:-8px;background:#e5314a;color:#fff;font:700 10px/14px Nunito;width:14px;text-align:center;border-radius:50%}
-.sect{font-size:11px;color:var(--mut);margin:16px 6px 4px;padding-top:10px;border-top:1px solid var(--line)}
-.mi{display:flex;align-items:center;gap:14px;width:100%;padding:10px 8px;border-radius:12px;font-size:15px;color:#4b5563;text-align:left}
-.mi:active{background:var(--c2)}
+.brand{position:relative;display:inline-block;font-weight:800;font-size:22px;line-height:26px;letter-spacing:1px;color:#1c5ba6}
+.brand i{position:absolute;right:-12px;top:-5px;width:11px;height:11px;border:2px solid #f59a1f;border-radius:50%}
+.brand small{display:block;font-size:6px;line-height:6px;letter-spacing:0;margin-top:-1px}
+.drawer .ava{width:61px;height:61px;font-size:30px;margin:35px auto 0}
+.dname{font-size:14px;line-height:16px;color:#6b7280;margin-top:3px}
+.coins{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:26px;font-size:17px;color:#555;font-weight:400}
+.coin{display:inline-block;width:19px;height:19px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f0a500);margin-right:5px;vertical-align:-4px}
+.bell{position:relative;color:#777}
+.bell svg{width:18px;height:18px}
+.bd2{position:absolute;right:-6px;bottom:-5px;min-width:13px;height:13px;border-radius:7px;background:#e5314a;color:#fff;font-size:8px;font-weight:600;line-height:13px;text-align:center}
+.bd2.cy{background:var(--cy)}
+.dv{height:1px;background:#eceef1;margin:30px 52px 0}
+.sl{text-align:left;font-size:9.5px;letter-spacing:1px;color:#b3b9bf;padding:11px 52px 3px;text-transform:uppercase}
+.mi{display:flex;align-items:center;gap:14px;width:100%;height:48px;padding-left:47px;font-size:13.3px;color:#7b838c;text-align:left}
+.mi svg{width:17px;height:17px;flex:none;position:relative}
+.mi:active{background:var(--pl)}
 
-/* основная часть */
-.main{flex:1;min-width:0;padding:24px 34px 70px;max-width:1440px}
-.cap{font-size:12px;color:var(--mut)}
-h1{font-weight:600;font-size:32px;line-height:1.15;margin:4px 0 6px}
-.sec{font-size:17px;font-weight:600;color:var(--c);margin:22px 0 10px}
-.card{background:#fff;border-radius:26px;box-shadow:0 8px 28px rgba(18,194,240,.07);padding:18px 20px}
+/* ---------- основная часть ---------- */
+.main{flex:1;min-width:0;padding:38px 52px 0}
+.cap{font-size:9px;color:#a5a8ac}
+h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6px}
+.sec{font-size:14.5px;font-weight:400;color:var(--hd);margin:22px 0 14px}
+.card{background:#fff;border-radius:25px;box-shadow:0 6px 30px rgba(0,0,0,.04);padding:22px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
+.hd h2{font-size:15px;font-weight:400;color:var(--hd)}
+.hd span{font-size:9.5px;color:var(--mu)}
+.hd2{font-size:9.5px;color:var(--mu);margin-bottom:14px}
 
 /* карточки уроков */
-.today{display:flex;gap:14px;flex-wrap:wrap}
-.lc{width:216px;background:#fff;border-radius:22px;box-shadow:0 8px 28px rgba(18,194,240,.07);overflow:hidden;text-align:center;padding-bottom:14px}
-.ban{height:84px;position:relative;display:grid;place-items:center;font-size:40px}
-.tg{position:absolute;left:10px;top:10px;background:#fff;border-radius:14px;padding:2px 10px;font-size:12px;font-weight:600}
-.lc h3{font-size:16px;margin:10px 8px 2px}
-.tm{font-size:13px;color:#566170;margin-bottom:6px}
-.lc .tn{font-size:12px;color:var(--mut);margin-bottom:8px}
-.join,.soon,.done{display:block;margin:0 14px;width:calc(100% - 28px);border-radius:20px;padding:8px 0;font-weight:700;font-size:14px}
-.join{background:var(--c);color:#fff}
-.soon{border:1.5px solid #bdeaf7;color:#8fd3ea}
+.today{display:flex;gap:8px;flex-wrap:wrap}
+.lc{width:254px;background:#fff;border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}
+.ban{height:179px;position:relative;display:grid;place-items:center;background:linear-gradient(160deg,#ffe8c8,#fdd9a8);font-size:84px}
+.ban b{position:absolute;top:54px;left:0;right:0;font-size:19px;font-weight:800;letter-spacing:.5px;color:#e8793a;text-transform:uppercase;padding:0 12px}
+.tg{position:absolute;left:14px;top:14px;background:#fff;border-radius:14px;padding:0 13px;height:28px;line-height:28px;font-size:12.5px;font-weight:600;color:var(--tx)}
+.lc h3{font-size:19.5px;font-weight:700;margin:16px 8px 8px}
+.tm{display:flex;gap:7px;justify-content:center;align-items:center;font-size:14.5px;font-weight:600;color:#4a5563;margin-bottom:17px}
+.tm svg{width:14px;height:14px;color:#8a929b}
+.join,.soon,.done{display:block;margin:0 auto;width:180px;height:36px;border-radius:18px;font-weight:600;font-size:14px}
+.join{background:var(--cy);color:#fff}
+.soon{border:1.5px solid #c4e9f6;color:#8fcfe6}
 .done{background:#f1f3f5;color:#a9b2bb}
-.rest{background:#fff;border-radius:20px;padding:16px 20px;color:#566170;box-shadow:0 8px 28px rgba(18,194,240,.07)}
+.rest{background:#fff;border-radius:20px;padding:18px 22px;color:#6b7580;font-size:13px;box-shadow:0 6px 30px rgba(0,0,0,.04)}
 
 /* конструктор */
-.how{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.st{flex:1 1 200px;display:flex;gap:10px;align-items:center;background:var(--c2);border-radius:16px;padding:8px 12px;font-size:13px;line-height:1.25}
-.st b{flex:none;width:24px;height:24px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:13px}
-.ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.meter{display:flex;align-items:center;gap:10px;flex:1 1 240px;min-width:200px}
-.meter strong{font-size:20px;white-space:nowrap}
-.bar{height:10px;border-radius:6px;background:#eaf0f4;overflow:hidden;flex:1}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,#12c2f0,#6ee7ff);width:0;transition:width .25s}
-.main-btn{background:var(--c);color:#fff;border-radius:20px;padding:9px 20px;font-weight:700;font-size:14px}
-.main-btn:disabled{background:#e5eaee;color:#9aa5b0;cursor:not-allowed}
-.soft-btn{background:var(--c2);color:#0a8fb5;border-radius:20px;padding:8px 16px;font-weight:700;font-size:14px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.dt{border-radius:18px;padding:8px 16px;background:#f1f4f6;font-weight:700;font-size:14px;color:#566170}
-.dt small{margin-left:6px;font-size:12px;opacity:.8}
-.dt.on{background:var(--c);color:#fff}
-.rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:0 28px}
-.br{display:grid;grid-template-columns:1fr 92px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
-.br b{display:block;font-size:15px;line-height:1.2}
-.br small{color:var(--mut);font-size:12px}
-.dots{display:flex;gap:3px;margin-top:4px}
-.dots i{width:8px;height:8px;border-radius:50%;background:#e3e8ed}
-.dots i.f{background:var(--c)}
-.chip{border:1.5px solid #cdeffa;background:var(--c2);color:#0a8fb5;border-radius:14px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;line-height:1.15;min-height:46px;justify-content:center;transition:background .15s}
-.chip b{font-size:15px}
-.chip small{font-size:10px;color:inherit;opacity:.85}
+.how{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.st{flex:1 1 200px;display:flex;gap:10px;align-items:center;background:var(--pl);border-radius:14px;padding:9px 12px;font-size:11px;line-height:1.35;color:#566170}
+.st b{flex:none;width:22px;height:22px;border-radius:50%;background:var(--cy);color:#fff;display:grid;place-items:center;font-size:11px}
+.ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.meter{display:flex;align-items:center;gap:12px;flex:1 1 260px;min-width:220px}
+.meter strong{font-size:13px;font-weight:600;white-space:nowrap}
+.bar{height:9.5px;border-radius:5px;background:#edf2f6;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--cy);width:0;transition:width .25s}
+.main-btn{background:var(--cy);color:#fff;border-radius:18px;height:36px;padding:0 22px;font-weight:600;font-size:13px}
+.main-btn:disabled{background:#e9eef2;color:#a9b2bb;cursor:not-allowed}
+.soft-btn{background:var(--pl);color:var(--bt);border-radius:18px;height:36px;padding:0 18px;font-weight:600;font-size:13px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.dt{height:29px;padding:0 15px;border:1px solid #12c6f4;border-radius:9px;color:#12c6f4;font-weight:500;font-size:12.5px}
+.dt small{margin-left:6px;font-size:10.5px}
+.dt.on{background:var(--cy);border-color:var(--cy);color:#fff}
+.rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px 14px}
+.it{display:flex;align-items:center;gap:14px;border:1px solid var(--ln);border-radius:17px;padding:0 14px 0 18px;min-height:75px;background:#fff}
+.it .ico{flex:none;width:42px;height:42px;border-radius:11px;background:var(--sq);color:var(--cy);display:grid;place-items:center;font-size:19px}
+.it .ico svg{width:14px;height:14px}
+.it>div{flex:1;min-width:0}
+.it b{display:block;font-size:16px;font-weight:600;line-height:1.25}
+.it small{display:block;color:var(--mu);font-size:11px;margin-top:2px}
+.it small strong{font-weight:600;color:#6b7580}
+.dots{display:flex;gap:3px;margin-top:5px}
+.dots i{width:7px;height:7px;border-radius:50%;background:#e3e8ed}
+.dots i.f{background:var(--cy)}
+.tag2{display:inline-block;background:#eef1f4;border-radius:9px;padding:1px 8px;font-size:9.5px;font-weight:500;margin-left:6px;vertical-align:2px;color:#6b7580}
+.go,.chip{flex:none;background:var(--pl);color:var(--bt);border-radius:18px;font-weight:700;font-size:12px}
+.go{height:36px;padding:0 17px}
+.go.ok{background:#e7f6e5;color:var(--ok)}
+.chip{width:84px;height:44px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;border:1.5px solid transparent;transition:background .15s}
+.chip b{display:block;font-size:14px;font-weight:700}
+.chip small{font-size:9.5px;font-weight:500;margin:0;color:inherit;opacity:.85}
 .chip.low small{color:#d97706;opacity:1}
-.chip.on{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 4px 12px rgba(18,194,240,.35)}
+.chip.on{background:var(--cy);color:#fff;box-shadow:0 4px 12px rgba(10,209,248,.3)}
 .chip.on small{color:#fff}
-.chip:disabled{background:#f3f5f7;border-color:#f3f5f7;color:#b7c0c8;cursor:not-allowed}
+.chip:disabled{background:#f3f5f7;color:#b7c0c8;cursor:not-allowed}
 
-/* показанное расписание */
-.sum{font-size:13px;color:#566170;margin:14px 0 4px}
-.day{display:grid;grid-template-columns:54px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
-.dn b{display:block;font-size:15px}
-.dn span{font-size:12px;color:var(--mut)}
-.load{display:flex;gap:2px;margin-bottom:5px}
-.load i{width:14px;height:6px;border-radius:3px;background:#e8edf1}
-.load i.f{background:var(--c)}
-.pls{display:flex;gap:5px;flex-wrap:wrap}
-.pill{border-radius:12px;padding:3px 9px;font-size:12px;font-weight:600;color:#3b4552}
-.pill i{font-style:normal;font-weight:800;margin-right:5px}
-.fr{font-size:13px;color:#9aa5b0}
+/* готовое расписание */
+.sum{font-size:11px;color:#6b7580;margin:16px 0 12px}
+.wk{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.dc{background:#fff;border-radius:25px;box-shadow:0 6px 30px rgba(0,0,0,.04);padding:16px 14px 14px}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px;border-bottom:1px solid var(--ln);margin-bottom:10px}
+.dh b{font-size:17px;font-weight:600;color:var(--hd)}
+.bd{background:#eef1f4;border-radius:12px;padding:3px 9px;font-size:10.5px;color:#7a838c}
+.ls{display:flex;gap:10px;align-items:center;border:1px solid var(--ln);border-radius:14px;padding:8px;margin-bottom:8px}
+.tp{flex:none;width:53px;border-radius:11px;background:var(--pl);text-align:center;padding:6px 0;line-height:1.2}
+.tp b{display:block;font-size:13px;font-weight:700;color:var(--bt)}
+.tp small{font-size:9.5px;color:var(--mu)}
+.ls div:last-child{min-width:0}
+.ls strong{font-size:13px;font-weight:700}
+.ls span.t{display:inline-block;background:var(--pl);color:var(--bt);border-radius:9px;padding:1px 7px;font-size:9px;font-weight:600;margin-left:5px;vertical-align:1px}
+.ls small{display:block;font-size:10.5px;color:var(--mu);margin-top:2px}
+.fr{font-size:11.5px;color:#9aa5b0;padding:10px 4px}
 
 /* учитель */
 .tch{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.pb2{border-radius:16px;padding:5px 12px;font-size:13px;font-weight:600;background:#f1f4f6;color:#566170}
-.pb2.on{background:var(--c2);color:#0a8fb5}
-.topic{background:#fff8e6;border-radius:14px;padding:8px 12px;font-size:14px;margin:8px 0 10px}
-.sr{display:grid;grid-template-columns:78px 1fr 150px;gap:10px;align-items:center;font-size:13px;padding:4px 0}
+.pb2{border-radius:14px;padding:6px 13px;font-size:11.5px;font-weight:500;background:#f1f4f6;color:#6b7580}
+.pb2.on{background:var(--pl);color:var(--bt);font-weight:600}
+.topic{background:#fff8e6;border-radius:12px;padding:9px 13px;font-size:12px;margin:10px 0}
+.sr{display:grid;grid-template-columns:84px 1fr 160px;gap:10px;align-items:center;font-size:11.5px;padding:4px 0}
 .sr .bar i.hot{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
-.note{font-size:12px;color:var(--mut);margin-top:8px}
+.note{font-size:10.5px;color:var(--mu);margin-top:10px;line-height:1.5}
 
 /* чек-лист, дз, оценки */
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
-.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
-.hd h2{font-size:17px;font-weight:600;color:var(--c)}
-.hd span{font-size:13px;color:#566170}
-.it{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:18px;padding:10px 12px;margin-bottom:8px}
-.it .ico{flex:none;width:36px;height:36px;border-radius:12px;background:var(--c2);color:var(--c);display:grid;place-items:center;font-weight:800}
-.it div{flex:1;min-width:0}
-.it b{display:block;font-size:15px}
-.it small{color:var(--mut);font-size:12px}
-.tag2{display:inline-block;background:#eef1f4;border-radius:10px;padding:1px 8px;font-size:11px;margin-left:6px;vertical-align:1px}
-.go{flex:none;background:var(--c2);color:var(--c);border-radius:16px;padding:7px 14px;font-weight:700;font-size:13px}
-.go.ok{background:#e7f6e5;color:var(--ok)}
-.gr{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-.gc{background:#fff;border-radius:22px;padding:14px 16px;box-shadow:0 8px 28px rgba(18,194,240,.07);display:flex;justify-content:space-between;gap:10px}
-.gc small{color:var(--mut);font-size:12px;display:block}
-.gc b{font-size:20px;color:var(--c);display:block;margin:2px 0 6px}
-.gc em{font-style:normal;font-size:13px;color:#566170}
-.mark{flex:none;width:48px;height:48px;border-radius:50%;background:var(--ok);color:#fff;font-weight:800;font-size:20px;display:grid;place-items:center}
-.mark.m4{background:var(--c)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:start;margin-top:18px}
+.cl-h{display:grid;grid-template-columns:1fr auto;gap:0 20px}
+.cl-m{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.cl-m span{font-size:12.5px;color:#8b929a}
+.cl-m b{font-size:13px;font-weight:600}
+.cl-m .bar{flex:1}
+.gr{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
+.gc{background:#fff;border-radius:19px;padding:16px;box-shadow:0 6px 30px rgba(0,0,0,.04)}
+.gt{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.gt small{display:block;color:var(--mu);font-size:12px}
+.gt b{display:block;font-size:21px;font-weight:600;color:#12c6f4;margin-top:6px}
+.mark{flex:none;width:44px;height:44px;border-radius:50%;background:var(--ok);color:#fff;font-weight:700;font-size:18px;display:grid;place-items:center}
+.mark.m4{background:var(--cy)}
+.gd{display:flex;gap:12px;align-items:center;margin-top:12px}
+.gd div{flex:1;background:#f4f6f8;border-radius:11px;padding:9px 14px}
+.gd small{display:block;color:var(--mu);font-size:10.8px}
+.gd b{font-size:15.8px;font-weight:600}
+.gd span{flex:none;width:35px;height:35px;border-radius:12px;background:var(--sq);color:var(--cy);display:grid;place-items:center}
+.gd svg{width:15px;height:15px}
+.nav{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.foot{margin:46px -52px 0;padding:34px 52px 46px;border-top:1px solid #ececec;font-size:12.7px;letter-spacing:.4px;color:#9aa1a9;text-transform:uppercase}
+.chat{position:fixed;right:13px;bottom:23px;width:58px;height:58px;border-radius:50%;background:#12c6f4;color:#fff;display:grid;place-items:center;box-shadow:0 6px 20px rgba(18,198,244,.35);z-index:4}
+.chat svg{width:26px;height:26px}
 
 @media(max-width:1100px){.row2{grid-template-columns:1fr}}
-@media(max-width:640px){.main{padding:16px 14px 60px}.rail{width:60px}.sr{grid-template-columns:70px 1fr 100px}}
+@media(max-width:640px){.main{padding:30px 16px 0}.foot{margin:40px -16px 0;padding:28px 16px 40px}.sr{grid-template-columns:70px 1fr 100px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -167,14 +197,14 @@ h1{font-weight:600;font-size:32px;line-height:1.15;margin:4px 0 6px}
   </section>
 
   <!-- потом: готовое расписание -->
-  <section class="card" id="result" hidden>
+  <section id="result" hidden>
     <div class="ctl">
       <div class="tabs" id="rtabs" style="margin:0;flex:1"></div>
       <button class="soft-btn" id="edit">Изменить расписание</button>
     </div>
     <div class="today" id="rday"></div>
     <div class="sum" id="sum"></div>
-    <div id="week"></div>
+    <div class="wk" id="week"></div>
   </section>
 
   <h2 class="sec">Как это видит учитель</h2>
@@ -184,38 +214,68 @@ h1{font-weight:600;font-size:32px;line-height:1.15;margin:4px 0 6px}
     <div class="note">Учитель даёт одну тему на неделю для всех 7-х классов, а ученики сами приходят к нему — не нужно помнить, на чём остановились 7А и 7Д. Система для 5–9 классов; в 1–4 остаётся готовое расписание.</div>
   </section>
 
-  <div class="row2" style="margin-top:22px">
+  <div class="row2">
     <section class="card">
-      <div class="hd"><h2>Чек-лист дня</h2><span id="cl-n"></span></div>
-      <div class="bar" style="margin-bottom:12px"><i id="cl-bar"></i></div>
+      <div class="cl-h"><div class="hd"><h2>Чек-лист дня</h2></div></div>
+      <div class="cl-m"><div class="hd2" style="margin:0;flex:1">Подготовка к учебному дню</div><span>Выполнено</span><div class="bar" style="max-width:260px"><i id="cl-bar"></i></div><b id="cl-n"></b></div>
       <div id="cl"></div>
     </section>
     <section class="card">
-      <div class="hd"><h2>Домашние задания</h2><span>Актуальные на сегодня</span></div>
+      <div class="hd"><h2>Домашние задания</h2><span>Все домашние задания ›</span></div>
+      <div class="hd2">Актуальные задания на сегодня</div>
       <div id="hw"></div>
     </section>
   </div>
 
-  <h2 class="sec">Оценки</h2>
-  <div class="gr" id="gr"></div>
+  <div class="hd" style="margin-top:22px"><h2 class="sec" style="margin:0">Оценки</h2><span>Мой дневник ›</span></div>
+  <div class="gr" id="gr" style="margin-top:14px"></div>
+  <div class="nav"><button class="dt">Назад</button><button class="dt">Далее</button></div>
+
+  <footer class="foot">Milky School 2026</footer>
 </main>
+<button class="chat" aria-label="Чат поддержки" id="chat"></button>
 
 <script>
 (function(){
 const $=s=>document.querySelector(s);
 
-/* ---------- иконки и меню ---------- */
-const ICON={home:'M4 20V9l5-3 5 3v11M14 20V4l6 3v13M3 20h18',chat:'M4 5h16v11H10l-4 3v-3H4z',book:'M6 3h12v18H6zM9 3v8l2-1.5 2 1.5V3',tasks:'M3 7l1.5 1.5L7 6M10 7h11M3 17l1.5 1.5L7 16M10 17h11',box:'M3 5h18v4H3zM5 9v10h14V9M10 13h4',doc:'M6 3h9l4 4v14H6zM9 12h7M9 16h7',dipl:'M6 3h12v18H6zM9 8h6M9 12h6M9 16h3',shop:'M4 10l2-6h12l2 6v10H4zM9 20v-6h6v6',check:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 12l3 3 5-6',crown:'M3 8l5 4 4-7 4 7 5-4-2 11H5z',play:'M3 6h18v13H3zM8 3l4 3 4-3M10 10l5 3-5 3z',game:'M3 9h18v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM8 12v4M6 14h4M16 13h.01M18 15h.01',news:'M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5',user:'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21c0-4 4-6 8-6s8 2 8 6',exit:'M10 4H5v16h5M15 8l4 4-4 4M19 12H9',feed:'M4 4h16v16H4zM8 9h8M8 13h5',club:'M5 9h14l-1 11H6zM8 9V6a4 4 0 0 1 8 0v3'};
-const ic=k=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ICON[k]}"/></svg>`;
+/* ---------- иконки (линейные, как в оригинале) ---------- */
+const ICON={
+ home:'M3.2 12.3L8.2 3 20.8 8.9M3.2 12.3v7.2c0 .8.7 1.5 1.5 1.5h14.6c.8 0 1.5-.7 1.5-1.5V8.9M8.2 12v9M11.5 21v-4.2c0-.7.5-1.2 1.2-1.2h.1c.7 0 1.2.5 1.2 1.2V21',
+ chat:'M6.5 3.5h11a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H11l-4.2 3.5V15.5H6.5a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3z',
+ book:'M7.5 3.5h9a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-11a3 3 0 0 1 3-3zM9.5 3.5v6.2l2.3-1.6 2.3 1.6V3.5',
+ tasks:'M3.5 7.2l1.6 1.6 2.9-3.2M11 7h9.5M3.5 16.6l1.6 1.6 2.9-3.2M11 16.4h9.5',
+ box:'M4.3 3.8h15.4c.7 0 1.3.6 1.3 1.3v2.4c0 .7-.6 1.3-1.3 1.3H4.3C3.6 8.8 3 8.2 3 7.5V5.1c0-.7.6-1.3 1.3-1.3zM4.5 8.8v9.2a2.7 2.7 0 0 0 2.7 2.7h9.6a2.7 2.7 0 0 0 2.7-2.7V8.8M10 12.8h4',
+ doc:'M7.5 3.5h6.8l4.7 4.7v9.8a3 3 0 0 1-3 3H7.5a3 3 0 0 1-3-3V6.5a3 3 0 0 1 3-3zM14.3 3.5v3.2a1.5 1.5 0 0 0 1.5 1.5H19M8.3 11.5h7.4M8.3 14.8h7.4M8.3 18h4.4',
+ dipl:'M7.5 3.5h9a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-11a3 3 0 0 1 3-3zM9 7.5h6v3.2H9zM8.5 14.5h7M8.5 18h4.5',
+ shop:'M6.2 3.6h11.6l2.9 4.9c.2.4-.1.9-.5.9H3.8c-.4 0-.7-.5-.5-.9zM5 9.5v9.4A2.1 2.1 0 0 0 7.1 21h9.8a2.1 2.1 0 0 0 2.1-2.1V9.5M8.5 21v-6.8L12 11l3.5 3.2V21M10.7 21v-3h2.6v3',
+ check:'M20.3 9.5A8.8 8.8 0 1 0 21 13M8 12.2l3 3 6.2-6.4',
+ crown:'M3.4 8.5l4.4 3.4L12 5l4.2 6.9 4.4-3.4-1.8 9.8H5.2z',
+ club:'M7.5 12.5a3.5 3.5 0 0 1-.8-6.9 4.3 4.3 0 0 1 8.1-.6 3.7 3.7 0 0 1 2.7 6.6M7.8 12.5h8.4a1 1 0 0 1 1 1v5.2a1 1 0 0 1-1 1H7.8a1 1 0 0 1-1-1v-5.2a1 1 0 0 1 1-1z',
+ feed:'M5.5 4h13a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM7.5 8h3v8h-3zM13.5 8h4',
+ tube:'M6 8.5h12a2.5 2.5 0 0 1 2.5 2.5v6a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 17v-6A2.5 2.5 0 0 1 6 8.5zM9 3.5l3 3 3-3M8.5 21.3h1.5M14 21.3h1.5M9.5 15.5l1.2-2.3M13.2 15.5l1.2-2.3',
+ game:'M7.5 8h9a4.5 4.5 0 0 1 4.4 3.6l.9 4.5a2.2 2.2 0 0 1-3.8 1.9L16 15.7H8l-2 2.3a2.2 2.2 0 0 1-3.8-1.9l.9-4.5A4.5 4.5 0 0 1 7.5 8zM7.5 10.8v2.6M6.2 12h2.6M15.3 11.2h.01M17.2 13h.01',
+ bell:'M12 3.8a5.2 5.2 0 0 0-5.2 5.2v3.1l-1.6 2.7c-.5.8.1 1.7 1 1.7h11.6c.9 0 1.5-.9 1-1.7l-1.6-2.7V9A5.2 5.2 0 0 0 12 3.8zM10 19a2.2 2.2 0 0 0 4 0',
+ user:'M12 3.8a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zM4.5 20.5c.4-3.5 3.7-5.5 7.5-5.5s7.1 2 7.5 5.5',
+ exit:'M15 4.5h3.2a1.3 1.3 0 0 1 1.3 1.3v12.4a1.3 1.3 0 0 1-1.3 1.3H15M3.5 12h11M7.3 8.2L3.5 12l3.8 3.8',
+ clock:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5V12l3 2',
+ tick:'M5.5 12.5l4.2 4.2L18.5 8',
+ note:'M7 3.5h10a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2zM9.5 8h5M9.5 11.5h5M9.5 15h3',
+ talk:'M12 3.5c-5 0-8.5 3.2-8.5 7.3 0 2 .9 3.8 2.4 5.1L5 20.5l4-1.8c.9.2 1.9.4 3 .4 5 0 8.5-3.2 8.5-7.3S17 3.5 12 3.5zM8.5 11h.01M12 11h.01M15.5 11h.01'
+};
+const ic=k=>`<svg viewBox="0 0 24 24"><path d="${ICON[k]}"/></svg>`;
+const RAIL=['home','chat','book','tasks','box','doc','dipl','shop'];
 const MENU=[
  ['Школа',[['home','Главная'],['chat','Мессенджер'],['book','Мой дневник'],['tasks','Домашняя работа'],['box','Библиотека'],['doc','Мои сертификаты'],['dipl','Мои дипломы'],['shop','Аттестационный центр']]],
  ['Развитие',[['check','Тренажеры'],['crown','Гильдии'],['dipl','Годовой проект'],['club','Клубы Milky']]],
- ['Развлечения',[['feed','Лента','#d62ad0'],['play','MilkyTube','#e5314a'],['crown','Маркетплейс','#12c2f0'],['game','Игры','#f59e0b'],['news','Новости']]],
+ ['Развлечения',[['feed','Лента','#d61fc4','cy'],['tube','MilkyTube','#d4202f'],['crown','Маркетплейс','#17c0e8'],['game','Игры','#e8a21a'],['bell','Новости','','red']]],
  ['Аккаунт',[['user','Профиль'],['exit','Выход']]]];
-$('#rail').innerHTML='<button class="logo" data-menu aria-label="Меню">M</button><button class="ava" data-menu aria-label="Меню">🌷</button><hr>'+
-  MENU[0][1].map(m=>`<button class="ri${m[0]==='home'?' act':''}" aria-label="${m[1]}">${ic(m[0])}</button>`).join('')+'<hr>';
-$('#drawer').innerHTML='<div class="brand">МИЛКИ<small>школа</small></div><div class="dp"><div class="ava">🌷</div><div class="nm">Милколенок</div><div class="coins"><span><span class="coin"></span>227</span><span class="bell">🔔<i>1</i></span></div></div>'+
-  MENU.map((g,i)=>`<div class="sect"${i?'':' style="border:0;margin-top:8px"'}>${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}>${ic(m[0])}${m[1]}</button>`).join('')).join('');
+$('#rail').innerHTML='<button class="logo" data-menu aria-label="Меню">M</button><button class="ava" data-menu aria-label="Меню">🌷</button><hr class="h1">'+
+  RAIL.map((k,i)=>`<button class="ri${i?'':' first'}" aria-label="${k}">${ic(k)}</button>`).join('')+'<hr class="h2">';
+$('#drawer').innerHTML='<div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><div class="ava">🌷</div><div class="dname">Милколенок</div>'+
+  `<div class="coins"><span><span class="coin"></span>227</span><span class="bell">${ic('bell')}<span class="bd2">1</span></span></div>`+
+  MENU.map(g=>`<div class="dv"></div><div class="sl">${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}><span style="position:relative;display:block">${ic(m[0])}${m[3]?`<span class="bd2${m[3]==='cy'?' cy':''}" style="right:-7px;bottom:-7px">1</span>`:''}</span>${m[1]}</button>`).join('')).join('');
+$('#chat').innerHTML=ic('talk');
 document.addEventListener('click',e=>{
   if(e.target.closest('[data-menu]'))document.body.classList.toggle('menu');
   else if(e.target.id==='shade')document.body.classList.remove('menu');
@@ -227,20 +287,21 @@ const ALLD=DAYS.concat('Вс');
 const CAP=25;               // мест на одном уроке
 const TEACHER='Имя учителя'; // заглушка
 const S=[
- ['alg','Алгебра',3,'➗','#ffe3c2','Линейные уравнения'],
- ['geom','Геометрия',2,'📐','#ffd9e3','Треугольники'],
- ['rus','Русский язык',3,'✍️','#e3dcff','Причастный оборот'],
- ['lit','Литература',1,'📖','#ffe9a8','Басни Крылова'],
- ['phys','Физика',2,'⚛️','#cfe9ff','Давление'],
- ['bio','Биология',2,'🧬','#d4f5d2','Строение клетки'],
- ['geog','География',2,'🌍','#cdf3ee','Климат России'],
- ['hist','История',2,'🏛️','#f3dcc8','Древний Рим'],
- ['inf','Информатика',1,'💻','#d9e2ff','Алгоритмы'],
- ['eng','Английский язык',2,'🗣️','#ffd6d6','Past Simple']
-].map((a,i)=>({id:a[0],n:a[1],q:a[2],e:a[3],c:a[4],top:a[5],i,k:a[0]==='eng'?'Академия':'Урок'}));
+ ['alg','Алгебра',3,'➗','Линейные уравнения'],
+ ['geom','Геометрия',2,'📐','Треугольники'],
+ ['rus','Русский язык',3,'✍️','Причастный оборот'],
+ ['lit','Литература',1,'📖','Басни Крылова'],
+ ['phys','Физика',2,'⚛️','Давление'],
+ ['bio','Биология',2,'🧬','Строение клетки'],
+ ['geog','География',2,'🌍','Климат России'],
+ ['hist','История',2,'🏛️','Древний Рим'],
+ ['inf','Информатика',1,'💻','Алгоритмы'],
+ ['eng','Английский язык',2,'🗣️','Past Simple']
+].map((a,i)=>({id:a[0],n:a[1],q:a[2],e:a[3],top:a[4],i,k:a[0]==='eng'?'Академия':'Урок'}));
 const SUB=Object.fromEntries(S.map(s=>[s.id,s]));
 const TOTAL=S.reduce((a,s)=>a+s.q,0); // часов в неделю
 const hash=t=>{let x=7;for(const ch of t)x=(x*31+ch.charCodeAt(0))>>>0;return x};
+const pad=n=>String(n).padStart(2,'0');
 const SL={}; // слоты: когда учитель проводит урок на неделе
 S.forEach(s=>DAYS.forEach((_,d)=>{
   const h=s.id==='eng'?16:8+((3*s.i+d*(s.i%3+1))%8);
@@ -265,14 +326,14 @@ const TXT={full:'нет мест',quota:'лимит',time:'занято'};
 /* ---------- отрисовка ---------- */
 function card(x,btn){
   const s=SUB[x.s];
-  return `<article class="lc"><div class="ban" style="background:linear-gradient(135deg,${s.c},#fff6ea)"><span class="tg">${s.k}</span>${s.e}</div><h3>${s.n}</h3><div class="tm">🕘 ${x.h}:00 – ${x.h}:45</div><div class="tn">${TEACHER}</div>${btn||''}</article>`;
+  return `<article class="lc"><div class="ban"><span class="tg">${s.k}</span><b>${s.n}</b>🍩</div><h3>${s.n}</h3><div class="tm">${ic('clock')}${pad(x.h)}:00 - ${pad(x.h)}:45</div>${btn||''}</article>`;
 }
 function rBuild(){
   $('#btabs').innerHTML=DAYS.map((dn,d)=>`<button class="dt${d===bd?' on':''}" data-d="${d}">${dn}<small>${mine(d).length||''}</small></button>`).join('');
   $('#rows').innerHTML=S.map(s=>{
     const n=cnt(s.id),sl=SL[s.id+'-'+bd],on=chosen.has(sl.id),r=on?null:why(sl),lf=left(sl);
-    return `<div class="br"><div><b>${s.e} ${s.n}</b><small>${TEACHER}</small><div class="dots">${Array.from({length:s.q},(_,k)=>`<i class="${k<n?'f':''}"></i>`).join('')}</div></div>`+
-      `<button class="chip${on?' on':''}${!r&&lf<=3?' low':''}" data-id="${sl.id}"${r?' disabled':''}><b>${sl.h}:00</b><small>${r?TXT[r]:lf+' мест'}</small></button></div>`;
+    return `<div class="it"><div class="ico">${s.e}</div><div><b>${s.n}</b><small>${TEACHER}</small><div class="dots">${Array.from({length:s.q},(_,k)=>`<i class="${k<n?'f':''}"></i>`).join('')}</div></div>`+
+      `<button class="chip${on?' on':''}${!r&&lf<=3?' low':''}" data-id="${sl.id}"${r?' disabled':''}><b>${pad(sl.h)}:00</b><small>${r?TXT[r]:lf+' мест'}</small></button></div>`;
   }).join('');
   const n=chosen.size;
   $('#used').textContent='Выбрано '+n+' из '+TOTAL+' ч';
@@ -284,15 +345,17 @@ function rResult(){
   const ls=rd<6?mine(rd):[];
   $('#rday').innerHTML=ls.length?ls.map(x=>card(x)).join(''):'<div class="rest">В этот день уроков нет — свободный день 🌿</div>';
   const free=[];let top=null;
+  const FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
   const w=DAYS.map((dn,d)=>{
     const l=mine(d);
     if(!l.length)free.push(dn);
     if(l.length&&(!top||l.length>top[1]))top=[dn,l.length];
-    return `<div class="day"><div class="dn"><b>${dn}</b><span>${l.length?l.length+' ур.':'—'}</span></div><div><div class="load">${Array.from({length:8},(_,k)=>`<i class="${k<l.length?'f':''}"></i>`).join('')}</div>`+
-      (l.length?`<div class="pls">${l.map(x=>`<span class="pill" style="background:${SUB[x.s].c}"><i>${x.h}:00</i>${SUB[x.s].n}</span>`).join('')}</div>`:'<div class="fr">Свободный день 🌿</div>')+'</div></div>';
+    const word=l.length===1?'урок':l.length>1&&l.length<5?'урока':'уроков';
+    return `<div class="dc"><div class="dh"><b>${FULL[d]}</b><span class="bd">${l.length} ${word}</span></div>`+
+      (l.length?l.map(x=>`<div class="ls"><div class="tp"><b>${pad(x.h)}:00</b><small>${pad(x.h)}:45</small></div><div><strong>${SUB[x.s].n}</strong><span class="t">${SUB[x.s].k}</span><small>${TEACHER}</small></div></div>`).join(''):'<div class="fr">Свободный день 🌿</div>')+'</div>';
   }).join('');
   free.push('Вс');
-  $('#week').innerHTML=w+'<div class="day"><div class="dn"><b>Вс</b><span>—</span></div><div><div class="fr">Свободный день 🌿</div></div></div>';
+  $('#week').innerHTML=w;
   $('#sum').innerHTML=`Всего ${chosen.size} ч · свободно: <b>${free.join(', ')}</b>${top?` · самый плотный день: <b>${top[0]}</b> (${top[1]})`:''}`;
 }
 function rToday(){
@@ -303,7 +366,7 @@ function rToday(){
   const m=now.getHours()*60+now.getMinutes();
   box.innerHTML=ls.map(x=>{
     const st=x.h*60;
-    return card(x,m>=st&&m<st+45?'<button class="join">Присоединиться</button>':m<st?'<button class="soon">Скоро начнётся</button>':'<button class="done" disabled>Урок прошёл</button>');
+    return card(x,m>=st&&m<st+45?'<button class="join">Присоединиться</button>':m<st?'<button class="soon">Скоро начнется</button>':'<button class="done" disabled>Урок прошёл</button>');
   }).join('');
 }
 function rTeacher(){
@@ -312,7 +375,7 @@ function rTeacher(){
   $('#tinfo').innerHTML=`<b>${s.e} ${s.n}</b> · ${TEACHER}<div class="topic">Тема недели для всех 7-х классов: <b>${s.top}</b></div>`+
     DAYS.map((dn,d)=>{
       const sl=SL[s.id+'-'+d],on=chosen.has(sl.id),tk=sl.base+(on?1:0);
-      return `<div class="sr"><span>${dn} ${sl.h}:00</span><div class="bar"><i class="${tk>=CAP-3?'hot':''}" style="width:${tk/CAP*100}%"></i></div><span>${tk} из ${CAP}${on?' · ты здесь ✓':''}</span></div>`;
+      return `<div class="sr"><span>${dn} ${pad(sl.h)}:00</span><div class="bar"><i class="${tk>=CAP-3?'hot':''}" style="width:${tk/CAP*100}%"></i></div><span>${tk} из ${CAP}${on?' · ты здесь ✓':''}</span></div>`;
     }).join('');
 }
 function all(){
@@ -340,19 +403,19 @@ $('#tchips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');i
 const CL=[['Настроила камеру и микрофон','Проверь, что всё работает заранее'],['Проснулась вовремя','Отметь, если день начался без спешки'],['Сделала зарядку / разминку','Короткая активность перед уроками'],['Позавтракала / выпила воды','Подготовка к концентрации на занятиях'],['Проверила, сданы ли все домашние задания','Убедись, что ничего не забыто'],['Подготовила рабочее место','Стол, свет, тишина, наушники'],['Открыла расписание уроков на сегодня','Проверь время и последовательность занятий'],['Заранее зашла на первый урок','Лучше за 2–3 минуты до начала']];
 const done=new Set();
 function rCl(){
-  $('#cl').innerHTML=CL.map((c,i)=>`<div class="it"><div class="ico">✓</div><div><b>${c[0]}</b><small>${c[1]}</small></div><button class="go${done.has(i)?' ok':''}" data-i="${i}">${done.has(i)?'Готово ✓':'Отметить'}</button></div>`).join('');
-  $('#cl-n').textContent='Выполнено '+done.size+'/'+CL.length;
+  $('#cl').innerHTML=CL.map((c,i)=>`<div class="it" style="margin-bottom:11px"><div class="ico">${ic('tick')}</div><div><b>${c[0]}</b><small>${c[1]}</small></div><button class="go${done.has(i)?' ok':''}" data-i="${i}">${done.has(i)?'Готово ✓':'Отметить'}</button></div>`).join('');
+  $('#cl-n').textContent=done.size+'/'+CL.length;
   $('#cl-bar').style.width=(done.size/CL.length*100)+'%';
 }
 $('#cl').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;done.has(i)?done.delete(i):done.add(i);rCl()});
 const HW=[['Биология','','13 Октября 20:00'],['Русский язык','Базовый вариант','12 Октября 20:00'],['География','','12 Октября 20:00'],['Информатика','','13 Октября 20:00'],['Литература','','13 Октября 17:00']];
 const sent=new Set();
 function rHw(){
-  $('#hw').innerHTML=HW.map((w,i)=>`<div class="it"><div class="ico">≣</div><div><b>${w[0]}${w[1]?`<span class="tag2">${w[1]}</span>`:''}</b><small>Сдать до ${w[2]}</small></div><button class="go${sent.has(i)?' ok':''}" data-i="${i}">${sent.has(i)?'Сдано ✓':'Сдать ›'}</button></div>`).join('');
+  $('#hw').innerHTML=HW.map((w,i)=>`<div class="it" style="margin-bottom:11px"><div class="ico">${ic('note')}</div><div><b>${w[0]}${w[1]?`<span class="tag2">${w[1]}</span>`:''}</b><small>Сдать до <strong>${w[2]}</strong></small></div><button class="go${sent.has(i)?' ok':''}" data-i="${i}">${sent.has(i)?'Сдано ✓':'Сдать ›'}</button></div>`).join('');
 }
 $('#hw').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;sent.has(i)?sent.delete(i):sent.add(i);rHw()});
 $('#gr').innerHTML=[['Домашнее задание','Русский язык',5,'11 Октября'],['Домашнее задание','География',4,'10 Октября'],['Домашнее задание','Физика',5,'10 Октября'],['Оценка на уроке','Биология',5,'10 Октября']]
-  .map(g=>`<div class="gc"><div><small>${g[0]}</small><b>${g[1]}</b><em>${g[3]}</em></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div>`).join('');
+  .map(g=>`<div class="gc"><div class="gt"><div><small>${g[0]}</small><b>${g[1]}</b></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div><div class="gd"><div><small>Дата</small><b>${g[3]}</b></div><span>${ic('note')}</span></div></div>`).join('');
 
 /* ---------- старт ---------- */
 rCl();rHw();all();
