@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Милки — Моя страница (расписание выбираю сама)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--c:#12c2f0;--c2:#e9f9fe;--ink:#1f2a37;--mut:#8b95a1;--line:#eef1f4;--ok:#3a8f2f}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{font-family:'Nunito',system-ui,sans-serif;background:#fafafa;color:var(--ink);display:flex;min-height:100vh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+
+/* боковая панель */
+.rail{position:sticky;top:0;align-self:flex-start;height:100vh;width:76px;flex:none;background:#fff;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 0;border-radius:0 0 24px 0;box-shadow:0 0 24px rgba(0,0,0,.04);z-index:5}
+.logo{font-weight:800;font-size:30px;color:#1d5fa8;height:44px}
+.ava{width:44px;height:44px;border-radius:50%;background:#fde4e4;display:grid;place-items:center;font-size:22px;flex:none}
+.rail hr{width:46px;border:0;border-top:1px solid var(--line);margin:10px 0}
+.ri{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#6b7683}
+.ri.act{background:var(--c2);color:var(--c)}
+.shade{position:fixed;inset:0;background:rgba(20,30,40,.25);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:300px;max-width:86vw;background:#fff;z-index:11;transform:translateX(-102%);transition:transform .25s;overflow-y:auto;padding:22px 20px 30px;border-radius:0 24px 24px 0;box-shadow:8px 0 40px rgba(0,0,0,.08)}
+.menu .shade{opacity:1;pointer-events:auto}
+.menu .drawer{transform:none}
+.brand{font-weight:800;font-size:28px;color:#1d5fa8;text-align:center;letter-spacing:1px;line-height:1}
+.brand small{display:block;font-size:9px;letter-spacing:0;margin-top:2px}
+.dp{display:flex;flex-direction:column;align-items:center;gap:6px;margin:14px 0 8px}
+.dp .ava{width:60px;height:60px;font-size:30px}
+.nm{font-size:14px;text-align:center}
+.coins{display:flex;gap:14px;justify-content:center;align-items:center;font-size:20px;margin-top:4px}
+.coin{display:inline-block;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f0a500);margin-right:6px;vertical-align:-3px}
+.bell{position:relative;font-size:18px}
+.bell i{position:absolute;top:-6px;right:-8px;background:#e5314a;color:#fff;font:700 10px/14px Nunito;width:14px;text-align:center;border-radius:50%}
+.sect{font-size:11px;color:var(--mut);margin:16px 6px 4px;padding-top:10px;border-top:1px solid var(--line)}
+.mi{display:flex;align-items:center;gap:14px;width:100%;padding:10px 8px;border-radius:12px;font-size:15px;color:#4b5563;text-align:left}
+.mi:active{background:var(--c2)}
+
+/* основная часть */
+.main{flex:1;min-width:0;padding:24px 34px 70px;max-width:1440px}
+.cap{font-size:12px;color:var(--mut)}
+h1{font-weight:600;font-size:32px;line-height:1.15;margin:4px 0 6px}
+.sec{font-size:17px;font-weight:600;color:var(--c);margin:22px 0 10px}
+.card{background:#fff;border-radius:26px;box-shadow:0 8px 28px rgba(18,194,240,.07);padding:18px 20px}
+
+/* карточки уроков */
+.today{display:flex;gap:14px;flex-wrap:wrap}
+.lc{width:216px;background:#fff;border-radius:22px;box-shadow:0 8px 28px rgba(18,194,240,.07);overflow:hidden;text-align:center;padding-bottom:14px}
+.ban{height:84px;position:relative;display:grid;place-items:center;font-size:40px}
+.tg{position:absolute;left:10px;top:10px;background:#fff;border-radius:14px;padding:2px 10px;font-size:12px;font-weight:600}
+.lc h3{font-size:16px;margin:10px 8px 2px}
+.tm{font-size:13px;color:#566170;margin-bottom:6px}
+.lc .tn{font-size:12px;color:var(--mut);margin-bottom:8px}
+.join,.soon,.done{display:block;margin:0 14px;width:calc(100% - 28px);border-radius:20px;padding:8px 0;font-weight:700;font-size:14px}
+.join{background:var(--c);color:#fff}
+.soon{border:1.5px solid #bdeaf7;color:#8fd3ea}
+.done{background:#f1f3f5;color:#a9b2bb}
+.rest{background:#fff;border-radius:20px;padding:16px 20px;color:#566170;box-shadow:0 8px 28px rgba(18,194,240,.07)}
+
+/* конструктор */
+.how{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.st{flex:1 1 200px;display:flex;gap:10px;align-items:center;background:var(--c2);border-radius:16px;padding:8px 12px;font-size:13px;line-height:1.25}
+.st b{flex:none;width:24px;height:24px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:13px}
+.ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.meter{display:flex;align-items:center;gap:10px;flex:1 1 240px;min-width:200px}
+.meter strong{font-size:20px;white-space:nowrap}
+.bar{height:10px;border-radius:6px;background:#eaf0f4;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#12c2f0,#6ee7ff);width:0;transition:width .25s}
+.main-btn{background:var(--c);color:#fff;border-radius:20px;padding:9px 20px;font-weight:700;font-size:14px}
+.main-btn:disabled{background:#e5eaee;color:#9aa5b0;cursor:not-allowed}
+.soft-btn{background:var(--c2);color:#0a8fb5;border-radius:20px;padding:8px 16px;font-weight:700;font-size:14px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.dt{border-radius:18px;padding:8px 16px;background:#f1f4f6;font-weight:700;font-size:14px;color:#566170}
+.dt small{margin-left:6px;font-size:12px;opacity:.8}
+.dt.on{background:var(--c);color:#fff}
+.rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:0 28px}
+.br{display:grid;grid-template-columns:1fr 92px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.br b{display:block;font-size:15px;line-height:1.2}
+.br small{color:var(--mut);font-size:12px}
+.dots{display:flex;gap:3px;margin-top:4px}
+.dots i{width:8px;height:8px;border-radius:50%;background:#e3e8ed}
+.dots i.f{background:var(--c)}
+.chip{border:1.5px solid #cdeffa;background:var(--c2);color:#0a8fb5;border-radius:14px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;line-height:1.15;min-height:46px;justify-content:center;transition:background .15s}
+.chip b{font-size:15px}
+.chip small{font-size:10px;color:inherit;opacity:.85}
+.chip.low small{color:#d97706;opacity:1}
+.chip.on{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 4px 12px rgba(18,194,240,.35)}
+.chip.on small{color:#fff}
+.chip:disabled{background:#f3f5f7;border-color:#f3f5f7;color:#b7c0c8;cursor:not-allowed}
+
+/* показанное расписание */
+.sum{font-size:13px;color:#566170;margin:14px 0 4px}
+.day{display:grid;grid-template-columns:54px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.dn b{display:block;font-size:15px}
+.dn span{font-size:12px;color:var(--mut)}
+.load{display:flex;gap:2px;margin-bottom:5px}
+.load i{width:14px;height:6px;border-radius:3px;background:#e8edf1}
+.load i.f{background:var(--c)}
+.pls{display:flex;gap:5px;flex-wrap:wrap}
+.pill{border-radius:12px;padding:3px 9px;font-size:12px;font-weight:600;color:#3b4552}
+.pill i{font-style:normal;font-weight:800;margin-right:5px}
+.fr{font-size:13px;color:#9aa5b0}
+
+/* учитель */
+.tch{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.pb2{border-radius:16px;padding:5px 12px;font-size:13px;font-weight:600;background:#f1f4f6;color:#566170}
+.pb2.on{background:var(--c2);color:#0a8fb5}
+.topic{background:#fff8e6;border-radius:14px;padding:8px 12px;font-size:14px;margin:8px 0 10px}
+.sr{display:grid;grid-template-columns:78px 1fr 150px;gap:10px;align-items:center;font-size:13px;padding:4px 0}
+.sr .bar i.hot{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.note{font-size:12px;color:var(--mut);margin-top:8px}
+
+/* чек-лист, дз, оценки */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.hd h2{font-size:17px;font-weight:600;color:var(--c)}
+.hd span{font-size:13px;color:#566170}
+.it{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:18px;padding:10px 12px;margin-bottom:8px}
+.it .ico{flex:none;width:36px;height:36px;border-radius:12px;background:var(--c2);color:var(--c);display:grid;place-items:center;font-weight:800}
+.it div{flex:1;min-width:0}
+.it b{display:block;font-size:15px}
+.it small{color:var(--mut);font-size:12px}
+.tag2{display:inline-block;background:#eef1f4;border-radius:10px;padding:1px 8px;font-size:11px;margin-left:6px;vertical-align:1px}
+.go{flex:none;background:var(--c2);color:var(--c);border-radius:16px;padding:7px 14px;font-weight:700;font-size:13px}
+.go.ok{background:#e7f6e5;color:var(--ok)}
+.gr{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.gc{background:#fff;border-radius:22px;padding:14px 16px;box-shadow:0 8px 28px rgba(18,194,240,.07);display:flex;justify-content:space-between;gap:10px}
+.gc small{color:var(--mut);font-size:12px;display:block}
+.gc b{font-size:20px;color:var(--c);display:block;margin:2px 0 6px}
+.gc em{font-style:normal;font-size:13px;color:#566170}
+.mark{flex:none;width:48px;height:48px;border-radius:50%;background:var(--ok);color:#fff;font-weight:800;font-size:20px;display:grid;place-items:center}
+.mark.m4{background:var(--c)}
+
+@media(max-width:1100px){.row2{grid-template-columns:1fr}}
+@media(max-width:640px){.main{padding:16px 14px 60px}.rail{width:60px}.sr{grid-template-columns:70px 1fr 100px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shade" id="shade"></div>
+<aside class="drawer" id="drawer"></aside>
+<nav class="rail" id="rail"></nav>
+
+<main class="main">
+  <div class="cap">Моя страница</div>
+  <h1>Мир тебе, Милколенок!</h1>
+
+  <h2 class="sec">Занятия на сегодня</h2>
+  <div class="today" id="today"></div>
+
+  <h2 class="sec" id="ttl">Составь своё расписание</h2>
+
+  <!-- сначала: конструктор -->
+  <section class="card" id="build">
+    <div class="how">
+      <div class="st"><b>1</b>Группа получает часы в неделю и предметы с учителями</div>
+      <div class="st"><b>2</b>Выбираю время у каждого учителя, начиная с понедельника</div>
+      <div class="st"><b>3</b>Нажимаю «Показать расписание» — и оно появляется</div>
+    </div>
+    <div class="ctl">
+      <div class="meter"><strong id="used"></strong><div class="bar"><i id="fill"></i></div></div>
+      <button class="main-btn" id="show">Показать расписание</button>
+    </div>
+    <div class="tabs" id="btabs"></div>
+    <div class="rows" id="rows"></div>
+  </section>
+
+  <!-- потом: готовое расписание -->
+  <section class="card" id="result" hidden>
+    <div class="ctl">
+      <div class="tabs" id="rtabs" style="margin:0;flex:1"></div>
+      <button class="soft-btn" id="edit">Изменить расписание</button>
+    </div>
+    <div class="today" id="rday"></div>
+    <div class="sum" id="sum"></div>
+    <div id="week"></div>
+  </section>
+
+  <h2 class="sec">Как это видит учитель</h2>
+  <section class="card">
+    <div class="tch" id="tchips"></div>
+    <div id="tinfo"></div>
+    <div class="note">Учитель даёт одну тему на неделю для всех 7-х классов, а ученики сами приходят к нему — не нужно помнить, на чём остановились 7А и 7Д. Система для 5–9 классов; в 1–4 остаётся готовое расписание.</div>
+  </section>
+
+  <div class="row2" style="margin-top:22px">
+    <section class="card">
+      <div class="hd"><h2>Чек-лист дня</h2><span id="cl-n"></span></div>
+      <div class="bar" style="margin-bottom:12px"><i id="cl-bar"></i></div>
+      <div id="cl"></div>
+    </section>
+    <section class="card">
+      <div class="hd"><h2>Домашние задания</h2><span>Актуальные на сегодня</span></div>
+      <div id="hw"></div>
+    </section>
+  </div>
+
+  <h2 class="sec">Оценки</h2>
+  <div class="gr" id="gr"></div>
+</main>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+
+/* ---------- иконки и меню ---------- */
+const ICON={home:'M4 20V9l5-3 5 3v11M14 20V4l6 3v13M3 20h18',chat:'M4 5h16v11H10l-4 3v-3H4z',book:'M6 3h12v18H6zM9 3v8l2-1.5 2 1.5V3',tasks:'M3 7l1.5 1.5L7 6M10 7h11M3 17l1.5 1.5L7 16M10 17h11',box:'M3 5h18v4H3zM5 9v10h14V9M10 13h4',doc:'M6 3h9l4 4v14H6zM9 12h7M9 16h7',dipl:'M6 3h12v18H6zM9 8h6M9 12h6M9 16h3',shop:'M4 10l2-6h12l2 6v10H4zM9 20v-6h6v6',check:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 12l3 3 5-6',crown:'M3 8l5 4 4-7 4 7 5-4-2 11H5z',play:'M3 6h18v13H3zM8 3l4 3 4-3M10 10l5 3-5 3z',game:'M3 9h18v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM8 12v4M6 14h4M16 13h.01M18 15h.01',news:'M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5',user:'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21c0-4 4-6 8-6s8 2 8 6',exit:'M10 4H5v16h5M15 8l4 4-4 4M19 12H9',feed:'M4 4h16v16H4zM8 9h8M8 13h5',club:'M5 9h14l-1 11H6zM8 9V6a4 4 0 0 1 8 0v3'};
+const ic=k=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${ICON[k]}"/></svg>`;
+const MENU=[
+ ['Школа',[['home','Главная'],['chat','Мессенджер'],['book','Мой дневник'],['tasks','Домашняя работа'],['box','Библиотека'],['doc','Мои сертификаты'],['dipl','Мои дипломы'],['shop','Аттестационный центр']]],
+ ['Развитие',[['check','Тренажеры'],['crown','Гильдии'],['dipl','Годовой проект'],['club','Клубы Milky']]],
+ ['Развлечения',[['feed','Лента','#d62ad0'],['play','MilkyTube','#e5314a'],['crown','Маркетплейс','#12c2f0'],['game','Игры','#f59e0b'],['news','Новости']]],
+ ['Аккаунт',[['user','Профиль'],['exit','Выход']]]];
+$('#rail').innerHTML='<button class="logo" data-menu aria-label="Меню">M</button><button class="ava" data-menu aria-label="Меню">🌷</button><hr>'+
+  MENU[0][1].map(m=>`<button class="ri${m[0]==='home'?' act':''}" aria-label="${m[1]}">${ic(m[0])}</button>`).join('')+'<hr>';
+$('#drawer').innerHTML='<div class="brand">МИЛКИ<small>школа</small></div><div class="dp"><div class="ava">🌷</div><div class="nm">Милколенок</div><div class="coins"><span><span class="coin"></span>227</span><span class="bell">🔔<i>1</i></span></div></div>'+
+  MENU.map((g,i)=>`<div class="sect"${i?'':' style="border:0;margin-top:8px"'}>${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}>${ic(m[0])}${m[1]}</button>`).join('')).join('');
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-menu]'))document.body.classList.toggle('menu');
+  else if(e.target.id==='shade')document.body.classList.remove('menu');
+});
+
+/* ---------- данные ---------- */
+const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб'];
+const ALLD=DAYS.concat('Вс');
+const CAP=25;               // мест на одном уроке
+const TEACHER='Имя учителя'; // заглушка
+const S=[
+ ['alg','Алгебра',3,'➗','#ffe3c2','Линейные уравнения'],
+ ['geom','Геометрия',2,'📐','#ffd9e3','Треугольники'],
+ ['rus','Русский язык',3,'✍️','#e3dcff','Причастный оборот'],
+ ['lit','Литература',1,'📖','#ffe9a8','Басни Крылова'],
+ ['phys','Физика',2,'⚛️','#cfe9ff','Давление'],
+ ['bio','Биология',2,'🧬','#d4f5d2','Строение клетки'],
+ ['geog','География',2,'🌍','#cdf3ee','Климат России'],
+ ['hist','История',2,'🏛️','#f3dcc8','Древний Рим'],
+ ['inf','Информатика',1,'💻','#d9e2ff','Алгоритмы'],
+ ['eng','Английский язык',2,'🗣️','#ffd6d6','Past Simple']
+].map((a,i)=>({id:a[0],n:a[1],q:a[2],e:a[3],c:a[4],top:a[5],i,k:a[0]==='eng'?'Академия':'Урок'}));
+const SUB=Object.fromEntries(S.map(s=>[s.id,s]));
+const TOTAL=S.reduce((a,s)=>a+s.q,0); // часов в неделю
+const hash=t=>{let x=7;for(const ch of t)x=(x*31+ch.charCodeAt(0))>>>0;return x};
+const SL={}; // слоты: когда учитель проводит урок на неделе
+S.forEach(s=>DAYS.forEach((_,d)=>{
+  const h=s.id==='eng'?16:8+((3*s.i+d*(s.i%3+1))%8);
+  const id=s.id+'-'+d,x=hash(id);
+  SL[id]={id,s:s.id,d,h,base:x%11===0?CAP:3+x%20}; // base — сколько уже записалось
+}));
+
+/* ---------- состояние ---------- */
+const chosen=new Set();
+let shown=false,bd=0,rd=0,tsub='alg'; // bd — день в конструкторе, rd — день в готовом расписании (с понедельника)
+const cnt=sid=>[...chosen].filter(id=>SL[id].s===sid).length;
+const left=sl=>CAP-sl.base-(chosen.has(sl.id)?1:0);
+const mine=d=>[...chosen].map(id=>SL[id]).filter(x=>x.d===d).sort((a,b)=>a.h-b.h);
+function why(sl){
+  if(sl.base>=CAP)return'full';
+  if(cnt(sl.s)>=SUB[sl.s].q)return'quota';
+  for(const id of chosen){const o=SL[id];if(o.d===sl.d&&o.h===sl.h)return'time'}
+  return null;
+}
+const TXT={full:'нет мест',quota:'лимит',time:'занято'};
+
+/* ---------- отрисовка ---------- */
+function card(x,btn){
+  const s=SUB[x.s];
+  return `<article class="lc"><div class="ban" style="background:linear-gradient(135deg,${s.c},#fff6ea)"><span class="tg">${s.k}</span>${s.e}</div><h3>${s.n}</h3><div class="tm">🕘 ${x.h}:00 – ${x.h}:45</div><div class="tn">${TEACHER}</div>${btn||''}</article>`;
+}
+function rBuild(){
+  $('#btabs').innerHTML=DAYS.map((dn,d)=>`<button class="dt${d===bd?' on':''}" data-d="${d}">${dn}<small>${mine(d).length||''}</small></button>`).join('');
+  $('#rows').innerHTML=S.map(s=>{
+    const n=cnt(s.id),sl=SL[s.id+'-'+bd],on=chosen.has(sl.id),r=on?null:why(sl),lf=left(sl);
+    return `<div class="br"><div><b>${s.e} ${s.n}</b><small>${TEACHER}</small><div class="dots">${Array.from({length:s.q},(_,k)=>`<i class="${k<n?'f':''}"></i>`).join('')}</div></div>`+
+      `<button class="chip${on?' on':''}${!r&&lf<=3?' low':''}" data-id="${sl.id}"${r?' disabled':''}><b>${sl.h}:00</b><small>${r?TXT[r]:lf+' мест'}</small></button></div>`;
+  }).join('');
+  const n=chosen.size;
+  $('#used').textContent='Выбрано '+n+' из '+TOTAL+' ч';
+  $('#fill').style.width=(n/TOTAL*100)+'%';
+  $('#show').disabled=!n;
+}
+function rResult(){
+  $('#rtabs').innerHTML=ALLD.map((dn,d)=>`<button class="dt${d===rd?' on':''}" data-d="${d}">${dn}<small>${d<6?(mine(d).length||''):''}</small></button>`).join('');
+  const ls=rd<6?mine(rd):[];
+  $('#rday').innerHTML=ls.length?ls.map(x=>card(x)).join(''):'<div class="rest">В этот день уроков нет — свободный день 🌿</div>';
+  const free=[];let top=null;
+  const w=DAYS.map((dn,d)=>{
+    const l=mine(d);
+    if(!l.length)free.push(dn);
+    if(l.length&&(!top||l.length>top[1]))top=[dn,l.length];
+    return `<div class="day"><div class="dn"><b>${dn}</b><span>${l.length?l.length+' ур.':'—'}</span></div><div><div class="load">${Array.from({length:8},(_,k)=>`<i class="${k<l.length?'f':''}"></i>`).join('')}</div>`+
+      (l.length?`<div class="pls">${l.map(x=>`<span class="pill" style="background:${SUB[x.s].c}"><i>${x.h}:00</i>${SUB[x.s].n}</span>`).join('')}</div>`:'<div class="fr">Свободный день 🌿</div>')+'</div></div>';
+  }).join('');
+  free.push('Вс');
+  $('#week').innerHTML=w+'<div class="day"><div class="dn"><b>Вс</b><span>—</span></div><div><div class="fr">Свободный день 🌿</div></div></div>';
+  $('#sum').innerHTML=`Всего ${chosen.size} ч · свободно: <b>${free.join(', ')}</b>${top?` · самый плотный день: <b>${top[0]}</b> (${top[1]})`:''}`;
+}
+function rToday(){
+  const now=new Date(),d=now.getDay()-1,box=$('#today');
+  if(!shown){box.innerHTML='<div class="rest">Расписание ещё не составлено — собери его ниже 👇</div>';return}
+  const ls=d>=0?mine(d):[];
+  if(!ls.length){box.innerHTML='<div class="rest">Сегодня уроков нет — это свободный день, который ты выбрала сама 🌿</div>';return}
+  const m=now.getHours()*60+now.getMinutes();
+  box.innerHTML=ls.map(x=>{
+    const st=x.h*60;
+    return card(x,m>=st&&m<st+45?'<button class="join">Присоединиться</button>':m<st?'<button class="soon">Скоро начнётся</button>':'<button class="done" disabled>Урок прошёл</button>');
+  }).join('');
+}
+function rTeacher(){
+  const s=SUB[tsub];
+  $('#tchips').innerHTML=S.map(x=>`<button class="pb2${x.id===tsub?' on':''}" data-t="${x.id}">${x.n}</button>`).join('');
+  $('#tinfo').innerHTML=`<b>${s.e} ${s.n}</b> · ${TEACHER}<div class="topic">Тема недели для всех 7-х классов: <b>${s.top}</b></div>`+
+    DAYS.map((dn,d)=>{
+      const sl=SL[s.id+'-'+d],on=chosen.has(sl.id),tk=sl.base+(on?1:0);
+      return `<div class="sr"><span>${dn} ${sl.h}:00</span><div class="bar"><i class="${tk>=CAP-3?'hot':''}" style="width:${tk/CAP*100}%"></i></div><span>${tk} из ${CAP}${on?' · ты здесь ✓':''}</span></div>`;
+    }).join('');
+}
+function all(){
+  $('#build').hidden=shown;
+  $('#result').hidden=!shown;
+  $('#ttl').textContent=shown?'Моё расписание':'Составь своё расписание';
+  rBuild();rResult();rToday();rTeacher();
+}
+
+/* ---------- действия ---------- */
+$('#btabs').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){bd=+b.dataset.d;rBuild()}});
+$('#rows').addEventListener('click',e=>{
+  const b=e.target.closest('.chip');
+  if(!b||b.disabled)return;
+  const id=b.dataset.id;
+  if(chosen.has(id))chosen.delete(id);else if(!why(SL[id]))chosen.add(id);
+  all();
+});
+$('#show').addEventListener('click',()=>{if(chosen.size){shown=true;rd=0;all()}});
+$('#edit').addEventListener('click',()=>{shown=false;all()});
+$('#rtabs').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){rd=+b.dataset.d;rResult()}});
+$('#tchips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){tsub=b.dataset.t;rTeacher()}});
+
+/* ---------- чек-лист, домашка, оценки ---------- */
+const CL=[['Настроила камеру и микрофон','Проверь, что всё работает заранее'],['Проснулась вовремя','Отметь, если день начался без спешки'],['Сделала зарядку / разминку','Короткая активность перед уроками'],['Позавтракала / выпила воды','Подготовка к концентрации на занятиях'],['Проверила, сданы ли все домашние задания','Убедись, что ничего не забыто'],['Подготовила рабочее место','Стол, свет, тишина, наушники'],['Открыла расписание уроков на сегодня','Проверь время и последовательность занятий'],['Заранее зашла на первый урок','Лучше за 2–3 минуты до начала']];
+const done=new Set();
+function rCl(){
+  $('#cl').innerHTML=CL.map((c,i)=>`<div class="it"><div class="ico">✓</div><div><b>${c[0]}</b><small>${c[1]}</small></div><button class="go${done.has(i)?' ok':''}" data-i="${i}">${done.has(i)?'Готово ✓':'Отметить'}</button></div>`).join('');
+  $('#cl-n').textContent='Выполнено '+done.size+'/'+CL.length;
+  $('#cl-bar').style.width=(done.size/CL.length*100)+'%';
+}
+$('#cl').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;done.has(i)?done.delete(i):done.add(i);rCl()});
+const HW=[['Биология','','13 Октября 20:00'],['Русский язык','Базовый вариант','12 Октября 20:00'],['География','','12 Октября 20:00'],['Информатика','','13 Октября 20:00'],['Литература','','13 Октября 17:00']];
+const sent=new Set();
+function rHw(){
+  $('#hw').innerHTML=HW.map((w,i)=>`<div class="it"><div class="ico">≣</div><div><b>${w[0]}${w[1]?`<span class="tag2">${w[1]}</span>`:''}</b><small>Сдать до ${w[2]}</small></div><button class="go${sent.has(i)?' ok':''}" data-i="${i}">${sent.has(i)?'Сдано ✓':'Сдать ›'}</button></div>`).join('');
+}
+$('#hw').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;sent.has(i)?sent.delete(i):sent.add(i);rHw()});
+$('#gr').innerHTML=[['Домашнее задание','Русский язык',5,'11 Октября'],['Домашнее задание','География',4,'10 Октября'],['Домашнее задание','Физика',5,'10 Октября'],['Оценка на уроке','Биология',5,'10 Октября']]
+  .map(g=>`<div class="gc"><div><small>${g[0]}</small><b>${g[1]}</b><em>${g[3]}</em></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div>`).join('');
+
+/* ---------- старт ---------- */
+rCl();rHw();all();
+setInterval(rToday,60000);
+})();
+</script>
+</body>
+</html>
