@@ -13,11 +13,13 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:#f9f9f9;color:var(
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 button:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 svg{display:block;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+img{display:block}
 
-/* ---------- боковая панель ---------- */
+/* боковая панель */
 .rail{position:sticky;top:0;align-self:flex-start;height:100vh;width:72px;flex:none;background:#fff;display:flex;flex-direction:column;align-items:center;padding-top:34px;border-radius:0 19px 19px 0;box-shadow:0 0 30px rgba(0,0,0,.05);z-index:5}
 .logo{height:32px;font-weight:800;font-size:23px;line-height:32px;color:#2d6a9f}
-.ava{width:30px;height:30px;border-radius:50%;background:#fde4e4;display:grid;place-items:center;font-size:15px;flex:none}
+.ava{width:30px;height:30px;border-radius:50%;background:#fde4e4;overflow:hidden;flex:none}
+.ava img{width:100%;height:100%;object-fit:cover}
 .rail .ava{margin-top:36px}
 .rail hr{width:30px;border:0;border-top:1px solid #ebedf0}
 .rail hr.h1{margin-top:133px}
@@ -32,9 +34,9 @@ svg{display:block;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:
 .brand{position:relative;display:inline-block;font-weight:800;font-size:22px;line-height:26px;letter-spacing:1px;color:#1c5ba6}
 .brand i{position:absolute;right:-12px;top:-5px;width:11px;height:11px;border:2px solid #f59a1f;border-radius:50%}
 .brand small{display:block;font-size:6px;line-height:6px;letter-spacing:0;margin-top:-1px}
-.drawer .ava{width:61px;height:61px;font-size:30px;margin:35px auto 0}
+.drawer .ava{width:61px;height:61px;margin:35px auto 0}
 .dname{font-size:14px;line-height:16px;color:#6b7280;margin-top:3px}
-.coins{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:26px;font-size:17px;color:#555;font-weight:400}
+.coins{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:26px;font-size:17px;color:#555}
 .coin{display:inline-block;width:19px;height:19px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f0a500);margin-right:5px;vertical-align:-4px}
 .bell{position:relative;color:#777}
 .bell svg{width:18px;height:18px}
@@ -43,13 +45,15 @@ svg{display:block;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:
 .dv{height:1px;background:#eceef1;margin:30px 52px 0}
 .sl{text-align:left;font-size:9.5px;letter-spacing:1px;color:#b3b9bf;padding:11px 52px 3px;text-transform:uppercase}
 .mi{display:flex;align-items:center;gap:14px;width:100%;height:48px;padding-left:47px;font-size:13.3px;color:#7b838c;text-align:left}
-.mi svg{width:17px;height:17px;flex:none;position:relative}
+.mi svg{width:17px;height:17px;flex:none}
 .mi:active{background:var(--pl)}
 
-/* ---------- основная часть ---------- */
+/* основная часть */
 .main{flex:1;min-width:0;padding:38px 52px 0}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
 .cap{font-size:9px;color:#a5a8ac}
 h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6px}
+.sw{background:var(--cy);color:#fff;border-radius:18px;height:36px;padding:0 20px;font-weight:600;font-size:13px}
 .sec{font-size:14.5px;font-weight:400;color:var(--hd);margin:22px 0 14px}
 .card{background:#fff;border-radius:25px;box-shadow:0 6px 30px rgba(0,0,0,.04);padding:22px}
 .hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
@@ -60,90 +64,37 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 /* карточки уроков */
 .today{display:flex;gap:8px;flex-wrap:wrap}
 .lc{width:254px;background:#fff;border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}
-.ban{height:179px;position:relative;display:grid;place-items:center;background:linear-gradient(160deg,#ffe8c8,#fdd9a8);font-size:84px}
-.ban b{position:absolute;top:54px;left:0;right:0;font-size:19px;font-weight:800;letter-spacing:.5px;color:#e8793a;text-transform:uppercase;padding:0 12px}
+.ban{height:179px;position:relative;background:linear-gradient(160deg,#ffe8c8,#fdd9a8) center/cover no-repeat;display:grid;place-items:center;font-size:70px}
+.ban b{position:absolute;top:44px;left:0;right:0;font-size:18px;font-weight:800;color:#e8793a;text-transform:uppercase;padding:0 10px}
 .tg{position:absolute;left:14px;top:14px;background:#fff;border-radius:14px;padding:0 13px;height:28px;line-height:28px;font-size:12.5px;font-weight:600;color:var(--tx)}
 .lc h3{font-size:19.5px;font-weight:700;margin:16px 8px 8px}
 .tm{display:flex;gap:7px;justify-content:center;align-items:center;font-size:14.5px;font-weight:600;color:#4a5563;margin-bottom:17px}
 .tm svg{width:14px;height:14px;color:#8a929b}
-.join,.soon,.done{display:block;margin:0 auto;width:180px;height:36px;border-radius:18px;font-weight:600;font-size:14px}
+.lc .info{font-size:12px;color:var(--mu);margin:-8px 0 14px}
+.join,.soon{display:block;margin:0 auto;width:180px;height:36px;border-radius:18px;font-weight:600;font-size:14px}
 .join{background:var(--cy);color:#fff}
 .soon{border:1.5px solid #c4e9f6;color:#8fcfe6}
-.done{background:#f1f3f5;color:#a9b2bb}
-.rest{background:#fff;border-radius:20px;padding:18px 22px;color:#6b7580;font-size:13px;box-shadow:0 6px 30px rgba(0,0,0,.04)}
+.rest{background:#fff;border-radius:20px;padding:20px 22px;color:#6b7580;font-size:13px;box-shadow:0 6px 30px rgba(0,0,0,.04);display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.start{display:flex;align-items:center;gap:8px;background:var(--cy);color:#fff;border-radius:18px;height:36px;padding:0 20px;font-weight:600;font-size:14px}
+.start svg{width:15px;height:15px}
 
-/* конструктор */
-.how{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.st{flex:1 1 200px;display:flex;gap:10px;align-items:center;background:var(--pl);border-radius:14px;padding:9px 12px;font-size:11px;line-height:1.35;color:#566170}
-.st b{flex:none;width:22px;height:22px;border-radius:50%;background:var(--cy);color:#fff;display:grid;place-items:center;font-size:11px}
-.ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
-.meter{display:flex;align-items:center;gap:12px;flex:1 1 260px;min-width:220px}
-.meter strong{font-size:13px;font-weight:600;white-space:nowrap}
+/* список и карточки */
 .bar{height:9.5px;border-radius:5px;background:#edf2f6;overflow:hidden;flex:1}
 .bar i{display:block;height:100%;background:var(--cy);width:0;transition:width .25s}
-.main-btn{background:var(--cy);color:#fff;border-radius:18px;height:36px;padding:0 22px;font-weight:600;font-size:13px}
-.main-btn:disabled{background:#e9eef2;color:#a9b2bb;cursor:not-allowed}
-.soft-btn{background:var(--pl);color:var(--bt);border-radius:18px;height:36px;padding:0 18px;font-weight:600;font-size:13px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.dt{height:29px;padding:0 15px;border:1px solid #12c6f4;border-radius:9px;color:#12c6f4;font-weight:500;font-size:12.5px}
-.dt small{margin-left:6px;font-size:10.5px}
-.dt.on{background:var(--cy);border-color:var(--cy);color:#fff}
-.rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px 14px}
-.it{display:flex;align-items:center;gap:14px;border:1px solid var(--ln);border-radius:17px;padding:0 14px 0 18px;min-height:75px;background:#fff}
+.it{display:flex;align-items:center;gap:14px;border:1px solid var(--ln);border-radius:17px;padding:0 14px 0 18px;min-height:75px;background:#fff;margin-bottom:11px}
 .it .ico{flex:none;width:42px;height:42px;border-radius:11px;background:var(--sq);color:var(--cy);display:grid;place-items:center;font-size:19px}
 .it .ico svg{width:14px;height:14px}
 .it>div{flex:1;min-width:0}
 .it b{display:block;font-size:16px;font-weight:600;line-height:1.25}
 .it small{display:block;color:var(--mu);font-size:11px;margin-top:2px}
 .it small strong{font-weight:600;color:#6b7580}
-.dots{display:flex;gap:3px;margin-top:5px}
-.dots i{width:7px;height:7px;border-radius:50%;background:#e3e8ed}
-.dots i.f{background:var(--cy)}
 .tag2{display:inline-block;background:#eef1f4;border-radius:9px;padding:1px 8px;font-size:9.5px;font-weight:500;margin-left:6px;vertical-align:2px;color:#6b7580}
-.go,.chip{flex:none;background:var(--pl);color:var(--bt);border-radius:18px;font-weight:700;font-size:12px}
-.go{height:36px;padding:0 17px}
+.go{flex:none;height:36px;padding:0 17px;background:var(--pl);color:var(--bt);border-radius:18px;font-weight:700;font-size:12px}
 .go.ok{background:#e7f6e5;color:var(--ok)}
-.chip{width:84px;height:44px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;border:1.5px solid transparent;transition:background .15s}
-.chip b{display:block;font-size:14px;font-weight:700}
-.chip small{font-size:9.5px;font-weight:500;margin:0;color:inherit;opacity:.85}
-.chip.low small{color:#d97706;opacity:1}
-.chip.on{background:var(--cy);color:#fff;box-shadow:0 4px 12px rgba(10,209,248,.3)}
-.chip.on small{color:#fff}
-.chip:disabled{background:#f3f5f7;color:#b7c0c8;cursor:not-allowed}
-
-/* готовое расписание */
-.sum{font-size:11px;color:#6b7580;margin:16px 0 12px}
-.wk{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.dc{background:#fff;border-radius:25px;box-shadow:0 6px 30px rgba(0,0,0,.04);padding:16px 14px 14px}
-.dh{display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px;border-bottom:1px solid var(--ln);margin-bottom:10px}
-.dh b{font-size:17px;font-weight:600;color:var(--hd)}
-.bd{background:#eef1f4;border-radius:12px;padding:3px 9px;font-size:10.5px;color:#7a838c}
-.ls{display:flex;gap:10px;align-items:center;border:1px solid var(--ln);border-radius:14px;padding:8px;margin-bottom:8px}
-.tp{flex:none;width:53px;border-radius:11px;background:var(--pl);text-align:center;padding:6px 0;line-height:1.2}
-.tp b{display:block;font-size:13px;font-weight:700;color:var(--bt)}
-.tp small{font-size:9.5px;color:var(--mu)}
-.ls div:last-child{min-width:0}
-.ls strong{font-size:13px;font-weight:700}
-.ls span.t{display:inline-block;background:var(--pl);color:var(--bt);border-radius:9px;padding:1px 7px;font-size:9px;font-weight:600;margin-left:5px;vertical-align:1px}
-.ls small{display:block;font-size:10.5px;color:var(--mu);margin-top:2px}
-.fr{font-size:11.5px;color:#9aa5b0;padding:10px 4px}
-
-/* учитель */
-.tch{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.pb2{border-radius:14px;padding:6px 13px;font-size:11.5px;font-weight:500;background:#f1f4f6;color:#6b7580}
-.pb2.on{background:var(--pl);color:var(--bt);font-weight:600}
-.topic{background:#fff8e6;border-radius:12px;padding:9px 13px;font-size:12px;margin:10px 0}
-.sr{display:grid;grid-template-columns:84px 1fr 160px;gap:10px;align-items:center;font-size:11.5px;padding:4px 0}
-.sr .bar i.hot{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
-.note{font-size:10.5px;color:var(--mu);margin-top:10px;line-height:1.5}
-
-/* чек-лист, дз, оценки */
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:start;margin-top:18px}
-.cl-h{display:grid;grid-template-columns:1fr auto;gap:0 20px}
 .cl-m{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .cl-m span{font-size:12.5px;color:#8b929a}
 .cl-m b{font-size:13px;font-weight:600}
-.cl-m .bar{flex:1}
 .gr{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
 .gc{background:#fff;border-radius:19px;padding:16px;box-shadow:0 6px 30px rgba(0,0,0,.04)}
 .gt{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
@@ -157,13 +108,64 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 .gd b{font-size:15.8px;font-weight:600}
 .gd span{flex:none;width:35px;height:35px;border-radius:12px;background:var(--sq);color:var(--cy);display:grid;place-items:center}
 .gd svg{width:15px;height:15px}
-.nav{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.nav{display:flex;gap:10px;justify-content:flex-end}
+.dt{height:29px;padding:0 15px;border:1px solid #12c6f4;border-radius:9px;color:#12c6f4;font-weight:500;font-size:12.5px;background:#fff;display:inline-flex;align-items:center;gap:6px}
+.dt svg{width:13px;height:13px}
+.wk{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.dc{background:#fff;border-radius:25px;box-shadow:0 6px 30px rgba(0,0,0,.04);padding:16px 14px 14px}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:0 4px 10px;border-bottom:1px solid var(--ln);margin-bottom:10px}
+.dh b{font-size:17px;font-weight:600;color:var(--hd)}
+.bd{background:#eef1f4;border-radius:12px;padding:3px 9px;font-size:10.5px;color:#7a838c}
+.ls{display:flex;gap:10px;align-items:center;border:1px solid var(--ln);border-radius:14px;padding:8px;margin-bottom:8px}
+.tp{flex:none;width:53px;border-radius:11px;background:var(--pl);text-align:center;padding:6px 0;line-height:1.2}
+.tp b{display:block;font-size:13px;font-weight:700;color:var(--bt)}
+.tp small{font-size:9.5px;color:var(--mu)}
+.ls div:last-child{min-width:0}
+.ls strong{font-size:13px;font-weight:700}
+.ls span.t{display:inline-block;background:var(--pl);color:var(--bt);border-radius:9px;padding:1px 7px;font-size:9px;font-weight:600;margin-left:5px;vertical-align:1px}
+.ls small{display:block;font-size:10.5px;color:var(--mu);margin-top:2px}
+.fr{font-size:11.5px;color:#9aa5b0;padding:10px 4px}
 .foot{margin:46px -52px 0;padding:34px 52px 46px;border-top:1px solid #ececec;font-size:12.7px;letter-spacing:.4px;color:#9aa1a9;text-transform:uppercase}
+
+/* экран выбора */
+.pick{min-height:calc(100vh - 76px);display:flex;flex-direction:column}
+.subs{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px}
+.sc{background:#fff;border-radius:16px;padding:6px 6px 9px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.04);border:2px solid transparent}
+.sc.on{border-color:var(--cy)}
+.sb{height:78px;border-radius:11px;background:linear-gradient(160deg,#ffe8c8,#fdd9a8) center/cover no-repeat;display:grid;place-items:center;font-size:30px;margin-bottom:6px}
+.sc b{display:block;font-size:11px;font-weight:600;line-height:1.2}
+.sc small{font-size:10px;color:var(--mu)}
+.tl{display:flex;align-items:center;gap:14px;margin:18px 0 6px}
+.tl strong{font-size:13px;font-weight:600;white-space:nowrap}
+.sh{font-size:15px;font-weight:600;margin:18px 0 10px}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;flex:1;align-content:start}
+.dd{background:#fff;border-radius:20px;padding:14px;box-shadow:0 6px 30px rgba(0,0,0,.04)}
+.dd b{display:block;font-size:15px;font-weight:600;color:var(--hd)}
+.dd .tmx{font-size:20px;font-weight:700;margin:8px 0 2px}
+.dd small{display:block;color:var(--mu);font-size:11px;margin-bottom:10px}
+.pick-b{width:100%;height:36px;border-radius:18px;background:var(--pl);color:var(--bt);font-weight:700;font-size:12.5px}
+.pick-b.on{background:var(--cy);color:#fff}
+.pick-b:disabled{background:#f3f5f7;color:#b7c0c8;cursor:not-allowed}
+.low{color:#d97706!important}
+.rd{padding:34px 0 90px}
+.rd h2{font-size:17px;font-weight:600;color:var(--hd);margin-bottom:14px}
+.back{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--cy);color:var(--cy);border-radius:18px;height:36px;padding:0 18px;font-weight:600;font-size:13px;margin-bottom:6px}
+.back svg{width:15px;height:15px}
+.fab{position:fixed;right:24px;bottom:23px;height:44px;padding:0 28px;border-radius:22px;background:var(--cy);color:#fff;font-weight:700;font-size:14px;box-shadow:0 6px 20px rgba(10,209,248,.35);z-index:4}
+.fab:disabled{background:#e9eef2;color:#a9b2bb;box-shadow:none}
 .chat{position:fixed;right:13px;bottom:23px;width:58px;height:58px;border-radius:50%;background:#12c6f4;color:#fff;display:grid;place-items:center;box-shadow:0 6px 20px rgba(18,198,244,.35);z-index:4}
 .chat svg{width:26px;height:26px}
+.mod{position:fixed;inset:0;background:rgba(15,25,35,.4);display:grid;place-items:center;z-index:20;padding:20px}
+.mbox{background:#fff;border-radius:25px;padding:28px 30px;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mbox h3{font-size:19px;font-weight:700;margin-bottom:10px}
+.mbox p{font-size:13px;color:#566170;line-height:1.5;margin-bottom:22px}
+.mbox div{display:flex;gap:12px;justify-content:center}
+.mbox button{height:38px;min-width:110px;border-radius:19px;color:#fff;font-weight:700;font-size:14px}
+.yes{background:var(--ok)}
+.no{background:var(--cy)}
 
 @media(max-width:1100px){.row2{grid-template-columns:1fr}}
-@media(max-width:640px){.main{padding:30px 16px 0}.foot{margin:40px -16px 0;padding:28px 16px 40px}.sr{grid-template-columns:70px 1fr 100px}}
+@media(max-width:640px){.main{padding:30px 16px 0}.foot{margin:40px -16px 0;padding:28px 16px 40px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -173,73 +175,74 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 <nav class="rail" id="rail"></nav>
 
 <main class="main">
-  <div class="cap">Моя страница</div>
-  <h1>Мир тебе, Милколенок!</h1>
-
-  <h2 class="sec">Занятия на сегодня</h2>
-  <div class="today" id="today"></div>
-
-  <h2 class="sec" id="ttl">Составь своё расписание</h2>
-
-  <!-- сначала: конструктор -->
-  <section class="card" id="build">
-    <div class="how">
-      <div class="st"><b>1</b>Группа получает часы в неделю и предметы с учителями</div>
-      <div class="st"><b>2</b>Выбираю время у каждого учителя, начиная с понедельника</div>
-      <div class="st"><b>3</b>Нажимаю «Показать расписание» — и оно появляется</div>
+  <!-- ГЛАВНАЯ -->
+  <section id="v-home">
+    <div class="top">
+      <div><div class="cap">Моя страница</div><h1 id="hello"></h1></div>
+      <button class="sw" id="sw"></button>
     </div>
-    <div class="ctl">
-      <div class="meter"><strong id="used"></strong><div class="bar"><i id="fill"></i></div></div>
-      <button class="main-btn" id="show">Показать расписание</button>
+    <h2 class="sec">Занятия на сегодня</h2>
+    <div class="today" id="today"></div>
+
+    <div id="stu">
+      <div class="row2">
+        <section class="card">
+          <div class="hd"><h2>Чек-лист дня</h2></div>
+          <div class="cl-m"><div class="hd2" style="margin:0;flex:1">Подготовка к учебному дню</div><span>Выполнено</span><div class="bar" style="max-width:260px"><i id="cl-bar"></i></div><b id="cl-n"></b></div>
+          <div id="cl"></div>
+        </section>
+        <section class="card">
+          <div class="hd"><h2>Домашние задания</h2><span>Все домашние задания ›</span></div>
+          <div class="hd2">Актуальные задания на сегодня</div>
+          <div id="hw"></div>
+        </section>
+      </div>
+      <div class="hd" style="margin-top:22px"><h2 class="sec" style="margin:0">Оценки</h2><span>Мой дневник ›</span></div>
+      <div class="gr" id="gr" style="margin-top:14px"></div>
     </div>
-    <div class="tabs" id="btabs"></div>
-    <div class="rows" id="rows"></div>
+
+    <div id="tea" hidden>
+      <h2 class="sec">Темы недели</h2>
+      <div id="topics"></div>
+    </div>
+
+    <div id="sched" hidden>
+      <div class="hd" style="margin-top:22px"><h2 class="sec" style="margin:0">Расписание занятий</h2><div class="nav"><button class="dt">Назад</button><button class="dt">Далее</button></div></div>
+      <div class="wk" id="week" style="margin-top:14px"></div>
+    </div>
+    <footer class="foot">Milky School 2026</footer>
   </section>
 
-  <!-- потом: готовое расписание -->
-  <section id="result" hidden>
-    <div class="ctl">
-      <div class="tabs" id="rtabs" style="margin:0;flex:1"></div>
-      <button class="soft-btn" id="edit">Изменить расписание</button>
+  <!-- ВЫБОР -->
+  <section id="v-pick" hidden>
+    <div class="pick">
+      <h2 class="sec" style="margin-top:0">Выбери уроки на неделю</h2>
+      <div class="subs" id="subs"></div>
+      <div class="tl"><strong id="tleft"></strong><div class="bar"><i id="tfill"></i></div></div>
+      <div class="sh" id="sh"></div>
+      <div class="days" id="days"></div>
+      <div class="tl"><strong id="sleft"></strong><div class="bar"><i id="sfill"></i></div></div>
     </div>
-    <div class="today" id="rday"></div>
-    <div class="sum" id="sum"></div>
-    <div class="wk" id="week"></div>
+    <div class="rd"><h2>Готовое расписание</h2><div class="wk" id="ready"></div></div>
   </section>
 
-  <h2 class="sec">Как это видит учитель</h2>
-  <section class="card">
-    <div class="tch" id="tchips"></div>
-    <div id="tinfo"></div>
-    <div class="note">Учитель даёт одну тему на неделю для всех 7-х классов, а ученики сами приходят к нему — не нужно помнить, на чём остановились 7А и 7Д. Система для 5–9 классов; в 1–4 остаётся готовое расписание.</div>
+  <!-- ПРОВЕРКА -->
+  <section id="v-review" hidden>
+    <button class="back" id="back"><svg viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></svg>Назад</button>
+    <div class="rd" style="padding-top:20px"><h2>Готовое расписание</h2><div class="wk" id="rv"></div></div>
   </section>
-
-  <div class="row2">
-    <section class="card">
-      <div class="cl-h"><div class="hd"><h2>Чек-лист дня</h2></div></div>
-      <div class="cl-m"><div class="hd2" style="margin:0;flex:1">Подготовка к учебному дню</div><span>Выполнено</span><div class="bar" style="max-width:260px"><i id="cl-bar"></i></div><b id="cl-n"></b></div>
-      <div id="cl"></div>
-    </section>
-    <section class="card">
-      <div class="hd"><h2>Домашние задания</h2><span>Все домашние задания ›</span></div>
-      <div class="hd2">Актуальные задания на сегодня</div>
-      <div id="hw"></div>
-    </section>
-  </div>
-
-  <div class="hd" style="margin-top:22px"><h2 class="sec" style="margin:0">Оценки</h2><span>Мой дневник ›</span></div>
-  <div class="gr" id="gr" style="margin-top:14px"></div>
-  <div class="nav"><button class="dt">Назад</button><button class="dt">Далее</button></div>
-
-  <footer class="foot">Milky School 2026</footer>
 </main>
-<button class="chat" aria-label="Чат поддержки" id="chat"></button>
+
+<button class="fab" id="done" hidden>Готово</button>
+<button class="fab" id="approve" hidden>Утвердить расписание</button>
+<button class="chat" id="chat" aria-label="Чат поддержки"></button>
+<div class="mod" id="mod" hidden><div class="mbox"><h3>Вы уверены?</h3><p id="mtext"></p><div><button class="yes" id="yes">Да</button><button class="no" id="no">Нет</button></div></div></div>
 
 <script>
 (function(){
 const $=s=>document.querySelector(s);
 
-/* ---------- иконки (линейные, как в оригинале) ---------- */
+/* ---------- иконки ---------- */
 const ICON={
  home:'M3.2 12.3L8.2 3 20.8 8.9M3.2 12.3v7.2c0 .8.7 1.5 1.5 1.5h14.6c.8 0 1.5-.7 1.5-1.5V8.9M8.2 12v9M11.5 21v-4.2c0-.7.5-1.2 1.2-1.2h.1c.7 0 1.2.5 1.2 1.2V21',
  chat:'M6.5 3.5h11a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H11l-4.2 3.5V15.5H6.5a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3z',
@@ -261,7 +264,8 @@ const ICON={
  clock:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5V12l3 2',
  tick:'M5.5 12.5l4.2 4.2L18.5 8',
  note:'M7 3.5h10a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2zM9.5 8h5M9.5 11.5h5M9.5 15h3',
- talk:'M12 3.5c-5 0-8.5 3.2-8.5 7.3 0 2 .9 3.8 2.4 5.1L5 20.5l4-1.8c.9.2 1.9.4 3 .4 5 0 8.5-3.2 8.5-7.3S17 3.5 12 3.5zM8.5 11h.01M12 11h.01M15.5 11h.01'
+ talk:'M12 3.5c-5 0-8.5 3.2-8.5 7.3 0 2 .9 3.8 2.4 5.1L5 20.5l4-1.8c.9.2 1.9.4 3 .4 5 0 8.5-3.2 8.5-7.3S17 3.5 12 3.5zM8.5 11h.01M12 11h.01M15.5 11h.01',
+ arrow:'M5 12h14M13 6l6 6-6 6'
 };
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${ICON[k]}"/></svg>`;
 const RAIL=['home','chat','book','tasks','box','doc','dipl','shop'];
@@ -270,9 +274,10 @@ const MENU=[
  ['Развитие',[['check','Тренажеры'],['crown','Гильдии'],['dipl','Годовой проект'],['club','Клубы Milky']]],
  ['Развлечения',[['feed','Лента','#d61fc4','cy'],['tube','MilkyTube','#d4202f'],['crown','Маркетплейс','#17c0e8'],['game','Игры','#e8a21a'],['bell','Новости','','red']]],
  ['Аккаунт',[['user','Профиль'],['exit','Выход']]]];
-$('#rail').innerHTML='<button class="logo" data-menu aria-label="Меню">M</button><button class="ava" data-menu aria-label="Меню">🌷</button><hr class="h1">'+
+const AVA='<img src="ava.jpg" alt="">';
+$('#rail').innerHTML='<button class="logo" data-menu aria-label="Меню">M</button><button class="ava" data-menu aria-label="Меню">'+AVA+'</button><hr class="h1">'+
   RAIL.map((k,i)=>`<button class="ri${i?'':' first'}" aria-label="${k}">${ic(k)}</button>`).join('')+'<hr class="h2">';
-$('#drawer').innerHTML='<div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><div class="ava">🌷</div><div class="dname">Милколенок</div>'+
+$('#drawer').innerHTML='<div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><div class="ava">'+AVA+'</div><div class="dname" id="dname"></div>'+
   `<div class="coins"><span><span class="coin"></span>227</span><span class="bell">${ic('bell')}<span class="bd2">1</span></span></div>`+
   MENU.map(g=>`<div class="dv"></div><div class="sl">${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}><span style="position:relative;display:block">${ic(m[0])}${m[3]?`<span class="bd2${m[3]==='cy'?' cy':''}" style="right:-7px;bottom:-7px">1</span>`:''}</span>${m[1]}</button>`).join('')).join('');
 $('#chat').innerHTML=ic('talk');
@@ -283,127 +288,133 @@ document.addEventListener('click',e=>{
 
 /* ---------- данные ---------- */
 const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб'];
-const ALLD=DAYS.concat('Вс');
-const CAP=25;               // мест на одном уроке
-const TEACHER='Имя учителя'; // заглушка
+const FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const CAP=25,TEACHER='Имя учителя';
+// id, название, родительный падеж, часов в неделю, эмодзи, картинка
 const S=[
- ['alg','Алгебра',3,'➗','Линейные уравнения'],
- ['geom','Геометрия',2,'📐','Треугольники'],
- ['rus','Русский язык',3,'✍️','Причастный оборот'],
- ['lit','Литература',1,'📖','Басни Крылова'],
- ['phys','Физика',2,'⚛️','Давление'],
- ['bio','Биология',2,'🧬','Строение клетки'],
- ['geog','География',2,'🌍','Климат России'],
- ['hist','История',2,'🏛️','Древний Рим'],
- ['inf','Информатика',1,'💻','Алгоритмы'],
- ['eng','Английский язык',2,'🗣️','Past Simple']
-].map((a,i)=>({id:a[0],n:a[1],q:a[2],e:a[3],top:a[4],i,k:a[0]==='eng'?'Академия':'Урок'}));
+ ['alg','Алгебра','Алгебры',3,'➗','formulogia.jpg','Линейные уравнения'],
+ ['geom','Геометрия','Геометрии',2,'📐','','Треугольники'],
+ ['rus','Русский язык','Русского языка',3,'✍️','russian.jpeg','Причастный оборот'],
+ ['lit','Литература','Литературы',1,'📖','','Басни Крылова'],
+ ['phys','Физика','Физики',2,'⚛️','kvantonomika.jpg','Давление'],
+ ['bio','Биология','Биологии',2,'🧬','ecoznanie2.jpg','Строение клетки'],
+ ['geog','География','Географии',2,'🌍','kartalogia.jpg','Климат России'],
+ ['hist','История','Истории',2,'🏛️','proshlovedenie.jpg','Древний Рим'],
+ ['eng','Английский язык','Английского языка',2,'🗣️','angliskiyazik.jpg','Past Simple']
+].map((a,i)=>({id:a[0],n:a[1],g:a[2],q:a[3],e:a[4],img:a[5],top:a[6],i,k:a[0]==='eng'?'Академия':'Урок'}));
 const SUB=Object.fromEntries(S.map(s=>[s.id,s]));
-const TOTAL=S.reduce((a,s)=>a+s.q,0); // часов в неделю
+const TOTAL=S.reduce((a,s)=>a+s.q,0);
 const hash=t=>{let x=7;for(const ch of t)x=(x*31+ch.charCodeAt(0))>>>0;return x};
 const pad=n=>String(n).padStart(2,'0');
-const SL={}; // слоты: когда учитель проводит урок на неделе
+const SL={};
 S.forEach(s=>DAYS.forEach((_,d)=>{
-  const h=s.id==='eng'?16:8+((3*s.i+d*(s.i%3+1))%8);
-  const id=s.id+'-'+d,x=hash(id);
-  SL[id]={id,s:s.id,d,h,base:x%11===0?CAP:3+x%20}; // base — сколько уже записалось
+  let h=s.id==='eng'?16:8+((3*s.i+d*(s.i%3+1))%8);
+  if(s.id==='geom'&&h===SL['alg-'+d].h)h=8+((h-7)%8); // у одного учителя уроки не совпадают
+  const id=s.id+'-'+d;
+  SL[id]={id,s:s.id,d,h,base:2+hash(id+'s')%21}; // сколько уже записалось (2–22 из 25)
 }));
 
 /* ---------- состояние ---------- */
 const chosen=new Set();
-let shown=false,bd=0,rd=0,tsub='alg'; // bd — день в конструкторе, rd — день в готовом расписании (с понедельника)
+let view='home',mode='student',approved=false,sel='alg',onYes=null;
 const cnt=sid=>[...chosen].filter(id=>SL[id].s===sid).length;
-const left=sl=>CAP-sl.base-(chosen.has(sl.id)?1:0);
+const taken=sl=>sl.base+(chosen.has(sl.id)?1:0);
 const mine=d=>[...chosen].map(id=>SL[id]).filter(x=>x.d===d).sort((a,b)=>a.h-b.h);
 function why(sl){
-  if(sl.base>=CAP)return'full';
-  if(cnt(sl.s)>=SUB[sl.s].q)return'quota';
-  for(const id of chosen){const o=SL[id];if(o.d===sl.d&&o.h===sl.h)return'time'}
+  if(cnt(sl.s)>=SUB[sl.s].q)return'лимит';
+  for(const id of chosen){const o=SL[id];if(o.d===sl.d&&o.h===sl.h)return'занято'}
   return null;
 }
-const TXT={full:'нет мест',quota:'лимит',time:'занято'};
+
+/* ---------- карточки ---------- */
+function banner(s,cls){
+  return s.img?`<div class="${cls}" style="background-image:url('${s.img}')">`:`<div class="${cls}">${cls==='ban'?`<b>${s.n}</b>`:''}🍩`;
+}
+function card(sl,btn,info){
+  const s=SUB[sl.s];
+  return `<article class="lc">${banner(s,'ban')}<span class="tg">${s.k}</span></div><h3>${s.n}</h3><div class="tm">${ic('clock')}${pad(sl.h)}:00 - ${pad(sl.h)}:45</div>${info?`<div class="info">${info}</div>`:''}${btn}</article>`;
+}
+function weekHTML(teacher){
+  return DAYS.map((dn,d)=>{
+    const l=teacher?['alg','geom'].map(id=>SL[id+'-'+d]).sort((a,b)=>a.h-b.h):mine(d);
+    const w=l.length===1?'урок':l.length>1&&l.length<5?'урока':'уроков';
+    return `<div class="dc"><div class="dh"><b>${FULL[d]}</b><span class="bd">${l.length} ${w}</span></div>`+
+      (l.length?l.map(x=>`<div class="ls"><div class="tp"><b>${pad(x.h)}:00</b><small>${pad(x.h)}:45</small></div><div><strong>${SUB[x.s].n}</strong><span class="t">${SUB[x.s].k}</span><small>${teacher?'7 класс · '+taken(x)+' из '+CAP:TEACHER}</small></div></div>`).join(''):'<div class="fr">Свободный день 🌿</div>')+'</div>';
+  }).join('');
+}
 
 /* ---------- отрисовка ---------- */
-function card(x,btn){
-  const s=SUB[x.s];
-  return `<article class="lc"><div class="ban"><span class="tg">${s.k}</span><b>${s.n}</b>🍩</div><h3>${s.n}</h3><div class="tm">${ic('clock')}${pad(x.h)}:00 - ${pad(x.h)}:45</div>${btn||''}</article>`;
+function rHome(){
+  const t=mode==='teacher';
+  $('#hello').textContent='Мир тебе, '+(t?'Имя учителя':'Милколенок')+'!';
+  $('#dname').textContent=t?'Имя учителя':'Милколенок';
+  $('#sw').textContent=t?'Переключить на режим Ученика':'Переключить на режим Учителя';
+  $('#stu').hidden=t;$('#tea').hidden=!t;
+  $('#sched').hidden=!(t||approved);
+  const box=$('#today');
+  if(t){
+    const ls=['alg','geom'].map(id=>SL[id+'-0']).sort((a,b)=>a.h-b.h);
+    box.innerHTML=ls.map((x,i)=>card(x,i?'<button class="soon">Скоро начнется</button>':'<button class="join">Присоединиться</button>','7 класс · записалось '+taken(x)+' из '+CAP)).join('');
+    $('#topics').innerHTML=['alg','geom'].map(id=>`<div class="it"><div class="ico">${SUB[id].e}</div><div><b>${SUB[id].n}</b><small>Тема недели для всех 7-х классов: <strong>${SUB[id].top}</strong></small></div></div>`).join('');
+    $('#week').innerHTML=weekHTML(true);
+  }else if(!approved){
+    box.innerHTML=`<div class="rest"><span>Расписание ещё не составлено</span><button class="start" id="start">Начать ${ic('arrow')}</button></div>`;
+  }else{
+    box.innerHTML=mine(0).map((x,i)=>card(x,i?'<button class="soon">Скоро начнется</button>':'<button class="join">Присоединиться</button>')).join('')||'<div class="rest">В понедельник уроков нет — свободный день 🌿</div>';
+    $('#week').innerHTML=weekHTML(false);
+  }
 }
-function rBuild(){
-  $('#btabs').innerHTML=DAYS.map((dn,d)=>`<button class="dt${d===bd?' on':''}" data-d="${d}">${dn}<small>${mine(d).length||''}</small></button>`).join('');
-  $('#rows').innerHTML=S.map(s=>{
-    const n=cnt(s.id),sl=SL[s.id+'-'+bd],on=chosen.has(sl.id),r=on?null:why(sl),lf=left(sl);
-    return `<div class="it"><div class="ico">${s.e}</div><div><b>${s.n}</b><small>${TEACHER}</small><div class="dots">${Array.from({length:s.q},(_,k)=>`<i class="${k<n?'f':''}"></i>`).join('')}</div></div>`+
-      `<button class="chip${on?' on':''}${!r&&lf<=3?' low':''}" data-id="${sl.id}"${r?' disabled':''}><b>${pad(sl.h)}:00</b><small>${r?TXT[r]:lf+' мест'}</small></button></div>`;
+function rPick(){
+  const n=chosen.size,s=SUB[sel];
+  $('#subs').innerHTML=S.map(x=>`<button class="sc${x.id===sel?' on':''}" data-s="${x.id}">${banner(x,'sb')}</div><b>${x.n}</b><small>${cnt(x.id)}/${x.q} ч</small></button>`).join('');
+  $('#tleft').textContent='Сколько часов осталось: '+(TOTAL-n)+' из '+TOTAL;
+  $('#tfill').style.width=(n/TOTAL*100)+'%';
+  $('#sh').textContent=s.n+' — когда проходят уроки на неделе';
+  $('#days').innerHTML=DAYS.map((dn,d)=>{
+    const sl=SL[s.id+'-'+d],on=chosen.has(sl.id),r=on?null:why(sl),lf=CAP-taken(sl);
+    return `<div class="dd"><b>${FULL[d]}</b><div class="tmx">${pad(sl.h)}:00 – ${pad(sl.h)}:45</div><small class="${lf<=3?'low':''}">Осталось мест: ${lf} из ${CAP}</small><button class="pick-b${on?' on':''}" data-id="${sl.id}"${r?' disabled':''}>${on?'Выбрано ✓':r||'Выбрать'}</button></div>`;
   }).join('');
-  const n=chosen.size;
-  $('#used').textContent='Выбрано '+n+' из '+TOTAL+' ч';
-  $('#fill').style.width=(n/TOTAL*100)+'%';
-  $('#show').disabled=!n;
+  const c=cnt(s.id);
+  $('#sleft').textContent='Сколько часов '+s.g+' осталось: '+(s.q-c)+' из '+s.q;
+  $('#sfill').style.width=(c/s.q*100)+'%';
+  $('#ready').innerHTML=weekHTML(false);
+  $('#done').disabled=!n;
 }
-function rResult(){
-  $('#rtabs').innerHTML=ALLD.map((dn,d)=>`<button class="dt${d===rd?' on':''}" data-d="${d}">${dn}<small>${d<6?(mine(d).length||''):''}</small></button>`).join('');
-  const ls=rd<6?mine(rd):[];
-  $('#rday').innerHTML=ls.length?ls.map(x=>card(x)).join(''):'<div class="rest">В этот день уроков нет — свободный день 🌿</div>';
-  const free=[];let top=null;
-  const FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-  const w=DAYS.map((dn,d)=>{
-    const l=mine(d);
-    if(!l.length)free.push(dn);
-    if(l.length&&(!top||l.length>top[1]))top=[dn,l.length];
-    const word=l.length===1?'урок':l.length>1&&l.length<5?'урока':'уроков';
-    return `<div class="dc"><div class="dh"><b>${FULL[d]}</b><span class="bd">${l.length} ${word}</span></div>`+
-      (l.length?l.map(x=>`<div class="ls"><div class="tp"><b>${pad(x.h)}:00</b><small>${pad(x.h)}:45</small></div><div><strong>${SUB[x.s].n}</strong><span class="t">${SUB[x.s].k}</span><small>${TEACHER}</small></div></div>`).join(''):'<div class="fr">Свободный день 🌿</div>')+'</div>';
-  }).join('');
-  free.push('Вс');
-  $('#week').innerHTML=w;
-  $('#sum').innerHTML=`Всего ${chosen.size} ч · свободно: <b>${free.join(', ')}</b>${top?` · самый плотный день: <b>${top[0]}</b> (${top[1]})`:''}`;
+function show(v){
+  view=v;
+  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';
+  $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden=v!=='home';
+  if(v==='home')rHome();
+  if(v==='pick')rPick();
+  if(v==='review')$('#rv').innerHTML=weekHTML(false);
+  window.scrollTo(0,0);
 }
-function rToday(){
-  const now=new Date(),d=now.getDay()-1,box=$('#today');
-  if(!shown){box.innerHTML='<div class="rest">Расписание ещё не составлено — собери его ниже 👇</div>';return}
-  const ls=d>=0?mine(d):[];
-  if(!ls.length){box.innerHTML='<div class="rest">Сегодня уроков нет — это свободный день, который ты выбрала сама 🌿</div>';return}
-  const m=now.getHours()*60+now.getMinutes();
-  box.innerHTML=ls.map(x=>{
-    const st=x.h*60;
-    return card(x,m>=st&&m<st+45?'<button class="join">Присоединиться</button>':m<st?'<button class="soon">Скоро начнется</button>':'<button class="done" disabled>Урок прошёл</button>');
-  }).join('');
-}
-function rTeacher(){
-  const s=SUB[tsub];
-  $('#tchips').innerHTML=S.map(x=>`<button class="pb2${x.id===tsub?' on':''}" data-t="${x.id}">${x.n}</button>`).join('');
-  $('#tinfo').innerHTML=`<b>${s.e} ${s.n}</b> · ${TEACHER}<div class="topic">Тема недели для всех 7-х классов: <b>${s.top}</b></div>`+
-    DAYS.map((dn,d)=>{
-      const sl=SL[s.id+'-'+d],on=chosen.has(sl.id),tk=sl.base+(on?1:0);
-      return `<div class="sr"><span>${dn} ${pad(sl.h)}:00</span><div class="bar"><i class="${tk>=CAP-3?'hot':''}" style="width:${tk/CAP*100}%"></i></div><span>${tk} из ${CAP}${on?' · ты здесь ✓':''}</span></div>`;
-    }).join('');
-}
-function all(){
-  $('#build').hidden=shown;
-  $('#result').hidden=!shown;
-  $('#ttl').textContent=shown?'Моё расписание':'Составь своё расписание';
-  rBuild();rResult();rToday();rTeacher();
-}
+function ask(text,fn){$('#mtext').textContent=text;onYes=fn;$('#mod').hidden=false}
 
 /* ---------- действия ---------- */
-$('#btabs').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){bd=+b.dataset.d;rBuild()}});
-$('#rows').addEventListener('click',e=>{
-  const b=e.target.closest('.chip');
-  if(!b||b.disabled)return;
-  const id=b.dataset.id;
-  if(chosen.has(id))chosen.delete(id);else if(!why(SL[id]))chosen.add(id);
-  all();
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('#start'))show('pick');
+  else if(t.closest('#sw')){mode=mode==='student'?'teacher':'student';rHome()}
+  else if(t.closest('#done')&&!$('#done').disabled)ask('После утверждения расписания его нельзя будет изменить в течение 1 месяца.',()=>show('review'));
+  else if(t.closest('#back'))show('pick');
+  else if(t.closest('#approve'))ask('После нажатия «Да» Вы не сможете редактировать расписание с 1 октября по 31 октября.',()=>{approved=true;show('home')});
+  else if(t.closest('#yes')){$('#mod').hidden=true;if(onYes)onYes();onYes=null}
+  else if(t.closest('#no')){$('#mod').hidden=true;onYes=null}
+  else if(t.closest('.sc')){sel=t.closest('.sc').dataset.s;rPick()}
+  else if(t.closest('.pick-b')){
+    const b=t.closest('.pick-b');if(b.disabled)return;
+    const id=b.dataset.id;
+    if(chosen.has(id))chosen.delete(id);else if(!why(SL[id]))chosen.add(id);
+    rPick();
+  }
 });
-$('#show').addEventListener('click',()=>{if(chosen.size){shown=true;rd=0;all()}});
-$('#edit').addEventListener('click',()=>{shown=false;all()});
-$('#rtabs').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){rd=+b.dataset.d;rResult()}});
-$('#tchips').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b){tsub=b.dataset.t;rTeacher()}});
 
 /* ---------- чек-лист, домашка, оценки ---------- */
 const CL=[['Настроила камеру и микрофон','Проверь, что всё работает заранее'],['Проснулась вовремя','Отметь, если день начался без спешки'],['Сделала зарядку / разминку','Короткая активность перед уроками'],['Позавтракала / выпила воды','Подготовка к концентрации на занятиях'],['Проверила, сданы ли все домашние задания','Убедись, что ничего не забыто'],['Подготовила рабочее место','Стол, свет, тишина, наушники'],['Открыла расписание уроков на сегодня','Проверь время и последовательность занятий'],['Заранее зашла на первый урок','Лучше за 2–3 минуты до начала']];
 const done=new Set();
 function rCl(){
-  $('#cl').innerHTML=CL.map((c,i)=>`<div class="it" style="margin-bottom:11px"><div class="ico">${ic('tick')}</div><div><b>${c[0]}</b><small>${c[1]}</small></div><button class="go${done.has(i)?' ok':''}" data-i="${i}">${done.has(i)?'Готово ✓':'Отметить'}</button></div>`).join('');
+  $('#cl').innerHTML=CL.map((c,i)=>`<div class="it"><div class="ico">${ic('tick')}</div><div><b>${c[0]}</b><small>${c[1]}</small></div><button class="go${done.has(i)?' ok':''}" data-i="${i}">${done.has(i)?'Готово ✓':'Отметить'}</button></div>`).join('');
   $('#cl-n').textContent=done.size+'/'+CL.length;
   $('#cl-bar').style.width=(done.size/CL.length*100)+'%';
 }
@@ -411,15 +422,14 @@ $('#cl').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b
 const HW=[['Биология','','13 Октября 20:00'],['Русский язык','Базовый вариант','12 Октября 20:00'],['География','','12 Октября 20:00'],['Информатика','','13 Октября 20:00'],['Литература','','13 Октября 17:00']];
 const sent=new Set();
 function rHw(){
-  $('#hw').innerHTML=HW.map((w,i)=>`<div class="it" style="margin-bottom:11px"><div class="ico">${ic('note')}</div><div><b>${w[0]}${w[1]?`<span class="tag2">${w[1]}</span>`:''}</b><small>Сдать до <strong>${w[2]}</strong></small></div><button class="go${sent.has(i)?' ok':''}" data-i="${i}">${sent.has(i)?'Сдано ✓':'Сдать ›'}</button></div>`).join('');
+  $('#hw').innerHTML=HW.map((w,i)=>`<div class="it"><div class="ico">${ic('note')}</div><div><b>${w[0]}${w[1]?`<span class="tag2">${w[1]}</span>`:''}</b><small>Сдать до <strong>${w[2]}</strong></small></div><button class="go${sent.has(i)?' ok':''}" data-i="${i}">${sent.has(i)?'Сдано ✓':'Сдать ›'}</button></div>`).join('');
 }
 $('#hw').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;sent.has(i)?sent.delete(i):sent.add(i);rHw()});
 $('#gr').innerHTML=[['Домашнее задание','Русский язык',5,'11 Октября'],['Домашнее задание','География',4,'10 Октября'],['Домашнее задание','Физика',5,'10 Октября'],['Оценка на уроке','Биология',5,'10 Октября']]
   .map(g=>`<div class="gc"><div class="gt"><div><small>${g[0]}</small><b>${g[1]}</b></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div><div class="gd"><div><small>Дата</small><b>${g[3]}</b></div><span>${ic('note')}</span></div></div>`).join('');
 
 /* ---------- старт ---------- */
-rCl();rHw();all();
-setInterval(rToday,60000);
+rCl();rHw();show('home');
 })();
 </script>
 </body>
