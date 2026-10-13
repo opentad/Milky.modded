@@ -16,7 +16,7 @@ svg{display:block;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:
 img{display:block}
 
 /* боковая панель */
-.rail{position:sticky;top:0;align-self:flex-start;height:100vh;width:72px;flex:none;background:#fff;display:flex;flex-direction:column;align-items:center;padding-top:34px;border-radius:0 19px 19px 0;box-shadow:0 0 30px rgba(0,0,0,.05);z-index:5}
+.rail{position:sticky;top:0;align-self:flex-start;height:100vh;width:72px;flex:none;background:#fff;display:flex;flex-direction:column;align-items:center;padding-top:34px;border-radius:0 19px 19px 0;box-shadow:0 0 30px rgba(0,0,0,.05);z-index:5;cursor:pointer}
 .logo{height:32px;font-weight:800;font-size:23px;line-height:32px;color:#2d6a9f}
 .ava{width:30px;height:30px;border-radius:50%;background:#fde4e4;overflow:hidden;flex:none}
 .ava img{width:100%;height:100%;object-fit:cover}
@@ -231,6 +231,9 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
     <button class="back" id="back"><svg viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></svg>Назад</button>
     <div class="rd" style="padding-top:20px"><h2>Готовое расписание</h2><div class="wk" id="rv"></div></div>
   </section>
+
+  <section id="v-hw" hidden></section>
+  <section id="v-sim" hidden></section>
 </main>
 
 <button class="fab" id="done" hidden>Готово</button>
@@ -238,6 +241,7 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 <button class="chat" id="chat" aria-label="Чат поддержки"></button>
 <div class="mod" id="mod" hidden><div class="mbox"><h3>Вы уверены?</h3><p id="mtext"></p><div><button class="yes" id="yes">Да</button><button class="no" id="no">Нет</button></div></div></div>
 
+<script src="hw.js"></script>
 <script>
 (function(){
 const $=s=>document.querySelector(s);
@@ -275,32 +279,42 @@ const MENU=[
  ['Развлечения',[['feed','Лента','#d61fc4','cy'],['tube','MilkyTube','#d4202f'],['crown','Маркетплейс','#17c0e8'],['game','Игры','#e8a21a'],['bell','Новости','','red']]],
  ['Аккаунт',[['user','Профиль'],['exit','Выход']]]];
 const AVA='<img src="ava.jpg" alt="">';
-$('#rail').innerHTML='<button class="logo" data-menu aria-label="Меню">M</button><button class="ava" data-menu aria-label="Меню">'+AVA+'</button><hr class="h1">'+
+$('#rail').innerHTML='<button class="logo" aria-label="Меню">M</button><button class="ava" aria-label="Меню">'+AVA+'</button><hr class="h1">'+
   RAIL.map((k,i)=>`<button class="ri${i?'':' first'}" aria-label="${k}">${ic(k)}</button>`).join('')+'<hr class="h2">';
 $('#drawer').innerHTML='<div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><div class="ava">'+AVA+'</div><div class="dname" id="dname"></div>'+
   `<div class="coins"><span><span class="coin"></span>227</span><span class="bell">${ic('bell')}<span class="bd2">1</span></span></div>`+
   MENU.map(g=>`<div class="dv"></div><div class="sl">${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}><span style="position:relative;display:block">${ic(m[0])}${m[3]?`<span class="bd2${m[3]==='cy'?' cy':''}" style="right:-7px;bottom:-7px">1</span>`:''}</span>${m[1]}</button>`).join('')).join('');
 $('#chat').innerHTML=ic('talk');
-document.addEventListener('click',e=>{
-  if(e.target.closest('[data-menu]'))document.body.classList.toggle('menu');
-  else if(e.target.id==='shade')document.body.classList.remove('menu');
-});
+
+/* ---------- боковое меню: открывается по наведению или клику на всю панель ---------- */
+const rail=$('#rail'),drawer=$('#drawer');
+const canHover=window.matchMedia('(hover:hover)').matches;
+const openMenu=()=>document.body.classList.add('menu');
+const closeMenu=()=>document.body.classList.remove('menu');
+rail.addEventListener('click',openMenu);                 // клик в любое место панели
+if(canHover){
+  rail.addEventListener('mouseenter',openMenu);          // наведение курсора
+  drawer.addEventListener('mouseleave',closeMenu);       // увели курсор — закрылось
+}
+$('#shade').addEventListener('click',closeMenu);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
 
 /* ---------- данные ---------- */
-const DAYS=['Пн','Вт','Ср','Чт','Пт','Сб'];
-const FULL=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const DAYS=['Пн','Вт','Ср','Чт','Сб'];                    // пятница — неучебный день
+const FULL=['Понедельник','Вторник','Среда','Четверг','Суббота'];
 const CAP=25,TEACHER='Имя учителя';
-// id, название, родительный падеж, часов в неделю, эмодзи, картинка
+// id, название, родительный падеж, часов в неделю, эмодзи, картинка, тема недели
 const S=[
  ['alg','Алгебра','Алгебры',3,'➗','formulogia.jpg','Линейные уравнения'],
  ['geom','Геометрия','Геометрии',2,'📐','','Треугольники'],
  ['rus','Русский язык','Русского языка',3,'✍️','russian.jpeg','Причастный оборот'],
- ['lit','Литература','Литературы',1,'📖','','Басни Крылова'],
+ ['lit','Литература','Литературы',1,'📖','literaturnoechtenie.jpg','Басни Крылова'],
  ['phys','Физика','Физики',2,'⚛️','kvantonomika.jpg','Давление'],
  ['bio','Биология','Биологии',2,'🧬','ecoznanie2.jpg','Строение клетки'],
  ['geog','География','Географии',2,'🌍','kartalogia.jpg','Климат России'],
  ['hist','История','Истории',2,'🏛️','proshlovedenie.jpg','Древний Рим'],
- ['eng','Английский язык','Английского языка',2,'🗣️','angliskiyazik.jpg','Past Simple']
+ ['eng','Английский язык','Английского языка',2,'🗣️','angliskiyazik.jpg','Past Simple'],
+ ['inf','Информатика','Информатики',2,'💻','programmirovanie.jpg','Алгоритмы']
 ].map((a,i)=>({id:a[0],n:a[1],g:a[2],q:a[3],e:a[4],img:a[5],top:a[6],i,k:a[0]==='eng'?'Академия':'Урок'}));
 const SUB=Object.fromEntries(S.map(s=>[s.id,s]));
 const TOTAL=S.reduce((a,s)=>a+s.q,0);
@@ -382,8 +396,8 @@ function rPick(){
 }
 function show(v){
   view=v;
-  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';
-  $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden=v!=='home';
+  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';$('#v-hw').hidden=v!=='hw';$('#v-sim').hidden=v!=='sim';
+  $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden=!(v==='home'||v==='hw');
   if(v==='home')rHome();
   if(v==='pick')rPick();
   if(v==='review')$('#rv').innerHTML=weekHTML(false);
@@ -419,17 +433,21 @@ function rCl(){
   $('#cl-bar').style.width=(done.size/CL.length*100)+'%';
 }
 $('#cl').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;done.has(i)?done.delete(i):done.add(i);rCl()});
-const HW=[['Биология','','13 Октября 20:00'],['Русский язык','Базовый вариант','12 Октября 20:00'],['География','','12 Октября 20:00'],['Информатика','','13 Октября 20:00'],['Литература','','13 Октября 17:00']];
-const sent=new Set();
+const HW=[['phys','Физика','','15 Октября 20:00'],['bio','Биология','','13 Октября 20:00'],['alg','Алгебра','','15 Октября 20:00'],['geom','Геометрия','','14 Октября 20:00'],['inf','Информатика','','13 Октября 20:00'],['rus','Русский язык','Базовый вариант','12 Октября 20:00'],['geog','География','','12 Октября 20:00'],['lit','Литература','','13 Октября 17:00']];
 function rHw(){
-  $('#hw').innerHTML=HW.map((w,i)=>`<div class="it"><div class="ico">${ic('note')}</div><div><b>${w[0]}${w[1]?`<span class="tag2">${w[1]}</span>`:''}</b><small>Сдать до <strong>${w[2]}</strong></small></div><button class="go${sent.has(i)?' ok':''}" data-i="${i}">${sent.has(i)?'Сдано ✓':'Сдать ›'}</button></div>`).join('');
+  $('#hw').innerHTML=HW.map(w=>{const s=HWM.st(w[0]);const bt=s==='graded'?'<button class="go ok" data-hw="'+w[0]+'">Оценка 5 ✓</button>':s==='review'?'<button class="go" data-hw="'+w[0]+'" style="background:#eef1f4;color:#6b7580">На проверке</button>':'<button class="go" data-hw="'+w[0]+'">Открыть ›</button>';
+    return `<div class="it"><div class="ico">${ic('note')}</div><div><b>${w[1]}${w[2]?`<span class="tag2">${w[2]}</span>`:''}</b><small>Сдать до <strong>${w[3]}</strong></small></div>${bt}</div>`}).join('');
 }
-$('#hw').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;sent.has(i)?sent.delete(i):sent.add(i);rHw()});
-$('#gr').innerHTML=[['Домашнее задание','Русский язык',5,'11 Октября'],['Домашнее задание','География',4,'10 Октября'],['Домашнее задание','Физика',5,'10 Октября'],['Оценка на уроке','Биология',5,'10 Октября']]
-  .map(g=>`<div class="gc"><div class="gt"><div><small>${g[0]}</small><b>${g[1]}</b></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div><div class="gd"><div><small>Дата</small><b>${g[3]}</b></div><span>${ic('note')}</span></div></div>`).join('');
+$('#hw').addEventListener('click',e=>{const b=e.target.closest('[data-hw]');if(b)HWM.open(b.dataset.hw)});
+const GR=[['Домашнее задание','Русский язык',5,'11 Октября'],['Домашнее задание','География',4,'10 Октября'],['Домашнее задание','Физика',5,'10 Октября'],['Оценка на уроке','Биология',5,'10 Октября']];
+function rGr(){
+  $('#gr').innerHTML=[...HWM.grades(),...GR].map(g=>`<div class="gc"><div class="gt"><div><small>${g[0]}</small><b>${g[1]}</b></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div><div class="gd"><div><small>Дата</small><b>${g[3]}</b></div><span>${ic('note')}</span></div></div>`).join('');
+}
+window.MS={show,ic,SUB,HW};
+HWM.onchange=()=>{rHw();rGr()};
 
 /* ---------- старт ---------- */
-rCl();rHw();show('home');
+rCl();rHw();rGr();show('home');
 })();
 </script>
 </body>
