@@ -210,7 +210,7 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
       <div class="hd" style="margin-top:22px"><h2 class="sec" style="margin:0">Расписание занятий</h2><div class="nav"><button class="dt">Назад</button><button class="dt">Далее</button></div></div>
       <div class="wk" id="week" style="margin-top:14px"></div>
     </div>
-    <footer class="foot">Milky School 2026</footer>
+    <footer class="foot">Milky School 2026 · версия с интерактивными ДЗ</footer>
   </section>
 
   <!-- ВЫБОР -->
@@ -295,6 +295,13 @@ css.textContent=`
 .fb{font-size:13px;margin-top:8px;min-height:18px;font-weight:600}.ok2{color:var(--ok)}.bad{color:#d97706}
 .ucard{border:1px solid var(--ln);border-radius:14px;padding:14px;margin-top:10px}
 .ucard input{width:120px;border:1px solid #dfe5ea;border-radius:10px;padding:8px;font:inherit;margin-right:8px}
+#v-sim .gm{position:fixed;inset:0;z-index:9;background:radial-gradient(circle at 30% 20%,#1c3a5c,#0b1626);display:flex;flex-direction:column}
+.gbar{display:flex;align-items:center;gap:14px;padding:12px 18px;color:#fff}.gbar b{font-size:17px;flex:1}.gbar .back{margin:0}
+.gfs{background:rgba(255,255,255,.14);color:#fff;border-radius:18px;height:36px;padding:0 16px;font-weight:600}
+.gmain{flex:1;display:flex;gap:16px;padding:0 16px 16px;min-height:0}.gstage{flex:1;min-width:0;display:grid;place-items:center;overflow:hidden}
+.gstage canvas{border-radius:18px;box-shadow:0 10px 50px rgba(0,0,0,.5);touch-action:none}
+.gside{width:320px;flex:none;background:#fff;border-radius:22px;padding:16px;overflow:auto}
+@media(max-width:900px){.gmain{flex-direction:column}.gside{width:auto;max-height:42vh}}
 @media(max-width:1000px){.hg,.sg{grid-template-columns:1fr}}`;
 document.head.appendChild(css);
 
@@ -334,11 +341,11 @@ function render(){
   const id=cur,d=dd(id),s=get(id),w=MS.HW.find(x=>x[0]===id),sub=SUBJ(id),[pd,pt]=progress(id);
   const sc={new:['Новое','+','можно приступить',''],draft:['Черновик','✎','ответ сохранён',''],review:['На проверке','⏳','<span id="cd" title="Нажми, чтобы пропустить ожидание (для демо)" style="cursor:pointer"></span>','r'],graded:['Оценка','5','проверено','g']}[s.status];
   const locked=s.status==='review'||s.status==='graded';
-  const items=d.sims.map(k=>{const m=SIM[k];return `<div class="it"><div class="ico">${m.e}</div><div><b>${m.t}</b><small>${m.d}</small></div><button class="go${simDone(id,k)?' ok':''}" data-sim="${k}">${simDone(id,k)?'Пройдено ✓':'Перейти к симуляции'}</button></div>`}).join('')+
-    (d.test?`<div class="it"><div class="ico">📝</div><div><b>Тест по теме</b><small>${d.test.length} вопросов: ответы нужно формулировать самому</small></div><button class="go${s.tdone?' ok':''}" data-test="1">${s.tdone?'Пройден ✓':'Перейти к тесту'}</button></div>`:'');
+  const items=d.sims.map(k=>{const m=SIM[k];return `<div class="it"><div class="ico">${MS.ic('tasks')}</div><div><b>${m.t}</b><small>${m.d}</small></div><button class="go${simDone(id,k)?' ok':''}" data-sim="${k}">${simDone(id,k)?'Пройдено ✓':'Перейти к симуляции'}</button></div>`}).join('')+
+    (d.test?`<div class="it"><div class="ico">${MS.ic('note')}</div><div><b>Тест по теме</b><small>${d.test.length} вопросов: ответы нужно формулировать самому</small></div><button class="go${s.tdone?' ok':''}" data-test="1">${s.tdone?'Пройден ✓':'Перейти к тесту'}</button></div>`:'');
   $('#v-hw').innerHTML=`<div class="crumb"><a id="hb">Главная</a> &nbsp;|&nbsp; Домашние задания</div>
   <div class="hero"><div><small>Домашнее задание</small><h1>${sub}</h1><span class="chp">7 уровень</span><span class="chp">Учитель: Имя учителя</span><span class="chp">Сдать до: ${w?w[3]:''}</span></div>
-  <div class="ban2" style="${d.img?`background-image:url('${d.img}')`:''}">${d.img?'':'📐'}</div>
+  <div class="ban2" style="${d.img?`background-image:url('${d.img}')`:''}"></div>
   <div class="stc ${sc[3]}"><b>${sc[0]}</b><i>${sc[1]}</i>${sc[2]}</div></div>
   <div class="hg"><div>
    ${s.status==='graded'?'<div class="card"><div class="cmt"><small>КОММЕНТАРИЙ УЧИТЕЛЯ</small><br><b>Молодец! Интересная работа получилась.</b></div></div>':''}
@@ -371,18 +378,20 @@ document.addEventListener('click',e=>{
   else if(b('#sv')){const s=get(cur);s.text=$('#hwt').value;s.saved=true;if(s.status==='new')s.status='draft';render();changed()}
   else if(b('#snd')){get(cur).text=$('#hwt').value;sendModal()}
   else if(b('#cd')){get(cur).due=Date.now()}
+  else if(b('#fs')){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
 });
-function leave(){if(destroy){destroy();destroy=null}}
+function leave(){if(destroy){destroy();destroy=null}if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
 
 /* ---------- экран симуляции ---------- */
 function frame(title,intro){return `<button class="back" id="bk"><svg viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></svg>К заданию</button><h2 class="sec" style="margin-top:14px">${title}</h2><p class="intro">${intro}</p>`}
 function openSim(k){
   const m=SIM[k],s=get(cur);if(!s.sim[k])s.sim[k]=m.m.map(()=>false);
-  MS.show('sim');
-  $('#v-sim').innerHTML=frame(m.t,m.d)+'<div class="sg"><section class="card" id="sr"></section><section class="card"><h2 class="t" style="font-size:18px">Задания</h2><div id="ml"></div></section></div>';
-  const ml=()=>{$('#ml').innerHTML=m.m.map((x,i)=>`<div class="mi2${s.sim[k][i]?' d':''}"><i>${s.sim[k][i]?'✓':''}</i>${x}</div>`).join('')+(s.sim[k].every(Boolean)?'<div class="note">Симуляция пройдена! Вернись к заданию.</div>':'')};
-  ml();leave();
-  destroy=m.mount($('#sr'),{ok:i=>{if(!s.sim[k][i]){s.sim[k][i]=true;ml();changed()}}});
+  leave();MS.show('sim');
+  $('#v-sim').innerHTML=`<div class="gm"><div class="gbar"><button class="back" id="bk"><svg viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></svg>К заданию</button><b>${m.t}</b><button class="gfs" id="fs">Во весь экран</button></div><div class="gmain"><div class="gstage" id="sr"></div><aside class="gside"><p class="intro">${m.d}</p><div id="ml"></div><div id="gx"></div></aside></div></div>`;
+  const ml=()=>{$('#ml').innerHTML=m.m.map((x,i)=>`<div class="mi2${s.sim[k][i]?' d':''}"><i>${s.sim[k][i]?'✓':''}</i>${x}</div>`).join('')+(s.sim[k].every(Boolean)?'<div class="note">Симуляция пройдена! Нажми «К заданию».</div>':'')};
+  ml();
+  destroy=m.mount($('#sr'),{ui:$('#gx'),ok:i=>{if(!s.sim[k][i]){s.sim[k][i]=true;ml();changed()}}});
+  if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});
 }
 /* ---------- тест ---------- */
 function openTest(){
@@ -397,110 +406,146 @@ function openTest(){
   $('#tf').onclick=()=>{s.tdone=true;changed();MS.show('hw');render()};
 }
 
-/* ---------- симуляции ---------- */
-const SIM={};
-const mk=(r,w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;r.appendChild(c);return [c,c.getContext('2d')]};
-const pt=(c,e)=>{const b=c.getBoundingClientRect();return {x:(e.clientX-b.left)*c.width/b.width,y:(e.clientY-b.top)*c.height/b.height}};
-const raf=(f)=>{let on=true;const l=t=>{if(!on)return;f(t);requestAnimationFrame(l)};requestAnimationFrame(l);return ()=>on=false};
+/* ---------- симуляции (полноэкранные, нарисованные) ---------- */
+const SIM={},W=1280,H=720;
+const mk=r=>{const c=document.createElement('canvas');c.width=W;c.height=H;r.appendChild(c);const fit=()=>{const k=Math.min(r.clientWidth/W,r.clientHeight/H)||1;c.style.width=W*k+'px';c.style.height=H*k+'px'};fit();new ResizeObserver(fit).observe(r);return [c,c.getContext('2d')]};
+const pt=(c,e)=>{const b=c.getBoundingClientRect();return {x:(e.clientX-b.left)*W/b.width,y:(e.clientY-b.top)*H/b.height}};
+const raf=f=>{let on=true;const l=t=>{if(!on)return;f(t);requestAnimationFrame(l)};requestAnimationFrame(l);return ()=>on=false};
+const circ=(x,X,Y,r,f)=>{x.fillStyle=f;x.beginPath();x.arc(X,Y,r,0,7);x.fill()};
+const rr=(x,X,Y,w,h,r,f)=>{x.fillStyle=f;x.beginPath();x.roundRect(X,Y,w,h,r);x.fill()};
+const sky=(x,off)=>{const g=x.createLinearGradient(0,0,0,420);g.addColorStop(0,'#7cc8f0');g.addColorStop(1,'#e8f8ff');x.fillStyle=g;x.fillRect(0,0,W,H);circ(x,1050,110,46,'#fff4b8');
+  [['#b9dcc0',330,55,.004],['#9ccfa8',390,40,.007]].forEach(([c,b,a,f],i)=>{x.fillStyle=c;x.beginPath();x.moveTo(0,H);for(let X=0;X<=W;X+=16)x.lineTo(X,b+Math.sin((X+off*(.15+i*.2))*f*3)*a);x.lineTo(W,H);x.fill()})};
+const tree=(x,X,Y,s)=>{rr(x,X-9*s,Y-80*s,18*s,80*s,4,'#7a4a2a');[['#2e8b57',0,-125,50],['#3aa46a',-26,-98,40],['#3aa46a',28,-96,38],['#4cbf80',2,-156,36]].forEach(c=>circ(x,X+c[1]*s,Y+c[2]*s,c[3]*s,c[0]))};
+const wheel=(x,X,Y,r)=>{circ(x,X,Y,r,'#20262c');circ(x,X,Y,r*.55,'#b8c0c8');circ(x,X,Y,r*.15,'#6b737b')};
+const person=(x,X,Y,s,sh)=>{rr(x,X-22*s,Y,44*s,56*s,12*s,sh||'#3b7bd9');circ(x,X,Y-14*s,18*s,'#f2c9a0');x.fillStyle='#5a3a22';x.beginPath();x.arc(X,Y-18*s,18*s,Math.PI,0);x.fill();circ(x,X+6*s,Y-12*s,2.5*s,'#333')};
+const bus=(x,X,Y)=>{x.save();x.translate(X,Y);rr(x,-150,-150,300,115,[18,30,6,6],'#f5b81c');rr(x,-150,-62,300,12,0,'#e29a0a');
+  for(let i=0;i<5;i++)rr(x,-135+i*54,-135,44,45,6,'#bfe6f7');x.save();x.beginPath();x.rect(-81,-135,44,45);x.clip();person(x,-59,-92,.7,'#e5517a');x.restore();
+  rr(x,141,-84,9,16,3,'#fff4b8');wheel(x,-90,-30,26);wheel(x,90,-30,26);x.restore()};
+const car=(x,X,Y)=>{x.save();x.translate(X,Y);x.scale(-1,1);rr(x,-100,-60,200,40,[10,16,6,6],'#d9344a');rr(x,-55,-98,105,44,[20,24,0,0],'#d9344a');
+  rr(x,-45,-90,40,32,6,'#bfe6f7');rr(x,0,-90,40,32,6,'#bfe6f7');rr(x,92,-54,8,12,3,'#fff4b8');wheel(x,-55,-20,21);wheel(x,60,-20,21);x.restore()};
 
-SIM.ref={e:'🚌',t:'Относительно кого?',d:'Выбери тело отсчёта и посмотри на мир его глазами: что движется, а что покоится?',m:['Посмотри глазами дерева','Посмотри глазами автобуса','Посмотри глазами встречной машины'],
+SIM.ref={t:'Относительно кого?',d:'Ты смотришь на дорогу из окна. Выбери, чьими глазами смотришь: что движется, а что стоит?',m:['Посмотри глазами дерева','Посмотри глазами автобуса','Посмотри глазами встречной машины'],
 mount(r,c){
-  const [cv,x]=mk(r,700,230),O=[['🌳','Дерево',0,0],['🚌','Автобус',50,0],['🧍','Пассажир',50,0],['🚗','Встречная машина',-80,700]];
-  let ref=0,t0=performance.now();
-  r.insertAdjacentHTML('beforeend','<div class="chips" id="rb"></div><div class="chips" id="st"></div>');
-  const sel=(i,u)=>{ref=i;const mi={0:0,1:1,3:2}[i];if(u&&mi!==undefined)c.ok(mi);$('#rb').innerHTML='<span class="s">Я — это:</span>'+O.map((o,j)=>`<button class="${j===ref?'on':''}" data-r="${j}">${o[0]} ${o[1]}</button>`).join('');
-    $('#st').innerHTML=O.map((o,j)=>{if(j===ref)return `<span class="s">${o[1]}: тело отсчёта</span>`;const v=o[2]-O[ref][2];return `<span>${o[1]}: ${v===0?'покоится':'движется '+(v>0?'→':'←')}</span>`}).join('')};
-  r.addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(b)sel(+b.dataset.r,1)});sel(0);
-  return raf(()=>{const t=(performance.now()-t0)/1000,p=i=>O[i][3]+O[i][2]*t,cam=p(ref),sx=w=>((w-cam)%1400+2100)%1400-700+350;
-    x.fillStyle='#d9f4fd';x.fillRect(0,0,700,230);x.fillStyle='#9aa5b0';x.fillRect(0,150,700,60);x.fillStyle='#bfe3a8';x.fillRect(0,210,700,20);
-    x.textAlign='center';x.font='50px serif';for(let k=0;k<4;k++)x.fillText('🌳',sx(k*350),120);
-    x.fillText('🚌',sx(p(1)),150);x.font='24px serif';x.fillText('🧍',sx(p(2)),128);x.font='44px serif';x.fillText('🚗',sx(p(3)),205);
-    x.font='bold 13px Montserrat,sans-serif';x.fillStyle='#e8793a';const rx=ref===0?sx(0):sx(p(ref));x.fillText('▼ ты',rx,ref===3?140:ref===2?100:ref===1?85:55)});
+  const [cv,x]=mk(r),O=[['Дерево',0,0],['Автобус',120,0],['Пассажир',120,0],['Встречная машина',-200,1500]];let ref=0,t0=performance.now();
+  c.ui.innerHTML='<div class="lbl">Я смотрю глазами:</div><div class="chips" id="rb"></div><div class="lbl">Что я вижу:</div><div class="chips" id="st"></div>';
+  const sel=(i,u)=>{ref=i;const mi={0:0,1:1,3:2}[i];if(u&&mi!==undefined)c.ok(mi);$('#rb').innerHTML=O.map((o,j)=>`<button class="${j===ref?'on':''}" data-r="${j}">${o[0]}</button>`).join('');
+    $('#st').innerHTML=O.map((o,j)=>{if(j===ref)return `<span class="s">${o[0]}: это я</span>`;const v=o[1]-O[ref][1];return `<span>${o[0]}: ${v===0?'покоится':'движется '+(v>0?'→':'←')}</span>`}).join('')};
+  c.ui.addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(b)sel(+b.dataset.r,1)});sel(0);
+  return raf(()=>{const t=(performance.now()-t0)/1000,p=i=>O[i][2]+O[i][1]*t,cam=p(ref),rel=w=>((w-cam)%2400+3600)%2400-1200+640;
+    sky(x,cam);x.fillStyle='#8bc86a';x.fillRect(0,420,W,H);x.fillStyle='#4a5560';x.fillRect(0,450,W,170);x.fillStyle='#e6ebef';x.fillRect(0,448,W,4);x.fillRect(0,618,W,4);
+    const o=((-cam)%120+120)%120;for(let X=-120+o;X<W;X+=120)x.fillRect(X,532,64,8);
+    for(let k=0;k<8;k++){const X=rel(k*300);if(X>-120&&X<W+120)tree(x,X,450,1.25)}
+    if(ref!==3)car(x,rel(p(3)),548);if(ref!==1&&ref!==2)bus(x,rel(p(1)),608);
+    const fr=['#5b3a22','#2b3440','#2b3440','#7a1f2b'][ref];x.fillStyle=fr;x.beginPath();x.rect(0,0,W,H);x.roundRect(60,40,W-120,H-120,40);x.fill('evenodd');
+    if(ref===0){[[110,70,60],[200,48,46],[1170,70,60],[1080,48,46],[640,36,50],[420,40,40],[860,40,40]].forEach(a=>circ(x,a[0],a[1],a[2],'#3aa46a'));rr(x,0,0,60,H,0,'#7a4a2a');rr(x,W-60,0,60,H,0,'#7a4a2a')}
+    if(ref===1){person(x,250,598,1.9,'#e5517a');rr(x,0,660,W,60,0,'#1e252d')}
+    if(ref===2){rr(x,0,660,W,60,0,'#1e252d');[[520,684],[760,684]].forEach(a=>{x.fillStyle='#3b7bd9';x.beginPath();x.ellipse(a[0],a[1]+14,70,34,0,0,7);x.fill();circ(x,a[0],a[1],26,'#f2c9a0')})}
+    if(ref===3){rr(x,0,650,W,70,0,'#33191d');x.strokeStyle='#111';x.lineWidth=16;x.beginPath();x.ellipse(640,730,150,90,0,Math.PI,2*Math.PI);x.stroke()}
+    x.fillStyle='#fff';x.font='bold 22px Montserrat,sans-serif';x.fillText('Вид от первого лица: '+O[ref][0].toLowerCase(),90,26)});
 }};
 
-SIM.units={e:'📏',t:'Единицы длины (СИ)',d:'Лестница единиц: переведи значения и введи ответ.',m:['Байкал: метры → километры','Дюймы → метры','Аршины, дюймы и вершки → сантиметры'],
+SIM.units={t:'Единицы длины (СИ)',d:'Переведи значения и введи ответ. Лестница единиц на экране подскажет, во сколько раз они отличаются.',m:['Байкал: метры → километры','Дюймы → метры','Аршины, дюймы и вершки → сантиметры'],
 mount(r,c){
-  r.innerHTML='<div class="chips"><span class="s">мм ←×10→ см ←×10→ дм ←×10→ м ←×1000→ км</span></div><p class="intro" style="margin-top:10px">1 аршин = 28 дюймов = 16 вершков = 71,12 см</p>'+
-  [['Глубина Байкала 1642 м. Запиши в километрах:',1.642,'км',0.0005],['Сколько метров в 30 дюймах?',0.762,'м',0.002],['2 аршина 16 дюймов и 3 вершка — сколько это сантиметров?',196.2,'см',0.3]].map((q,i)=>`<div class="ucard">${q[0]}<br><br><input data-u="${i}" inputmode="decimal"> ${q[2]} <button class="go" data-ck="${i}">Проверить</button><div class="fb" id="f${i}"></div></div>`).join('');
-  const A=[[1.642,.0005],[.762,.002],[196.2,.3]];
-  r.onclick=e=>{const b=e.target.closest('[data-ck]');if(!b)return;const i=+b.dataset.ck,v=parseFloat(r.querySelector(`[data-u="${i}"]`).value.replace(',','.')),f=r.querySelector('#f'+i);
-    if(Math.abs(v-A[i][0])<=A[i][1]){f.className='fb ok2';f.textContent='Верно!';c.ok(i)}else{f.className='fb bad';f.textContent='Пока нет. Проверь, сколько единиц в одной и в какую сторону переводишь.'}};
-  return ()=>{};
+  const [cv,x]=mk(r),A=[[1.642,.0005],[.762,.002],[196.2,.3]];
+  c.ui.innerHTML='<p class="intro">1 аршин = 28 дюймов = 16 вершков = 71,12 см</p>'+[['Глубина Байкала 1642 м. Запиши в километрах:','км'],['Сколько метров в 30 дюймах?','м'],['2 аршина 16 дюймов и 3 вершка — сколько сантиметров?','см']].map((q,i)=>`<div class="ucard">${q[0]}<br><br><input data-u="${i}" inputmode="decimal"> ${q[1]} <button class="go" data-ck="${i}">Проверить</button><div class="fb" id="f${i}"></div></div>`).join('');
+  c.ui.onclick=e=>{const b=e.target.closest('[data-ck]');if(!b)return;const i=+b.dataset.ck,v=parseFloat(c.ui.querySelector(`[data-u="${i}"]`).value.replace(',','.')),f=c.ui.querySelector('#f'+i);
+    if(Math.abs(v-A[i][0])<=A[i][1]){f.className='fb ok2';f.textContent='Верно!';c.ok(i)}else{f.className='fb bad';f.textContent='Пока нет. Проверь, во сколько раз отличаются единицы.'}};
+  return raf(t=>{const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#eaf7ff');g.addColorStop(1,'#cbe8f7');x.fillStyle=g;x.fillRect(0,0,W,H);x.textAlign='center';
+    ['мм','см','дм','м','км'].forEach((u,i)=>{const X=150+i*245;rr(x,X-80,60,160,110,24,['#7ad3f0','#4fb9e6','#2f9ad6','#1c78c0','#14589a'][i]);x.fillStyle='#fff';x.font='bold 46px Montserrat,sans-serif';x.fillText(u,X,128);
+      if(i<4){x.fillStyle='#34404e';x.font='bold 22px Montserrat,sans-serif';x.fillText(['×10','×10','×10','×1000'][i],X+122,122)}});
+    const wy=330,g2=x.createLinearGradient(0,wy,0,H);g2.addColorStop(0,'#5bb8e8');g2.addColorStop(1,'#0d3b66');x.fillStyle=g2;x.beginPath();x.moveTo(60,wy);for(let X=60;X<=1060;X+=20)x.lineTo(X,wy+Math.sin(X/40+t/400)*6);x.lineTo(1060,H-30);x.lineTo(60,H-30);x.fill();
+    x.fillStyle='#fff';x.font='bold 24px Montserrat,sans-serif';x.fillText('Байкал',560,wy+50);x.fillText('1642 м = ? км',560,wy+90);
+    x.strokeStyle='#fff';x.lineWidth=3;x.beginPath();x.moveTo(1130,wy);x.lineTo(1130,H-30);x.stroke();for(let i=0;i<=8;i++){x.beginPath();x.moveTo(1118,wy+i*45);x.lineTo(1142,wy+i*45);x.stroke()}
+    for(let i=0;i<3;i++){const fx=((t/20+i*300)%1000)+60,fy=wy+120+i*70+Math.sin(t/500+i)*10;x.fillStyle='#ffb347';x.beginPath();x.ellipse(fx,fy,26,12,0,0,7);x.fill();x.beginPath();x.moveTo(fx-24,fy);x.lineTo(fx-42,fy-12);x.lineTo(fx-42,fy+12);x.fill()}});
 }};
 
-SIM.touch={e:'🪱',t:'Потрогай гидру',d:'Коснись гидры иглой и посмотри, как сигнал бежит по нервной сети. Это рефлекс!',m:['Дотронься до тела гидры','Дотронься до щупальца','Включи нервную сеть и дотронься снова'],
+SIM.touch={t:'Потрогай гидру',d:'Ты смотришь в микроскоп. Коснись гидры иглой и следи, как сигнал бежит по нервной сети. Это рефлекс!',m:['Дотронься до тела гидры','Дотронься до щупальца','Включи нервную сеть и дотронься снова'],
 mount(r,c){
-  const [cv,x]=mk(r,420,340),CX=210,B=300;let net=false,wave=null,seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
-  const N=Array.from({length:34},()=>({u:rnd(),v:rnd()}));
-  r.insertAdjacentHTML('beforeend','<div class="chips"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nt"> Показать нервную сеть</label></div>');
-  $('#nt').onchange=e=>net=e.target.checked;
-  cv.onpointerdown=e=>{const p=pt(cv,e);if(Math.abs(p.x-CX)>110||p.y<40||p.y>B)return;wave={x:p.x,y:p.y,t:performance.now()};
-    const top=B-180;if(p.y>=top&&Math.abs(p.x-CX)<40)c.ok(0);else if(p.y<top)c.ok(1);if(net)c.ok(2)};
-  return raf(()=>{x.clearRect(0,0,420,340);x.fillStyle='#e6f7fc';x.fillRect(0,0,420,340);
-    const tt=wave?(performance.now()-wave.t)/1000:99,k=tt>.5&&tt<2.1?1-.5*Math.sin(Math.PI*(tt-.5)/1.6):1,top=B-180*k,rad=tt*260;
-    x.strokeStyle='#4aa86a';x.lineWidth=7;x.lineCap='round';for(let i=0;i<6;i++){const o=(i-2.5);x.beginPath();x.moveTo(CX+o*9,top);x.quadraticCurveTo(CX+o*30,top-40*k,CX+o*42,top-75*k);x.stroke()}
-    x.fillStyle='#bfe8c9';x.strokeStyle='#4aa86a';x.lineWidth=5;x.beginPath();x.roundRect(CX-32,top,64,B-top,16);x.fill();x.stroke();
-    x.fillStyle='#8fd0a5';x.beginPath();x.ellipse(CX,B+4,46,10,0,0,7);x.fill();
-    if(net){const P=N.map(n=>({x:CX-24+n.u*48,y:top+8+n.v*(B-top-16)}));x.lineWidth=1;
-      P.forEach((a,i)=>P.forEach((b,j)=>{if(j>i&&Math.hypot(a.x-b.x,a.y-b.y)<42){const lit=wave&&Math.hypot(a.x-wave.x,a.y-wave.y)<rad&&tt<2;x.strokeStyle=lit?'#e5314a':'#4a90c9';x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}));
-      P.forEach(a=>{const lit=wave&&Math.hypot(a.x-wave.x,a.y-wave.y)<rad&&tt<2;x.fillStyle=lit?'#e5314a':'#2d6a9f';x.beginPath();x.arc(a.x,a.y,3,0,7);x.fill()})}
-    if(wave&&tt<.6){x.strokeStyle='#555';x.lineWidth=3;x.beginPath();x.moveTo(wave.x+60,wave.y-20);x.lineTo(wave.x+4,wave.y-1);x.stroke()}});
+  const [cv,x]=mk(r),CX=640,B=640;let net=false,wave=null,m={x:900,y:380},kk=1,seed=7,down=0;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const N=Array.from({length:46},()=>({u:rnd(),v:rnd()})),Q=Array.from({length:50},()=>({x:rnd()*W,y:rnd()*H,s:rnd()*3+1,p:rnd()*6}));
+  c.ui.innerHTML='<label style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="nt"> Показать нервную сеть</label>';
+  c.ui.querySelector('#nt').onchange=e=>net=e.target.checked;cv.style.cursor='none';
+  cv.onpointermove=e=>m=pt(cv,e);
+  cv.onpointerdown=e=>{const p=pt(cv,e);m=p;const top=B-380*kk;if(Math.hypot(p.x-CX,p.y-360)>340||Math.abs(p.x-CX)>210||p.y<top-200||p.y>B)return;wave={x:p.x,y:p.y,t:performance.now()};down=performance.now();
+    if(p.y>=top&&Math.abs(p.x-CX)<80)c.ok(0);else if(p.y<top)c.ok(1);if(net)c.ok(2)};
+  return raf(()=>{const now=performance.now(),tt=wave?(now-wave.t)/1000:99,k=tt>.5&&tt<2.1?1-.45*Math.sin(Math.PI*(tt-.5)/1.6):1,top=B-380*k,rad=tt*520;kk=k;
+    x.fillStyle='#000';x.fillRect(0,0,W,H);x.save();x.beginPath();x.arc(CX,360,340,0,7);x.clip();
+    const g=x.createRadialGradient(CX,360,40,CX,360,340);g.addColorStop(0,'#c9f0f8');g.addColorStop(1,'#5aaed0');x.fillStyle=g;x.fillRect(0,0,W,H);
+    Q.forEach(q=>circ(x,(q.x+now*.01*q.s)%W,q.y+Math.sin(now/900+q.p)*10,q.s,'rgba(255,255,255,.55)'));
+    x.lineCap='round';x.strokeStyle='#58b57a';x.lineWidth=20;for(let i=0;i<7;i++){const o=i-3;x.beginPath();x.moveTo(CX+o*18,top+10);x.bezierCurveTo(CX+o*45,top-70*k,CX+o*80+Math.sin(now/700+i)*8,top-120*k,CX+o*105,top-170*k+Math.abs(o)*14*k);x.stroke()}
+    x.fillStyle='#8fd6a6';x.strokeStyle='#3f9e63';x.lineWidth=8;x.beginPath();x.roundRect(CX-70,top,140,B-top,34);x.fill();x.stroke();
+    x.strokeStyle='#6fc08a';x.lineWidth=3;x.beginPath();x.roundRect(CX-52,top+16,104,B-top-24,24);x.stroke();rr(x,CX-44,top+24,88,B-top-40,20,'#d6f3de');
+    x.fillStyle='#56a878';x.beginPath();x.ellipse(CX,B+6,96,16,0,0,7);x.fill();circ(x,CX,top+6,12,'#2f7a50');
+    if(net){const P=N.map(n=>({x:CX-40+n.u*80,y:top+34+n.v*(B-top-60)})),lit=a=>wave&&tt<2&&Math.hypot(a.x-wave.x,a.y-wave.y)<rad;x.lineWidth=1.5;
+      P.forEach((a,i)=>P.forEach((b,j)=>{if(j>i&&Math.hypot(a.x-b.x,a.y-b.y)<75){x.strokeStyle=lit(a)?'#e5314a':'#2d6a9f';x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}));P.forEach(a=>circ(x,a.x,a.y,4,lit(a)?'#e5314a':'#1c4f8a'))}
+    x.restore();x.strokeStyle='#1b1b1b';x.lineWidth=16;x.beginPath();x.arc(CX,360,340,0,7);x.stroke();
+    if(Math.hypot(m.x-CX,m.y-360)<340){x.lineCap='round';x.strokeStyle='rgba(70,70,70,.85)';x.lineWidth=12;x.beginPath();x.moveTo(m.x+430,m.y+320);x.lineTo(m.x+10,m.y+7);x.stroke();x.strokeStyle='#e8e8e8';x.lineWidth=4;x.beginPath();x.moveTo(m.x+430,m.y+320);x.lineTo(m.x+8,m.y+5);x.stroke();circ(x,m.x,m.y,now-down<400?9:4,'#e5314a')}});
 }};
 
-SIM.bal={e:'⚖️',t:'Весы-уравнения',d:'Делай одно и то же с обеими частями уравнения, пока x не останется один.',m:['Реши 4x + 6 = 18','Реши 7x − 5 = 16','Реши 8x = 40 (карандаши)'],
+SIM.bal={t:'Весы-уравнения',d:'Делай одно и то же с обеими чашами весов, пока не останется один ящик x.',m:['Реши 4x + 6 = 18','Реши 7x − 5 = 16','Реши 8x = 40 (карандаши)'],
 mount(r,c){
-  const E=[[4,6,18],[7,-5,16],[8,0,40]];let i=0,q=[...E[0]];
-  r.innerHTML='<div class="chips" id="es"></div><div class="eqb" id="eq" style="margin-top:12px"></div><div class="chips"><span class="s">Сделать с обеими частями:</span>'+['+','−','×','÷'].map(o=>`<button data-o="${o}">${o}</button>`).join('')+'</div><div class="eq2" style="margin-top:12px;display:flex;gap:10px"><input id="nn" inputmode="numeric" placeholder="число"><button class="go" id="ap">Применить</button></div><div class="fb" id="fm"></div>';
-  let op='+';
+  const [cv,x]=mk(r),E=[[4,6,18],[7,-5,16],[8,0,40]];let i=0,q=[...E[0]],tilt=0,v=0,op='+';
   const f=(a,b,cc)=>`${a===1?'':a}x ${b>0?'+ '+b:b<0?'− '+(-b):''} = ${cc}`;
-  const dr=()=>{$('#eq').textContent=f(...q);$('#es').innerHTML=E.map((e,j)=>`<button class="${j===i?'on':''}" data-e="${j}">${f(...e)}</button>`).join('');r.querySelectorAll('[data-o]').forEach(b=>b.classList.toggle('on',b.dataset.o===op))};
-  r.onclick=e=>{const t=e.target.closest('button');if(!t)return;
-    if(t.dataset.e){i=+t.dataset.e;q=[...E[i]];$('#fm').textContent='';dr()}
-    else if(t.dataset.o){op=t.dataset.o;dr()}
+  c.ui.innerHTML='<div class="chips" id="es"></div><div class="lbl">Сделать с обеими чашами:</div><div class="chips" id="os"></div><div class="eq2" style="margin-top:12px;display:flex;gap:10px"><input id="nn" inputmode="numeric" placeholder="число"><button class="go" id="ap">Применить</button></div><div class="fb" id="fm"></div>';
+  const dr=()=>{$('#es').innerHTML=E.map((e,j)=>`<button class="${j===i?'on':''}" data-e="${j}">${f(...e)}</button>`).join('');$('#os').innerHTML=['+','−','×','÷'].map(o=>`<button class="${o===op?'on':''}" data-o="${o}">${o}</button>`).join('')};
+  c.ui.onclick=e=>{const t=e.target.closest('button');if(!t)return;
+    if(t.dataset.e){i=+t.dataset.e;q=[...E[i]];$('#fm').textContent='';dr()}else if(t.dataset.o){op=t.dataset.o;dr()}
     else if(t.id==='ap'){const n=parseFloat($('#nn').value),fm=$('#fm');if(!n){fm.className='fb bad';fm.textContent='Введи число';return}
-      if(op==='+'){q[1]+=n;q[2]+=n}else if(op==='−'){q[1]-=n;q[2]-=n}else if(op==='×'){q=q.map(v=>v*n)}else{if(q.some(v=>v%n)){fm.className='fb bad';fm.textContent='Не делится нацело — подумай, что нужно сделать сначала.';return}q=q.map(v=>v/n)}
-      fm.textContent='';dr();if(q[0]===1&&q[1]===0){fm.className='fb ok2';fm.textContent='x = '+q[2]+'. Верно!';c.ok(i)}}};
-  dr();return ()=>{};
+      if(op==='+'){q[1]+=n;q[2]+=n}else if(op==='−'){q[1]-=n;q[2]-=n}else if(op==='×'){q=q.map(z=>z*n)}else{if(q.some(z=>z%n)){fm.className='fb bad';fm.textContent='Не делится нацело — подумай, что сделать сначала.';return}q=q.map(z=>z/n)}
+      v=.05;fm.textContent='';dr();if(q[0]===1&&q[1]===0){fm.className='fb ok2';fm.textContent='x = '+q[2]+'. Верно!';c.ok(i)}}};
+  dr();
+  return raf(()=>{v+=-tilt*.06;v*=.92;tilt+=v;const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fff4e0');g.addColorStop(1,'#ffd9a8');x.fillStyle=g;x.fillRect(0,0,W,H);
+    rr(x,0,650,W,70,0,'#b57d4a');rr(x,610,260,60,390,10,'#7a5a3a');rr(x,520,630,240,34,12,'#5b3f26');circ(x,640,260,22,'#d4a017');
+    x.save();x.translate(640,260);x.rotate(tilt);rr(x,-340,-10,680,20,10,'#a67c3d');x.restore();
+    x.fillStyle='#34404e';x.font='bold 56px Montserrat,sans-serif';x.textAlign='center';x.fillText(f(...q),640,90);
+    [-1,1].forEach(s=>{const ex=640+s*340*Math.cos(tilt),ey=260+s*340*Math.sin(tilt),py=ey+240;x.strokeStyle='#8a8a8a';x.lineWidth=3;x.beginPath();x.moveTo(ex,ey);x.lineTo(ex-110,py);x.moveTo(ex,ey);x.lineTo(ex+110,py);x.stroke();
+      x.fillStyle='#c9ced4';x.beginPath();x.ellipse(ex,py+6,125,16,0,0,7);x.fill();x.fillStyle='#e6e9ed';x.beginPath();x.ellipse(ex,py,125,14,0,0,7);x.fill();
+      if(s<0){const a=q[0];for(let n=0;n<a;n++){const X=ex-108+(n%4)*54,Y=py-50-Math.floor(n/4)*50;rr(x,X,Y,48,48,6,'#4aa3df');x.strokeStyle='#2d7fb8';x.lineWidth=3;x.strokeRect(X,Y,48,48);x.fillStyle='#fff';x.font='bold 28px Montserrat,sans-serif';x.fillText('x',X+24,Y+34)}
+        if(q[1]){const X=ex-108+Math.min(a,4)*54+(a?20:60);circ(x,X,py-30,30,q[1]>0?'#3fae5a':'#e5517a');x.fillStyle='#fff';x.font='bold 24px Montserrat,sans-serif';x.fillText((q[1]>0?'+':'−')+Math.abs(q[1]),X,py-21)}}
+      else{circ(x,ex,py-38,38,'#2d6a9f');x.fillStyle='#fff';x.font='bold 30px Montserrat,sans-serif';x.fillText(q[2],ex,py-27)}})});
 }};
 
-SIM.draw={e:'📐',t:'Построй и измерь',d:'Проведи линию (тяни пальцем или мышью). Построй перпендикуляр в точке A и измерь угол транспортиром.',m:['Построй прямую AB','Построй в точке A перпендикуляр','Измерь угол транспортиром'],
+SIM.draw={t:'Построй и измерь',d:'Рисуй пальцем или мышью: линии привязываются к клеткам. Построй перпендикуляр в точке A и измерь угол транспортиром.',m:['Построй прямую AB','Построй в точке A перпендикуляр','Измерь угол транспортиром'],
 mount(r,c){
-  const [cv,x]=mk(r,700,360),L=[];let cu=null,pr=false;const sn=v=>Math.round(v/20)*20;
-  r.insertAdjacentHTML('beforeend','<div class="chips"><button id="pb">Транспортир</button><button id="cb">Очистить</button><b id="rd" style="margin-left:8px"></b></div>');
-  const vert=()=>{if(L.length<2)return L[0]?L[0].a:null;const [p,q]=[L[0],L[1]],d1={x:p.b.x-p.a.x,y:p.b.y-p.a.y},d2={x:q.b.x-q.a.x,y:q.b.y-q.a.y},den=d1.x*d2.y-d1.y*d2.x;if(Math.abs(den)<1e-6)return p.a;const t=((q.a.x-p.a.x)*d2.y-(q.a.y-p.a.y)*d2.x)/den;return {x:p.a.x+t*d1.x,y:p.a.y+t*d1.y}};
-  const far=(l,v)=>Math.hypot(l.a.x-v.x,l.a.y-v.y)>Math.hypot(l.b.x-v.x,l.b.y-v.y)?l.a:l.b;
+  const [cv,x]=mk(r),L=[],G=40;let cu=null,pr=false,m={x:-99,y:-99};const sn=v=>Math.round(v/G)*G;
+  c.ui.innerHTML='<div class="chips"><button id="pb">Транспортир</button><button id="cb">Очистить</button></div><div class="fb" id="rd" style="font-size:16px"></div>';cv.style.cursor='none';
+  const vert=()=>{if(L.length<2)return L[0]?L[0].a:null;const [p,q]=L,d1={x:p.b.x-p.a.x,y:p.b.y-p.a.y},d2={x:q.b.x-q.a.x,y:q.b.y-q.a.y},den=d1.x*d2.y-d1.y*d2.x;if(Math.abs(den)<1e-6)return p.a;const t=((q.a.x-p.a.x)*d2.y-(q.a.y-p.a.y)*d2.x)/den;return {x:p.a.x+t*d1.x,y:p.a.y+t*d1.y}};
+  const far=(l,V)=>Math.hypot(l.a.x-V.x,l.a.y-V.y)>Math.hypot(l.b.x-V.x,l.b.y-V.y)?l.a:l.b;
   const angle=()=>{const V=vert();if(!V||L.length<2)return null;const p=L[0].b,q=far(L[1],V),a=Math.atan2(p.y-V.y,p.x-V.x),b=Math.atan2(q.y-V.y,q.x-V.x);let d=Math.abs(a-b)*180/Math.PI;if(d>180)d=360-d;return d};
-  const check=()=>{if(L.length>=1)c.ok(0);if(L.length>=2){const d=angle(),A=L[0].a,l=L[1],len=Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y),dist=Math.abs((l.b.x-l.a.x)*(l.a.y-A.y)-(l.a.x-A.x)*(l.b.y-l.a.y))/len;if(Math.abs(d-90)<3&&dist<8)c.ok(1)}if(pr&&L.length>=2)c.ok(2)};
+  const check=()=>{if(L.length>=1)c.ok(0);if(L.length>=2){const d=angle(),A=L[0].a,l=L[1],len=Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y),ds=Math.abs((l.b.x-l.a.x)*(l.a.y-A.y)-(l.a.x-A.x)*(l.b.y-l.a.y))/len;if(Math.abs(d-90)<3&&ds<8)c.ok(1)}if(pr&&L.length>=2)c.ok(2)};
   cv.onpointerdown=e=>{const p=pt(cv,e);cu={a:{x:sn(p.x),y:sn(p.y)},b:{x:sn(p.x),y:sn(p.y)}};cv.setPointerCapture(e.pointerId)};
-  cv.onpointermove=e=>{if(!cu)return;const p=pt(cv,e);cu.b={x:sn(p.x),y:sn(p.y)}};
-  cv.onpointerup=()=>{if(cu&&Math.hypot(cu.b.x-cu.a.x,cu.b.y-cu.a.y)>=40){if(L.length>=2)L.length=0;L.push(cu);check()}cu=null};
-  r.onclick=e=>{if(e.target.id==='pb'){pr=!pr;check()}if(e.target.id==='cb'){L.length=0;pr=false}};
-  return raf(()=>{x.fillStyle='#fff';x.fillRect(0,0,700,360);x.strokeStyle='#dbeef5';x.lineWidth=1;for(let i=0;i<=700;i+=20){x.beginPath();x.moveTo(i,0);x.lineTo(i,360);x.stroke()}for(let i=0;i<=360;i+=20){x.beginPath();x.moveTo(0,i);x.lineTo(700,i);x.stroke()}
-    x.lineCap='round';[...L,...(cu?[cu]:[])].forEach(l=>{x.strokeStyle='#34404e';x.lineWidth=3;x.beginPath();x.moveTo(l.a.x,l.a.y);x.lineTo(l.b.x,l.b.y);x.stroke()});
-    x.fillStyle='#e8793a';x.font='bold 16px Montserrat,sans-serif';if(L[0]){x.fillText('A',L[0].a.x-14,L[0].a.y-8);x.fillText('B',L[0].b.x+8,L[0].b.y-8)}
-    const V=vert(),rd=$('#rd'),a=angle();
-    if(pr&&V&&L.length>=1){const p=L[0].b,rot=Math.atan2(p.y-V.y,p.x-V.x);x.save();x.translate(V.x,V.y);x.rotate(rot);x.fillStyle='rgba(10,209,248,.15)';x.strokeStyle='#0ad1f8';x.lineWidth=2;x.beginPath();x.arc(0,0,120,-Math.PI,0);x.closePath();x.fill();x.stroke();
-      x.font='10px sans-serif';x.fillStyle='#17b3e6';for(let d=0;d<=180;d+=10){const t=-d*Math.PI/180;x.beginPath();x.moveTo(Math.cos(t)*(d%30?112:104)*1,Math.sin(t)*(d%30?112:104));x.lineTo(Math.cos(t)*120,Math.sin(t)*120);x.stroke();if(d%30===0)x.fillText(d,Math.cos(t)*88-8,Math.sin(t)*88+4)}x.restore()}
-    rd.textContent=pr?(a===null?'Построй вторую линию':'Угол между лучами: '+Math.round(a)+'°'):''});
+  cv.onpointermove=e=>{const p=pt(cv,e);m=p;if(cu)cu.b={x:sn(p.x),y:sn(p.y)}};
+  cv.onpointerup=()=>{if(cu&&Math.hypot(cu.b.x-cu.a.x,cu.b.y-cu.a.y)>=2*G){if(L.length>=2)L.length=0;L.push(cu);check()}cu=null};
+  c.ui.onclick=e=>{if(e.target.id==='pb'){pr=!pr;check()}if(e.target.id==='cb'){L.length=0;pr=false}};
+  return raf(()=>{x.fillStyle='#fffdf5';x.fillRect(0,0,W,H);x.strokeStyle='#d6e6ee';x.lineWidth=1;for(let i=0;i<=W;i+=G){x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke()}for(let i=0;i<=H;i+=G){x.beginPath();x.moveTo(0,i);x.lineTo(W,i);x.stroke()}
+    x.lineCap='round';[...L,...(cu?[cu]:[])].forEach(l=>{x.strokeStyle='#3d4650';x.lineWidth=4;x.beginPath();x.moveTo(l.a.x,l.a.y);x.lineTo(l.b.x,l.b.y);x.stroke();circ(x,l.a.x,l.a.y,6,'#e8793a');circ(x,l.b.x,l.b.y,6,'#e8793a')});
+    x.fillStyle='#e8793a';x.font='bold 28px Montserrat,sans-serif';x.textAlign='left';if(L[0]){x.fillText('A',L[0].a.x-30,L[0].a.y-12);x.fillText('B',L[0].b.x+12,L[0].b.y-12)}
+    const V=vert(),a=angle();
+    if(pr&&V){const p=L[0].b,rot=Math.atan2(p.y-V.y,p.x-V.x);x.save();x.translate(V.x,V.y);x.rotate(rot);x.fillStyle='rgba(10,209,248,.16)';x.strokeStyle='#0a9fd0';x.lineWidth=3;x.beginPath();x.arc(0,0,230,-Math.PI,0);x.closePath();x.fill();x.stroke();
+      x.font='15px sans-serif';x.fillStyle='#0a7fa8';x.lineWidth=1.5;for(let d=0;d<=180;d+=5){const t=-d*Math.PI/180,l=d%10?12:d%30?20:30;x.beginPath();x.moveTo(Math.cos(t)*(230-l),Math.sin(t)*(230-l));x.lineTo(Math.cos(t)*230,Math.sin(t)*230);x.stroke();if(d%30===0)x.fillText(d,Math.cos(t)*172-10,Math.sin(t)*172+5)}circ(x,0,0,6,'#0a9fd0');x.restore()}
+    $('#rd').textContent=pr?(a===null?'Построй вторую линию':'Угол между лучами: '+Math.round(a)+'°'):'';
+    if(m.x>0){x.save();x.translate(m.x,m.y);x.rotate(-.9);x.fillStyle='#f5b81c';x.fillRect(0,-7,110,14);x.fillStyle='#e8a10c';x.fillRect(0,-7,110,4);x.fillStyle='#f2c9a0';x.beginPath();x.moveTo(0,0);x.lineTo(-22,-7);x.lineTo(-22,7);x.fill();x.fillStyle='#444';x.beginPath();x.moveTo(-22,-2);x.lineTo(-30,0);x.lineTo(-22,2);x.fill();x.fillStyle='#e5517a';x.fillRect(100,-7,14,14);x.restore()}});
 }};
 
-SIM.robot={e:'🤖',t:'Робот-алгоритмист',d:'Составь программу из команд, чтобы робот дошёл до флажка. Команда «3×⬆» повторяет шаг три раза.',m:['Уровень 1','Уровень 2','Уровень 3 (со стенами)'],
+SIM.robot={t:'Робот-алгоритмист',d:'Составь программу из команд, чтобы робот дошёл до флажка. Команда «3×⬆» делает три шага вперёд.',m:['Уровень 1','Уровень 2','Уровень 3 (со стенами)'],
 mount(r,c){
-  const LV=[{s:[0,5],g:[0,2],w:[]},{s:[0,5],g:[3,2],w:[]},{s:[0,5],g:[4,0],w:[[0,3],[2,2],[3,5]]}];let lv=0,prog=[],run=null;
-  const [cv,x]=mk(r,300,300);cv.style.maxWidth='300px';
-  r.insertAdjacentHTML('beforeend','<div class="chips" id="lv"></div><div class="chips">'+[['f','⬆ вперёд'],['l','↶ налево'],['r','↷ направо'],['m','3×⬆'],['x','Очистить'],['go','▶ Запустить']].map(b=>`<button data-c="${b[0]}">${b[1]}</button>`).join('')+'</div><div class="fb" id="pg"></div><div class="fb" id="rm"></div>');
-  let rb={x:0,y:5,d:0};const reset=()=>{const L=LV[lv];rb={x:L.s[0],y:L.s[1],d:0};clearInterval(run);$('#rm').textContent='';$('#lv').innerHTML=LV.map((_,j)=>`<button class="${j===lv?'on':''}" data-l="${j}">Уровень ${j+1}</button>`).join('')};
+  const [cv,x]=mk(r),T=88,X0=(W-6*T)/2,Y0=96,LV=[{s:[0,5],g:[0,2],w:[]},{s:[0,5],g:[3,2],w:[]},{s:[0,5],g:[4,0],w:[[0,3],[2,2],[3,5]]}];
+  let lv=0,prog=[],run=null,rb={x:0,y:5,d:0,ax:0,ay:5,aa:0};
+  c.ui.innerHTML='<div class="chips" id="lv"></div><div class="lbl">Команды:</div><div class="chips">'+[['f','⬆ вперёд'],['l','↶ налево'],['r','↷ направо'],['m','3×⬆'],['x','Очистить'],['go','▶ Запустить']].map(b=>`<button data-c="${b[0]}">${b[1]}</button>`).join('')+'</div><div class="fb" id="pg"></div><div class="fb" id="rm"></div>';
+  const reset=()=>{const L=LV[lv];rb={x:L.s[0],y:L.s[1],d:0,ax:L.s[0],ay:L.s[1],aa:0};clearInterval(run);$('#rm').textContent='';$('#lv').innerHTML=LV.map((_,j)=>`<button class="${j===lv?'on':''}" data-l="${j}">Уровень ${j+1}</button>`).join('')};
   const show=()=>{$('#pg').textContent='Программа: '+(prog.map(p=>({f:'⬆',l:'↶',r:'↷',m:'3×⬆'}[p])).join(' ')||'пусто')};
   const step=cmd=>{const D=[[0,-1],[1,0],[0,1],[-1,0]],L=LV[lv];if(cmd==='l')rb.d=(rb.d+3)%4;else if(cmd==='r')rb.d=(rb.d+1)%4;else{const n=cmd==='m'?3:1;for(let i=0;i<n;i++){const nx=rb.x+D[rb.d][0],ny=rb.y+D[rb.d][1];if(nx<0||ny<0||nx>5||ny>5||L.w.some(w=>w[0]===nx&&w[1]===ny)){$('#rm').className='fb bad';$('#rm').textContent='Стена! Робот не может пройти.';return}rb.x=nx;rb.y=ny}}};
-  r.onclick=e=>{const b=e.target.closest('button');if(!b)return;
-    if(b.dataset.l!==undefined){lv=+b.dataset.l;prog=[];reset();show()}
-    else if(b.dataset.c==='x'){prog=[];reset();show()}
-    else if(b.dataset.c==='go'){reset();let i=0;run=setInterval(()=>{if(i>=prog.length){clearInterval(run);const L=LV[lv];if(rb.x===L.g[0]&&rb.y===L.g[1]){$('#rm').className='fb ok2';$('#rm').textContent='Флажок достигнут!';c.ok(lv)}else{$('#rm').className='fb bad';$('#rm').textContent='Не дошёл. Попробуй изменить программу.'}return}step(prog[i++])},450)}
+  c.ui.onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.l!==undefined){lv=+b.dataset.l;prog=[];reset();show()}else if(b.dataset.c==='x'){prog=[];reset();show()}
+    else if(b.dataset.c==='go'){reset();let i=0;run=setInterval(()=>{if(i>=prog.length){clearInterval(run);const L=LV[lv];if(rb.x===L.g[0]&&rb.y===L.g[1]){$('#rm').className='fb ok2';$('#rm').textContent='Флажок достигнут!';c.ok(lv)}else{$('#rm').className='fb bad';$('#rm').textContent='Не дошёл. Попробуй изменить программу.'}return}step(prog[i++])},650)}
     else if(b.dataset.c){prog.push(b.dataset.c);show()}};
   reset();show();
-  return raf(()=>{const L=LV[lv];x.fillStyle='#fff';x.fillRect(0,0,300,300);x.strokeStyle='#cfe9f3';for(let i=0;i<=6;i++){x.beginPath();x.moveTo(i*50,0);x.lineTo(i*50,300);x.moveTo(0,i*50);x.lineTo(300,i*50);x.stroke()}
-    x.textAlign='center';x.font='30px serif';L.w.forEach(w=>x.fillText('🧱',w[0]*50+25,w[1]*50+36));x.fillText('🚩',L.g[0]*50+25,L.g[1]*50+36);x.fillText('🤖',rb.x*50+25,rb.y*50+36);
-    x.font='bold 14px sans-serif';x.fillStyle='#e8793a';x.fillText(['▲','▶','▼','◀'][rb.d],rb.x*50+25,rb.y*50+12)});
+  return raf(()=>{const L=LV[lv];rb.ax+=(rb.x-rb.ax)*.14;rb.ay+=(rb.y-rb.ay)*.14;let da=rb.d*90-rb.aa;da=((da+540)%360)-180;rb.aa+=da*.18;
+    const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1c3a5c');g.addColorStop(1,'#0b1626');x.fillStyle=g;x.fillRect(0,0,W,H);
+    for(let i=0;i<6;i++)for(let j=0;j<6;j++)rr(x,X0+i*T+2,Y0+j*T+2,T-4,T-4,8,(i+j)%2?'#2b4a6e':'#335882');
+    rr(x,X0+L.g[0]*T+2,Y0+L.g[1]*T+2,T-4,T-4,8,'rgba(91,209,120,.35)');const fx=X0+L.g[0]*T+T/2,fy=Y0+L.g[1]*T+T/2;x.fillStyle='#ddd';x.fillRect(fx-3,fy-34,6,60);x.fillStyle='#e5314a';x.beginPath();x.moveTo(fx+3,fy-34);x.lineTo(fx+40,fy-22);x.lineTo(fx+3,fy-8);x.fill();
+    L.w.forEach(w=>{const X=X0+w[0]*T+6,Y=Y0+w[1]*T+6;rr(x,X,Y-12,T-12,T-12,6,'#8a4b32');rr(x,X,Y-12,T-12,(T-12)*.7,6,'#b5654a');x.strokeStyle='#7a3f2a';x.lineWidth=2;x.beginPath();x.moveTo(X,Y+14);x.lineTo(X+T-12,Y+14);x.moveTo(X+30,Y-12);x.lineTo(X+30,Y+14);x.stroke()});
+    x.save();x.translate(X0+rb.ax*T+T/2,Y0+rb.ay*T+T/2);x.rotate(rb.aa*Math.PI/180);rr(x,-34,-24,12,48,4,'#20262c');rr(x,22,-24,12,48,4,'#20262c');rr(x,-26,-30,52,60,14,'#12c6f4');rr(x,-20,-26,40,24,8,'#0b3d57');circ(x,-9,-14,5,'#9ff3ff');circ(x,9,-14,5,'#9ff3ff');rr(x,-3,-44,6,16,2,'#ddd');circ(x,0,-46,5,'#e5314a');x.restore()});
 }};
 
 /* ---------- публичный интерфейс ---------- */
@@ -716,6 +761,8 @@ function rGr(){
 }
 window.MS={show,ic,SUB,HW};
 HWM.onchange=()=>{rHw();rGr()};
+$('#drawer').addEventListener('click',e=>{const b=e.target.closest('.mi');if(!b)return;const t=b.textContent.trim();
+  if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show('home');if(t!=='Главная')$('#hw').scrollIntoView({behavior:'smooth',block:'center'})}});
 
 /* ---------- старт ---------- */
 rCl();rHw();rGr();show('home');
