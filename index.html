@@ -203,6 +203,7 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 
     <div id="tea" hidden>
       <h2 class="sec">Темы недели</h2>
+      <div class="chips" id="tf" style="margin:-4px 0 14px"></div>
       <div id="topics"></div>
     </div>
 
@@ -727,16 +728,16 @@ const CAP=25,TEACHER='Имя учителя';
 // id, название, родительный падеж, часов в неделю, эмодзи, картинка, тема недели
 const S=[
  ['alg','Алгебра','Алгебры',3,'➗','formulogia.jpg','Линейные уравнения'],
- ['geom','Геометрия','Геометрии',2,'📐','','Треугольники'],
+ ['geom','Геометрия','Геометрии',2,'📐','','Треугольники','Смежные углы'],
  ['rus','Русский язык','Русского языка',3,'✍️','russian.jpeg','Причастный оборот'],
  ['lit','Литература','Литературы',1,'📖','literaturnoechtenie.jpg','Басни Крылова'],
- ['phys','Физика','Физики',2,'⚛️','kvantonomika.jpg','Давление'],
- ['bio','Биология','Биологии',2,'🧬','ecoznanie2.jpg','Строение клетки'],
- ['geog','География','Географии',2,'🌍','kartalogia.jpg','Климат России'],
- ['hist','История','Истории',2,'🏛️','proshlovedenie.jpg','Древний Рим'],
- ['eng','Английский язык','Английского языка',2,'🗣️','angliskiyazik.jpg','Past Simple'],
- ['inf','Информатика','Информатики',2,'💻','programmirovanie.jpg','Алгоритмы']
-].map((a,i)=>({id:a[0],n:a[1],g:a[2],q:a[3],e:a[4],img:a[5],top:a[6],i,k:a[0]==='eng'?'Академия':'Урок'}));
+ ['phys','Физика','Физики',2,'⚛️','kvantonomika.jpg','Давление','Механическое движение'],
+ ['bio','Биология','Биологии',2,'🧬','ecoznanie2.jpg','Строение клетки','Кишечнополостные'],
+ ['geog','География','Географии',2,'🌍','kartalogia.jpg','Климат России','Реки и озёра'],
+ ['hist','История','Истории',2,'🏛️','proshlovedenie.jpg','Древний Рим','Древняя Греция'],
+ ['eng','Английский язык','Английского языка',2,'🗣️','angliskiyazik.jpg','Past Simple','Present Perfect'],
+ ['inf','Информатика','Информатики',2,'💻','programmirovanie.jpg','Алгоритмы','Циклы']
+].map((a,i)=>({id:a[0],n:a[1],g:a[2],q:a[3],e:a[4],img:a[5],top:a[6],t2:a[7],i,k:a[0]==='eng'?'Академия':'Урок'}));
 const SUB=Object.fromEntries(S.map(s=>[s.id,s]));
 const TOTAL=S.reduce((a,s)=>a+s.q,0);
 const hash=t=>{let x=7;for(const ch of t)x=(x*31+ch.charCodeAt(0))>>>0;return x};
@@ -754,12 +755,25 @@ const chosen=new Set();
 let view='home',mode='student',approved=false,sel='alg',onYes=null;
 const cnt=sid=>[...chosen].filter(id=>SL[id].s===sid).length;
 const taken=sl=>sl.base+(chosen.has(sl.id)?1:0);
+const topic=x=>{const b=SUB[x.s];return b.t2&&x.d>=2?b.t2:b.top};
 const mine=d=>[...chosen].map(id=>SL[id]).filter(x=>x.d===d).sort((a,b)=>a.h-b.h);
 function why(sl){
   if(cnt(sl.s)>=SUB[sl.s].q)return'лимит';
+  if(SUB[sl.s].t2){const hf=d=>d<2?0:1;for(const id of chosen){const o=SL[id];if(o.s===sl.s&&hf(o.d)===hf(sl.d))return'тема выбрана'}}
   for(const id of chosen){const o=SL[id];if(o.d===sl.d&&o.h===sl.h)return'занято'}
   return null;
 }
+
+/* ---------- учитель: слоты-комнаты для разных уровней ---------- */
+const TN={alg:'Алгебра',geom:'Геометрия',mat:'Математика'};
+const TT={'5mat':['Обыкновенные дроби','Десятичные дроби'],'6mat':['Отрицательные числа','Координатная плоскость'],'7alg':['Линейные уравнения'],'7geom':['Треугольники','Смежные углы'],'8alg':['Квадратные корни'],'8geom':['Площади фигур','Теорема Пифагора'],'9alg':['Квадратные уравнения'],'9geom':['Векторы','Окружность']};
+let tf='all';const tmatch=x=>tf==='all'||x.s===tf;
+const PLAN=[[5,'mat',[0,1,3,4]],[6,'mat',[0,1,2,4]],[7,'alg',[0,2]],[7,'geom',[1,3]],[8,'geom',[0,4]],[8,'alg',[1,3]],[9,'geom',[0,2]],[9,'alg',[1,3]]];
+const TL=(()=>{let sd=5;const rnd=()=>(sd=(sd*1664525+1013904223)>>>0)/4294967296,shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  return DAYS.map((_,d)=>{const D=shuf(PLAN.filter(p=>p[2].includes(d)).map(p=>({l:p[0],s:p[1]}))),hrs=shuf([9,10,11,12,13,14,15]).slice(0,D.length).sort((p,q)=>p-q);
+    return D.map((x,k)=>({...x,j:TT[x.l+x.s].length>1&&d>=2?1:0,h:hrs[k],d,n:2+hash('e'+d+k)%22}))})})();
+const tcard=(x,btn)=>{const s=x.s==='geom'?{n:'Геометрия',img:''}:{n:TN[x.s],img:'formulogia.jpg'};
+  return `<article class="lc">${banner(s,'ban')}<span class="tg">${x.l} уровень</span></div><h3>${s.n}</h3><div class="tm">${ic('clock')}${pad(x.h)}:00 - ${pad(x.h)}:45</div><div class="info">${TT[x.l+x.s][x.j]}<br>в комнате ${x.n} из ${CAP}</div>${btn}</article>`};
 
 /* ---------- карточки ---------- */
 function banner(s,cls){
@@ -771,10 +785,10 @@ function card(sl,btn,info){
 }
 function weekHTML(teacher){
   return DAYS.map((dn,d)=>{
-    const l=teacher?['alg','geom'].map(id=>SL[id+'-'+d]).sort((a,b)=>a.h-b.h):mine(d);
+    const l=teacher?TL[d]:mine(d);
     const w=l.length===1?'урок':l.length>1&&l.length<5?'урока':'уроков';
-    return `<div class="dc"><div class="dh"><b>${FULL[d]}</b><span class="bd">${l.length} ${w}</span></div>`+
-      (l.length?l.map(x=>`<div class="ls"><div class="tp"><b>${pad(x.h)}:00</b><small>${pad(x.h)}:45</small></div><div><strong>${SUB[x.s].n}</strong><span class="t">${SUB[x.s].k}</span><small>${teacher?'7 класс · '+taken(x)+' из '+CAP:TEACHER}</small></div></div>`).join(''):'<div class="fr">Свободный день 🌿</div>')+'</div>';
+    const row=x=>`<div class="ls"><div class="tp"><b>${pad(x.h)}:00</b><small>${pad(x.h)}:45</small></div><div><strong>${teacher?TN[x.s]:SUB[x.s].n}</strong><span class="t">${teacher?x.l+' уровень':SUB[x.s].k}</span><small>${teacher?TT[x.l+x.s][x.j]+' · '+x.n+' из '+CAP:TEACHER+' · '+topic(x)}</small></div></div>`;
+    return `<div class="dc"><div class="dh"><b>${FULL[d]}</b><span class="bd">${l.length} ${w}</span></div>`+(l.length?l.map(row).join(''):'<div class="fr">Свободный день 🌿</div>')+'</div>';
   }).join('');
 }
 
@@ -785,12 +799,13 @@ function rHome(){
   $('#dname').textContent=t?'Имя учителя':'Милколенок';
   $('#sw').textContent=t?'Переключить на режим Ученика':'Переключить на режим Учителя';
   $('#stu').hidden=t;$('#tea').hidden=!t;
+  $('#tf').innerHTML=[['all','Все'],['mat','Математика'],['alg','Алгебра'],['geom','Геометрия']].map(b=>`<button class="${b[0]===tf?'on':''}" data-tf="${b[0]}">${b[1]}</button>`).join('');
   $('#sched').hidden=!(t||approved);
   const box=$('#today');
   if(t){
-    const ls=['alg','geom'].map(id=>SL[id+'-0']).sort((a,b)=>a.h-b.h);
-    box.innerHTML=ls.map((x,i)=>card(x,i?'<button class="soon">Скоро начнется</button>':'<button class="join">Присоединиться</button>','7 класс · записалось '+taken(x)+' из '+CAP)).join('');
-    $('#topics').innerHTML=['alg','geom'].map(id=>`<div class="it"><div class="ico">${SUB[id].e}</div><div><b>${SUB[id].n}</b><small>Тема недели для всех 7-х классов: <strong>${SUB[id].top}</strong></small></div></div>`).join('');
+    const tl0=TL[0];
+    box.innerHTML=(tl0.length?'':'<div class="rest">Сегодня уроков по этому предмету нет</div>')+tl0.map((x,i)=>tcard(x,i?'<button class="soon">Скоро начнется</button>':'<button class="join">Присоединиться</button>')).join('');
+    $('#topics').innerHTML=Object.keys(TT).sort().filter(k=>tf==='all'||k.slice(1)===tf).map(k=>`<div class="it"><div class="ico">${ic('book')}</div><div><b>${k[0]} уровень · ${TN[k.slice(1)]}</b><small>${TT[k].length>1?'Две темы: <strong>1) '+TT[k][0]+' (Пн–Вт); 2) '+TT[k][1]+' (Ср–Сб)</strong>':'Тема недели: <strong>'+TT[k][0]+'</strong>'}</small></div></div>`).join('');
     $('#week').innerHTML=weekHTML(true);
   }else if(!approved){
     box.innerHTML=`<div class="rest"><span>Расписание ещё не составлено</span><button class="start" id="start">Начать ${ic('arrow')}</button></div>`;
@@ -804,10 +819,10 @@ function rPick(){
   $('#subs').innerHTML=S.map(x=>`<button class="sc${x.id===sel?' on':''}" data-s="${x.id}">${banner(x,'sb')}</div><b>${x.n}</b><small>${cnt(x.id)}/${x.q} ч</small></button>`).join('');
   $('#tleft').textContent='Сколько часов осталось: '+(TOTAL-n)+' из '+TOTAL;
   $('#tfill').style.width=(n/TOTAL*100)+'%';
-  $('#sh').textContent=s.n+' — когда проходят уроки на неделе';
+  $('#sh').textContent=s.n+' — когда проходят уроки на неделе'+(s.t2?'. Две темы: по одному уроку в первой (Пн–Вт) и во второй (Ср–Сб) половине недели':'. Одна тема на всю неделю: выбирай любые дни');
   $('#days').innerHTML=DAYS.map((dn,d)=>{
     const sl=SL[s.id+'-'+d],on=chosen.has(sl.id),r=on?null:why(sl),lf=CAP-taken(sl);
-    return `<div class="dd"><b>${FULL[d]}</b><div class="tmx">${pad(sl.h)}:00 – ${pad(sl.h)}:45</div><small class="${lf<=3?'low':''}">Осталось мест: ${lf} из ${CAP}</small><button class="pick-b${on?' on':''}" data-id="${sl.id}"${r?' disabled':''}>${on?'Выбрано ✓':r||'Выбрать'}</button></div>`;
+    return `<div class="dd"><b>${FULL[d]}</b><div class="tmx">${pad(sl.h)}:00 – ${pad(sl.h)}:45</div><small>Тема: ${topic(sl)}</small><small class="${lf<=3?'low':''}">Осталось мест: ${lf} из ${CAP}</small><button class="pick-b${on?' on':''}" data-id="${sl.id}"${r?' disabled':''}>${on?'Выбрано ✓':r||'Выбрать'}</button></div>`;
   }).join('');
   const c=cnt(s.id);
   $('#sleft').textContent='Сколько часов '+s.g+' осталось: '+(s.q-c)+' из '+s.q;
@@ -865,6 +880,7 @@ function rGr(){
   $('#gr').innerHTML=[...HWM.grades(),...GR].map(g=>`<div class="gc"><div class="gt"><div><small>${g[0]}</small><b>${g[1]}</b></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div><div class="gd"><div><small>Дата</small><b>${g[3]}</b></div><span>${ic('note')}</span></div></div>`).join('');
 }
 window.MS={show,ic,SUB,HW};
+$('#tf').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(b){tf=b.dataset.tf;rHome()}});
 HWM.onchange=()=>{rHw();rGr()};
 $('#drawer').addEventListener('click',e=>{const b=e.target.closest('.mi');if(!b)return;const t=b.textContent.trim();
   if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show('home');if(t!=='Главная')$('#hw').scrollIntoView({behavior:'smooth',block:'center'})}});
