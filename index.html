@@ -411,10 +411,10 @@ function openTest(){
    q.k==='t'?`<textarea data-q="${i}" placeholder="Напиши ответ…">${s.ans[i]||''}</textarea>`:
    q.k==='n'?`<input class="n" data-q="${i}" inputmode="decimal" placeholder="Число" value="${s.ans[i]||''}">`:
    q.k==='m'?q.o.map((o,j)=>`<label><input type="checkbox" data-q="${i}" data-j="${j}"${(s.ans[i]||[]).includes(j)?' checked':''}>${o}</label>`).join(''):
-   `<div class="opts">${q.o.map((o,j)=>`<label><input type="radio" name="q${i}" data-q="${i}" data-j="${j}"${s.ans[i]===j?' checked':''}>${ang(o)}<span>${'АБВГ'[j]}</span></label>`).join('')}</div>`}</div>`).join('')}<button class="bt gn" id="tf">Завершить тест</button></section>`;
+   `<div class="opts">${q.o.map((o,j)=>`<label><input type="radio" name="q${i}" data-q="${i}" data-j="${j}"${s.ans[i]===j?' checked':''}>${ang(o)}<span>${'АБВГ'[j]}</span></label>`).join('')}</div>`}</div>`).join('')}<button class="bt gn" id="tfin">Завершить тест</button></section>`;
   $('#v-sim').oninput=$('#v-sim').onchange=e=>{const i=e.target.dataset.q;if(i===undefined)return;const q=d.test[i];
     if(q.k==='m'){const a=s.ans[i]||[],j=+e.target.dataset.j;s.ans[i]=e.target.checked?[...new Set([...a,j])]:a.filter(x=>x!==j)}else if(q.k==='i')s.ans[i]=+e.target.dataset.j;else s.ans[i]=e.target.value};
-  $('#tf').onclick=()=>{s.tdone=true;changed();MS.show('hw');render()};
+  $('#tfin').onclick=()=>{s.tdone=true;changed();MS.show('hw');render()};
 }
 
 /* ---------- симуляции (полноэкранные, нарисованные) ---------- */
