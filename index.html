@@ -564,44 +564,132 @@ mount(r,c){
     if(Math.hypot(m.x-CX,m.y-360)<340){x.lineCap='round';x.strokeStyle='rgba(70,70,70,.85)';x.lineWidth=12;x.beginPath();x.moveTo(m.x+430,m.y+320);x.lineTo(m.x+10,m.y+7);x.stroke();x.strokeStyle='#e8e8e8';x.lineWidth=4;x.beginPath();x.moveTo(m.x+430,m.y+320);x.lineTo(m.x+8,m.y+5);x.stroke();circ(x,m.x,m.y,now-down<400?9:4,'#e5314a')}});
 }};
 
-SIM.bal={t:'Весы-уравнения',d:'Реши все задания со слайда. Весы в равновесии: что делаешь с одной чашей, то делай и с другой. Цель: оставить на левой чаше один ящик x.',m:['Задание 1а','Задание 1б','Задание 2','Задание 3','Задание 4'],
+SIM.bal={t:'Взлом сейфов',d:'Ты в хранилище с пятью сейфами. Реши задание, поставь ответ на счётчик и нажми «Огонь»: ответ равен числу выстрелов. Верный ответ срывает замок и открывает путь к следующему сейфу.',m:['Сейф 1 (задание 1а)','Сейф 2 (задание 1б)','Сейф 3 (задание 2)','Сейф 4 (задание 3)','Сейф 5 (задание 4)'],
 mount(r,c){
-  const [cv,x]=mk(r),W2={'+':'прибавили','−':'вычли','×':'умножили на','÷':'разделили на'};
+  const [cv,x]=mk(r),e=E3(x),F9=900;
   const T=[
-   {n:'Задание 1а',txt:'Решить уравнение: 4x + 6 = 18',q:[4,6,18]},
-   {n:'Задание 1б',txt:'Решить уравнение: 7x − 5 = 16',q:[7,-5,16]},
-   {n:'Задание 2',txt:'Число увеличили в 3 раза, получилось 24. Найди число.',q:[3,0,24],eqs:['3x = 24','x + 3 = 24','x − 3 = 24'],right:0,eh:'Увеличили в 3 раза значит умножили на 3: 3 · x = 24.'},
-   {n:'Задание 3',txt:'За x одинаковых карандашей заплатили 40 рублей. Цена одного карандаша 8 рублей. Сколько карандашей купили?',q:[8,0,40],eqs:['8x = 40','x + 8 = 40','40x = 8'],right:0,eh:'Один карандаш стоит 8 ₽, всего x штук: 8 · x = 40.'},
-   {n:'Задание 4',txt:'Найди значение выражения 3x + 5, если x = 9.',q:[3,5,'?'],calc:true,ans:32}];
-  let i=0,q=[...T[0].q],eqOk=true,tilt=0,vv=0,op=null,n=null,log=[];
-  const f=(a,b,cc)=>`${a===1?'':a}x${b>0?' + '+b:b<0?' − '+(-b):''} = ${cc}`;
-  const load=j=>{i=j;q=[...T[j].q];log=[];op=n=null;eqOk=!T[j].eqs};
-  const panel=(msg,good)=>{const t=T[i];
-    let h=`<div class="chips">${T.map((a,j)=>`<button class="${j===i?'on':''}" data-e="${j}">${a.n}</button>`).join('')}</div><div class="txt" style="font-size:15px;margin:12px 0"><b>${t.n}.</b> ${t.txt}</div>`;
-    if(t.calc)h+=`<div class="lbl">Подставь 9 вместо x и посчитай. Ответ:</div><input id="ci" inputmode="decimal" style="width:100%;border:1px solid #dfe5ea;border-radius:12px;padding:12px;font:inherit"><button class="bt" id="ck" style="height:42px">Проверить</button><div class="chips"><button id="hn">Подсказка</button></div>`;
-    else if(!eqOk)h+=`<div class="lbl">Шаг 1. Выбери уравнение к задаче:</div><div class="chips">${t.eqs.map((e,j)=>`<button data-q="${j}">${e}</button>`).join('')}</div>`;
-    else h+=`<div class="lbl">${t.eqs?'Шаг 2':'Шаг 1'}. Что сделать с обеими чашами?</div><div class="chips">${[['+','Прибавить'],['−','Вычесть'],['×','Умножить'],['÷','Разделить']].map(o=>`<button class="${o[0]===op?'on':''}" data-o="${o[0]}">${o[1]}</button>`).join('')}</div><div class="lbl">Какое число?</div><div class="chips">${[1,2,3,4,5,6,7,8,9,10].map(k=>`<button class="${k===n?'on':''}" data-n="${k}">${k}</button>`).join('')}</div><button class="bt" id="ap" style="height:42px;margin-top:12px">Сделать с обеими чашами</button><div class="lbl">Ход решения</div><div style="font-size:13px;line-height:1.7">${log.length?log.map(l=>'• '+l).join('<br>'):'<span style="color:#9aa5b0">Пока ничего не сделано</span>'}</div><div class="chips"><button id="hn">Подсказка</button><button id="rs">Начать заново</button></div>`;
-    h+=`<div class="fb ${good?'ok2':'bad'}">${msg||''}</div>`;c.ui.innerHTML=h};
+   {n:'Задание 1а',txt:'Решить уравнение: 4x + 6 = 18',eq:'4x + 6 = 18',ans:3,h:'Сначала убери 6 с обеих сторон: 4x = 12. Потом раздели 12 на 4.'},
+   {n:'Задание 1б',txt:'Решить уравнение: 7x − 5 = 16',eq:'7x − 5 = 16',ans:3,h:'Сначала прибавь 5 к обеим сторонам: 7x = 21. Потом раздели 21 на 7.'},
+   {n:'Задание 2',txt:'Число увеличили в 3 раза, получилось 24. Найди число.',eq:'3x = 24',eqs:['3x = 24','x + 3 = 24','x − 3 = 24'],right:0,eh:'«Увеличили в 3 раза» значит умножили на 3: 3 · x = 24.',ans:8,h:'Раздели 24 на 3.'},
+   {n:'Задание 3',txt:'За x одинаковых карандашей заплатили 40 рублей. Цена одного карандаша 8 рублей. Сколько карандашей купили?',eq:'8x = 40',eqs:['8x = 40','x + 8 = 40','40x = 8'],right:0,eh:'Один карандаш стоит 8 ₽, всего x штук: 8 · x = 40.',ans:5,h:'Раздели 40 на 8.'},
+   {n:'Задание 4',txt:'Найди значение выражения 3x + 5, если x = 9.',eq:'3x + 5, x = 9',calc:1,ans:32,h:'Подставь 9 вместо x: 3 · 9 + 5. Сначала умножение, потом сложение.'}];
+  const SZ=k=>7+8*k,EQ=[1,1,0,0,1],alive=[1,1,1,1,1],open=[0,0,0,0,0],holes=[[],[],[],[],[]],P3=[],CH=[];
+  let ph='walk',cur=0,num=0,msg='',good=0,sound=true,camZ=-6,yaw=0,rc=0,fl=0,shake=0,white=0,down=0,shots=0,fired=0,nextAt=0,endAt=0,phT=0,gren=null,chain=[],last=performance.now(),ac=null;
+  const rnd=()=>Math.random();
+  const snd=(dur,fr,vol)=>{if(!sound)return;try{const A=window.AudioContext||window.webkitAudioContext;ac=ac||new A();const n=ac.createBufferSource(),len=Math.floor(ac.sampleRate*dur),b=ac.createBuffer(1,len,ac.sampleRate),d=b.getChannelData(0);for(let k=0;k<len;k++)d[k]=(rnd()*2-1)*Math.pow(1-k/len,3);n.buffer=b;const g=ac.createGain();g.gain.value=vol;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=fr;n.connect(f);f.connect(g);g.connect(ac.destination);n.start()}catch(err){}};
+  const panel=()=>{const t=T[Math.min(cur,4)];let h='';
+    if(ph==='ready')h='<div class="txt" style="font-size:15px;margin:0 0 12px">Все 5 сейфов открыты, ты внутри. Остался последний шаг: брось гранату в коридор.</div><button class="bt" id="gr" style="background:#e5314a">Бросить гранату</button>';
+    else if(ph==='end')h='<div class="note"><b>Алгебра взломана!</b><br>Все 5 заданий выполнены.</div><button class="bt gn" id="ex">Выйти из задания</button>';
+    else if(ph==='throw'||ph==='chain')h='<div class="txt" style="font-size:15px">Бум!</div>';
+    else if(cur>=5)h='<div class="txt" style="font-size:15px">Идём в последний зал…</div>';
+    else{
+      h+=`<div class="chips" style="margin:0 0 8px">${T.map((a,j)=>`<span class="${j<cur?'':'s'}">${j+1}${j<cur?' ✓':''}</span>`).join('')}</div>`;
+      h+=`<div class="txt" style="font-size:15px;margin:8px 0"><b>${t.n}.</b> ${t.txt}</div>`;
+      if(ph==='walk'||ph==='open')h+='<div class="fb" style="color:#566170">Подходим к сейфу…</div>';
+      else if(!EQ[cur])h+=`<div class="lbl">Шаг 1. Выбери уравнение к задаче:</div><div class="chips">${t.eqs.map((q,j)=>`<button data-q="${j}">${q}</button>`).join('')}</div>`;
+      else h+=`<div class="lbl">${t.eqs?'Шаг 2. ':''}Реши: <b>${t.eq}</b></div><div class="intro" style="margin:0 0 8px;font-size:13px">Ответ = число выстрелов. Поставь его на счётчик и нажми «Огонь».</div><div style="display:flex;gap:8px;align-items:center"><button class="go" data-d="-1">−</button><input id="cn" inputmode="numeric" value="${num}" style="width:84px;text-align:center;font-size:22px;border:1px solid #dfe5ea;border-radius:12px;padding:8px"><button class="go" data-d="1">+</button></div><button class="bt" id="fr" style="background:#e5314a">Огонь!</button>`;
+      h+=`<div class="chips"><button id="hn">Подсказка</button><button id="sn">Звук: ${sound?'вкл':'выкл'}</button></div><div class="fb ${good?'ok2':'bad'}">${msg}</div>`}
+    c.ui.innerHTML=h};
+  const fire=()=>{if(ph!=='aim')return;if(!EQ[cur]){msg='Сначала выбери уравнение.';good=0;panel();return}
+    if(num<1){msg='Поставь на счётчик число больше нуля.';good=0;panel();return}
+    shots=num;fired=0;nextAt=performance.now()+250;ph='fire';msg='';panel()};
+  const throwG=()=>{if(ph!=='ready')return;ph='throw';phT=performance.now();snd(.05,900,.3);panel()};
   panel();
-  c.ui.onclick=e2=>{const b=e2.target.closest('button');if(!b)return;const t=T[i];
-    if(b.dataset.e!==undefined){load(+b.dataset.e);panel()}
-    else if(b.dataset.q!==undefined){if(+b.dataset.q===t.right){eqOk=true;panel('Верно! Теперь реши это уравнение на весах.',1)}else panel('Не подходит. '+t.eh)}
-    else if(b.dataset.o){op=b.dataset.o;panel()}else if(b.dataset.n){n=+b.dataset.n;panel()}
-    else if(b.id==='rs'){q=[...t.q];log=[];op=n=null;panel()}
-    else if(b.id==='ck'){const v=parseFloat(c.ui.querySelector('#ci').value.replace(',','.'));if(v===t.ans){panel('Верно! 3 · 9 + 5 = 32',1);c.ok(i)}else panel('Пока нет. Нажми «Подсказка».')}
-    else if(b.id==='hn')panel(t.calc?'Замени x на 9: 3 · 9 + 5. Сначала умножение, потом сложение.':q[1]>0?`Сначала убери лишнее число слева: вычти ${q[1]} с обеих чаш.`:q[1]<0?`Сначала верни недостающее: прибавь ${-q[1]} с обеих чаш.`:`Осталось разделить обе чаши на ${q[0]}.`,1);
-    else if(b.id==='ap'){if(!op||!n){panel('Выбери действие и число.');return}const was=f(...q);
-      if(op==='+'){q[1]+=n;q[2]+=n}else if(op==='−'){q[1]-=n;q[2]-=n}else if(op==='×'){q=q.map(z=>z*n)}else{if(q.some(z=>z%n)){panel('Не делится нацело. Подумай, что нужно сделать сначала.');return}q=q.map(z=>z/n)}
-      log.push(`${was}  →  ${W2[op]} ${n}  →  ${f(...q)}`);vv=.05;if(q[0]===1&&q[1]===0){panel(`Готово! x = ${q[2]}.`,1);c.ok(i)}else panel('Весы в равновесии. Что делаем дальше?',1)}};
-  return raf(()=>{const t=T[i];vv+=-tilt*.06;vv*=.92;tilt+=vv;const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fff4e0');g.addColorStop(1,'#ffd9a8');x.fillStyle=g;x.fillRect(0,0,W,H);
-    rr(x,0,650,W,70,0,'#b57d4a');rr(x,610,260,60,390,10,'#7a5a3a');rr(x,520,630,240,34,12,'#5b3f26');circ(x,640,260,22,'#d4a017');
-    x.save();x.translate(640,260);x.rotate(tilt);rr(x,-340,-10,680,20,10,'#a67c3d');x.restore();
-    x.fillStyle='#34404e';x.font='bold 52px Montserrat,sans-serif';x.textAlign='center';x.fillText(t.calc?'3x + 5,  x = 9':eqOk?f(...q):'Составь уравнение',640,80);x.font='20px Montserrat,sans-serif';x.fillStyle='#8a6d2f';x.fillText(t.calc?'Левая чаша: три ящика по 9 и ещё 5':'левая чаша = правая чаша',640,120);
-    [-1,1].forEach(s=>{const ex=640+s*340*Math.cos(tilt),ey=260+s*340*Math.sin(tilt),py=ey+240;x.strokeStyle='#8a8a8a';x.lineWidth=3;x.beginPath();x.moveTo(ex,ey);x.lineTo(ex-110,py);x.moveTo(ex,ey);x.lineTo(ex+110,py);x.stroke();
-      x.fillStyle='#c9ced4';x.beginPath();x.ellipse(ex,py+6,125,16,0,0,7);x.fill();x.fillStyle='#e6e9ed';x.beginPath();x.ellipse(ex,py,125,14,0,0,7);x.fill();
-      if(s<0){const a=q[0];for(let k=0;k<a;k++){const X=ex-108+(k%4)*54,Y=py-50-Math.floor(k/4)*50;rr(x,X,Y,48,48,6,'#4aa3df');x.strokeStyle='#2d7fb8';x.lineWidth=3;x.strokeRect(X,Y,48,48);x.fillStyle='#fff';x.font='bold 28px Montserrat,sans-serif';x.fillText(t.calc?'9':'x',X+24,Y+34)}
-        if(q[1]){const X=ex-108+Math.min(a,4)*54+(a?20:60);circ(x,X,py-30,30,q[1]>0?'#3fae5a':'#e5517a');x.fillStyle='#fff';x.font='bold 24px Montserrat,sans-serif';x.fillText((q[1]>0?'+':'−')+Math.abs(q[1]),X,py-21)}}
-      else{if(!eqOk&&!t.calc){circ(x,ex,py-38,38,'#9aa5b0');x.fillStyle='#fff';x.font='bold 30px Montserrat,sans-serif';x.fillText('?',ex,py-27)}else{circ(x,ex,py-38,38,'#2d6a9f');x.fillStyle='#fff';x.font='bold 30px Montserrat,sans-serif';x.fillText(q[2],ex,py-27)}}})});
+  c.ui.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;const t=T[Math.min(cur,4)];
+    if(b.dataset.q!==undefined){if(+b.dataset.q===t.right){EQ[cur]=1;msg='Верно! Теперь реши это уравнение.';good=1}else{msg='Не подходит. '+t.eh;good=0}panel()}
+    else if(b.dataset.d){if(ph!=='aim')return;num=Math.max(0,Math.min(60,num+ +b.dataset.d));const i2=c.ui.querySelector('#cn');if(i2)i2.value=num}
+    else if(b.id==='fr')fire();
+    else if(b.id==='hn'){msg=EQ[cur]?t.h:'Прочитай условие ещё раз: что в нём делают с числом x?';good=1;panel()}
+    else if(b.id==='sn'){sound=!sound;panel()}
+    else if(b.id==='gr')throwG();
+    else if(b.id==='ex'){const k=document.querySelector('#bk');if(k)k.click()}};
+  c.ui.oninput=ev=>{if(ev.target.id==='cn')num=Math.max(0,Math.min(60,parseInt(ev.target.value)||0))};
+  cv.onpointerdown=()=>fire();
+  const burst=(X,Y,Z,nf,ns,sp)=>{for(let k=0;k<nf;k++){const a=rnd()*6.28,b=rnd()*3.14-1.2,s=sp*(.3+rnd());P3.push({k:'fi',x:X,y:Y,z:Z,vx:Math.cos(a)*s,vy:Math.abs(Math.sin(b))*s+1,vz:Math.sin(a)*s,l:0,m:.6+rnd()*.7})}
+    for(let k=0;k<ns;k++){const a=rnd()*6.28,s=sp*.4*rnd();P3.push({k:'sm',x:X,y:Y,z:Z,vx:Math.cos(a)*s,vy:1+rnd()*2,vz:Math.sin(a)*s,l:0,m:1.5+rnd()*1.5})}
+    for(let k=0;k<16;k++){const a=rnd()*6.28,s=sp*(.5+rnd());P3.push({k:'sp',x:X,y:Y,z:Z,vx:Math.cos(a)*s,vy:rnd()*sp*.8,vz:Math.sin(a)*s,l:0,m:.5+rnd()*.5})}};
+  const chunk=(X,Y,Z,vx,vy,vz,s,col)=>{CH.push({x:X,y:Y,z:Z,vx,vy,vz,s,col});if(CH.length>170)CH.shift()};
+  const shoot=()=>{rc=1;fl=1;shake=Math.max(shake,.1);snd(.12,4200,.3);const z0=SZ(cur),hx=(rnd()-.5)*4.4,hy=.6+rnd()*2.4;
+    if(holes[cur].length<50)holes[cur].push([hx,hy]);
+    for(let k=0;k<9;k++)P3.push({k:'sp',x:hx,y:hy,z:z0-.15,vx:(rnd()-.5)*5,vy:rnd()*4,vz:-rnd()*5,l:0,m:.35+rnd()*.25});
+    P3.push({k:'sm',x:hx,y:hy,z:z0-.2,vx:0,vy:.6,vz:-.3,l:0,m:.8})};
+  const resolve=now=>{if(num===T[cur].ans){const z0=SZ(cur),cols=[[122,136,152],[214,172,62],[200,40,48],[84,96,112],[50,54,60]];open[cur]=1;burst(0,1.7,z0-.3,34,16,7);
+      for(let k=0;k<16;k++)chunk((rnd()-.5)*5,.4+rnd()*3,z0+.2,(rnd()-.5)*5,2+rnd()*5,3+rnd()*7,.2+rnd()*.5,cols[k%5]);
+      shake=.7;white=.55;snd(.9,1500,.9);c.ok(cur);msg='Замок сорван! Дверь выбита.';good=1;ph='open';phT=now}
+    else{msg='Замок выдержал. '+(T[cur].calc?'Пересчитай: сначала 3 · 9, потом + 5.':'Проверь: подставь свой ответ в уравнение, сошлось?');good=0;ph='aim'}
+    panel()};
+  const prj=(X,Y,Z)=>{const cm=e.cam,dx=X-cm.x,dy=Y-cm.y,dz=Z-cm.z,co=Math.cos(cm.yaw),si=Math.sin(cm.yaw),xr=dx*co-dz*si,zr=dx*si+dz*co,cp=Math.cos(cm.pitch),sp=Math.sin(cm.pitch),yy=dy*cp+zr*sp,zz=zr*cp-dy*sp;return zz>.4?{x:W/2+F9*xr/zz,y:H/2-F9*yy/zz,z:zz}:null};
+  const frameF=k=>{const z0=SZ(k),S1=[96,110,130],F=[...boxF(-3.5,-2.8,0,5,z0,z0+2.5,S1),...boxF(2.8,3.5,0,5,z0,z0+2.5,S1),...boxF(-2.8,2.8,3.4,5,z0,z0+2.5,S1)];
+    for(let j=0;j<7;j++)F.push(...boxF(-3.5+j,-2.5+j,3.5,3.9,z0-.04,z0,j%2?[30,30,34]:[240,200,40]));return F};
+  const doorF=k=>{const z0=SZ(k),F=[...boxF(-2.8,2.8,0,3.4,z0,z0+.35,[122,136,152]),...boxF(-2.8,2.8,.25,.4,z0-.04,z0,[84,96,112]),...boxF(-2.2,2.2,2.3,3.2,z0-.06,z0,[26,32,40]),...boxF(-.8,.8,.5,1.8,z0-.1,z0,[214,172,62]),...boxF(-1.2,1.2,1.08,1.22,z0-.2,z0-.1,[50,54,60]),...boxF(-.08,.08,.45,1.85,z0-.2,z0-.1,[50,54,60]),...boxF(-.3,.3,.85,1.45,z0-.3,z0-.2,[200,40,48])];
+    [-2.5,2.5].forEach(X=>[.7,2.0].forEach(Y=>F.push(...boxF(X-.08,X+.08,Y-.08,Y+.08,z0-.09,z0,[190,196,204]))));
+    holes[k].forEach(h=>F.push(...boxF(h[0]-.07,h[0]+.07,h[1]-.07,h[1]+.07,z0-.31,z0,[22,22,26])));return F};
+  const segs=[[-8,7]];for(let k=0;k<4;k++)segs.push([SZ(k)+2.5,SZ(k+1)]);segs.push([SZ(4)+2.5,53]);
+  const wallF=(a,b)=>[...boxF(-4,-3.5,0,5,a,b,[138,148,162]),...boxF(3.5,4,0,5,a,b,[138,148,162]),...boxF(-4,4,5,5.3,a,b,[110,118,132]),...boxF(-3.5,-3.45,.9,1.1,a,b,[240,180,40]),...boxF(3.45,3.5,.9,1.1,a,b,[240,180,40])];
+  const FR=[0,1,2,3,4].map(frameF),WL=segs.map(s=>wallF(s[0],s[1])),EW=[boxF(-4,4,0,5.3,-8.5,-8,[120,130,145]),boxF(-4,4,0,5.3,53,53.5,[120,130,145])],DC=[],DN=[-1,-1,-1,-1,-1];
+  const doorGet=k=>{if(DN[k]!==holes[k].length){DC[k]=doorF(k);DN[k]=holes[k].length}return DC[k]};
+  const gun=()=>{x.save();x.translate(1040,790+down+rc*26);x.scale(-1,1);x.rotate(-.82+rc*.03);
+    rr(x,-170,26,260,78,36,'#3b7bd9');rr(x,-130,-14,140,38,8,'#2a2d33');rr(x,70,22,40,78,10,'#23262b');
+    rr(x,0,-28,270,52,12,'#3a3f47');rr(x,6,-28,260,9,4,'#5a626d');rr(x,150,22,46,96,10,'#23262b');
+    rr(x,270,-22,170,40,8,'#2f343b');rr(x,282,-8,146,7,3,'#e8793a');
+    rr(x,56,8,92,70,26,'#f2c9a0');rr(x,310,14,96,58,22,'#f2c9a0');
+    rr(x,440,-12,110,18,5,'#6b7480');rr(x,548,-17,28,28,4,'#4a525c');rr(x,300,-38,26,14,3,'#1c1e22');rr(x,520,-28,9,18,2,'#1c1e22');
+    if(fl>.02){x.globalAlpha=Math.min(1,fl);const g2=x.createRadialGradient(584,-3,4,584,-3,120);g2.addColorStop(0,'#fff');g2.addColorStop(.3,'#ffe27a');g2.addColorStop(1,'rgba(255,140,30,0)');x.fillStyle=g2;x.beginPath();x.arc(584,-3,120,0,7);x.fill()}
+    x.restore()};
+  const stop=raf(()=>{
+    const now=performance.now(),dt=Math.min(.05,(now-last)/1000),t=now/1000;last=now;
+    const zt=cur<5?SZ(cur)-6:SZ(4)+7.5;camZ+=(zt-camZ)*(1-Math.exp(-dt*(ph==='walk'?2:5)));
+    const mv=ph==='walk'&&Math.abs(zt-camZ)>.25;
+    if(ph==='walk'&&Math.abs(zt-camZ)<.2){if(cur<5){ph='aim';panel()}else{ph='turn';phT=now;panel()}}
+    else if(ph==='fire'){if(fired<shots){if(now>=nextAt){shoot();fired++;nextAt=now+(shots>12?110:230);if(fired>=shots)endAt=now+550}}else if(now>=endAt)resolve(now)}
+    else if(ph==='open'){if(now-phT>1300){cur++;ph='walk';msg='';good=0;panel()}}
+    else if(ph==='turn'){const u=Math.min(1,(now-phT)/1500);yaw=Math.PI*(u*u*(3-2*u));if(u>=1){ph='ready';panel()}}
+    else if(ph==='throw'){const u=(now-phT)/1600;
+      if(u>=1){gren=null;ph='chain';phT=now;burst(0,.8,24,60,30,10);shake=1;white=1;snd(1.8,600,1.2);
+        chain=[0,1,2,3,4].sort((a,b)=>Math.abs(SZ(a)+1-24)-Math.abs(SZ(b)+1-24)).map((k,i)=>({k,d:0,at:now+250+i*330}));panel()}
+      else gren={x:.5*(1-u),y:1.3*(1-u)+.25*u+5*u*(1-u),z:camZ-.5+(24-(camZ-.5))*u}}
+    else if(ph==='chain'){
+      chain.forEach(q=>{if(!q.d&&now>=q.at){q.d=1;const z0=SZ(q.k);alive[q.k]=0;open[q.k]=1;burst(0,2,z0+1.2,36,18,9);
+        for(let j=0;j<14;j++)chunk((rnd()-.5)*6.2,rnd()*4.6,z0+rnd()*2.5,(rnd()-.5)*9,3+rnd()*7,(rnd()-.5)*9,.25+rnd()*.7,[[96,110,130],[122,136,152],[84,96,112],[240,200,40]][j%4]);
+        shake=.8;white=.4;snd(1.3,800,.9)}});
+      if(chain.every(q=>q.d)&&now>chain[chain.length-1].at+2200){ph='end';panel()}}
+    down+=((['turn','ready','throw','chain','end'].includes(ph)?520:0)-down)*(1-Math.exp(-dt*5));
+    if(ph==='end'&&rnd()<.5)P3.push({k:'cf',x:(rnd()-.5)*5,y:5,z:camZ-3-rnd()*10,vx:(rnd()-.5)*.8,vy:-1.2,vz:0,l:0,m:4,c:'hsl('+Math.floor(rnd()*360)+',90%,60%)'});
+    const cm=e.cam,bob=mv?Math.sin(t*9)*.035:0;
+    cm.x=(rnd()-.5)*shake*.4;cm.y=1.7+bob+(rnd()-.5)*shake*.3;cm.z=camZ;cm.yaw=yaw+(rnd()-.5)*shake*.03;cm.pitch=.03;
+    shake=Math.max(0,shake-dt*1.6);rc=Math.max(0,rc-dt*9);fl=Math.max(0,fl-dt*14);white=Math.max(0,white-dt*1.6);
+    CH.forEach(q=>{q.vy-=14*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.z+=q.vz*dt;const h=q.s/2;
+      if(q.y<h){q.y=h;q.vy*=-.3;q.vx*=.6;q.vz*=.6;if(Math.abs(q.vy)<.5)q.vy=0}
+      if(q.y<=h+.01){q.vx*=.92;q.vz*=.92}
+      if(q.x>3.1){q.x=3.1;q.vx*=-.4}if(q.x<-3.1){q.x=-3.1;q.vx*=-.4}if(q.y>4.7&&q.vy>0){q.y=4.7;q.vy*=-.3}});
+    for(let k=P3.length-1;k>=0;k--){const p=P3[k];p.l+=dt;if(p.l>p.m){P3.splice(k,1);continue}
+      if(p.k==='sp'){p.vy-=9*dt;if(p.y<0){p.y=0;p.vy*=-.4}}else if(p.k==='fi'){p.vy+=2*dt;p.vx*=.97;p.vz*=.97}
+      p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt}
+    if(P3.length>700)P3.splice(0,P3.length-700);
+    for(let z=-8;z<53;z+=4)for(let xi=0;xi<2;xi++)e.quad(-3.5+xi*3.5,xi*3.5,z,z+4,((z/4+xi)&1)?[150,152,158]:[122,124,132]);
+    WL.forEach(f=>e.obj(f));EW.forEach(f=>e.obj(f));
+    for(let k=0;k<5;k++){if(!alive[k])continue;const z0=SZ(k);e.obj(FR[k]);e.shadow(-3.5,-2.8,z0,z0+2.5,5);e.shadow(2.8,3.5,z0,z0+2.5,5);
+      if(!open[k]){e.obj(doorGet(k));e.shadow(-2.8,2.8,z0,z0+.35,3.4)}}
+    CH.forEach(q=>{const h=q.s/2;e.obj(boxF(q.x-h,q.x+h,q.y-h,q.y+h,q.z-h,q.z+h,q.col));e.shadow(q.x-h,q.x+h,q.z-h,q.z+h,q.y+q.s)});
+    e.render();
+    x.save();
+    P3.forEach(p=>{if(p.k!=='sm')return;const pp=prj(p.x,p.y,p.z);if(!pp)return;const u=p.l/p.m;x.globalAlpha=.4*(1-u);circ(x,pp.x,pp.y,(.5+u*1.3)*F9/pp.z,'#4a4d52')});
+    x.globalCompositeOperation='lighter';
+    P3.forEach(p=>{if(p.k==='sm'||p.k==='cf')return;const pp=prj(p.x,p.y,p.z);if(!pp)return;const u=p.l/p.m;
+      if(p.k==='sp'){x.globalAlpha=1-u;circ(x,pp.x,pp.y,Math.max(1.5,.07*F9/pp.z),'#ffd36a')}
+      else{x.globalAlpha=.75*(1-u);circ(x,pp.x,pp.y,(.5+u*.9)*F9/pp.z,'rgb(255,'+Math.round(190-150*u)+','+Math.round(60*(1-u))+')')}});
+    x.restore();
+    x.save();P3.forEach(p=>{if(p.k!=='cf')return;const pp=prj(p.x,p.y,p.z);if(!pp)return;x.fillStyle=p.c;x.fillRect(pp.x,pp.y,Math.max(2,.12*F9/pp.z),Math.max(2,.07*F9/pp.z))});x.restore();
+    if(gren){const pp=prj(gren.x,gren.y,gren.z);if(pp){const q=.14*F9/pp.z;circ(x,pp.x,pp.y,q,'#3f6b3a');circ(x,pp.x-q*.3,pp.y-q*.3,q*.35,'#6aa85f');x.fillStyle='#222';x.fillRect(pp.x-q*.35,pp.y-q*1.3,q*.7,q*.4)}}
+    if(cur<5&&alive[cur]&&!open[cur]){const pp=prj(0,2.75,SZ(cur)-.1);if(pp){x.font='bold '+(.5*F9/pp.z)+'px Montserrat,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#7fe3ff';x.fillText(EQ[cur]?T[cur].eq:'?',pp.x,pp.y);x.textBaseline='alphabetic'}}
+    gun();
+    if(cur<5){x.save();x.strokeStyle='rgba(255,255,255,.85)';x.lineWidth=2;x.beginPath();x.arc(W/2,H/2,10,0,7);x.moveTo(W/2-22,H/2);x.lineTo(W/2-12,H/2);x.moveTo(W/2+12,H/2);x.lineTo(W/2+22,H/2);x.moveTo(W/2,H/2-22);x.lineTo(W/2,H/2-12);x.moveTo(W/2,H/2+12);x.lineTo(W/2,H/2+22);x.stroke();x.restore();
+      rr(x,W/2-110,16,220,44,22,'rgba(20,40,60,.75)');x.fillStyle='#fff';x.font='bold 22px Montserrat,sans-serif';x.textAlign='center';x.fillText('Сейф '+(cur+1)+' из 5',W/2,46);
+      rr(x,24,H-70,260,46,23,'rgba(20,40,60,.75)');x.textAlign='left';x.fillText('Выстрелов: '+(ph==='fire'?fired+' / '+shots:num),44,H-39)}
+    if(ph==='end'){x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,0,W,H);x.textAlign='center';x.font='bold 84px Montserrat,sans-serif';x.lineWidth=8;x.strokeStyle='#1c2a3a';x.strokeText('Алгебра взломана!',W/2,H/2);x.fillStyle='#fff';x.fillText('Алгебра взломана!',W/2,H/2);x.font='bold 28px Montserrat,sans-serif';x.fillStyle='#ffe27a';x.fillText('Все 5 сейфов уничтожены',W/2,H/2+56)}
+    if(white>.01){x.fillStyle='rgba(255,255,255,'+Math.min(1,white)+')';x.fillRect(0,0,W,H)}
+  });
+  return ()=>{stop();try{if(ac)ac.close()}catch(err){}};
 }};
 
 SIM.draw={t:'Построй и измерь',d:'Инструменты — на самом поле, слева вверху. Построй прямую AB, перпендикуляр в точке A и измерь угол транспортиром. Транспортир можно двигать (тяни за него) и поворачивать (тяни за оранжевую ручку).',m:['Построй прямую AB','Построй в точке A перпендикуляр','Измерь угол транспортиром'],
