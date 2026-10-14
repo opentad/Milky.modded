@@ -354,7 +354,7 @@ function render(){
   $('#v-hw').innerHTML=`<div class="crumb"><a id="hb">Главная</a> &nbsp;|&nbsp; Домашние задания</div>
   <div class="hero"><div><small>Домашнее задание</small><h1>${sub}</h1><span class="chp">7 уровень</span><span class="chp">Учитель: Имя учителя</span><span class="chp">Сдать до: ${w?w[3]:''}</span></div>
   <div class="ban2" style="${d.img?`background-image:url('${d.img}')`:''}"></div>
-  <div class="stc ${sc[3]}"><b>${sc[0]}</b><i>${sc[1]}</i>${sc[2]}</div></div>
+  ${s.status==='new'?'':`<div class="stc ${sc[3]}"><b>${sc[0]}</b><i>${sc[1]}</i>${sc[2]}</div>`}</div>
   <div class="hg"><div>
    ${s.status==='graded'?'<div class="card"><div class="cmt"><small>КОММЕНТАРИЙ УЧИТЕЛЯ</small><br><b>Молодец! Интересная работа получилась.</b></div></div>':''}
    <section class="card"><h2 class="t">Задание от учителя</h2><div class="hd2">Посмотри материалы перед отправкой ответа.</div><div class="txt">${d.task.map(t=>`<p>${t}</p>`).join('')}</div>
