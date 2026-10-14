@@ -758,15 +758,17 @@ mount(r,c){
 SIM.robot={t:'Робот-алгоритмист',d:'Составь программу из команд, чтобы робот дошёл до флажка. Команда «3×⬆» делает три шага вперёд.',m:['Уровень 1','Уровень 2','Уровень 3 (со стенами)'],
 mount(r,c){
   const [cv,x]=mk(r),e=E3(x),LV=[{s:[0,5],g:[0,2],w:[]},{s:[0,5],g:[3,2],w:[]},{s:[0,5],g:[4,0],w:[[0,3],[2,2],[3,5]]}];
-  let lv=0,prog=[],run=null,rb={x:0,y:5,d:0,ax:0,ay:5,aa:0};
+  let lv=0,prog=[],run=null,rb={x:0,y:5,d:0,ax:0,ay:5,aa:0},win=0;
+const prj=(X,Y,Z)=>{const cm=e.cam,dx=X-cm.x,dy=Y-cm.y,dz=Z-cm.z,co=Math.cos(cm.yaw),si=Math.sin(cm.yaw),xr=dx*co-dz*si,zr=dx*si+dz*co,cp=Math.cos(cm.pitch),sp=Math.sin(cm.pitch),yy=dy*cp+zr*sp,zz=zr*cp-dy*sp;return zz>.4?{x:W/2+900*xr/zz,y:H/2-900*yy/zz,z:zz}:null};
+const chime=()=>{try{const A=window.AudioContext||window.webkitAudioContext,ac=new A(),t=ac.currentTime;[523,659,784,1047].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,t+i*.11);g.gain.linearRampToValueAtTime(.25,t+i*.11+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.11+.9);o.connect(g);g.connect(ac.destination);o.start(t+i*.11);o.stop(t+i*.11+1)});setTimeout(()=>ac.close(),2000)}catch(err){}};
   c.ui.innerHTML='<div class="chips" id="lv"></div><div class="lbl">Команды:</div><div class="chips">'+[['f','⬆ вперёд'],['l','↶ налево'],['r','↷ направо'],['m','3×⬆'],['x','Очистить']].map(b=>`<button data-c="${b[0]}">${b[1]}</button>`).join('')+'</div><div class="fb" id="pg"></div><div class="fb" id="rm"></div>';
-  const reset=()=>{const L=LV[lv];rb={x:L.s[0],y:L.s[1],d:0,ax:L.s[0],ay:L.s[1],aa:0};clearInterval(run);$('#rm').textContent='';$('#lv').innerHTML=LV.map((_,j)=>`<button class="${j===lv?'on':''}" data-l="${j}">Уровень ${j+1}</button>`).join('')};
+  const reset=()=>{const L=LV[lv];rb={x:L.s[0],y:L.s[1],d:0,ax:L.s[0],ay:L.s[1],aa:0};clearInterval(run);win=0;$('#rm').textContent='';$('#lv').innerHTML=LV.map((_,j)=>`<button class="${j===lv?'on':''}" data-l="${j}">Уровень ${j+1}</button>`).join('')};
   const show=()=>{$('#pg').textContent='Программа: '+(prog.map(p=>({f:'⬆',l:'↶',r:'↷',m:'3×⬆'}[p])).join(' ')||'пусто')};
   const step=cmd=>{const D=[[0,-1],[1,0],[0,1],[-1,0]],L=LV[lv];if(cmd==='l')rb.d=(rb.d+3)%4;else if(cmd==='r')rb.d=(rb.d+1)%4;else{const n=cmd==='m'?3:1;for(let i=0;i<n;i++){const nx=rb.x+D[rb.d][0],ny=rb.y+D[rb.d][1];if(nx<0||ny<0||nx>5||ny>5||L.w.some(w=>w[0]===nx&&w[1]===ny)){$('#rm').className='fb bad';$('#rm').textContent='Стена! Робот не может пройти.';return}rb.x=nx;rb.y=ny}}};
   c.ui.onclick=e2=>{const b=e2.target.closest('button');if(!b)return;
     if(b.dataset.l!==undefined){lv=+b.dataset.l;prog=[];reset();show()}else if(b.dataset.c==='x'){prog=[];reset();show()}
     else if(b.dataset.c){prog.push(b.dataset.c);show()}};
-  const go=()=>{reset();let i=0;run=setInterval(()=>{if(i>=prog.length){clearInterval(run);const L=LV[lv];if(rb.x===L.g[0]&&rb.y===L.g[1]){$('#rm').className='fb ok2';$('#rm').textContent='Флажок достигнут!';c.ok(lv)}else{$('#rm').className='fb bad';$('#rm').textContent='Не дошёл. Попробуй изменить программу.'}return}step(prog[i++])},700)};
+  const go=()=>{reset();let i=0;run=setInterval(()=>{if(i>=prog.length){clearInterval(run);const L=LV[lv];if(rb.x===L.g[0]&&rb.y===L.g[1]){$('#rm').className='fb ok2';$('#rm').textContent='Флажок достигнут!';c.ok(lv);win=performance.now();chime()}else{$('#rm').className='fb bad';$('#rm').textContent='Не дошёл. Попробуй изменить программу.'}return}step(prog[i++])},700)};
   r.insertAdjacentHTML('beforeend','<button class="fabgo" id="go" title="Запустить">▶</button>');
   r.addEventListener('click',e2=>{if(e2.target.closest('#go'))go()});
   reset();show();
@@ -782,6 +784,8 @@ mount(r,c){
     b(-.46,-.32,0,.3,-.42,.42,[30,34,40]);b(.32,.46,0,.3,-.42,.42,[30,34,40]);b(-.3,.3,.18,.24,.3,.36,[240,200,40]);
     e.obj(rotF(B,cx,cz,rb.aa*Math.PI/180));e.shadow(cx-.5,cx+.5,cz-.45,cz+.45,1.3);
     e.render();
+                  if(win){const u=Math.min(1,(performance.now()-win)/600),pl=.8+.2*Math.sin(performance.now()/180),a=prj(gx,0,gz),b=prj(gx,9*u,gz);if(a&&b){x.save();x.globalCompositeOperation='lighter';const w=.5*900/a.z,g=x.createLinearGradient(0,a.y,0,b.y);g.addColorStop(0,'rgba(120,255,170,'+.95*pl+')');g.addColorStop(1,'rgba(120,255,170,0)');x.fillStyle=g;x.beginPath();x.moveTo(a.x-w,a.y);x.lineTo(a.x+w,a.y);x.lineTo(b.x+w*.3,b.y);x.lineTo(b.x-w*.3,b.y);x.fill();
+const h=x.createRadialGradient(a.x,a.y,0,a.x,a.y,w*3.2);h.addColorStop(0,'rgba(200,255,220,'+.8*pl+')');h.addColorStop(1,'rgba(120,255,170,0)');x.fillStyle=h;x.beginPath();x.ellipse(a.x,a.y,w*3.2,w*1.3,0,0,7);x.fill();x.restore()}}
     x.fillStyle='rgba(255,255,255,.9)';x.font='bold 20px Montserrat,sans-serif';x.textAlign='left';x.fillText('Полигон «Алгоритм»',24,H-22)});
 }};
 
