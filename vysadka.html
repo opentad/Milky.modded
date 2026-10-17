@@ -54,8 +54,6 @@ function choose(labels){return new Promise(res=>{acts.innerHTML='';labels.forEac
 /* ---------- 3D (Three.js) ---------- */
 const S={scene:'deck',t:0,storm:0,stormT:0,sink:0,sinkT:0,fade:0,fadeT:0,flash:0,echo:-9,active:false,hint:false,seen:{},stand:0};
 let R;for(const o of [{antialias:true},{antialias:false},{antialias:false,powerPreference:'low-power'}]){try{R=new THREE.WebGLRenderer({canvas:cv,...o});break}catch(e){}}
-if(!R){document.body.innerHTML='<p style="padding:28px;font:19px/1.5 Georgia;color:#f2ecdc">Не удалось включить 3D (WebGL). Открой файл в обычном браузере (Chrome) или на сайте, а не во встроенном просмотре приложения.</p>';throw new Error('no webgl')}
-R.setPixelRatio(Math.min(devicePixelRatio||1,2));
 const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(72,1,.1,1000);cam.rotation.order='YXZ';sc.add(cam);
 const fadeEl=document.createElement('div');fadeEl.style.cssText='position:absolute;left:0;top:0;right:0;background:#05080a;opacity:0;pointer-events:none';$('#app').append(fadeEl);
 function fit(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();fadeEl.style.height=h+'px'}
