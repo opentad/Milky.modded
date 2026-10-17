@@ -1064,8 +1064,7 @@ document.head.appendChild(st);
 const sec=document.createElement('section');sec.id='v-hws';sec.hidden=true;$('.main').appendChild(sec);
 let tab='act',q='',sub='';
 const fd=s=>s.replace(/^(\d+) (\S+) (\S+)$/,(m,a,b,c)=>a+' '+b.toLowerCase()+' в '+c);
-const items=()=>const items=()=>HW.map(w=>({id:w[0],n:w[1],tags:w[0]==='isl'?['Школа','Остров Эхо','Основное']:['Школа','Основное'],pub:'17 октября',due:fd(w[3]),s:HWM.st(w[0])}));
-  ...HW.map(w=>({id:w[0],n:w[1],tags:['Школа','Основное'],pub:'17 октября',due:fd(w[3]),s:HWM.st(w[0])}))];
+const items=()=>HW.map(w=>({id:w[0],n:w[1],tags:w[0]==='isl'?['Школа','Остров Эхо','Основное']:['Школа','Основное'],pub:'17 октября',due:fd(w[3]),s:HWM.st(w[0])}));
 function list(){
   const L=items(),act=L.filter(x=>x.s!=='graded'),arc=L.filter(x=>x.s==='graded'),src=(tab==='act'?act:arc).filter(x=>(!q||x.n.toLowerCase().includes(q))&&(!sub||x.id===sub));
   $('#hws-cnt').textContent=act.length;$('#hws-sh').textContent='Показано: '+src.length;
