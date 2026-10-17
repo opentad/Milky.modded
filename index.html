@@ -968,8 +968,9 @@ function rPick(){
 }
 function show(v){
   view=v;
-  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';$('#v-hw').hidden=v!=='hw';$('#v-sim').hidden=v!=='sim';
-  $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden=!(v==='home'||v==='hw');
+  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';$('#v-hw').hidden=v!=='hw';$('#v-sim').hidden=v!=='sim';$('#v-hws').hidden=v!=='hws';
+$('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden=!(v==='home'||v==='hw'||v==='hws');
+if(v==='hws')window.rHws();
   if(v==='home')rHome();
   if(v==='pick')rPick();
   if(v==='review')$('#rv').innerHTML=weekHTML(false);
@@ -1019,8 +1020,70 @@ window.MS={show,ic,SUB,HW};
 $('#tf').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(b){tf=b.dataset.tf;rHome()}});
 HWM.onchange=()=>{rHw();rGr()};
 $('#drawer').addEventListener('click',e=>{const b=e.target.closest('.mi');if(!b)return;const t=b.textContent.trim();
-  if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show('home');if(t!=='Главная')$('#hw').scrollIntoView({behavior:'smooth',block:'center'})}});
+  if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show(t==='Главная'?'home':'hws')}
 
+/* ---------- страница «Домашние задания» (как на school.милки.рф) ---------- */
+(function(){
+const st=document.createElement('style');st.textContent=`
+#v-hws{padding-bottom:70px}
+.hws-hero{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(110deg,#fff 35%,#d7f3fc);border-radius:28px;padding:28px 34px;box-shadow:0 6px 30px rgba(0,0,0,.04);margin-top:18px}
+.hws-hero small{display:flex;gap:10px;align-items:center;color:var(--cy);font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:12px}
+.hws-hero small svg{width:20px;height:20px}
+.hws-hero h1{font-weight:800;font-size:36px;color:#34404e;margin:6px 0 10px}
+.hws-hero p{font-size:14px;color:#7b838c}
+.hws-cnt{background:#fff;border-radius:22px;padding:18px 34px;text-align:center;box-shadow:0 6px 30px rgba(0,0,0,.05)}
+.hws-cnt b{display:block;font-size:36px;color:var(--cy);font-weight:600}.hws-cnt span{font-size:12px;color:var(--mu)}
+.hws-tabs{display:inline-flex;gap:6px;background:#eef3f8;border-radius:20px;padding:7px;margin:24px 0 18px}
+.hws-tabs button{display:flex;gap:9px;align-items:center;height:42px;padding:0 22px;border-radius:14px;color:#8a929b;font-weight:600;font-size:15px}
+.hws-tabs button.on{background:#fff;color:var(--cy);box-shadow:0 3px 14px rgba(0,0,0,.06)}
+.hws-tabs svg{width:20px;height:20px}
+.hws-box{background:#fff;border-radius:28px;padding:26px;box-shadow:0 6px 30px rgba(0,0,0,.04)}
+.hws-f{display:grid;grid-template-columns:2fr 1.2fr 1.2fr 1.2fr 1.2fr;gap:14px}
+.hws-f input,.hws-f select{height:54px;border:1px solid #e3e8ee;border-radius:20px;padding:0 20px;font:inherit;font-size:14px;color:#566170;background:#fff;outline:0;min-width:0}
+.hws-sh{font-size:13px;color:#a5a8ac;margin:22px 0 14px}
+.hws-it{display:flex;align-items:center;gap:20px;border:1px solid var(--ln);border-radius:24px;padding:18px 22px;margin-bottom:14px}
+.hws-ic{flex:none;width:60px;height:60px;border-radius:18px;background:#eaf8fd;color:var(--cy);display:grid;place-items:center}.hws-ic svg{width:26px;height:26px}
+.hws-mid{flex:1;min-width:0}
+.hws-mid b{font-size:21px;font-weight:700;margin-right:10px}
+.hws-ch{display:inline-block;background:#eef1f4;border-radius:12px;padding:4px 12px;font-size:12px;font-weight:600;color:#6b7580;margin-right:6px;vertical-align:3px}
+.hws-ch.o{background:#fff1e0;color:#e8873a}
+.hws-m{display:flex;gap:22px;flex-wrap:wrap;margin-top:10px;color:#8b929a;font-size:14px}
+.hws-m span{display:flex;gap:7px;align-items:center}.hws-m svg{width:18px;height:18px}
+.hws-d{text-align:right}.hws-d small{display:block;color:var(--mu);font-size:12px}.hws-d b{font-size:17px;font-weight:600;margin:0;display:block}
+.hws-go{flex:none;height:48px;padding:0 24px;border-radius:18px;background:#eaf8fd;color:var(--bt);font-weight:700;font-size:15px;display:flex;gap:8px;align-items:center}
+.hws-go svg{width:16px;height:16px}
+@media(max-width:1100px){.hws-f{grid-template-columns:1fr 1fr}.hws-it{flex-wrap:wrap}.hws-hero h1{font-size:28px}}`;
+document.head.appendChild(st);
+const sec=document.createElement('section');sec.id='v-hws';sec.hidden=true;$('.main').appendChild(sec);
+let tab='act',q='',sub='';
+const fd=s=>s.replace(/^(\d+) (\S+) (\S+)$/,(m,a,b,c)=>a+' '+b.toLowerCase()+' в '+c);
+const items=()=>[{id:'isl',n:'Высадка',tags:['Школа','Остров Эхо','Основное'],pub:'17 октября',due:'20 октября в 20:00',s:'new'},
+  ...HW.map(w=>({id:w[0],n:w[1],tags:['Школа','Основное'],pub:'17 октября',due:fd(w[3]),s:HWM.st(w[0])}))];
+function list(){
+  const L=items(),act=L.filter(x=>x.s!=='graded'),arc=L.filter(x=>x.s==='graded'),src=(tab==='act'?act:arc).filter(x=>(!q||x.n.toLowerCase().includes(q))&&(!sub||x.id===sub));
+  $('#hws-cnt').textContent=act.length;$('#hws-sh').textContent='Показано: '+src.length;
+  $('#hws-list').innerHTML=src.map(x=>`<div class="hws-it"><div class="hws-ic">${ic('note')}</div><div class="hws-mid"><b>${x.n}</b>${x.tags.map(t=>`<span class="hws-ch${t==='Дополнительное'?' o':''}">${t}</span>`).join('')}<div class="hws-m"><span>${ic('user')}7 уровень</span><span>${ic('clock')}Опубликовано: ${x.pub}</span></div></div><div class="hws-d"><small>Сдать до</small><b>${x.due}</b></div><button class="hws-go" data-hws="${x.id}">${tab==='act'?'Выполнить':'Открыть'} ${ic('arrow')}</button></div>`).join('')||'<div class="fr">Здесь пока пусто</div>';
+}
+window.rHws=function(){
+  const L=items();
+  sec.innerHTML=`<div class="crumb" style="font-size:12px;color:#a5a8ac"><a id="hws-home" style="cursor:pointer">Главная</a> &nbsp;|&nbsp; Домашние задания</div>
+  <div class="hws-hero"><div><small>${ic('tasks')}Учебный кабинет</small><h1>Домашние задания</h1><p>Все актуальные задания школы и курсов в одном месте. Сроки сдачи и тип работы видны сразу.</p></div><div class="hws-cnt"><b id="hws-cnt"></b><span>активных</span></div></div>
+  <div class="hws-tabs"><button data-tab="act" class="${tab==='act'?'on':''}">${ic('tasks')}Актуальные</button><button data-tab="arc" class="${tab==='arc'?'on':''}">${ic('box')}Архив</button></div>
+  <div class="hws-box"><div class="hws-f"><input id="hws-q" placeholder="Поиск по предмету или курсу" value="${q}"><select><option>Школа и курсы</option></select><select><option>Все задания</option></select><select id="hws-s"><option value="">Все предметы</option>${L.map(x=>`<option value="${x.id}"${x.id===sub?' selected':''}>${x.n}</option>`).join('')}</select><select><option>Все курсы</option></select></div><div class="hws-sh" id="hws-sh"></div><div id="hws-list"></div></div>`;
+  list();
+};
+document.addEventListener('input',e=>{if(e.target.id==='hws-q'){q=e.target.value.toLowerCase();list()}});
+document.addEventListener('change',e=>{if(e.target.id==='hws-s'){sub=e.target.value;list()}});
+document.addEventListener('click',e=>{const t=e.target;
+  if(t.closest('.hd span')&&t.closest('.hd span').textContent.includes('Все домашние')){mode='student';show('hws');return}
+  if(sec.hidden)return;
+  if(t.closest('#hws-home'))show('home');
+  else if(t.closest('[data-tab]')){tab=t.closest('[data-tab]').dataset.tab;window.rHws()}
+  else if(t.closest('[data-hws]')){const id=t.closest('[data-hws]').dataset.hws;id==='isl'?openIsland():HWM.open(id)}
+});
+function openIsland(){const f=document.createElement('div');f.style.cssText='position:fixed;inset:0;z-index:50;background:#10171c';f.innerHTML='<button style="position:absolute;top:10px;right:10px;z-index:2;height:36px;padding:0 16px;border-radius:18px;background:#fff;font-weight:600">Закрыть</button><iframe src="vysadka.html" style="width:100%;height:100%;border:0" allow="fullscreen"></iframe>';f.querySelector('button').onclick=()=>f.remove();document.body.appendChild(f)}
+})();
+  
 /* ---------- старт ---------- */
 rCl();rHw();rGr();show('home');
 })();
