@@ -6,69 +6,170 @@
 :root{--ink:#10171c;--lamp:#ffb44a;--paper:#f2ecdc;--teal:#8fd3c4}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;background:var(--ink);color:var(--paper);font-family:Georgia,'Times New Roman',serif;overflow:hidden}
-#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:600px;margin:auto}
-#stage{flex:1 1 50%;min-height:0;position:relative}
-#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
-#pad{position:absolute;left:10px;right:10px;bottom:10px;display:none;justify-content:space-between;align-items:flex-end;pointer-events:none}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#fade{position:fixed;inset:0;background:#05080a;opacity:0;pointer-events:none;z-index:5}
+
+/* верхняя полоска: вещи и звук */
+#hud{position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:10}
+.chip{font:inherit;font-size:15px;padding:6px 12px;background:rgba(16,23,28,.72);color:var(--paper);border:1px solid #34454c;border-radius:14px}
+#inv{display:none;color:var(--teal)}
+#snd{pointer-events:auto;cursor:pointer;margin-left:auto}
+
+/* джойстик и «присесть» */
+#pad{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:none;justify-content:space-between;align-items:flex-end;pointer-events:none;z-index:8}
 #joy{position:relative;width:112px;height:112px;border-radius:50%;background:rgba(16,23,28,.45);border:2px solid rgba(255,180,74,.7);touch-action:none;pointer-events:auto}
 #knob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--lamp);opacity:.85;pointer-events:none}
 #crch{pointer-events:auto;padding:12px 14px;font-size:16px;opacity:.92}
 #crch.on{background:var(--teal)}
-#panel{flex:0 1 auto;max-height:52%;display:flex;flex-direction:column;background:var(--ink);border-top:3px solid var(--lamp)}
-#log{overflow:auto;padding:12px 16px 4px;font-size:17px;line-height:1.5}
-#log p{margin-bottom:8px}
-#log p.hint{color:var(--lamp);font-style:italic}
-#log p.echo{color:#b9a7ff;font-style:italic}
-#log p:not([data-who]):not(.hint):not(.echo){font-style:italic;color:#d9d3c0}
-b[data-w^="Север"]{color:var(--lamp)}
-b[data-w^="Амир"]{color:var(--teal)}
-#inv{display:none;padding:4px 16px;font-size:15px;color:var(--teal);border-top:1px solid #24343b}
-#acts{padding:6px 16px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
-#acts:empty{padding:0}
+
+/* блок снизу посередине: диалоги, мысли, подсказки */
+#box{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));width:min(680px,calc(100vw - 24px));max-height:42vh;overflow:auto;z-index:10;
+ padding:12px 18px 14px;background:rgba(16,23,28,.9);border:2px solid #34454c;border-radius:22px;box-shadow:0 6px 22px rgba(0,0,0,.45)}
+body.beach #box{width:min(680px,calc(100vw - 300px))}
+@media (max-width:760px){body.beach #box{width:min(680px,calc(100vw - 24px));bottom:calc(138px + env(safe-area-inset-bottom))}}
+#tag{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;color:var(--lamp)}
+#tag:empty{display:none}
+#txt{font-size:18px;line-height:1.5}
+#acts{display:flex;flex-direction:column;gap:8px;padding-top:10px}
+#acts:empty{display:none}
+/* диалог */
+#box.dlg{border-color:var(--lamp)}
+#box.dlg[data-w^="Амир"]{border-color:var(--teal)}
+#box.dlg[data-w^="Амир"] #tag{color:var(--teal)}
+/* мысли и описание */
+#box.think{background:rgba(26,24,48,.84);border:2px dotted #8a86a8;border-radius:30px}
+#box.think #txt{font-style:italic;color:#d9d3c0}
+#box.think.echo{border-color:#b9a7ff}
+#box.think.echo #txt{color:#b9a7ff}
+/* голос игры: подсказки и правила */
+#box.game{background:rgba(10,24,28,.93);border-color:var(--teal)}
+#box.game #tag{color:var(--teal)}
+#box.game #txt{font-size:16px;white-space:pre-line}
+#box.game ol{margin-left:20px}
+#box.game li{margin:5px 0}
+/* дневник */
+#box.diary{background:var(--paper);color:var(--ink);border:3px solid #0a1216;border-radius:14px;box-shadow:4px 4px 0 var(--lamp)}
+#box.diary #tag{color:#5a4a2a}
+#box.diary #txt{font-size:16px;line-height:1.45}
+#box.diary ul{margin-left:18px}
+#box.diary li{margin:4px 0}
+/* конец уровня: по центру */
+#box.end{bottom:50%;transform:translate(-50%,50%)}
+
 .btn{font:inherit;font-size:17px;padding:13px 16px;background:var(--lamp);color:var(--ink);border:2px solid #0a1216;border-radius:10px;box-shadow:0 3px 0 #0a1216;cursor:pointer}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #0a1216}
 .btn:disabled{opacity:.4}
 #noise{font:20px/1.3 ui-monospace,Menlo,monospace;letter-spacing:2px;color:var(--teal);min-height:28px;text-align:center}
 input[type=range]{width:100%;height:36px;accent-color:var(--lamp)}
 small{color:#9fb0b5}
-textarea{font:inherit;font-size:16px;width:100%;min-height:54px;padding:8px;border-radius:8px;border:2px solid #34454c;background:#18242b;color:var(--paper)}
-label{font-size:15px;color:#d9d3c0}
-.card{background:var(--paper);color:var(--ink);border:3px solid #0a1216;border-radius:6px;padding:12px 14px;box-shadow:4px 4px 0 var(--lamp);font-size:16px;line-height:1.45}
-.card h3{font-size:18px;margin-bottom:6px}
-.card li{margin-left:18px}
 @media (prefers-reduced-motion:reduce){.btn{transition:none}}
 </style></head>
-<body><div id="app">
-<div id="stage"><canvas id="cv"></canvas><div id="pad"><div id="joy"><div id="knob"></div></div><button class="btn" id="crch">Присесть</button></div></div>
-<div id="panel"><div id="log"></div><div id="inv"></div><div id="acts"></div></div>
-</div>
+<body>
+<canvas id="cv"></canvas>
+<div id="fade"></div>
+<div id="hud"><div class="chip" id="inv"></div><button class="chip" id="snd">Звук: вкл</button></div>
+<div id="pad"><div id="joy"><div id="knob"></div></div><button class="btn" id="crch">Присесть</button></div>
+<div id="box"><div id="tag"></div><div id="txt"></div><div id="acts"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const $=s=>document.querySelector(s),log=$('#log'),acts=$('#acts'),cv=$('#cv'),inv=$('#inv'),pad=$('#pad');
+const $=s=>document.querySelector(s),box=$('#box'),tag=$('#tag'),txt=$('#txt'),acts=$('#acts'),cv=$('#cv'),inv=$('#inv'),pad=$('#pad'),fadeEl=$('#fade');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let skip=false;$('#panel').addEventListener('click',()=>skip=true);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+let skip=false;box.addEventListener('click',()=>skip=true);
 
-/* ---------- текст и кнопки ---------- */
-async function say(who,text,cls=''){
-  const p=document.createElement('p');if(cls)p.className=cls;if(who)p.dataset.who=1;
-  if(who){const b=document.createElement('b');b.textContent=who+': ';b.dataset.w=who;p.append(b)}
-  const s=document.createElement('span');p.append(s);log.append(p);skip=false;
-  for(const ch of text){s.textContent+=ch;log.scrollTop=log.scrollHeight;if(!skip)await sleep(18)}
-  await sleep(skip?60:250);
-}
-function choose(labels){return new Promise(res=>{acts.innerHTML='';labels.forEach((l,i)=>{const b=document.createElement('button');b.className='btn';b.textContent=l;b.onclick=()=>{acts.innerHTML='';res(i)};acts.append(b)})})}
+/* ---------- ЗВУК (WebAudio, всё рисуется кодом) ---------- */
+const A={ctx:null,on:true};
+function audioInit(){
+ if(A.ctx){if(A.ctx.state!=='running')A.ctx.resume();return}
+ const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+ const x=A.ctx=new AC();
+ A.master=x.createGain();A.master.gain.value=A.on?.8:0;
+ A.lp=x.createBiquadFilter();A.lp.type='lowpass';A.lp.frequency.value=18000;
+ A.master.connect(A.lp);A.lp.connect(x.destination);
+ const n=x.sampleRate*3;A.white=x.createBuffer(1,n,x.sampleRate);A.brown=x.createBuffer(1,n,x.sampleRate);
+ const w=A.white.getChannelData(0),b=A.brown.getChannelData(0);let l=0;
+ for(let i=0;i<n;i++){const r=Math.random()*2-1;w[i]=r;l=(l+.02*r)/1.02;b[i]=l*3.5}
+ A.sea=layer(A.brown,'lowpass',700,.5);A.surf=layer(A.white,'bandpass',1600,.5);A.wind=layer(A.white,'bandpass',500,.8);A.rain=layer(A.white,'highpass',3000,.7);
+ lfo(A.sea.g.gain,.1,.07);lfo(A.surf.g.gain,.085,.03);
+ A.tCreak=2;A.tGull=6;A.pf=0}
+addEventListener('pointerdown',audioInit);addEventListener('keydown',audioInit);
+function layer(buf,type,f,q){const x=A.ctx,s=x.createBufferSource();s.buffer=buf;s.loop=true;const fl=x.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q||.7;const g=x.createGain();g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(A.master);s.start();return{s,fl,g}}
+function lfo(param,f,depth){const x=A.ctx,o=x.createOscillator(),g=x.createGain();o.frequency.value=f;g.gain.value=depth;o.connect(g);g.connect(param);o.start()}
+function beep(f,d,t,v,w,f2){const x=A.ctx;if(!x||!A.on)return;const t0=x.currentTime+(w||0),o=x.createOscillator(),g=x.createGain();o.type=t||'sine';o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+d);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.01);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(A.master);o.start(t0);o.stop(t0+d+.05)}
+function burst(d,type,f,q,v,w,f2){const x=A.ctx;if(!x||!A.on)return;const t0=x.currentTime+(w||0),s=x.createBufferSource();s.buffer=A.white;const fl=x.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t0);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t0+d);fl.Q.value=q;const g=x.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+Math.min(.02,d/3));g.gain.exponentialRampToValueAtTime(.0001,t0+d);s.connect(fl);fl.connect(g);g.connect(A.master);s.start(t0,Math.random()*2);s.stop(t0+d+.05)}
+function creak(v){const x=A.ctx;if(!x||!A.on)return;const t0=x.currentTime,d=.5+Math.random()*.6,o=x.createOscillator(),f=x.createBiquadFilter(),g=x.createGain();o.type='sawtooth';o.frequency.setValueAtTime(70+Math.random()*30,t0);o.frequency.linearRampToValueAtTime(100+Math.random()*60,t0+d);f.type='bandpass';f.frequency.value=500+Math.random()*300;f.Q.value=6;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.08);g.gain.linearRampToValueAtTime(0,t0+d);o.connect(f);f.connect(g);g.connect(A.master);o.start(t0);o.stop(t0+d+.05)}
+function thunder(v){const w=.15+Math.random()*.5;burst(.12,'highpass',2500,.7,v*.6,0);burst(2.4,'lowpass',500,.6,v,w,70);burst(1.2,'lowpass',250,.6,v*.7,w+.4,50)}
+function gull(){beep(1700,.28,'triangle',.035,0,1100);beep(1500,.3,'triangle',.03,.32,900)}
+function step(h){if(h<.45){burst(.16,'bandpass',800+rnd(0,300),.9,.1);burst(.08,'highpass',3000,.5,.03)}else{burst(.1,'bandpass',1500+rnd(0,700),.9,.07);burst(.14,'lowpass',260,.6,.05)}}
+function chime(){beep(660,.25,'sine',.12);beep(990,.35,'sine',.1,.09);beep(1320,.4,'sine',.06,.18)}
+function click(){beep(900,.05,'square',.04)}
+function scribble(){for(let i=0;i<4;i++)burst(.07,'bandpass',3200,1.5,.05,i*.09)}
+function radioCrackle(){burst(.18,'bandpass',2600,1.6,.07);beep(1200,.05,'square',.02,.16)}
+function crash(){creak(.18);burst(.8,'lowpass',900,.7,.3,0,80)}
+function endSnd(){beep(110,3.5,'sine',.16);beep(165,3.5,'sine',.08,.15);beep(220,3.5,'sine',.04,.3)}
+/* голос «Эй!» и его эхо (чем дальше, тем глуше) */
+function shout(v,p,lowp,w){const x=A.ctx;if(!x||!A.on)return;const t0=x.currentTime+(w||0),d=.45,o=x.createOscillator(),g=x.createGain(),lp=x.createBiquadFilter();
+ o.type='sawtooth';o.frequency.setValueAtTime(p,t0);o.frequency.linearRampToValueAtTime(p*1.25,t0+.2);o.frequency.linearRampToValueAtTime(p*1.1,t0+d);
+ g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.04);g.gain.linearRampToValueAtTime(0,t0+d);
+ lp.type='lowpass';lp.frequency.value=lowp;lp.connect(A.master);
+ [[550,5],[2000,5]].forEach(([f,q])=>{const b=x.createBiquadFilter();b.type='bandpass';b.frequency.value=f;b.Q.value=q;g.connect(b);b.connect(lp)});
+ o.connect(g);o.start(t0);o.stop(t0+d+.05)}
+/* шум и голос рации при настройке */
+function radioStart(){const x=A.ctx;if(!x||!A.on)return;const st=layer(A.white,'bandpass',2200,.6),o=x.createOscillator(),o2=x.createOscillator(),f=x.createBiquadFilter(),g=x.createGain();
+ o.type=o2.type='sawtooth';o.frequency.value=165;o2.frequency.value=168;f.type='bandpass';f.frequency.value=900;f.Q.value=1.2;g.gain.value=0;
+ o.connect(f);o2.connect(f);f.connect(g);g.connect(A.master);o.start();o2.start();A.rad={st,o,o2,g};radioCrackle()}
+function radioSet(q){if(!A.rad)return;const T=A.ctx.currentTime;A.rad.st.g.gain.setTargetAtTime(.22*(1-q)+.02,T,.05);A.rad.st.fl.frequency.value=1200+Math.random()*3000;A.rad.g.gain.setTargetAtTime(.1*q*q,T,.05)}
+function radioStop(){const r=A.rad;if(!r)return;A.rad=null;const T=A.ctx.currentTime;r.st.g.gain.setTargetAtTime(0,T,.08);r.g.gain.setTargetAtTime(0,T,.08);setTimeout(()=>{try{r.st.s.stop();r.o.stop();r.o2.stop()}catch(e){}},700);beep(1000,.08,'sine',.08)}
+/* писк при печати текста: у каждого свой голос */
+function blip(kind,who){if(!A.ctx||!A.on)return;
+ if(kind==='dlg'){if(who.startsWith('Север'))beep(140+rnd(-10,14),.07,'triangle',.06);else beep(250+rnd(-25,25),.05,'square',.022)}
+ else if(kind==='think')beep(520+rnd(-40,40),.05,'sine',.03);
+ else beep(900,.03,'square',.012)}
+/* фоновый звук каждый кадр: море, ветер, дождь, скрип, чайки, гром */
+function audUpd(dt){const x=A.ctx;if(!x)return;const T=x.currentTime,k=S.storm,isB=cur==='beach';
+ A.sea.g.gain.setTargetAtTime(isB?.2:.13+.18*k,T,.3);
+ A.surf.g.gain.setTargetAtTime(isB?.05:.02+.06*k,T,.3);
+ A.wind.g.gain.setTargetAtTime(.015+.3*k+(isB?.02:0),T,.3);A.wind.fl.frequency.setTargetAtTime(350+700*k+120*Math.sin(S.t*.6),T,.3);
+ A.rain.g.gain.setTargetAtTime(rain.visible&&!isB?.2*k:0,T,.3);
+ A.lp.frequency.setTargetAtTime(400*Math.pow(45,1-S.fade),T,.1);
+ A.tCreak-=dt;if(A.tCreak<0){A.tCreak=rnd(2.5,6)/(1+2*k);if(!isB&&S.sink<.1)creak(.04+.1*k)}
+ A.tGull-=dt;if(A.tGull<0){A.tGull=rnd(9,18);if(k<.2&&!S.over)gull()}
+ if(S.flash>A.pf+.3)thunder(Math.min(.6,S.flash*.5));A.pf=S.flash}
+$('#snd').addEventListener('click',()=>{A.on=!A.on;if(A.master)A.master.gain.setTargetAtTime(A.on?.8:0,A.ctx.currentTime,.05);$('#snd').textContent='Звук: '+(A.on?'вкл':'выкл')});
+
+/* ---------- блок снизу: диалоги, мысли, подсказки ---------- */
+/* show: kind = dlg (кто-то говорит) | think (мысли, описание) | game (подсказки и правила) */
+async function show(kind,who,text,o={}){
+ box.className=kind+(o.cls?' '+o.cls:'');box.dataset.w=who||'';box.style.display='block';
+ tag.textContent=kind==='dlg'?who:(kind==='game'?(o.tag||'Подсказка'):'');
+ txt.textContent='';acts.innerHTML='';skip=false;
+ if(kind==='dlg'&&who.startsWith('Амир'))radioCrackle();
+ let i=0;for(const ch of text){txt.textContent+=ch;if(ch!==' '&&(i++%2===0))blip(kind,who);if(!skip)await sleep(20)}
+ skip=false;
+ if(o.nowait){await sleep(300);return}
+ const w=Math.min(6500,Math.max(1800,1300+45*text.length)),t0=performance.now();
+ while(!skip&&performance.now()-t0<w)await sleep(50);
+ skip=false}
+const say=(who,text,o)=>show('dlg',who,text,o);
+const think=(text,cls,o)=>show('think','',text,Object.assign({cls:cls||''},o||{}));
+const hint=(text,o)=>show('game','',text,o);
+function choose(labels){return new Promise(res=>{box.style.display='block';acts.innerHTML='';labels.forEach((l,i)=>{const b=document.createElement('button');b.className='btn';b.textContent=l;b.onclick=()=>{click();acts.innerHTML='';res(i)};acts.append(b)})})}
+/* правила даёт игра, а не персонаж */
+async function rules(){
+ box.className='game';box.dataset.w='';box.style.display='block';tag.textContent='Правила экспедиции';
+ txt.innerHTML='<ol><li>Каждая находка — улика. Всё важное попадёт в дневник.</li><li>Выводы ты делаешь сам и держишь их в голове. Ошибаться можно — это часть дела.</li><li>Задания можно проходить в любом порядке. Каждое — отдельная находка.</li></ol>';
+ acts.innerHTML='';chime();await choose(['Принято'])}
 
 /* ---------- 3D (Three.js) ---------- */
 if(typeof THREE==='undefined'){document.body.innerHTML='<p style="padding:28px;font:19px/1.5 Georgia;color:#f2ecdc">Не загрузилась библиотека Three.js. Проверь интернет и обнови страницу.</p>';throw new Error('no three')}
-const S={scene:'deck',t:0,storm:0,stormT:0,sink:0,sinkT:0,fade:0,fadeT:0,flash:0,echo:-9,active:false,hint:false,seen:{},stand:0,px:0,pz:12,cr:0,inv:[]};
+const S={scene:'deck',t:0,storm:0,stormT:0,sink:0,sinkT:0,fade:0,fadeT:0,flash:0,echo:-9,active:false,hint:false,seen:{},stand:0,px:0,pz:12,cr:0,dist:0,inv:[],over:false};
 let R;for(const o of [{antialias:true},{antialias:false},{antialias:false,powerPreference:'low-power'}]){try{R=new THREE.WebGLRenderer({canvas:cv,...o});break}catch(e){}}
 if(!R){document.body.innerHTML='<p style="padding:28px;font:19px/1.5 Georgia;color:#f2ecdc">Не удалось включить 3D (WebGL). Открой файл в обычном браузере (Chrome) или на сайте, а не во встроенном просмотре приложения.</p>';throw new Error('no webgl')}
 R.setPixelRatio(Math.min(devicePixelRatio||1,2));
 const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(72,1,.1,1000);cam.rotation.order='YXZ';sc.add(cam);
-const fadeEl=document.createElement('div');fadeEl.style.cssText='position:absolute;left:0;top:0;right:0;background:#05080a;opacity:0;pointer-events:none';$('#app').append(fadeEl);
-function fit(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();fadeEl.style.height=h+'px'}
+function fit(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
 new ResizeObserver(fit).observe(cv);
-const rnd=(a,b)=>a+Math.random()*(b-a),cc=h=>new THREE.Color(h);
+const cc=h=>new THREE.Color(h);
 const sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
 
 /* текстуры (рисуются кодом) */
@@ -168,9 +269,9 @@ mk(2,g=>{const b=new THREE.Mesh(new THREE.SphereGeometry(.5,12,10),new THREE.Mes
 mk(3,g=>{const rM=new THREE.MeshStandardMaterial({color:0xe2552b,roughness:.7}),wM=new THREE.MeshStandardMaterial({color:0xeeeadb,roughness:.7});for(let i=0;i<4;i++){const a=new THREE.Mesh(new THREE.TorusGeometry(.5,.13,8,10,Math.PI/2),i%2?wM:rM);a.rotation.z=i*Math.PI/2;g.add(a)}const t=g.children.slice();const w=new THREE.Group();t.forEach(c=>w.add(c));w.rotation.x=-Math.PI/2+.15;w.position.y=.15;g.add(w)});
 const marks=spotPos.map(([x,z])=>{const m=new THREE.Mesh(new THREE.OctahedronGeometry(.18),new THREE.MeshBasicMaterial({color:0xffb44a}));m.visible=false;beachG.add(m);return m});
 const rings=[0,1,2].map(()=>{const m=new THREE.Mesh(new THREE.RingGeometry(.95,1,64).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xb9a7ff,transparent:true,depthTest:false,depthWrite:false}));m.renderOrder=5;m.visible=false;beachG.add(m);return m});
-function toBeach(){ship.visible=false;island.visible=false;rain.visible=false;sunDisc.visible=false;beachG.visible=true;sc.add(cam);S.stand=0;S.px=0;S.pz=12;pitch=.6;yaw=0;pad.style.display='flex';inv.style.display='block';invUpd()}
+function toBeach(){ship.visible=false;island.visible=false;rain.visible=false;sunDisc.visible=false;beachG.visible=true;sc.add(cam);S.stand=0;S.px=0;S.pz=12;pitch=.6;yaw=0;pad.style.display='flex';inv.style.display='block';document.body.classList.add('beach');invUpd()}
 
-/* ---------- инвентарь ---------- */
+/* ---------- вещи ---------- */
 const ITEMS=['Консервы',null,'Рация','Спасательный круг'];
 function invUpd(){inv.textContent='Вещи: '+(S.inv.length?S.inv.join(' · '):'пусто')}
 
@@ -184,7 +285,7 @@ const ray=new THREE.Raycaster();
 function tap(e){if(!S.active||!S.onSpot)return;const r=cv.getBoundingClientRect();ray.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-((e.clientY-r.top)/r.height)*2+1},cam);const h=ray.intersectObjects(spotHit,false)[0];if(h)trySpot(h.object.userData.spot)}
 /* взять предмет можно, только если стоишь рядом */
 async function trySpot(i){if(!S.active||!S.onSpot||S.busy)return;
- if(Math.hypot(S.px-spotPos[i][0],S.pz-spotPos[i][1])>4.5){S.busy=true;await say('','Далековато. Подойди ближе.','hint');S.busy=false;return}
+ if(Math.hypot(S.px-spotPos[i][0],S.pz-spotPos[i][1])>4.5){S.busy=true;await hint('Далековато. Подойди ближе.',{nowait:true});S.busy=false;return}
  S.onSpot(i)}
 function interact(){if(!S.active)return;let b=-1,bd=1e9;spotPos.forEach((p,i)=>{const d=Math.hypot(S.px-p[0],S.pz-p[1]);if(d<bd){bd=d;b=i}});if(b>=0)trySpot(b)}
 
@@ -197,10 +298,11 @@ const joyEnd=e=>{if(e.pointerId!==J.id)return;J.id=null;J.x=J.y=0;knob.style.tra
 joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
 /* присесть */
 const crch=$('#crch');crch.addEventListener('click',()=>{crBtn=!crBtn;crch.classList.toggle('on',crBtn);crch.textContent=crBtn?'Встать':'Присесть'});
-/* клавиатура: WASD — идти, стрелки — смотреть, C или Shift — присесть, E — взять */
+/* клавиатура: WASD — идти, стрелки — смотреть, C или Shift — присесть, E — взять, Пробел/Enter — дальше */
 const K={};
 addEventListener('keydown',e=>{if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName))return;K[e.code]=true;
  if(e.code.startsWith('Arrow')||e.code==='Space')e.preventDefault();
+ if(e.code==='Space'||e.code==='Enter')skip=true;
  if(e.code==='KeyE'&&!e.repeat)interact()});
 addEventListener('keyup',e=>{K[e.code]=false});
 addEventListener('blur',()=>{for(const k in K)K[k]=false});
@@ -214,6 +316,7 @@ function walk(dt){
  let nx=S.px+(fx*cy-fy*sy)*v,nz=S.pz+(-fx*sy-fy*cy)*v;
  nx=Math.max(-38,Math.min(38,nx));nz=Math.max(4,Math.min(30,nz));
  for(const c of colls){const dx=nx-c[0],dz=nz-c[1],d=Math.hypot(dx,dz),mn=c[2]+.45;if(d<mn&&d>.0001){nx=c[0]+dx/d*mn;nz=c[1]+dz/d*mn}}
+ S.dist+=Math.hypot(nx-S.px,nz-S.pz);if(S.dist>(S.cr>.5?.8:1.25)){S.dist=0;step(th(nx,nz))}
  S.px=nx;S.pz=nz}
 
 /* кадр */
@@ -231,76 +334,83 @@ function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;S.t+=dt;
  if(!isB){ship.position.y=1.4+wh(0,0)*.8-S.sink*7;ship.rotation.z=Math.sin(S.t*1.1)*(.015+.16*k)+S.sink*.7;ship.rotation.x=Math.sin(S.t*.9+1)*(.01+.08*k)+S.sink*.15;lampL.intensity=1.1+.25*Math.sin(S.t*7);
   rain.visible=k>.25;if(rain.visible)rainUpd(dt)}
  else{S.stand=Math.min(1,S.stand+dt*.35);const e=S.stand*S.stand*(3-2*S.stand);
-  if(S.stand>.95)walk(dt);
+  if(S.stand>.95&&!S.over)walk(dt);
   cam.position.set(S.px,th(S.px,S.pz)+.3+(1.35-.7*S.cr)*e,S.pz);
   debris.forEach(d=>{d.position.y=wh(d.position.x,d.position.z)+.05;d.rotation.z=Math.sin(S.t+d.position.x)*.1});
   marks.forEach((m,i)=>{m.visible=!!(S.seen[i]||S.hint);const sc2=S.seen[i]?.5:1;m.scale.setScalar(sc2);m.position.set(spotPos[i][0],th(spotPos[i][0],spotPos[i][1])+1.5+Math.sin(S.t*3+i)*.1,spotPos[i][1]);m.rotation.y=S.t*2});
   const e2=S.t-S.echo;rings.forEach((m,i)=>{const r=e2-i*.35;m.visible=r>0&&r<2.2;if(m.visible){m.position.set(S.px,th(S.px,S.pz)+.2,S.pz);m.scale.setScalar(1+r*20);m.material.opacity=.8*(1-r/2.2)}})}
  const sh=(Math.random()-.5)*(.012*k+.03*S.flash);cam.rotation.set(pitch+sh*.5,yaw,sh,'YXZ');
+ audUpd(dt);
  fadeEl.style.opacity=S.fade;R.render(sc,cam);requestAnimationFrame(frame)}
 
 /* ---------- сюжет ---------- */
 const INFO=["Ящик раскололся. Внутри мокрые консервы. Пригодятся, но не сейчас.","Обломок мачты. Тяжёлый, мокрый, ничего полезного.","Рюкзак радиста. Внутри — портативная рация. Корпус цел. На крышке нацарапано: «Канал экспедиции: 63».","Спасательный круг с надписью «Ковчег-7». Значит, часть корабля вынесло к этому же берегу."];
 async function deck(){
-  await say('','Рассвет. Палуба «Ковчега-7» мерно качается. На горизонте — тёмный силуэт острова.');
-  await say('','Проведи пальцем по экрану (или стрелками на клавиатуре), чтобы осмотреться.','hint');
+  await hint('Остров Эхо. Уровень 1 — «Высадка».\nЛучше играть со звуком.',{tag:'Начало',nowait:true});
+  await choose(['Начать']);
+  await think('Рассвет. Палуба «Ковчега-7» мерно качается. На горизонте — тёмный силуэт острова.');
+  await hint('Проведи пальцем по экрану (или стрелками на клавиатуре), чтобы осмотреться.');
   await say('Север','Подъём, практикант. Остров по курсу. Эти воды я знаю лучше остальных.');
   await say('Амир (рация)','Ковчег-7, это радиорубка. Ветер ноль, шторма в прогнозе нет. Чисто.');
-  await say('Север','Слушай, пока есть минута. Три правила экспедиции.');
-  await say('Север','Первое: каждая находка — улика. Всё важное ляжет в общий дневник.');
-  await say('Север','Второе: выводы делаешь сам и держишь их в голове. Ошибиться можно, это тоже часть дела.');
-  await say('Север','Третье: задания можно проходить в любом порядке. Каждое — отдельная находка.');
-  await choose(['Понял, капитан']);
+  await rules();
+  await say('Север','Ну что, готов? Подходим к берегу.');
+  await choose(['Готов, капитан']);
   await storm()}
 async function storm(){
   await say('Амир (рация)','…странно. Барометр падает. Это не по прогнозу.');
   await say('Север','Всем держаться за леера!');
   S.scene='storm';S.stormT=1;
-  await say('','Волны бьют в борт. Жми «Держись!» пять раз, пока длится шторм.','hint');
+  await think('Волны бьют в борт. Палуба ходит ходуном.');
+  await hint('Жми «Держись!» пять раз, пока длится шторм.',{nowait:true});
   let n=0;
   await new Promise(res=>{acts.innerHTML='<button class="btn" id="hold">Держись! (0/5)</button>';const b=$('#hold');const to=setTimeout(res,7000);
-    b.onclick=()=>{n++;S.flash=.6;b.textContent=`Держись! (${Math.min(n,5)}/5)`;if(n>=5){clearTimeout(to);res()}}});
+    b.onclick=()=>{n++;S.flash=.6;creak(.1);burst(.5,'lowpass',700,.7,.15,0,200);b.textContent=`Держись! (${Math.min(n,5)}/5)`;if(n>=5){clearTimeout(to);res()}}});
   acts.innerHTML='';
-  await say('',n>=5?'Ты вцепился в канат мёртвой хваткой.':'Канат вырвало из рук.');
-  S.sinkT=1;await say('','Треск. Палуба уходит из-под ног. Тёмная вода. Потом — ничего.');
+  await think(n>=5?'Ты вцепился в канат мёртвой хваткой.':'Канат вырвало из рук.');
+  S.sinkT=1;crash();await think('Треск. Палуба уходит из-под ног. Тёмная вода. Потом — ничего.');
   S.fadeT=1;await sleep(1800);S.scene='beach';S.stormT=0;S.storm=0;S.sinkT=0;S.sink=0;S.fadeT=0;await beach()}
 async function beach(){
-  await say('','Песок. Холодный. Во рту соль. Ты жив.');
-  await say('','Корабля не видно, только обломки у кромки воды. Подойди к предметам на берегу и коснись их. Может, что-то уцелело.','hint');
-  await say('','Идти: джойстик слева внизу или W A S D. Присесть: кнопка справа или C. Взять: тап по предмету или E.','hint');
+  await think('Песок. Холодный. Во рту соль. Ты жив.');
+  await think('Корабля не видно, только обломки у кромки воды. Может, что-то уцелело.');
+  await hint('Подойди к вещам на берегу и коснись их.\nХодить: джойстик слева внизу или W A S D.\nПрисесть: кнопка справа или C. Взять: тап по вещи или E.',{nowait:true});
   S.hint=true;S.active=true;
   await new Promise(res=>{S.onSpot=async i=>{if(S.busy)return;S.busy=true;S.seen[i]=1;
-    if(ITEMS[i]&&!S.inv.includes(ITEMS[i])){S.inv.push(ITEMS[i]);invUpd()}
-    await say('',INFO[i]);S.busy=false;if(i===2){S.onSpot=null;res()}}});
+    if(ITEMS[i]&&!S.inv.includes(ITEMS[i])){S.inv.push(ITEMS[i]);invUpd();chime()}
+    await think(INFO[i],'',{nowait:true});S.busy=false;if(i===2){S.onSpot=null;res()}}});
   S.active=false;S.hint=false;
-  await say('','Ты включаешь рацию. Шипение. Нужно поймать канал 63.');
+  await sleep(1200);
+  await think('Ты включаешь рацию. Шипение. Нужно поймать канал 63.');
   await tune();
   await say('Амир (рация)','…Ковчег-7… кто на связи? Это Амир. Я жив, меня выбросило на северный берег.');
   await say('Амир (рация)','Остальные не отвечают. Продолжаю звать.');
   await say('Север','Слышу вас. Я на другом берегу. Сиди на месте и не уходи вглубь острова. Я найду тебя.');
-  await say('','Тишина. Ты решаешь проверить, слышит ли тебя хоть что-то на берегу.','hint');
+  await think('Тишина. Ты решаешь проверить, слышит ли тебя хоть что-то на берегу.');
   await choose(['Крикнуть: «Эй!»']);
-  await sleep(1800);S.echo=S.t;await say('','Эй… эй… эй…','echo');
-  await sleep(2500);
-  await say('','Ты молчишь. Эхо — нет.','echo');
+  shout(.28,190,9000,0);
+  await sleep(1800);S.echo=S.t;
+  shout(.2,190,5000,0);shout(.12,190,3200,1.1);shout(.07,188,2300,2.4);shout(.05,150,1500,3.8);
+  await think('Эй… эй… эй…','echo');
+  await think('Ты молчишь. Эхо — нет.','echo');
   await diary()}
 function tune(){return new Promise(res=>{
   acts.innerHTML='<div id="noise"></div><input type="range" min="0" max="100" value="12" id="sl"><small>Крути ручку, пока шум не сложится в голос</small>';
+  radioStart();
   const nz=$('#noise'),sl=$('#sl'),sig='Ковчег-7, ответьте…';let ok=0;
   const iv=setInterval(()=>{const d=Math.abs(sl.value-63),q=Math.max(0,1-d/35);let s='';
     for(let i=0;i<sig.length;i++)s+=Math.random()<q?sig[i]:'░▒▓#%/~'[Math.random()*7|0];
-    nz.textContent=s;ok=d<=2?ok+1:0;if(ok>10){clearInterval(iv);acts.innerHTML='';res()}},100)})}
+    nz.textContent=s;radioSet(q);ok=d<=2?ok+1:0;if(ok>10){clearInterval(iv);radioStop();acts.innerHTML='';res()}},100)})}
+/* конец уровня: дневник сам записывает находки, без вопросов */
 async function diary(){
-  await say('','Ты достаёшь дневник. Запись сама ложится на страницу.');
-  const c=document.createElement('div');c.className='card';
-  c.innerHTML='<h3>Дневник экспедиции. День 1: Высадка</h3><ul><li>Шторма не было в прогнозе (слова Амира на палубе).</li><li>Эхо вернулось и после того, как я замолчал.</li></ul>';
-  acts.append(c);await sleep(600);
-  await say('','Ответь на три вопроса своими словами.','hint');
-  const qs=['Как называется экспедиция и кто ею командует?','С кем ты вышел на связь после крушения?','Что показалось тебе странным? Опиши своими словами.'];
-  const t=[];qs.forEach(q=>{const l=document.createElement('label');l.textContent=q;const a=document.createElement('textarea');a.addEventListener('input',chk);t.push(a);acts.append(l,a)});
-  const b=document.createElement('button');b.className='btn';b.textContent='Сдать задание';b.disabled=true;acts.append(b);
-  function chk(){b.disabled=t.some(a=>a.value.trim().length<3)}
-  b.onclick=async()=>{const ans=t.map(a=>a.value.trim());acts.innerHTML='';window.vysadkaAnswers=ans;
-    await say('','Запись сохранена. Остальные находки этой недели ждут тебя в других заданиях. Порядок выбираешь ты.')}}
+  box.className='diary';box.dataset.w='';box.style.display='block';tag.textContent='Дневник экспедиции · День 1: Высадка';txt.innerHTML='';acts.innerHTML='';
+  const ul=document.createElement('ul');txt.append(ul);
+  for(const t of ['Шторма не было в прогнозе (так сказал Амир на палубе).','Рация нашлась на берегу. Канал экспедиции — 63.','Амир жив. Север на другом берегу и обещал найти меня.','Эхо вернулось и после того, как я замолчал.']){
+    const li=document.createElement('li');li.textContent=t;ul.append(li);scribble();await sleep(1500)}
+  await sleep(1800);await end()}
+async function end(){
+  window.vysadkaDone=true;dispatchEvent(new Event('vysadka:done'));
+  S.over=true;pad.style.display='none';document.body.classList.remove('beach');
+  S.fadeT=1;endSnd();await sleep(2200);
+  await show('game','','Уровень пройден. Дневник сохранён.\nОстальные находки этой недели ждут тебя в других заданиях.',{tag:'Высадка · конец уровня',cls:'end',nowait:true});
+  await choose(['Пройти заново']);location.reload()}
 fit();requestAnimationFrame(frame);deck();
 </script></body></html>
