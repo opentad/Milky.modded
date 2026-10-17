@@ -7,7 +7,13 @@
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;background:var(--ink);color:var(--paper);font-family:Georgia,'Times New Roman',serif;overflow:hidden}
 #app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:600px;margin:auto}
-#cv{flex:1 1 50%;width:100%;min-height:0;display:block;touch-action:none;cursor:grab}
+#stage{flex:1 1 50%;min-height:0;position:relative}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#pad{position:absolute;left:10px;right:10px;bottom:10px;display:none;justify-content:space-between;align-items:flex-end;pointer-events:none}
+#joy{position:relative;width:112px;height:112px;border-radius:50%;background:rgba(16,23,28,.45);border:2px solid rgba(255,180,74,.7);touch-action:none;pointer-events:auto}
+#knob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--lamp);opacity:.85;pointer-events:none}
+#crch{pointer-events:auto;padding:12px 14px;font-size:16px;opacity:.92}
+#crch.on{background:var(--teal)}
 #panel{flex:0 1 auto;max-height:52%;display:flex;flex-direction:column;background:var(--ink);border-top:3px solid var(--lamp)}
 #log{overflow:auto;padding:12px 16px 4px;font-size:17px;line-height:1.5}
 #log p{margin-bottom:8px}
@@ -16,6 +22,7 @@ html,body{height:100%;background:var(--ink);color:var(--paper);font-family:Georg
 #log p:not([data-who]):not(.hint):not(.echo){font-style:italic;color:#d9d3c0}
 b[data-w^="Север"]{color:var(--lamp)}
 b[data-w^="Амир"]{color:var(--teal)}
+#inv{display:none;padding:4px 16px;font-size:15px;color:var(--teal);border-top:1px solid #24343b}
 #acts{padding:6px 16px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}
 #acts:empty{padding:0}
 .btn{font:inherit;font-size:17px;padding:13px 16px;background:var(--lamp);color:var(--ink);border:2px solid #0a1216;border-radius:10px;box-shadow:0 3px 0 #0a1216;cursor:pointer}
@@ -32,12 +39,12 @@ label{font-size:15px;color:#d9d3c0}
 @media (prefers-reduced-motion:reduce){.btn{transition:none}}
 </style></head>
 <body><div id="app">
-<canvas id="cv"></canvas>
-<div id="panel"><div id="log"></div><div id="acts"></div></div>
+<div id="stage"><canvas id="cv"></canvas><div id="pad"><div id="joy"><div id="knob"></div></div><button class="btn" id="crch">Присесть</button></div></div>
+<div id="panel"><div id="log"></div><div id="inv"></div><div id="acts"></div></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const $=s=>document.querySelector(s),log=$('#log'),acts=$('#acts'),cv=$('#cv'),g=cv.getContext('2d');
+const $=s=>document.querySelector(s),log=$('#log'),acts=$('#acts'),cv=$('#cv'),inv=$('#inv'),pad=$('#pad');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let skip=false;$('#panel').addEventListener('click',()=>skip=true);
 
@@ -52,8 +59,11 @@ async function say(who,text,cls=''){
 function choose(labels){return new Promise(res=>{acts.innerHTML='';labels.forEach((l,i)=>{const b=document.createElement('button');b.className='btn';b.textContent=l;b.onclick=()=>{acts.innerHTML='';res(i)};acts.append(b)})})}
 
 /* ---------- 3D (Three.js) ---------- */
-const S={scene:'deck',t:0,storm:0,stormT:0,sink:0,sinkT:0,fade:0,fadeT:0,flash:0,echo:-9,active:false,hint:false,seen:{},stand:0};
+if(typeof THREE==='undefined'){document.body.innerHTML='<p style="padding:28px;font:19px/1.5 Georgia;color:#f2ecdc">Не загрузилась библиотека Three.js. Проверь интернет и обнови страницу.</p>';throw new Error('no three')}
+const S={scene:'deck',t:0,storm:0,stormT:0,sink:0,sinkT:0,fade:0,fadeT:0,flash:0,echo:-9,active:false,hint:false,seen:{},stand:0,px:0,pz:12,cr:0,inv:[]};
 let R;for(const o of [{antialias:true},{antialias:false},{antialias:false,powerPreference:'low-power'}]){try{R=new THREE.WebGLRenderer({canvas:cv,...o});break}catch(e){}}
+if(!R){document.body.innerHTML='<p style="padding:28px;font:19px/1.5 Georgia;color:#f2ecdc">Не удалось включить 3D (WebGL). Открой файл в обычном браузере (Chrome) или на сайте, а не во встроенном просмотре приложения.</p>';throw new Error('no webgl')}
+R.setPixelRatio(Math.min(devicePixelRatio||1,2));
 const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(72,1,.1,1000);cam.rotation.order='YXZ';sc.add(cam);
 const fadeEl=document.createElement('div');fadeEl.style.cssText='position:absolute;left:0;top:0;right:0;background:#05080a;opacity:0;pointer-events:none';$('#app').append(fadeEl);
 function fit(){const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();fadeEl.style.height=h+'px'}
@@ -133,6 +143,7 @@ function rainUpd(dt){for(let i=0;i<RN;i++){const d=rv[i];d[1]-=dt*24;if(d[1]<0)d
 /* берег */
 const th=(x,z)=>sm(-14,8,z)*1.8-1.3+sm(16,48,z)*(9+5*Math.sin(x*.06+1)+3*Math.sin(x*.13)+Math.sin(z*.1))+Math.sin(x*.4)*Math.sin(z*.35)*.08+Math.sin(x*.11+z*.07)*.25*sm(0,20,z);
 const beachG=new THREE.Group();beachG.visible=false;sc.add(beachG);
+const colls=[]; /* круги-препятствия: [x, z, радиус] */
 {const g=new THREE.PlaneGeometry(500,260,125,65).rotateX(-Math.PI/2),p=g.attributes.position,col=new Float32Array(p.count*3);
  for(let i=0;i<p.count;i++){const x=p.getX(i),zw=p.getZ(i)+50,h=th(x,zw);p.setY(i,h);const gr=sm(14,30,zw),wet=h<.35?.72:1;
   col[i*3]=wet*(1-.58*gr);col[i*3+1]=wet*(1-.42*gr);col[i*3+2]=wet*(1-.68*gr)}
@@ -141,10 +152,10 @@ const beachG=new THREE.Group();beachG.visible=false;sc.add(beachG);
 const leafM=new THREE.MeshStandardMaterial({color:0x3f7a4a,flatShading:true,side:THREE.DoubleSide,roughness:.9}),trunkM=new THREE.MeshStandardMaterial({color:0x7b5a3a,roughness:1,flatShading:true});
 function palm(x,z,s){const g=new THREE.Group(),h=5*s;const tr=new THREE.Mesh(new THREE.CylinderGeometry(.14*s,.26*s,h,7),trunkM);tr.position.y=h/2;g.add(tr);
  for(let i=0;i<8;i++){const pv=new THREE.Group();pv.position.y=h;pv.rotation.y=i*Math.PI/4+rnd(-.2,.2);const cg=new THREE.ConeGeometry(.32*s,3.4*s,4);cg.translate(0,1.7*s,0);const f=new THREE.Mesh(cg,leafM);f.rotation.z=-rnd(.9,1.35);f.scale.z=.25;pv.add(f);g.add(pv)}
- g.position.set(x,th(x,z)-.1,z);g.rotation.z=rnd(-.08,.08);beachG.add(g)}
+ g.position.set(x,th(x,z)-.1,z);g.rotation.z=rnd(-.08,.08);beachG.add(g);colls.push([x,z,.5*s])}
 for(let i=0;i<22;i++){const x=rnd(-40,40),z=rnd(8,36);if(Math.abs(x)<7&&z<16)continue;palm(x,z,rnd(.9,1.5))}
 const rockM=new THREE.MeshStandardMaterial({color:0x6d7377,flatShading:true,roughness:1});
-for(let i=0;i<16;i++){const g=new THREE.IcosahedronGeometry(rnd(.5,1.4),1),p=g.attributes.position;for(let k=0;k<p.count;k++){const n=1+.25*Math.sin(p.getX(k)*4+p.getY(k)*5+i);p.setXYZ(k,p.getX(k)*n,p.getY(k)*n*.7,p.getZ(k)*n)}g.computeVertexNormals();const m=new THREE.Mesh(g,rockM),x=rnd(-30,30),z=rnd(-1,9);m.position.set(x,th(x,z),z);beachG.add(m)}
+for(let i=0;i<16;i++){const rr=rnd(.5,1.4),g=new THREE.IcosahedronGeometry(rr,1),p=g.attributes.position;for(let k=0;k<p.count;k++){const n=1+.25*Math.sin(p.getX(k)*4+p.getY(k)*5+i);p.setXYZ(k,p.getX(k)*n,p.getY(k)*n*.7,p.getZ(k)*n)}g.computeVertexNormals();const m=new THREE.Mesh(g,rockM),x=rnd(-30,30),z=rnd(-1,9);m.position.set(x,th(x,z),z);colls.push([x,z,rr*.9]);beachG.add(m)}
 const bushM=new THREE.MeshStandardMaterial({color:0x2f6a3c,flatShading:true,roughness:1});
 for(let i=0;i<40;i++){const x=rnd(-35,35),z=rnd(14,34),m=new THREE.Mesh(new THREE.IcosahedronGeometry(rnd(.5,1.1),1),bushM);m.scale.y=.7;m.position.set(x,th(x,z)+.2,z);beachG.add(m)}
 const debris=[];for(let i=0;i<8;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(rnd(1.2,2.4),.09,.35),wood);m.position.set(rnd(-16,16),0,rnd(-16,-3));m.rotation.y=rnd(0,3);debris.push(m);beachG.add(m)}
@@ -156,20 +167,59 @@ mk(1,g=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.14,.18,5,10),dark);m
 mk(2,g=>{const b=new THREE.Mesh(new THREE.SphereGeometry(.5,12,10),new THREE.MeshStandardMaterial({color:0x3f6b4e,roughness:.9}));b.scale.set(1.2,.8,.9);b.position.y=.35;g.add(b);const st=new THREE.Mesh(new THREE.TorusGeometry(.3,.03,6,14,Math.PI),rope);st.position.set(0,.6,0);g.add(st)});
 mk(3,g=>{const rM=new THREE.MeshStandardMaterial({color:0xe2552b,roughness:.7}),wM=new THREE.MeshStandardMaterial({color:0xeeeadb,roughness:.7});for(let i=0;i<4;i++){const a=new THREE.Mesh(new THREE.TorusGeometry(.5,.13,8,10,Math.PI/2),i%2?wM:rM);a.rotation.z=i*Math.PI/2;g.add(a)}const t=g.children.slice();const w=new THREE.Group();t.forEach(c=>w.add(c));w.rotation.x=-Math.PI/2+.15;w.position.y=.15;g.add(w)});
 const marks=spotPos.map(([x,z])=>{const m=new THREE.Mesh(new THREE.OctahedronGeometry(.18),new THREE.MeshBasicMaterial({color:0xffb44a}));m.visible=false;beachG.add(m);return m});
-const rings=[0,1,2].map(()=>{const m=new THREE.Mesh(new THREE.RingGeometry(.95,1,64).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xb9a7ff,transparent:true,depthTest:false,depthWrite:false}));m.renderOrder=5;m.visible=false;m.position.set(0,th(0,12)+.2,12);beachG.add(m);return m});
-function toBeach(){ship.visible=false;island.visible=false;rain.visible=false;sunDisc.visible=false;beachG.visible=true;sc.add(cam);S.stand=0;pitch=.6;yaw=0}
+const rings=[0,1,2].map(()=>{const m=new THREE.Mesh(new THREE.RingGeometry(.95,1,64).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xb9a7ff,transparent:true,depthTest:false,depthWrite:false}));m.renderOrder=5;m.visible=false;beachG.add(m);return m});
+function toBeach(){ship.visible=false;island.visible=false;rain.visible=false;sunDisc.visible=false;beachG.visible=true;sc.add(cam);S.stand=0;S.px=0;S.pz=12;pitch=.6;yaw=0;pad.style.display='flex';inv.style.display='block';invUpd()}
 
-/* управление: свайп — осмотреться, тап — коснуться предмета */
-let yaw=.6,pitch=-.04,drag=null,cur='deck';
+/* ---------- инвентарь ---------- */
+const ITEMS=['Консервы',null,'Рация','Спасательный круг'];
+function invUpd(){inv.textContent='Вещи: '+(S.inv.length?S.inv.join(' · '):'пусто')}
+
+/* ---------- управление ---------- */
+let yaw=.6,pitch=-.04,drag=null,cur='deck',crBtn=false;
+/* свайп по картинке — осмотреться, тап — коснуться предмета */
 cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,m:0};cv.setPointerCapture(e.pointerId)});
 cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.m+=Math.abs(dx)+Math.abs(dy);drag.x=e.clientX;drag.y=e.clientY;yaw+=dx*.005;pitch=Math.max(-1.1,Math.min(1.1,pitch+dy*.005))});
 cv.addEventListener('pointerup',e=>{if(drag&&drag.m<8)tap(e);drag=null});
 const ray=new THREE.Raycaster();
-function tap(e){if(!S.active||!S.onSpot)return;const r=cv.getBoundingClientRect();ray.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-((e.clientY-r.top)/r.height)*2+1},cam);const h=ray.intersectObjects(spotHit,false)[0];if(h)S.onSpot(h.object.userData.spot)}
+function tap(e){if(!S.active||!S.onSpot)return;const r=cv.getBoundingClientRect();ray.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-((e.clientY-r.top)/r.height)*2+1},cam);const h=ray.intersectObjects(spotHit,false)[0];if(h)trySpot(h.object.userData.spot)}
+/* взять предмет можно, только если стоишь рядом */
+async function trySpot(i){if(!S.active||!S.onSpot||S.busy)return;
+ if(Math.hypot(S.px-spotPos[i][0],S.pz-spotPos[i][1])>4.5){S.busy=true;await say('','Далековато. Подойди ближе.','hint');S.busy=false;return}
+ S.onSpot(i)}
+function interact(){if(!S.active)return;let b=-1,bd=1e9;spotPos.forEach((p,i)=>{const d=Math.hypot(S.px-p[0],S.pz-p[1]);if(d<bd){bd=d;b=i}});if(b>=0)trySpot(b)}
+
+/* джойстик */
+const joy=$('#joy'),knob=$('#knob'),J={x:0,y:0,id:null};
+function joyMove(e){const r=joy.getBoundingClientRect(),h=r.width/2,m=h*.6;let dx=e.clientX-(r.left+h),dy=e.clientY-(r.top+h);const d=Math.hypot(dx,dy);if(d>m){dx*=m/d;dy*=m/d}J.x=dx/m;J.y=-dy/m;knob.style.transform=`translate(${dx}px,${dy}px)`}
+joy.addEventListener('pointerdown',e=>{J.id=e.pointerId;joy.setPointerCapture(e.pointerId);joyMove(e)});
+joy.addEventListener('pointermove',e=>{if(e.pointerId===J.id)joyMove(e)});
+const joyEnd=e=>{if(e.pointerId!==J.id)return;J.id=null;J.x=J.y=0;knob.style.transform=''};
+joy.addEventListener('pointerup',joyEnd);joy.addEventListener('pointercancel',joyEnd);
+/* присесть */
+const crch=$('#crch');crch.addEventListener('click',()=>{crBtn=!crBtn;crch.classList.toggle('on',crBtn);crch.textContent=crBtn?'Встать':'Присесть'});
+/* клавиатура: WASD — идти, стрелки — смотреть, C или Shift — присесть, E — взять */
+const K={};
+addEventListener('keydown',e=>{if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName))return;K[e.code]=true;
+ if(e.code.startsWith('Arrow')||e.code==='Space')e.preventDefault();
+ if(e.code==='KeyE'&&!e.repeat)interact()});
+addEventListener('keyup',e=>{K[e.code]=false});
+addEventListener('blur',()=>{for(const k in K)K[k]=false});
+function look(dt){if(K.ArrowLeft)yaw+=dt*1.8;if(K.ArrowRight)yaw-=dt*1.8;if(K.ArrowUp)pitch=Math.min(1.1,pitch+dt*1.4);if(K.ArrowDown)pitch=Math.max(-1.1,pitch-dt*1.4)}
+function walk(dt){
+ const crT=(crBtn||K.KeyC||K.ShiftLeft||K.ShiftRight)?1:0;S.cr+=(crT-S.cr)*Math.min(1,dt*8);
+ let fx=J.x,fy=J.y;if(K.KeyW)fy+=1;if(K.KeyS)fy-=1;if(K.KeyD)fx+=1;if(K.KeyA)fx-=1;
+ const l=Math.hypot(fx,fy);if(l>1){fx/=l;fy/=l}
+ if(l<.05)return;
+ const v=3.8*(1-.55*S.cr)*dt,sy=Math.sin(yaw),cy=Math.cos(yaw);
+ let nx=S.px+(fx*cy-fy*sy)*v,nz=S.pz+(-fx*sy-fy*cy)*v;
+ nx=Math.max(-38,Math.min(38,nx));nz=Math.max(4,Math.min(30,nz));
+ for(const c of colls){const dx=nx-c[0],dz=nz-c[1],d=Math.hypot(dx,dz),mn=c[2]+.45;if(d<mn&&d>.0001){nx=c[0]+dx/d*mn;nz=c[1]+dz/d*mn}}
+ S.px=nx;S.pz=nz}
 
 /* кадр */
 let last=0;
 function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;S.t+=dt;
+ look(dt);
  S.storm+=(S.stormT-S.storm)*dt*1.2;S.sink+=(S.sinkT-S.sink)*dt*.7;S.fade+=(S.fadeT-S.fade)*dt*2.5;S.flash=Math.max(0,S.flash-dt*2.2);
  if(S.scene==='storm'&&Math.random()<.01)S.flash=1;
  if(S.scene!==cur){cur=S.scene;if(cur==='beach')toBeach()}
@@ -180,10 +230,12 @@ function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;S.t+=dt;
  seaUpd();
  if(!isB){ship.position.y=1.4+wh(0,0)*.8-S.sink*7;ship.rotation.z=Math.sin(S.t*1.1)*(.015+.16*k)+S.sink*.7;ship.rotation.x=Math.sin(S.t*.9+1)*(.01+.08*k)+S.sink*.15;lampL.intensity=1.1+.25*Math.sin(S.t*7);
   rain.visible=k>.25;if(rain.visible)rainUpd(dt)}
- else{S.stand=Math.min(1,S.stand+dt*.35);const e=S.stand*S.stand*(3-2*S.stand);cam.position.set(0,th(0,12)+.3+1.35*e,12);
+ else{S.stand=Math.min(1,S.stand+dt*.35);const e=S.stand*S.stand*(3-2*S.stand);
+  if(S.stand>.95)walk(dt);
+  cam.position.set(S.px,th(S.px,S.pz)+.3+(1.35-.7*S.cr)*e,S.pz);
   debris.forEach(d=>{d.position.y=wh(d.position.x,d.position.z)+.05;d.rotation.z=Math.sin(S.t+d.position.x)*.1});
   marks.forEach((m,i)=>{m.visible=!!(S.seen[i]||S.hint);const sc2=S.seen[i]?.5:1;m.scale.setScalar(sc2);m.position.set(spotPos[i][0],th(spotPos[i][0],spotPos[i][1])+1.5+Math.sin(S.t*3+i)*.1,spotPos[i][1]);m.rotation.y=S.t*2});
-  const e2=S.t-S.echo;rings.forEach((m,i)=>{const r=e2-i*.35;m.visible=r>0&&r<2.2;if(m.visible){m.scale.setScalar(1+r*20);m.material.opacity=.8*(1-r/2.2)}})}
+  const e2=S.t-S.echo;rings.forEach((m,i)=>{const r=e2-i*.35;m.visible=r>0&&r<2.2;if(m.visible){m.position.set(S.px,th(S.px,S.pz)+.2,S.pz);m.scale.setScalar(1+r*20);m.material.opacity=.8*(1-r/2.2)}})}
  const sh=(Math.random()-.5)*(.012*k+.03*S.flash);cam.rotation.set(pitch+sh*.5,yaw,sh,'YXZ');
  fadeEl.style.opacity=S.fade;R.render(sc,cam);requestAnimationFrame(frame)}
 
@@ -191,7 +243,7 @@ function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;S.t+=dt;
 const INFO=["Ящик раскололся. Внутри мокрые консервы. Пригодятся, но не сейчас.","Обломок мачты. Тяжёлый, мокрый, ничего полезного.","Рюкзак радиста. Внутри — портативная рация. Корпус цел. На крышке нацарапано: «Канал экспедиции: 63».","Спасательный круг с надписью «Ковчег-7». Значит, часть корабля вынесло к этому же берегу."];
 async function deck(){
   await say('','Рассвет. Палуба «Ковчега-7» мерно качается. На горизонте — тёмный силуэт острова.');
-  await say('','Проведи пальцем по экрану, чтобы осмотреться.','hint');
+  await say('','Проведи пальцем по экрану (или стрелками на клавиатуре), чтобы осмотреться.','hint');
   await say('Север','Подъём, практикант. Остров по курсу. Эти воды я знаю лучше остальных.');
   await say('Амир (рация)','Ковчег-7, это радиорубка. Ветер ноль, шторма в прогнозе нет. Чисто.');
   await say('Север','Слушай, пока есть минута. Три правила экспедиции.');
@@ -214,9 +266,12 @@ async function storm(){
   S.fadeT=1;await sleep(1800);S.scene='beach';S.stormT=0;S.storm=0;S.sinkT=0;S.sink=0;S.fadeT=0;await beach()}
 async function beach(){
   await say('','Песок. Холодный. Во рту соль. Ты жив.');
-  await say('','Корабля не видно, только обломки у кромки воды. Коснись предметов на берегу. Может, что-то уцелело.','hint');
+  await say('','Корабля не видно, только обломки у кромки воды. Подойди к предметам на берегу и коснись их. Может, что-то уцелело.','hint');
+  await say('','Идти: джойстик слева внизу или W A S D. Присесть: кнопка справа или C. Взять: тап по предмету или E.','hint');
   S.hint=true;S.active=true;
-  await new Promise(res=>{S.onSpot=async i=>{if(S.busy)return;S.busy=true;S.seen[i]=1;await say('',INFO[i]);S.busy=false;if(i===2){S.onSpot=null;res()}}});
+  await new Promise(res=>{S.onSpot=async i=>{if(S.busy)return;S.busy=true;S.seen[i]=1;
+    if(ITEMS[i]&&!S.inv.includes(ITEMS[i])){S.inv.push(ITEMS[i]);invUpd()}
+    await say('',INFO[i]);S.busy=false;if(i===2){S.onSpot=null;res()}}});
   S.active=false;S.hint=false;
   await say('','Ты включаешь рацию. Шипение. Нужно поймать канал 63.');
   await tune();
