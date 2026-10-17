@@ -324,7 +324,8 @@ geom:{img:'formosfera.jpg',task:['Геометрия / Тема: смежные 
  test:[{q:'Выбери рисунок, на котором угол прямой.',k:'i',o:[60,90,120,150]},{q:'Выбери рисунок, на котором угол равен 120°.',k:'i',o:[150,60,120,90]},{q:'Один из смежных углов равен 90°. Найди другой (в градусах).',k:'n'},{q:'Один из смежных углов равен 40°. Найди другой (в градусах).',k:'n'},{q:'Выбери все пары, которые могут быть смежными углами.',k:'m',o:['40° и 140°','90° и 90°','70° и 100°','120° и 60°','110° и 80°','135° и 45°']},{q:'Объясни, как построить перпендикуляр к прямой в точке A.',k:'t'}]},
 inf:{img:'programmirovanie.jpg',task:['Информатика / Тема: алгоритмы','ДЗ: пройди игру «Робот» и ответь на вопросы теста.'],mat:[],sims:['robot'],
  test:[{q:'Что такое алгоритм? Объясни своими словами.',k:'t'},{q:'Как повтор (цикл) помог тебе сократить программу? Выбери верные ответы.',k:'m',o:['Одну команду не нужно писать много раз','Программа стала короче','Робот стал ехать быстрее','Программу стало проще читать','Робот перестал упираться в стены','Робот сам придумал путь']},{q:'Сколько команд выполнит робот: «повторить 4 раза: вперёд, направо»? (число)',k:'n'},{q:'Выбери свойства алгоритма.',k:'m',o:['понятность','определённость','результативность','конечность','красота','скорость звука']}]},
-def:{task:['Выполни упражнения по теме урока.','Оформи ответ аккуратно.'],mat:[],sims:[],test:null}
+isl:{task:['Введение / Остров Эхо','ДЗ: пройди игру «Высадка». Это вводный уровень: он знакомит с сюжетом и правилами. Лучше играть со звуком.'],mat:[],sims:['isl'],test:null},
+  def:{task:['Выполни упражнения по теме урока.','Оформи ответ аккуратно.'],mat:[],sims:[],test:null}
 };
 
   D.alg.test=null;D.alg.task[5]='Все задания проходятся в симуляции «Взлом сейфов»: стреляй и бомби!';
@@ -351,7 +352,7 @@ function render(){
   const id=cur,d=dd(id),s=get(id),w=MS.HW.find(x=>x[0]===id),sub=SUBJ(id),[pd,pt]=progress(id);
   const sc={new:['Новое','+','можно приступить',''],draft:['Черновик','✎','ответ сохранён',''],review:['На проверке','⏳','<span id="cd" title="Нажми, чтобы пропустить ожидание (для демо)" style="cursor:pointer"></span>','r'],graded:['Оценка','5','проверено','g']}[s.status];
   const locked=s.status==='review'||s.status==='graded';
-  const items=d.sims.map(k=>{const m=SIM[k];return `<div class="it"><div class="ico">${MS.ic('tasks')}</div><div><b>${m.t}</b><small>${m.d}</small></div><button class="go${simDone(id,k)?' ok':''}" data-sim="${k}">${simDone(id,k)?'Пройдено ✓':'Перейти к симуляции'}</button></div>`}).join('')+
+  const items=d.sims.map(k=>{const m=SIM[k];return `<div class="it"><div class="ico">${MS.ic('tasks')}</div><div><b>${m.t}</b><small>${m.d}</small></div><button class="go${simDone(id,k)?' ok':''}" data-sim="${k}">${simDone(id,k)?'Пройдено ✓':(m.btn||'Перейти к симуляции')}</button></div>`}).join('')+
     (d.test?`<div class="it"><div class="ico">${MS.ic('note')}</div><div><b>Тест по теме</b><small>${d.test.length} вопросов: ответы нужно формулировать самому</small></div><button class="go${s.tdone?' ok':''}" data-test="1">${s.tdone?'Пройден ✓':'Перейти к тесту'}</button></div>`:'');
   $('#v-hw').innerHTML=`<div class="crumb"><a id="hb">Главная</a> &nbsp;|&nbsp; Домашние задания</div>
   <div class="hero"><div><small>Домашнее задание</small><h1>${sub}</h1><span class="chp">7 уровень</span><span class="chp">Учитель: Имя учителя</span><span class="chp">Сдать до: ${w?w[3]:''}</span></div>
@@ -789,6 +790,11 @@ const h=x.createRadialGradient(a.x,a.y,0,a.x,a.y,w*3.2);h.addColorStop(0,'rgba(2
     x.fillStyle='rgba(255,255,255,.9)';x.font='bold 20px Montserrat,sans-serif';x.textAlign='left';x.fillText('Полигон «Алгоритм»',24,H-22)});
 }};
 
+  SIM.isl={t:'Высадка',btn:'Перейти к игре',d:'Остров Эхо, уровень 1. Лучше играть со звуком. В конце игра сама запишет находки в дневник.',m:['Пройди уровень «Высадка»'],
+mount(r,c){const f=document.createElement('iframe');f.src='vysadka.html';f.allow='fullscreen';f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:18px';r.appendChild(f);
+  const h=e=>{if(e.data==='vysadka:done')c.ok(0)};addEventListener('message',h);
+  return()=>{removeEventListener('message',h);f.remove()}}};
+
 /* ---------- публичный интерфейс ---------- */
 window.HWM={
   onchange:null,
@@ -1006,7 +1012,7 @@ function rCl(){
   $('#cl-bar').style.width=(done.size/CL.length*100)+'%';
 }
 $('#cl').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;done.has(i)?done.delete(i):done.add(i);rCl()});
-const HW=[['phys','Физика','','15 Октября 20:00'],['bio','Биология','','13 Октября 20:00'],['alg','Алгебра','','15 Октября 20:00'],['geom','Геометрия','','14 Октября 20:00'],['inf','Информатика','','13 Октября 20:00']];
+const HW=[['isl','Введение','','20 Октября 20:00'],['phys','Физика','','15 Октября 20:00'],['bio','Биология','','13 Октября 20:00'],['alg','Алгебра','','15 Октября 20:00'],['geom','Геометрия','','14 Октября 20:00'],['inf','Информатика','','13 Октября 20:00']];
 function rHw(){
   $('#hw').innerHTML=HW.map(w=>{const s=HWM.st(w[0]);const bt=s==='graded'?'<button class="go ok" data-hw="'+w[0]+'">Оценка 5 ✓</button>':s==='review'?'<button class="go" data-hw="'+w[0]+'" style="background:#eef1f4;color:#6b7580">На проверке</button>':'<button class="go" data-hw="'+w[0]+'">Открыть ›</button>';
     return `<div class="it"><div class="ico">${ic('note')}</div><div><b>${w[1]}${w[2]?`<span class="tag2">${w[2]}</span>`:''}</b><small>Сдать до <strong>${w[3]}</strong></small></div>${bt}</div>`}).join('');
@@ -1058,7 +1064,7 @@ document.head.appendChild(st);
 const sec=document.createElement('section');sec.id='v-hws';sec.hidden=true;$('.main').appendChild(sec);
 let tab='act',q='',sub='';
 const fd=s=>s.replace(/^(\d+) (\S+) (\S+)$/,(m,a,b,c)=>a+' '+b.toLowerCase()+' в '+c);
-const items=()=>[{id:'isl',n:'Высадка',tags:['Школа','Остров Эхо','Основное'],pub:'17 октября',due:'20 октября в 20:00',s:'new'},
+const items=()=>const items=()=>HW.map(w=>({id:w[0],n:w[1],tags:w[0]==='isl'?['Школа','Остров Эхо','Основное']:['Школа','Основное'],pub:'17 октября',due:fd(w[3]),s:HWM.st(w[0])}));
   ...HW.map(w=>({id:w[0],n:w[1],tags:['Школа','Основное'],pub:'17 октября',due:fd(w[3]),s:HWM.st(w[0])}))];
 function list(){
   const L=items(),act=L.filter(x=>x.s!=='graded'),arc=L.filter(x=>x.s==='graded'),src=(tab==='act'?act:arc).filter(x=>(!q||x.n.toLowerCase().includes(q))&&(!sub||x.id===sub));
