@@ -14,7 +14,8 @@ html,body{height:100%;background:var(--ink);color:var(--paper);font-family:Georg
 .chip{font:inherit;font-size:15px;padding:6px 12px;background:rgba(16,23,28,.72);color:var(--paper);border:1px solid #34454c;border-radius:14px}
 #inv{display:none;color:var(--teal)}
 #snd{pointer-events:auto;cursor:pointer}
-
+#fs{pointer-events:auto;cursor:pointer;margin-left:auto}
+ 
 /* джойстик и «присесть» */
 #pad{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:none;justify-content:space-between;align-items:flex-end;pointer-events:none;z-index:8}
 #joy{position:relative;width:112px;height:112px;border-radius:50%;background:rgba(16,23,28,.45);border:2px solid rgba(255,180,74,.7);touch-action:none;pointer-events:auto}
@@ -67,7 +68,7 @@ small{color:#9fb0b5}
 <body>
 <canvas id="cv"></canvas>
 <div id="fade"></div>
-<div id="hud"><button class="chip" id="snd">Звук: вкл</button><div class="chip" id="inv"></div></div>
+<div id="hud"><button class="chip" id="snd">Звук: вкл</button><div class="chip" id="inv"></div><button class="chip" id="fs">На весь экран</button></div>
 <div id="pad"><div id="joy"><div id="knob"></div></div><button class="btn" id="crch">Присесть</button></div>
 <div id="box"><div id="tag"></div><div id="txt"></div><div id="acts"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -90,11 +91,11 @@ function audioInit(){
  const w=A.white.getChannelData(0),b=A.brown.getChannelData(0);let l=0;
  for(let i=0;i<n;i++){const r=Math.random()*2-1;w[i]=r;l=(l+.02*r)/1.02;b[i]=l*3.5}
  A.sea=layer(A.brown,'lowpass',700,.5);A.surf=layer(A.white,'bandpass',1600,.5);A.wind=layer(A.white,'bandpass',500,.8);A.rain=layer(A.white,'highpass',3000,.7);
- lfo(A.sea.g.gain,.1,.07);lfo(A.surf.g.gain,.085,.03);
+ A.l1=lfo(A.sea.g.gain,.1,.07);A.l2=lfo(A.surf.g.gain,.085,.03);
  A.tCreak=2;A.tGull=6;A.pf=0}
 addEventListener('pointerdown',audioInit);addEventListener('keydown',audioInit);
 function layer(buf,type,f,q){const x=A.ctx,s=x.createBufferSource();s.buffer=buf;s.loop=true;const fl=x.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q||.7;const g=x.createGain();g.gain.value=0;s.connect(fl);fl.connect(g);g.connect(A.master);s.start();return{s,fl,g}}
-function lfo(param,f,depth){const x=A.ctx,o=x.createOscillator(),g=x.createGain();o.frequency.value=f;g.gain.value=depth;o.connect(g);g.connect(param);o.start()}
+function lfo(param,f,depth){const x=A.ctx,o=x.createOscillator(),g=x.createGain();o.frequency.value=f;g.gain.value=depth;o.connect(g);g.connect(param);o.start();return g}
 function beep(f,d,t,v,w,f2){const x=A.ctx;if(!x||!A.on)return;const t0=x.currentTime+(w||0),o=x.createOscillator(),g=x.createGain();o.type=t||'sine';o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+d);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.01);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(A.master);o.start(t0);o.stop(t0+d+.05)}
 function burst(d,type,f,q,v,w,f2){const x=A.ctx;if(!x||!A.on)return;const t0=x.currentTime+(w||0),s=x.createBufferSource();s.buffer=A.white;const fl=x.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t0);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t0+d);fl.Q.value=q;const g=x.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+Math.min(.02,d/3));g.gain.exponentialRampToValueAtTime(.0001,t0+d);s.connect(fl);fl.connect(g);g.connect(A.master);s.start(t0,Math.random()*2);s.stop(t0+d+.05)}
 function creak(v){const x=A.ctx;if(!x||!A.on)return;const t0=x.currentTime,d=.5+Math.random()*.6,o=x.createOscillator(),f=x.createBiquadFilter(),g=x.createGain();o.type='sawtooth';o.frequency.setValueAtTime(70+Math.random()*30,t0);o.frequency.linearRampToValueAtTime(100+Math.random()*60,t0+d);f.type='bandpass';f.frequency.value=500+Math.random()*300;f.Q.value=6;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.08);g.gain.linearRampToValueAtTime(0,t0+d);o.connect(f);f.connect(g);g.connect(A.master);o.start(t0);o.stop(t0+d+.05)}
@@ -127,8 +128,10 @@ function blip(kind,who){if(!A.ctx||!A.on)return;
  else beep(900,.03,'square',.012)}
 /* фоновый звук каждый кадр: море, ветер, дождь, скрип, чайки, гром */
 function audUpd(dt){const x=A.ctx;if(!x)return;const T=x.currentTime,k=S.storm,isB=cur==='beach';
- A.sea.g.gain.setTargetAtTime(isB?.2:.13+.18*k,T,.3);
- A.surf.g.gain.setTargetAtTime(isB?.05:.02+.06*k,T,.3);
+ const dk=isB?1-.85*Math.min(1,Math.max(0,(S.pz-6)/24)):1;
+A.sea.g.gain.setTargetAtTime(isB?.13*dk:.13+.18*k,T,.3);
+A.surf.g.gain.setTargetAtTime(isB?.035*dk:.02+.06*k,T,.3);
+A.l1.gain.setTargetAtTime(isB?.05*dk:.07,T,.3);A.l2.gain.setTargetAtTime(isB?.015*dk:.03,T,.3);
  A.wind.g.gain.setTargetAtTime(.015+.3*k+(isB?.02:0),T,.3);A.wind.fl.frequency.setTargetAtTime(350+700*k+120*Math.sin(S.t*.6),T,.3);
  A.rain.g.gain.setTargetAtTime(rain.visible&&!isB?.2*k:0,T,.3);
  A.lp.frequency.setTargetAtTime(400*Math.pow(45,1-S.fade),T,.1);
@@ -136,7 +139,8 @@ function audUpd(dt){const x=A.ctx;if(!x)return;const T=x.currentTime,k=S.storm,i
  A.tGull-=dt;if(A.tGull<0){A.tGull=rnd(9,18);if(k<.2&&!S.over)gull()}
  if(S.flash>A.pf+.3)thunder(Math.min(.6,S.flash*.5));A.pf=S.flash}
 $('#snd').addEventListener('click',()=>{A.on=!A.on;if(A.master)A.master.gain.setTargetAtTime(A.on?.8:0,A.ctx.currentTime,.05);$('#snd').textContent='Звук: '+(A.on?'вкл':'выкл')});
-
+$('#fs').addEventListener('click',()=>{const d=document,e=d.documentElement;if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);else(e.requestFullscreen||e.webkitRequestFullscreen||(()=>{})).call(e)});
+ 
 /* ---------- блок снизу: диалоги, мысли, подсказки ---------- */
 /* show: kind = dlg (кто-то говорит) | think (мысли, описание) | game (подсказки и правила) */
 async function show(kind,who,text,o={}){
