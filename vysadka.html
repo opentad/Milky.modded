@@ -10,10 +10,10 @@ html,body{height:100%;background:var(--ink);color:var(--paper);font-family:Georg
 #fade{position:fixed;inset:0;background:#05080a;opacity:0;pointer-events:none;z-index:5}
 
 /* верхняя полоска: вещи и звук */
-#hud{position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none;z-index:10}
+#hud{position:fixed;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:flex-start;align-items:flex-start;gap:8px;pointer-events:none;z-index:10}
 .chip{font:inherit;font-size:15px;padding:6px 12px;background:rgba(16,23,28,.72);color:var(--paper);border:1px solid #34454c;border-radius:14px}
 #inv{display:none;color:var(--teal)}
-#snd{pointer-events:auto;cursor:pointer;margin-left:auto}
+#snd{pointer-events:auto;cursor:pointer}
 
 /* джойстик и «присесть» */
 #pad{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:none;justify-content:space-between;align-items:flex-end;pointer-events:none;z-index:8}
@@ -67,7 +67,7 @@ small{color:#9fb0b5}
 <body>
 <canvas id="cv"></canvas>
 <div id="fade"></div>
-<div id="hud"><div class="chip" id="inv"></div><button class="chip" id="snd">Звук: вкл</button></div>
+<div id="hud"><button class="chip" id="snd">Звук: вкл</button><div class="chip" id="inv"></div></div>
 <div id="pad"><div id="joy"><div id="knob"></div></div><button class="btn" id="crch">Присесть</button></div>
 <div id="box"><div id="tag"></div><div id="txt"></div><div id="acts"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
