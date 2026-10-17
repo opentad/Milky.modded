@@ -408,6 +408,7 @@ async function diary(){
   await sleep(1800);await end()}
 async function end(){
   window.vysadkaDone=true;dispatchEvent(new Event('vysadka:done'));
+  try{parent.postMessage('vysadka:done','*')}catch(e){}
   S.over=true;pad.style.display='none';document.body.classList.remove('beach');
   S.fadeT=1;endSnd();await sleep(2200);
   await show('game','','Уровень пройден. Дневник сохранён.\nОстальные находки этой недели ждут тебя в других заданиях.',{tag:'Высадка · конец уровня',cls:'end',nowait:true});
