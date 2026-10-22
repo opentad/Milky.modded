@@ -433,6 +433,7 @@ sec.addEventListener('click',e=>{
   else if((x=b('[data-unpin]')))pinMsg(x.dataset.unpin);
   else if((x=b('[data-jump]')))pinJump(x.dataset.jump);
   else if((x=b('.mg-b[data-mid]'))&&!b('.mg-f')&&!b('.mg-po')&&!b('.mg-act')){ma=ma===x.dataset.mid?'':x.dataset.mid;rMsgs(1)}
+   else if(b('[data-code]')){const c=cur();if(c){navigator.clipboard&&navigator.clipboard.writeText(c.code);toast('Код скопирован: '+c.code)}}
   else if(b('#mgsd'))send();
   else if(b('#mgpx')){pf=null;rFoot()}
 });
@@ -560,7 +561,7 @@ function newTab(){return'<div class="mg-nf"><p>Создай чат и отпра
 function rInv(){
   const c=cur(),a=$('#mgap');
   if(!c||!aOpen){a.innerHTML='';return}
-  a.innerHTML='<div class="mg-ap"><small>Отправь ссылку тому, кого хочешь добавить. Он зарегистрируется или войдёт и сразу увидит переписку за последние 30 дней.'+(c.m.length===2?' С третьим участником чат станет групповым.':'')+'</small><div class="mg-ch"><button data-inv="1">Скопировать ссылку</button></div></div>';
+  a.innerHTML='<div class="mg-ap"><small>Отправь ссылку тому, кого хочешь добавить. Он зарегистрируется или войдёт и сразу увидит переписку за последние 30 дней.'+(c.m.length===2?' С третьим участником чат станет групповым.':'')+'</small><div class="mg-ch"><button data-inv="1">Скопировать ссылку</button><button data-code="1">Код: '+esc(c.code)+'</button></div></div>';
 }
 function authView(msg){
   $('#mgb').hidden=true;au.hidden=false;
