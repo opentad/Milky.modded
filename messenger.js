@@ -1,7 +1,7 @@
 /* Милки — Мессенджер (только дизайн, демо-данные, без Supabase). */
 (function(){
 const $=(s,r=document)=>r.querySelector(s);
-ME='Милколенок';const MAXM=20,MAXF=5*1024*1024;
+let ME='Милколенок';const MAXM=20,MAXF=5*1024*1024;
 const PA={
  search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
  send:'M21 3L10 14M21 3l-7 18-4-7-7-4z',
@@ -263,7 +263,7 @@ function rHead(){
   const fsb='<button class="mg-ib" id="mgfs" title="'+(fs?'Свернуть':'Во весь экран')+'">'+ic(fs?'exit':'full')+'</button>';
   if(!c){h.innerHTML='<div class="mg-hi"><b>Выбери чат</b><small>или создай новый</small></div>'+fsb;return}
   const n=c.m.length;
-  const sub=c.sys?'Сообщения от системы':(n>2?n+' '+pl(n)+': '+c.m.join(', ')(n<2?'Пока только ты. Пригласи по ссылке':'Личный чат'));
+  const sub=c.sys?'Сообщения от системы':(n>2?n+' '+pl(n)+': '+c.m.join(', '):(n<2?'Пока только ты. Пригласи по ссылке':'Личный чат'));
   h.innerHTML='<button class="mg-ib mg-bk" id="mgbk">'+ic('back')+'</button>'+
     '<span class="mg-a" style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+
     '<div class="mg-hi"><b>'+esc(nm(c))+'</b><small>'+esc(sub)+'</small></div>'+
@@ -350,7 +350,7 @@ function nav(d){
   const h=hits(c);if(!h.length)return;
   mi=(mi+d+h.length)%h.length;rMsgs();
 }
-function sendOld(){ и function create(){ → function createOld(){
+ function sendOld(){
   const c=cur();if(!c||c.sys)return;
   const x=dr.trim();if(!x&&!pf)return;
   c.msgs.push({w:ME,x:x,f:pf,t:Date.now()});
@@ -371,7 +371,7 @@ function addMember(n){
   c.msgs.push({w:'sys',x:'В чат добавлен(а): '+n+'. Вся история переписки доступна.',t:Date.now()});
   rHead();rAdd();rMsgs();rList();
 }
-function create(){
+function createOld(){
   const p=[...ns];if(!p.length)return;
   let c=p.length===1?C.find(z=>!z.sys&&z.m.length===2&&z.m.includes(p[0])):null;
   if(!c){
