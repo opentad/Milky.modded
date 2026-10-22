@@ -69,6 +69,18 @@ const nm=c=>c.m.length>2?(c.title||c.m.filter(x=>x!==ME).join(', ')):(c.m.filter
 const last=c=>c.msgs[c.msgs.length-1];
 const tx=m=>m.x||(m.f?'📎 '+m.f.n:'');
 const hits=c=>{const ql=cq.toLowerCase(),r=[];if(sOpen&&ql)c.msgs.forEach((m,i)=>{if((m.x||'').toLowerCase().includes(ql))r.push(i)});return r};
+ const RD=JSON.parse(localStorage.getItem('mgr')||'{}');
+const unread=c=>c.msgs.filter(m=>m.w!=='sys'&&m.w!==ME&&m.t>(RD[c.id]||0)).length;
+function markRead(c){RD[c.id]=Math.max(Date.now(),last(c).t);localStorage.setItem('mgr',JSON.stringify(RD))}
+const NAV='[data-v="msg"]'; /* селектор пункта «Мессенджер» в меню */
+function badge(){
+  const n=C.reduce((s,c)=>s+(c.un||0),0),el=document.querySelector(NAV);if(!el)return;
+  let b=el.querySelector('.mg-bd');
+  if(!b){b=document.createElement('i');b.className='mg-bd';
+    b.style.cssText='font-style:normal;margin-left:auto;min-width:20px;height:20px;border-radius:10px;background:#e5314a;color:#fff;font-size:11px;font-weight:700;align-items:center;justify-content:center;padding:0 6px';
+    el.appendChild(b)}
+  b.textContent=n>99?'99+':n;b.style.display=n?'inline-flex':'none';
+}
 
 /* ---------- каркас ---------- */
 const sec=document.createElement('section');
@@ -235,6 +247,7 @@ function rTabs(){
   $('#mgtb').innerHTML='<button data-tab="c" class="'+(tab==='c'?'on':'')+'">Чаты</button><button data-tab="n" class="'+(tab==='n'?'on':'')+'">Новый диалог</button>';
 }
 function rList(){
+ C.forEach(c=>c.un=unread(c));badge();
   const box=$('#mgl');
   if(tab==='n'){box.innerHTML=newTab();return}
   if(false){
@@ -324,7 +337,7 @@ function rFoot(){
     '<button class="mg-snd" id="mgsd"'+dis+'>'+ic('send')+'</button></div>';
 }
 function renderAll(){
-  const c=cur();if(c)c.un=0;
+  const c=cur();if(c&&!sec.hidden)markRead(c);
   $('#mgb').classList.toggle('has',!!c);
   rTabs();rList();rHead();rBar();rAdd();rMsgs();rFoot();
 }
@@ -384,6 +397,7 @@ function createOld(){
 
 sec.addEventListener('click',e=>{
   const t=e.target,b=k=>t.closest(k);let x;
+ if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
   if(b('#mg-home'))MS.show('home');
   else if(b('#mgfs'))setFs(!fs);
   else if(b('#mgx')||b('#mgbk'))closeChat();
@@ -493,12 +507,21 @@ au.addEventListener('click',async e=>{
   if(!r.data.session)bad('Подтверди почту по письму или выключи «Confirm email» в Supabase');
 });
 au.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=$('#mgag');if(b)b.click()}});
+
+ function notify(c,m){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  if(m.w==='sys'||(!document.hidden&&sel===c.id))return;
+  const n=new Notification(nm(c),{body:m.w+': '+tx(m),tag:c.id});
+  n.onclick=()=>{window.focus();MS.show('msg');open(c.id);n.close()};
+}
+ 
 function push(r){
   const c=C.find(z=>z.id===r.chat_id);
   if(!c){loadAll().then(rList);return}
   if(c.msgs.some(m=>m.id===r.id))return;
-  c.msgs.push(toM(r));
-  if(r.user_id!==me.id&&sel!==c.id)c.un++;
+  const m=toM(r);c.msgs.push(m);
+if(r.user_id!==me.id)notify(c,m);
+  if(sel===c.id&&!sec.hidden&&!document.hidden)markRead(c);
   if(sel===c.id)rMsgs();
   rList();
 }
@@ -557,12 +580,13 @@ async function boot(){
   else if(!sel&&matchMedia('(min-width:821px)').matches&&C.length)sel=[...C].sort((a,b)=>last(b).t-last(a).t)[0].id;
   renderAll();live();
 }
+ document.addEventListener('visibilitychange',()=>{const c=cur();if(!document.hidden&&c&&!sec.hidden){markRead(c);rList()}});
 const lib=document.createElement('script');lib.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 lib.onload=async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY);
   const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
-  sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;if(!sec.hidden)setTimeout(boot,0)}});
-  if(J)MS.show('msg');else if(!sec.hidden)boot();
+  sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;setTimeout(boot,0)}});
+  if(J)MS.show('msg');else boot();
 };
 lib.onerror=()=>{$('#mgb').hidden=true;au.hidden=false;au.textContent='Не удалось загрузить Supabase. Проверь интернет и обнови страницу.'};
 document.head.appendChild(lib);
