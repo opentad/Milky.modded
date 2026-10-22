@@ -72,7 +72,7 @@ const tx=m=>m.x||(m.f?'📎 '+m.f.n:'');
 const hits=c=>{const ql=cq.toLowerCase(),r=[];if(sOpen&&ql)c.msgs.forEach((m,i)=>{if((m.x||'').toLowerCase().includes(ql))r.push(i)});return r};
  const RD=JSON.parse(localStorage.getItem('mgr')||'{}');
 let LIVE=0;
- let mOpen=0,menuOpen=0,pinI=-1,ma='',VT={},LS={};
+ let mOpen=0,menuOpen=0,pinI=-1,ma='',VT={},LS={},FI={};
 const unread=c=>LIVE?c.msgs.filter(m=>m.w!=='sys'&&m.w!==ME&&m.t>(RD[c.id]||0)).length:0;
 function markRead(c){RD[c.id]=Math.max(Date.now(),last(c).t);localStorage.setItem('mgr',JSON.stringify(RD))}
 
@@ -319,7 +319,7 @@ function rMsgs(keep){
     h+='<div class="mg-r1'+(me?' me':'')+'">'+
       (me?'':'<span class="mg-a s" style="background:'+col(m.w)+'">'+ini(m.w)+'</span>')+
       '<div class="mg-b'+(hit[mi]===i?' cur':'')+'"'+(m.id?' data-mid="'+m.id+'"':'')+'>'+
-      (!me&&c.m.length>2?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>':'')+
+      (!me&&c.m.length>2?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>'+(FI[m.uid]?'<span class="fio">'+esc(FI[m.uid])+'</span>':''):'')+
       (m.poll?pollHTML(m):(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
       (m.f?'<div class="mg-f"'+(m.f.p?' data-fp="'+esc(m.f.p)+'" style="cursor:pointer"':'')+'>'+ic('clip')+'<span>'+esc(m.f.n)+'</span><small>'+m.f.s+'</small></div>':'')+
       '<small>'+(m.pin?'📌 ':'')+dm(m.t)+' в '+hm(m.t)+'</small>'+(m.id&&ma===String(m.id)?actHTML(m,me):'')+'</div>'+
@@ -339,10 +339,14 @@ function rFoot(){
     (pf?'<div class="mg-pf">'+ic('clip')+esc(pf.n)+' · '+pf.s+'<button id="mgpx">'+ic('close')+'</button></div>':'')+
     (err?'<div class="mg-er">'+err+'</div>':'')+
     '<div class="mg-fr"><button class="mg-sm" id="mgem"'+dis+'>'+ic('smile')+'</button>'+
-    '<input id="mgi" autocomplete="off" placeholder="'+(c.sys?'Только чтение':'Напишите сообщение…')+'" value="'+esc(dr)+'"'+dis+'>'+
+    '<textarea id="mgi" rows="1" name="msg" enterkeyhint="send" data-lpignore="true" data-1p-ignore autocomplete="off" placeholder="'+(c.sys?'Только чтение':'Напишите сообщение…')+'"'+dis+'>'+esc(dr)+'</textarea>'+
     '<label class="mg-ib mg-fl'+(c.sys?' off':'')+'" title="Прикрепить файл (до 5 МБ)">'+ic('clip')+'<input type="file" id="mgfl" hidden'+dis+'></label>'+
     '<button class="mg-snd" id="mgsd"'+dis+'>'+ic('send')+'</button></div>';
+ const ti=$('#mgi');if(ti)grow(ti);
 }
+
+ function grow(t){t.style.height='48px';t.style.height=Math.min(t.scrollHeight+2,140)+'px'}
+ 
 function renderAll(){
   const c=cur();if(c&&!sec.hidden)markRead(c);
   $('#mgb').classList.toggle('has',!!c);
@@ -434,19 +438,20 @@ sec.addEventListener('click',e=>{
   else if((x=b('[data-jump]')))pinJump(x.dataset.jump);
   else if((x=b('.mg-b[data-mid]'))&&!b('.mg-f')&&!b('.mg-po')&&!b('.mg-act')){ma=ma===x.dataset.mid?'':x.dataset.mid;rMsgs(1)}
    else if(b('[data-code]')){const c=cur();if(c){navigator.clipboard&&navigator.clipboard.writeText(c.code);toast('Код скопирован: '+c.code)}}
+    else if(b('#mgdel'))delAccModal();
   else if(b('#mgsd'))send();
   else if(b('#mgpx')){pf=null;rFoot()}
 });
 sec.addEventListener('input',e=>{
   const id=e.target.id;
   if(id==='mgq'){q=e.target.value;if(tab!=='c'){tab='c';rTabs()}rList()}
-  else if(id==='mgi')dr=e.target.value;
+  else if(id==='mgi'){dr=e.target.value;grow(e.target)}
   else if(id==='mgcq'){cq=e.target.value;mi=-1;rMsgs()}
   else if(id==='mgnt')nt=e.target.value;
 });
 sec.addEventListener('keydown',e=>{
   if(e.key!=='Enter')return;
-  if(e.target.id==='mgi'){e.preventDefault();send()}
+  if(e.target.id==='mgi'){if(!e.shiftKey){e.preventDefault();send()}}
   else if(e.target.id==='mgcq'){e.preventDefault();nav(-1)}
 });
 sec.addEventListener('change',e=>{
@@ -532,11 +537,13 @@ document.head.appendChild(st2);
 .mg.fs .mg-pv{background:rgba(255,255,255,.08)}
 .mg.fs .me .mg-pv{background:rgba(255,255,255,.18)}`;
 document.head.appendChild(st3);
+ const st4=document.createElement('style');st4.textContent='.fio{display:block;font-size:9px;font-weight:400;opacity:.4;margin:-1px 0 3px;color:inherit}.mg-mr .fio{margin:0}';document.head.appendChild(st4);
+const st5=document.createElement('style');st5.textContent='.mg-fr{align-items:flex-end}.mg-fr textarea#mgi{flex:1;min-width:0;height:48px;max-height:140px;border:1px solid var(--ln);background:#f9fafc;border-radius:16px;padding:13px 18px;font:inherit;font-size:14px;line-height:1.4;outline:0;color:var(--tx);resize:none;overflow-y:auto}.mg.fs .mg-fr textarea#mgi{background:none;border:0;color:#fff}';document.head.appendChild(st5);
 const au=document.createElement('div');au.id='mgau';au.hidden=true;sec.appendChild(au);
 const tr=m=>/Invalid login/i.test(m)?'Неверная почта или пароль':/already/i.test(m)?'Такая почта уже зарегистрирована':/rate limit/i.test(m)?'Слишком много попыток, подожди минуту':m;
 function toast(t){let d=$('#mgtoast');if(!d){d=document.createElement('div');d.id='mgtoast';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:60;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
 const setName=(id,n)=>{n=n||'Участник';let k=n,i=2;while(Object.entries(nmap).some(([u,v])=>v===k&&u!==id))k=n+' '+i++;nmap[id]=k};
-const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,cid:r.chat_id,pin:!!r.pinned,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
+const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,uid:r.user_id,cid:r.chat_id,pin:!!r.pinned,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
 async function loadAll(){
   const since=new Date(Date.now()-30*864e5).toISOString();
   const [a,b,d]=await Promise.all([
@@ -546,7 +553,7 @@ async function loadAll(){
   if(a.error||b.error||d.error){toast('Ошибка загрузки: '+(a.error||b.error||d.error).message);return}
   const ms=d.data.reverse(),ids=new Set([me.id]);
   b.data.forEach(x=>ids.add(x.user_id));ms.forEach(x=>ids.add(x.user_id));
-  ((await sb.from('profiles').select('id,name,last_seen').in('id',[...ids])).data||[]).forEach(r=>{LS[r.id]=Date.parse(r.last_seen);if(!nmap[r.id])setName(r.id,r.name)});
+  ((await sb.from('profiles').select('id,name,last_seen,fio').in('id',[...ids])).data||[]).forEach(r=>{LS[r.id]=Date.parse(r.last_seen);FI[r.id]=r.fio||'';if(!nmap[r.id])setName(r.id,r.name)});
 await loadVotes();
   ME=nmap[me.id]||'Я';
   const un=Object.fromEntries(C.map(c=>[c.id,c.un||0]));
@@ -557,7 +564,7 @@ await loadVotes();
 }
 const link=c=>location.origin+location.pathname+'?join='+c.code;
 function copy(t){const ok=()=>toast('Ссылка скопирована. Отправь её тому, кого хочешь пригласить');if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,()=>prompt('Скопируй ссылку',t));else prompt('Скопируй ссылку',t)}
-function newTab(){return'<div class="mg-nf"><p>Создай чат и отправь ссылку-приглашение. Пока в чате двое, он выглядит как личный, с трёх участников становится групповым.</p><input id="mgnt" placeholder="Название чата (необязательно)" value="'+esc(nt)+'" autocomplete="off"><button class="mg-go" id="mgcr">Создать чат</button><p style="margin-top:22px">Есть ссылка или код приглашения?</p><input id="mgjc" placeholder="Вставь ссылку или код" autocomplete="off"><button class="mg-go" id="mgjn" style="background:#eaf8fd;color:var(--bt)">Войти в чат</button><button class="mg-go" id="mgout" style="background:none;color:var(--mu);font-weight:600">Выйти из аккаунта ('+esc(ME)+')</button></div>'}
+function newTab(){return'<div class="mg-nf"><p>Создай чат и отправь ссылку-приглашение. Пока в чате двое, он выглядит как личный, с трёх участников становится групповым.</p><input id="mgnt" placeholder="Название чата (необязательно)" value="'+esc(nt)+'" autocomplete="off"><button class="mg-go" id="mgcr">Создать чат</button><p style="margin-top:22px">Есть ссылка или код приглашения?</p><input id="mgjc" placeholder="Вставь ссылку или код" autocomplete="off"><button class="mg-go" id="mgjn" style="background:#eaf8fd;color:var(--bt)">Войти в чат</button><button class="mg-go" id="mgout" style="background:none;color:var(--mu);font-weight:600">Выйти из аккаунта ('+esc(ME)+')</button><button class="mg-go" id="mgdel" style="background:none;color:#e5314a;font-weight:600">Удалить аккаунт</button></div>'}
 function rInv(){
   const c=cur(),a=$('#mgap');
   if(!c||!aOpen){a.innerHTML='';return}
@@ -567,16 +574,32 @@ function authView(msg){
   $('#mgb').hidden=true;au.hidden=false;
   au.innerHTML='<div class="mg-ac"><h2>'+(am==='in'?'Вход':'Регистрация')+'</h2>'+(sessionStorage.getItem('mj')?'<p class="mg-ai">Тебя пригласили в чат. Войди или зарегистрируйся, и мы сразу тебя добавим.</p>':'')+
   '<div class="mg-warn">НЕ ВВОДИТЬ ПАРОЛЬ ОТ НАСТОЯЩЕГО АККАУНТА MILKY SCHOOL</div><p class="mg-ai">Почта и пароль нужны только для идентификации и сохранения истории переписки.</p>'+
-  (am==='up'?'<input id="mgan" placeholder="Имя в чате" autocomplete="off">':'')+
+  (am==='up'?'<input id="mgan" placeholder="Имя в чате" autocomplete="off"><input id="mgfio" placeholder="ФИО полностью: Иванова Мария Ивановна" autocomplete="off"><p class="mg-ai">ФИО нужно, чтобы понять, что ты из школы. Оно показывается мелким бледным текстом под именем.</p>':'')+
   '<input id="mgae" type="email" placeholder="Почта" autocomplete="off"><input id="mgpw" type="password" placeholder="Пароль (от 6 символов)" autocomplete="off">'+
   '<div class="mg-er" id="mgaer">'+(msg||'')+'</div><button class="mg-go" id="mgag">'+(am==='in'?'Войти':'Зарегистрироваться')+'</button><button class="mg-go" id="mgsw" style="background:none;color:var(--bt);margin-top:4px">'+(am==='in'?'Нет аккаунта? Регистрация':'Уже есть аккаунт? Войти')+'</button></div>';
+}
+ function checkFio(s){
+  const PAT=/(ович|евич|ьич|ич|овна|евна|ьевна|ична|инична|ыч|оглы|кызы|кизи|улы|угли)$/i;
+  const SUR=/(ов|ова|ёв|ёва|ев|ева|ин|ина|ын|ына|ский|ская|цкий|цкая|ой|ый|ий|ая|ко|енко|ук|юк|ян|дзе|ли|ых|их|ан|ец|ик)$/i;
+  const w=(s||'').trim().replace(/\s+/g,' ').split(' ');
+  if(w.length!==3)return{err:'Введи ФИО полностью: фамилия, имя и отчество (три слова)'};
+  if(w.some(x=>x.length<2||!/^[А-ЯЁа-яё]+(-[А-ЯЁа-яё]+)?$/.test(x)))return{err:'ФИО пишется русскими буквами, без цифр и символов'};
+  if(w.some(x=>/(.)\1\1/i.test(x))||new Set(w.map(x=>x.toLowerCase())).size<3)return{err:'Проверь ФИО: похоже на опечатку'};
+  if(!SUR.test(w[0]))return{err:'Проверь фамилию: она должна оканчиваться, например, на «-ов», «-ова», «-ин», «-ская»'};
+  if(!PAT.test(w[2]))return{err:'Проверь отчество: оно должно оканчиваться, например, на «-ович», «-евич», «-овна», «-евна»'};
+  return{v:w.map(x=>x.toLowerCase().replace(/(^|-)./g,m=>m.toUpperCase())).join(' ')};
 }
 au.addEventListener('click',async e=>{
   if(e.target.closest('#mgsw')){am=am==='in'?'up':'in';authView();return}
   if(!e.target.closest('#mgag'))return;
   const em=$('#mgae').value.trim(),pw=$('#mgpw').value,nn=am==='up'?$('#mgan').value.trim():'',bad=t=>{$('#mgaer').textContent=t};
   if(!em||pw.length<6)return bad('Введи почту и пароль (от 6 символов)');
-  const r=am==='in'?await sb.auth.signInWithPassword({email:em,password:pw}):await sb.auth.signUp({email:em,password:pw,options:{data:{name:nn}}});
+ let fio='';
+  if(am==='up'){
+    if(nn.length<2)return bad('Введи имя в чате');
+    const f=checkFio($('#mgfio').value);if(f.err)return bad(f.err);fio=f.v;
+  }
+  const r=am==='in'?await sb.auth.signInWithPassword({email:em,password:pw}):await sb.auth.signUp({email:em,password:pw,options:{data:{name:nn,fio}}});
   if(r.error)return bad(tr(r.error.message));
   if(!r.data.session)bad('Подтверди почту по письму или выключи «Confirm email» в Supabase');
 });
@@ -609,7 +632,7 @@ function dots(){return'<button class="mg-ib'+(menuOpen?' on':'')+'" id="mgdots" 
 function rMem(){
   const c=cur(),b=$('#mgmem');
   if(!c||c.sys){b.className='mg-mp';b.innerHTML='';return}
-  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b><small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
+  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
   b.classList.toggle('open',!!mOpen);
 }
 function rPins(){
@@ -680,6 +703,23 @@ function pollModal(){
   d.querySelector('#pq').focus();
 }
 sec.addEventListener('contextmenu',e=>{const x=e.target.closest('.mg-b[data-mid]');if(x&&!e.target.closest('.mg-f')){e.preventDefault();ma=x.dataset.mid;rMsgs(1)}});
+
+ function delAccModal(){
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;inset:0;z-index:70;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:20px';
+  d.innerHTML='<div class="mg-pm"><h3 style="color:#e5314a">Удалить аккаунт?</h3><p style="font-size:14px;line-height:1.5;margin-bottom:14px">Это действие <b>невозвратно</b>. Будут удалены твой аккаунт, все твои сообщения и участие во всех чатах. Восстановить их будет нельзя.</p><div class="pe" id="de"></div><div class="pb"><button id="dcn">Отмена</button><button class="ok" id="dok" style="background:#e5314a">Удалить навсегда</button></div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',async e=>{
+    const id=e.target.id;
+    if(e.target===d||id==='dcn')d.remove();
+    else if(id==='dok'){
+      e.target.disabled=true;
+      const r=await sb.rpc('delete_account');
+      if(r.error){d.querySelector('#de').textContent='Не получилось: '+r.error.message;e.target.disabled=false;return}
+      d.remove();await sb.auth.signOut({scope:'local'});toast('Аккаунт удалён');
+    }
+  });
+}
  
 function push(r){
   const c=C.find(z=>z.id===r.chat_id);
@@ -741,8 +781,8 @@ sec.addEventListener('change',async e=>{
 async function boot(){
   if(!sb)return;
   if(!me){if(ch){sb.removeChannel(ch);ch=null}C.splice(0);sel=null;LIVE=0;badge();authView();return}
-  au.hidden=true;$('#mgb').hidden=true;
-  await loadAll();LIVE=1;touch();
+  au.hidden=true;au.innerHTML='';$('#mgb').hidden=true;
+  await loadAll();LIVE=1;touch();if(me.user_metadata&&me.user_metadata.fio)sb.rpc('set_fio',{p_fio:me.user_metadata.fio});
   if(!C.some(z=>z.id===sel))sel=null;
   $('#mgb').hidden=false;
   const code=sessionStorage.getItem('mj');
