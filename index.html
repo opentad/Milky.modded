@@ -974,7 +974,7 @@ function rPick(){
 }
 function show(v){
   view=v;
-  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';$('#v-hw').hidden=v!=='hw';$('#v-sim').hidden=v!=='sim';$('#v-hws').hidden=v!=='hws';
+  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';$('#v-hw').hidden=v!=='hw';$('#v-sim').hidden=v!=='sim';$('#v-hws').hidden=v!=='hws';if($('#v-msg'))$('#v-msg').hidden=v!=='msg';if(v==='msg'&&window.rMsg)window.rMsg();
 $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden=!(v==='home'||v==='hw'||v==='hws');
 if(v==='hws')window.rHws();
   if(v==='home')rHome();
@@ -1026,7 +1026,7 @@ window.MS={show,ic,SUB,HW};
 $('#tf').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(b){tf=b.dataset.tf;rHome()}});
 HWM.onchange=()=>{rHw();rGr()};
 $('#drawer').addEventListener('click',e=>{const b=e.target.closest('.mi');if(!b)return;const t=b.textContent.trim();
-  if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show(t==='Главная'?'home':'hws')}
+  if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show(t==='Главная'?'home':'hws')}else if(t==='Мессенджер'){closeMenu();show('msg')}
 });
 
 /* ---------- страница «Домашние задания» (как на school.милки.рф) ---------- */
@@ -1094,5 +1094,6 @@ function openIsland(){const f=document.createElement('div');f.style.cssText='pos
 rCl();rHw();rGr();show('home');
 })();
 </script>
+  <script src="messenger.js"></script>
 </body>
 </html>
