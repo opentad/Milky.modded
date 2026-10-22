@@ -96,7 +96,7 @@ document.querySelector('.main').appendChild(sec);
 sec.innerHTML='<div class="mg-cr"><a id="mg-home" style="cursor:pointer">Главная</a> &nbsp;|&nbsp; Мессенджер</div>'+
  '<h1 class="mg-h1">Мессенджер</h1>'+
  '<div class="mg-box" id="mgb"><aside class="mg-l">'+
- '<div class="mg-lh"><h2>Сообщения</h2><p>Чаты.</p></div>'+
+ '<div class="mg-lh"><h2>Сообщения</h2><p>Существующие чаты.</p></div>'+
  '<label class="mg-s">'+ic('search')+'<input id="mgq" placeholder="Поиск по сообщениям" autocomplete="off"></label>'+
  '<div class="mg-tabs" id="mgtb"></div><div class="mg-list" id="mgl"></div></aside>'+
  '<section class="mg-r"><header class="mg-hd" id="mgh"></header><div class="mg-mp" id="mgmem"></div><div id="mgpin"></div><div id="mgsr"></div><div id="mgap"></div>'+
