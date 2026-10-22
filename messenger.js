@@ -408,7 +408,7 @@ function createOld(){
 
 sec.addEventListener('click',e=>{
   const t=e.target,b=k=>t.closest(k);let x;
- if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+ enablePush();
  if(menuOpen&&!b('#mgdots')&&!b('#mgpoll')){menuOpen=0;rHead()}
   if(b('#mg-home'))MS.show('home');
   else if(b('#mgfs'))setFs(!fs);
@@ -719,6 +719,24 @@ sec.addEventListener('contextmenu',e=>{const x=e.target.closest('.mg-b[data-mid]
       d.remove();await sb.auth.signOut({scope:'local'});toast('Аккаунт удалён');
     }
   });
+}
+
+ const VAPID='BAOfbFU4uplaxZ4OZTlNsHUVipnCzQm5i-_jOLrl0YWDuhKQXDqDGFxR1FeISQGgOpnwijoJsBrY15GrcIsksJo';
+const b64=s=>{const r=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
+let pushOn=0;
+async function enablePush(){
+  if(pushOn||!me||!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  pushOn=1;
+  try{
+    if(Notification.permission==='default')await Notification.requestPermission();
+    if(Notification.permission!=='granted')return;
+    const reg=await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    let s=await reg.pushManager.getSubscription();
+    if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(VAPID)});
+    const j=s.toJSON();
+    await sb.from('push_subs').upsert({user_id:me.id,endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth});
+  }catch(err){pushOn=0}
 }
  
 function push(r){
