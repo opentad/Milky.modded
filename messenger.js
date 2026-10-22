@@ -70,16 +70,12 @@ const last=c=>c.msgs[c.msgs.length-1];
 const tx=m=>m.x||(m.f?'📎 '+m.f.n:'');
 const hits=c=>{const ql=cq.toLowerCase(),r=[];if(sOpen&&ql)c.msgs.forEach((m,i)=>{if((m.x||'').toLowerCase().includes(ql))r.push(i)});return r};
  const RD=JSON.parse(localStorage.getItem('mgr')||'{}');
-const unread=c=>c.msgs.filter(m=>m.w!=='sys'&&m.w!==ME&&m.t>(RD[c.id]||0)).length;
+let LIVE=0;
+const unread=c=>LIVE?c.msgs.filter(m=>m.w!=='sys'&&m.w!==ME&&m.t>(RD[c.id]||0)).length:0;
 function markRead(c){RD[c.id]=Math.max(Date.now(),last(c).t);localStorage.setItem('mgr',JSON.stringify(RD))}
-const NAV='[data-v="msg"]'; /* селектор пункта «Мессенджер» в меню */
 function badge(){
-  const n=C.reduce((s,c)=>s+(c.un||0),0),el=document.querySelector(NAV);if(!el)return;
-  let b=el.querySelector('.mg-bd');
-  if(!b){b=document.createElement('i');b.className='mg-bd';
-    b.style.cssText='font-style:normal;margin-left:auto;min-width:20px;height:20px;border-radius:10px;background:#e5314a;color:#fff;font-size:11px;font-weight:700;align-items:center;justify-content:center;padding:0 6px';
-    el.appendChild(b)}
-  b.textContent=n>99?'99+':n;b.style.display=n?'inline-flex':'none';
+  const n=C.reduce((s,c)=>s+(c.un||0),0),b=document.querySelector('.mgbd');if(!b)return;
+  b.textContent=n>99?'99+':n;b.hidden=!n;
 }
 
 /* ---------- каркас ---------- */
@@ -570,9 +566,9 @@ sec.addEventListener('change',async e=>{
 });
 async function boot(){
   if(!sb)return;
-  if(!me){if(ch){sb.removeChannel(ch);ch=null}C.splice(0);sel=null;authView();return}
+  if(!me){if(ch){sb.removeChannel(ch);ch=null}C.splice(0);sel=null;LIVE=0;badge();authView();return}
   au.hidden=true;$('#mgb').hidden=true;
-  await loadAll();
+  await loadAll();LIVE=1;
   if(!C.some(z=>z.id===sel))sel=null;
   $('#mgb').hidden=false;
   const code=sessionStorage.getItem('mj');
