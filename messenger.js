@@ -73,9 +73,18 @@ const hits=c=>{const ql=cq.toLowerCase(),r=[];if(sOpen&&ql)c.msgs.forEach((m,i)=
 let LIVE=0;
 const unread=c=>LIVE?c.msgs.filter(m=>m.w!=='sys'&&m.w!==ME&&m.t>(RD[c.id]||0)).length:0;
 function markRead(c){RD[c.id]=Math.max(Date.now(),last(c).t);localStorage.setItem('mgr',JSON.stringify(RD))}
-function badge(){
-  const n=C.reduce((s,c)=>s+(c.un||0),0),b=document.querySelector('.mgbd');if(!b)return;
-  b.textContent=n>99?'99+':n;b.hidden=!n;
+
+ function badge(){
+  const n=C.reduce((s,c)=>s+(c.un||0),0),t=n>99?'99+':n;
+  const b=document.querySelector('.mgbd');
+  if(b){b.textContent=t;b.hidden=!n}
+  const r=document.querySelectorAll('#rail .ri')[1];
+  if(r){
+    let d=r.querySelector('.bd2');
+    if(!d){r.style.position='relative';d=document.createElement('span');d.className='bd2';d.style.cssText='right:6px;top:6px;bottom:auto';r.appendChild(d)}
+    d.textContent=t;d.hidden=!n;
+  }
+  console.log('badge',n,'LIVE',LIVE);
 }
 
 /* ---------- каркас ---------- */
