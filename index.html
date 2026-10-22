@@ -1025,7 +1025,7 @@ function rGr(){
 window.MS={show,ic,SUB,HW};
 $('#tf').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(b){tf=b.dataset.tf;rHome()}});
 HWM.onchange=()=>{rHw();rGr()};
-$('#drawer').addEventListener('click',e=>{const b=e.target.closest('.mi');if(!b)return;const t=b.textContent.trim();
+$('#drawer').addEventListener('click',e=>{const b=e.target.closest('.mi');if(!b)return;const t=b.textContent.replace(/^[\d+]+/,'').trim();
   if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show(t==='Главная'?'home':'hws')}else if(t==='Мессенджер'){closeMenu();show('msg')}
 });
 
