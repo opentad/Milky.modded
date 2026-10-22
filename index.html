@@ -837,7 +837,7 @@ const ICON={
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${ICON[k]}"/></svg>`;
 const RAIL=['home','chat','book','tasks','box','doc','dipl','shop'];
 const MENU=[
- ['Школа',[['home','Главная'],['chat','Мессенджер'],['book','Мой дневник'],['tasks','Домашняя работа'],['box','Библиотека'],['doc','Мои сертификаты'],['dipl','Мои дипломы'],['shop','Аттестационный центр']]],
+ ['Школа',[['home','Главная'],['chat','Мессенджер','','red'],['book','Мой дневник'],['tasks','Домашняя работа'],['box','Библиотека'],['doc','Мои сертификаты'],['dipl','Мои дипломы'],['shop','Аттестационный центр']]],
  ['Развитие',[['check','Тренажеры'],['crown','Гильдии'],['dipl','Годовой проект'],['club','Клубы Milky']]],
  ['Развлечения',[['feed','Лента','#d61fc4','cy'],['tube','MilkyTube','#d4202f'],['crown','Маркетплейс','#17c0e8'],['game','Игры','#e8a21a'],['bell','Новости','','red']]],
  ['Аккаунт',[['user','Профиль'],['exit','Выход']]]];
@@ -846,7 +846,7 @@ $('#rail').innerHTML='<button class="logo" aria-label="Меню">M</button><butt
   RAIL.map((k,i)=>`<button class="ri${i?'':' first'}" aria-label="${k}">${ic(k)}</button>`).join('')+'<hr class="h2">';
 $('#drawer').innerHTML='<div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><div class="ava">'+AVA+'</div><div class="dname" id="dname"></div>'+
   `<div class="coins"><span><span class="coin"></span>227</span><span class="bell">${ic('bell')}<span class="bd2">1</span></span></div>`+
-  MENU.map(g=>`<div class="dv"></div><div class="sl">${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}><span style="position:relative;display:block">${ic(m[0])}${m[3]?`<span class="bd2${m[3]==='cy'?' cy':''}" style="right:-7px;bottom:-7px">1</span>`:''}</span>${m[1]}</button>`).join('')).join('');
+  MENU.map(g=>`<div class="dv"></div><div class="sl">${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}><span style="position:relative;display:block">${ic(m[0])}${m[3]?`<span class="bd2${m[3]==='cy'?' cy':''}${m[1]==='Мессенджер'?' mgbd':''}" style="right:-7px;bottom:-7px"${m[1]==='Мессенджер'?' hidden':''}>1</span>`:''}</span>${m[1]}</button>`).join('')).join('');
 $('#chat').innerHTML=ic('talk');
 
 /* ---------- боковое меню: открывается по наведению или клику на всю панель ---------- */
