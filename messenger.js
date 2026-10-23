@@ -1,4 +1,4 @@
-/* Милки — Мессенджер (полный код + текстовый ИИ-бот с сохранением истории и кодом доступа 30062014). */
+/* Милки — Мессенджер (только чистый код, чаты, Supabase и функция «Ответить»). */
 (function(){
 const $=(s,r=document)=>r.querySelector(s);
 let ME='Милколенок';const MAXM=20,MAXF=5*1024*1024;
@@ -15,7 +15,7 @@ const PA={
  down:'M6 9l6 6 6-6',
  back:'M15 6l-6 6 6 6',
  bell:'M12 3.8a5.2 5.2 0 0 0-5.2 5.2v3.1l-1.6 2.7c-.5.8.1 1.7 1 1.7h11.6c.9 0 1.5-.9 1-1.7l-1.6-2.7V9A5.2 5.2 0 0 0 12 3.8zM10 19a2.2 2.2 0 0 0 4 0',
- bot:'M12 2a2 2 0 0 1 2 2v1h1a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1V4a2 2 0 0 1 2-2zm-3 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-6.5 7h7a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1z'
+ reply:'M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z'
 };
 const ic=k=>'<svg viewBox="0 0 24 24"><path d="'+PA[k]+'"/></svg>';
 Object.assign(PA,{dots:'M12 5.5h.01M12 12h.01M12 18.5h.01',poll:'M5 20V11M12 20V4M19 20v-6',trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7M10 11v5M14 11v5',pin:'M9 4h6l-.8 5.5L17 13H7l2.8-3.5zM12 13v7'});
@@ -27,8 +27,8 @@ const hl=(t,q)=>{
 };
 const PAL=['#f0a04b','#e5617a','#8774e1','#4fb9e6','#5cc08a','#e8793a','#4a8fd9'];
 const hs=t=>{let x=7;for(const c of t)x=(x*31+c.charCodeAt(0))>>>0;return x};
-const col=n=>n==='ИИ Бот'?'#8774e1':PAL[hs(n)%PAL.length];
-const ini=n=>n==='ИИ Бот'?'AI':n.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const col=n=>PAL[hs(n)%PAL.length];
+const ini=n=>n.split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const MO=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
 const p2=n=>String(n).padStart(2,'0');
 const hm=t=>{const d=new Date(t);return p2(d.getHours())+':'+p2(d.getMinutes())};
@@ -39,19 +39,13 @@ const fsz=b=>b<1048576?Math.max(1,Math.round(b/1024))+' КБ':(b/1048576).toFixe
 const EM=['😀','😂','😍','😊','😎','🤔','😢','😡','👍','🙏','❤️','🔥','🎉','👌'];
 const RE=['Ок!','Поняла)','Хорошо 👍','Сейчас гляну','Договорились'];
 
-/* ---------- Загрузка сохраненной истории ИИ-бота ---------- */
-const savedAiMsgs = JSON.parse(localStorage.getItem('ai_bot_msgs') || 'null');
+/* ---------- демо-данные ---------- */
 const N=Date.now(),mn=60000,H=36e5,D=24*H;
-const defaultAiMsgs = [
-  {w:'ИИ Бот',x:'Привет! Я твой личный ИИ-помощник. Спрашивай о чем угодно, я отвечу!',t:N-D}
-];
-
 const CT=['Айша К.','Милана Р.','Зара Т.','Лейла Ш.','Амина Д.'];
 let uid=1;
 const C=[
  {id:'sys',sys:1,m:[ME],title:'Уведомления',un:1,msgs:[
   {w:'Система',x:'Расписание на октябрь утверждено. Изменить его можно будет с 1 ноября.',t:N-2*D}]},
- {id:'ai_bot',ai:1,m:[ME,'ИИ Бот'],title:'ИИ Помощник',un:0,msgs: savedAiMsgs || defaultAiMsgs},
  {id:'c1',m:[ME,'Айша К.'],un:2,msgs:[
   {w:'Айша К.',x:'Привет! Ты уже сделала ДЗ по алгебре?',t:N-3*D},
   {w:ME,x:'Привет, да, осталась последняя задача',t:N-3*D+6*mn},
@@ -65,20 +59,15 @@ const C=[
   {w:'sys',x:'Группа создана',t:N-6*D},
   {w:'Зара Т.',x:'Я сделаю про гидру, кто берёт медуз?',t:N-6*D+2*mn},
   {w:'Лейла Ш.',x:'Медуз беру я',t:N-6*D+5*mn},
-  {w:'ME',x:'Тогда я оформляю презентацию',t:N-6*D+9*mn},
+  {w:ME,x:'Тогда я оформляю презентацию',t:N-6*D+9*mn},
   {w:'Лейла Ш.',x:'',f:{n:'медузы.pdf',s:'1,2 МБ'},t:N-2*D-H},
   {w:'Зара Т.',x:'Классно получилось, медузы красивые',t:N-2*D}]}
 ];
 
-function saveAiMsgs(){
-  const aiChat = C.find(z => z.ai);
-  if(aiChat) {
-    localStorage.setItem('ai_bot_msgs', JSON.stringify(aiChat.msgs));
-  }
-}
-
 /* ---------- состояние ---------- */
 let sel=null,q='',cq='',sOpen=0,aOpen=0,eOpen=0,tab='c',fs=0,pf=null,ns=new Set(),nt='',mi=-1,err='',dr='';
+let replyTo = null; // ID сообщения, на которое отвечаем
+
 const cur=()=>C.find(c=>c.id===sel);
 const nm=c=>c.m.length>2?(c.title||c.m.filter(x=>x!==ME).join(', ')):(c.m.filter(x=>x!==ME).join(', ')||c.title||'Новый чат');
 const last=c=>c.msgs[c.msgs.length-1];
@@ -100,36 +89,6 @@ function badge(){
     if(!d){r.style.position='relative';d=document.createElement('span');d.className='bd2';d.style.cssText='right:6px;top:6px;bottom:auto';r.appendChild(d)}
     d.textContent=t;d.hidden=!n;
   }
-}
-
-/* ---------- проверка кода для ИИ (30062014) ---------- */
-function checkAiAccess(callback){
-  const hasAccess = localStorage.getItem('ai_unlocked') === 'true';
-  if(hasAccess){ callback(); return; }
-
-  const d=document.createElement('div');
-  d.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.5);display:grid;place-items:center;padding:20px';
-  d.innerHTML='<div style="background:#fff;padding:25px;border-radius:20px;width:100%;max-width:360px;text-align:center">'+
-    '<h3 style="margin-bottom:10px;font-size:18px">🔒 Доступ к ИИ-чату</h3>'+
-    '<p style="font-size:13px;color:#666;margin-bottom:15px">Введите специальный код доступа для разблокировки:</p>'+
-    '<input id="ai-code-inp" type="password" placeholder="Введите код" style="width:100%;height:42px;padding:0 12px;border:1px solid #ddd;border-radius:10px;margin-bottom:10px;font-size:14px;outline:0;text-align:center">'+
-    '<div id="ai-err" style="color:red;font-size:12px;margin-bottom:10px"></div>'+
-    '<button id="ai-sub" style="width:100%;height:42px;background:#0ab0e8;color:#fff;border:0;border-radius:10px;font-weight:bold;cursor:pointer">Войти</button>'+
-    '</div>';
-  document.body.appendChild(d);
-  
-  const inp = d.querySelector('#ai-code-inp');
-  inp.focus();
-  
-  d.querySelector('#ai-sub').onclick = ()=>{
-    if(inp.value.trim() === '30062014'){
-      localStorage.setItem('ai_unlocked','true');
-      d.remove();
-      callback();
-    } else {
-      d.querySelector('#ai-err').textContent = 'Неверный код!';
-    }
-  };
 }
 
 /* ---------- каркас ---------- */
@@ -159,7 +118,7 @@ st.textContent=`
 .mg-s svg{width:18px;height:18px;flex:none}
 .mg-s input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:13.5px;color:var(--tx);background:none}
 .mg-tabs{display:flex;gap:4px;margin:14px 22px 8px;padding:5px;background:#eef3f8;border-radius:16px}
-.mg-tabs button{flex:1;height:38px;border-radius:12px;font-weight:600;font-size:13px;color:#8a929b}
+.mg-tabs button{flex:1;height:38px;border-radius:12px;font-weight:600;font-size:13px;color:#8a929b;background:none;border:0;cursor:pointer}
 .mg-tabs button.on{background:#fff;color:var(--bt);box-shadow:0 2px 10px rgba(0,0,0,.05)}
 .mg-list{flex:1;overflow-y:auto;padding:4px 12px 12px}
 .mg-c{display:flex;gap:12px;align-items:center;width:100%;padding:10px;border-radius:18px;text-align:left;background:none;border:0;cursor:pointer}
@@ -186,7 +145,7 @@ st.textContent=`
 .mg-sr{display:flex;gap:8px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--ln)}
 .mg-sr input{flex:1;min-width:0;height:38px;border:1px solid #e3e8ee;border-radius:12px;padding:0 14px;font:inherit;font-size:13px;outline:0}
 .mg-sr span{font-size:12px;color:var(--mu);min-width:34px;text-align:center}
-.mg-sr button{width:34px;height:34px;border-radius:10px;background:var(--pl);color:var(--bt);display:grid;place-items:center;border:0}
+.mg-sr button{width:34px;height:34px;border-radius:10px;background:var(--pl);color:var(--bt);display:grid;place-items:center;border:0;cursor:pointer}
 .mg-sr button svg{width:16px;height:16px}
 .mg-ap{padding:10px 20px;border-bottom:1px solid var(--ln);background:#f8fcfe}
 .mg-ap small{display:block;font-size:12px;color:var(--mu);margin-bottom:8px}
@@ -205,6 +164,12 @@ st.textContent=`
 .me .mg-b{background:linear-gradient(135deg,#1ac9f5,#0ab0e8);border:0;color:#fff}
 .mg-b.cur{outline:2px solid #f5b81c}
 .mg-b mark{background:#ffe27a;color:#34404e;border-radius:4px;padding:0 2px}
+
+/* Стиль для цитирования (ответа на сообщение) */
+.mg-reply-preview{background:rgba(0,0,0,0.05);border-left:3px solid var(--bt);padding:4px 8px;border-radius:4px;font-size:12px;margin-bottom:6px;cursor:pointer}
+.me .mg-reply-preview{background:rgba(255,255,255,0.2);border-left-color:#fff}
+.mg-reply-preview b{display:block;font-size:11px;opacity:0.9}
+
 .mg-f{display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.07);border-radius:12px;padding:8px 10px;margin-top:4px;font-size:13px}
 .mg-f svg{width:16px;height:16px;flex:none}
 .mg-f small{margin:0}
@@ -221,6 +186,12 @@ st.textContent=`
 .mg-pf{display:flex;gap:8px;align-items:center;font-size:12.5px;color:#566170;background:var(--pl);border-radius:12px;padding:6px 10px;margin-bottom:8px}
 .mg-pf svg{width:15px;height:15px;flex:none}
 .mg-pf button{margin-left:auto;color:#9aa5b0;background:none;border:0;cursor:pointer}
+
+/* Плашка ответа над полем ввода */
+.mg-replying-bar{display:flex;align-items:center;gap:8px;background:#f0f4f8;padding:6px 12px;border-radius:12px;margin-bottom:8px;font-size:12.5px;color:#34404e}
+.mg-replying-bar b{color:var(--bt)}
+.mg-replying-bar button{margin-left:auto;background:none;border:0;cursor:pointer;color:#9aa5b0}
+
 .mg-er{font-size:12.5px;color:#d97706;margin-bottom:8px;font-weight:600}
 .mg-nf{padding:6px 10px}
 .mg-nf p{font-size:12.5px;color:var(--mu);margin:6px 0 10px;line-height:1.4}
@@ -232,7 +203,7 @@ st.textContent=`
 .mg-go{display:block;width:100%;height:44px;border-radius:14px;background:var(--cy);color:#fff;font-weight:700;margin-top:10px;border:0;cursor:pointer}
 .mg-go:disabled{background:#e9eef2;color:#a9b2bb}
 
-/* режим «во весь экран»: как в Telegram */
+/* режим «во весь экран» */
 .mg.fs{position:fixed;inset:0;z-index:40;background:#181818;color:#e8e8e8;padding:0;overflow:hidden}
 .mg.fs .mg-cr,.mg.fs .mg-h1,.mg.fs .mg-lh{display:none}
 .mg.fs .mg-box{height:100vh;min-height:0;gap:0;grid-template-columns:minmax(300px,420px) 1fr}
@@ -276,10 +247,7 @@ st.textContent=`
 .mg.fs .mg-sm{order:2;color:#9a9a9a}
 .mg.fs .mg-snd{order:3;background:none;color:#8774e1;width:42px}
 .mg.fs .mg-pf{background:#2c2c2c;color:#ddd}
-.mg.fs .mg-p{color:#fff}
-.mg.fs .mg-p.on{background:#2c2c2c}
-.mg.fs .mg-nf input{background:#2c2c2c;border:0;color:#fff}
-.mg.fs .mg-em2 button{background:none}
+.mg.fs .mg-replying-bar{background:#2c2c2c;color:#fff}
 
 @media(max-width:820px){
  .mg-box{grid-template-columns:1fr;height:calc(100vh - 150px)}
@@ -298,13 +266,7 @@ function rTabs(){
 function rList(){
  C.forEach(c=>c.un=unread(c));badge();
   const box=$('#mgl');
-  if(tab==='n'){
-    box.innerHTML='<div class="mg-nf"><p>Выбери одного человека — получится личный чат. Выбери нескольких — получится группа. Новые участники потом видят всю историю.</p>'+
-      (ns.size>1?'<input id="mgnt" placeholder="Название группы (необязательно)" value="'+esc(nt)+'" autocomplete="off">':'')+
-      CT.map(n=>'<button class="mg-p'+(ns.has(n)?' on':'')+'" data-p="'+esc(n)+'"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+esc(n)+'<em>'+(ns.has(n)?'✓':'')+'</em></button>').join('')+
-      '<button class="mg-go" id="mgcr"'+(ns.size?'':' disabled')+'>Создать '+(ns.size>1?'группу':'чат')+'</button></div>';
-    return;
-  }
+  if(tab==='n'){box.innerHTML=newTab();return}
   const ql=q.toLowerCase();
   const L=C.filter(c=>!ql||nm(c).toLowerCase().includes(ql)||c.msgs.some(m=>(m.x||'').toLowerCase().includes(ql)))
     .sort((a,b)=>last(b).t-last(a).t);
@@ -314,7 +276,7 @@ function rList(){
     const hit=ql&&[...c.msgs].reverse().find(m=>(m.x||'').toLowerCase().includes(ql));
     if(hit)line=hl(hit.x,q);
     else line=esc((lm.w===ME?'Вы: ':(c.m.length>2&&lm.w!=='sys'?lm.w.split(' ')[0]+': ':''))+tx(lm));
-    return '<button class="mg-c'+(c.id===sel?' on':'')+'" data-c="'+c.id+'"><span class="mg-a" style="background:'+col(nm(c))+'">'+(c.ai?ic('bot'):c.sys?ic('bell'):ini(nm(c)))+'</span>'+
+    return '<button class="mg-c'+(c.id===sel?' on':'')+'" data-c="'+c.id+'"><span class="mg-a" style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+
       '<span class="mg-ci"><b>'+hl(nm(c),q)+'</b><small>'+line+'</small></span>'+
       '<span class="mg-ct">'+lt(lm.t)+(c.un?'<i>'+c.un+'</i>':'')+'</span></button>';
   }).join('')||'<div class="mg-em" style="padding:30px 10px">Ничего не найдено</div>';
@@ -324,27 +286,24 @@ function rHead(){
   const fsb='<button class="mg-ib" id="mgfs" title="'+(fs?'Свернуть':'Во весь экран')+'">'+ic(fs?'exit':'full')+'</button>';
   if(!c){h.innerHTML='<div class="mg-hi"><b>Выбери чат</b><small>или создай новый</small></div>'+fsb;return}
   const n=c.m.length;
-  const sub=c.ai?'Искусственный интеллект':c.sys?'Сообщения от системы':(n>2?n+' '+pl(n)+': '+c.m.join(', '):(n<2?'Пока только ты. Пригласи по ссылке':'Личный чат'));
+  const sub=c.sys?'Сообщения от системы':(n>2?n+' '+pl(n)+': '+c.m.join(', '):(n<2?'Пока только ты. Пригласи по ссылке':'Личный чат'));
   h.innerHTML='<button class="mg-ib mg-bk" id="mgbk">'+ic('back')+'</button>'+
-    '<span class="mg-a" style="background:'+col(nm(c))+'">'+(c.ai?ic('bot'):c.sys?ic('bell'):ini(nm(c)))+'</span>'+
+    '<span class="mg-a" style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+
     '<div class="mg-hi"><b>'+esc(nm(c))+'</b><small>'+esc(sub)+'</small></div>'+
-    (c.sys||c.ai?'':'<button class="mg-ib'+(sOpen?' on':'')+'" id="mgsb" title="Поиск в чате">'+ic('search')+'</button>'+
+    (c.sys?'':'<button class="mg-ib'+(sOpen?' on':'')+'" id="mgsb" title="Поиск в чате">'+ic('search')+'</button>'+
       '<button class="mg-ib'+(aOpen?' on':'')+'" id="mgad" title="Добавить участника">'+ic('adduser')+'</button>')+
-    (c.sys||c.ai?'':dots())+fsb+'<button class="mg-ib x" id="mgx" title="Закрыть чат">'+ic('close')+'</button>';
+    (c.sys?'':dots())+fsb+'<button class="mg-ib x" id="mgx" title="Закрыть чат">'+ic('close')+'</button>';
 }
 function rBar(){
   const c=cur(),b=$('#mgsr');
-  if(!c||!sOpen||c.ai){b.innerHTML='';return}
+  if(!c||!sOpen){b.innerHTML='';return}
   b.innerHTML='<div class="mg-sr"><input id="mgcq" placeholder="Поиск по этому чату" autocomplete="off" value="'+esc(cq)+'"><span id="mgcn"></span>'+
     '<button id="mgup" title="Раньше">'+ic('up')+'</button><button id="mgdn" title="Позже">'+ic('down')+'</button></div>';
 }
 function rAdd(){
   const c=cur(),a=$('#mgap');
-  if(!c||!aOpen||c.sys||c.ai){a.innerHTML='';return}
-  if(c.id.startsWith('c') || c.id.startsWith('n')){rInv();return}
-  const av=CT.filter(n=>!c.m.includes(n));
-  a.innerHTML='<div class="mg-ap"><small>Добавить в чат. Новый участник увидит всю переписку с самого начала.'+(c.m.length===2?' Личный чат станет групповым.':'')+'</small><div class="mg-ch">'+
-    (c.m.length>=MAXM?'Достигнут лимит участников':(av.map(n=>'<button data-add="'+esc(n)+'">+ '+esc(n)+'</button>').join('')||'Все уже в чате'))+'</div></div>';
+  if(!c||!aOpen||c.sys){a.innerHTML='';return}
+  return rInv();
 }
 function rMsgs(keep){
   const c=cur(),b=$('#mgm'),s0=b.scrollTop;
@@ -358,10 +317,21 @@ function rMsgs(keep){
     if(d!==day){day=d;h+='<div class="mg-d"><span>'+dm(m.t)+'</span></div>'}
     if(m.w==='sys'){h+='<div class="mg-n">'+esc(m.x)+'</div>';return}
     const me=m.w===ME;
+    
+    // Ищем оригинальное сообщение для цитаты, если это ответ
+    let replyBlock = '';
+    if(m.replyToId){
+      const original = c.msgs.find(x => String(x.id) === String(m.replyToId));
+      if(original){
+        replyBlock = '<div class="mg-reply-preview" data-jump="'+original.id+'"><b>'+esc(original.w)+'</b><span>'+esc(tx(original))+'</span></div>';
+      }
+    }
+
     h+='<div class="mg-r1'+(me?' me':'')+'">'+
-      (me?'':'<span class="mg-a s" style="background:'+col(m.w)+'">'+(m.w==='ИИ Бот'?ic('bot'):ini(m.w))+'</span>')+
+      (me?'':'<span class="mg-a s" style="background:'+col(m.w)+'">'+ini(m.w)+'</span>')+
       '<div class="mg-b'+(hit[mi]===i?' cur':'')+'"'+(m.id?' data-mid="'+m.id+'"':'')+'>'+
       (!me&&c.m.length>2?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>'+(FI[m.uid]?'<span class="fio">'+esc(FI[m.uid])+'</span>':''):'')+
+      replyBlock+
       (m.poll?pollHTML(m):(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
       (m.f?'<div class="mg-f"'+(m.f.p?' data-fp="'+esc(m.f.p)+'" style="cursor:pointer"':'')+'>'+ic('clip')+'<span>'+esc(m.f.n)+'</span><small>'+m.f.s+'</small></div>':'')+
       '<small>'+(m.pin?'📌 ':'')+dm(m.t)+' в '+hm(m.t)+'</small>'+(m.id&&ma===String(m.id)?actHTML(m,me):'')+'</div>'+
@@ -377,12 +347,23 @@ function rFoot(){
   if(!c){f.innerHTML='';f.hidden=true;return}
   f.hidden=false;
   const dis=c.sys?' disabled':'';
+  
+  // Плашка ответа над полем ввода
+  let replyBarHTML = '';
+  if(replyTo){
+    const orig = c.msgs.find(x => String(x.id) === String(replyTo));
+    if(orig){
+      replyBarHTML = '<div class="mg-replying-bar">'+ic('reply')+'<div>Ответ на: <b>'+esc(orig.w)+'</b> — '+esc(tx(orig))+'</div><button id="mgrmreply">'+ic('close')+'</button></div>';
+    }
+  }
+
   f.innerHTML=(eOpen?'<div class="mg-em2">'+EM.map(e=>'<button data-e="'+e+'">'+e+'</button>').join('')+'</div>':'')+
+    replyBarHTML+
     (pf?'<div class="mg-pf">'+ic('clip')+esc(pf.n)+' · '+pf.s+'<button id="mgpx">'+ic('close')+'</button></div>':'')+
     (err?'<div class="mg-er">'+err+'</div>':'')+
     '<div class="mg-fr"><button class="mg-sm" id="mgem"'+dis+'>'+ic('smile')+'</button>'+
-    '<textarea id="mgi" rows="1" name="msg" enterkeyhint="send" data-lpignore="true" autocomplete="off" placeholder="'+(c.sys?'Только чтение':c.ai?'Напишите сообщение…':'Напишите сообщение…')+'"'+dis+'>'+esc(dr)+'</textarea>'+
-    (c.ai?'':'<label class="mg-ib mg-fl'+(c.sys?' off':'')+'" title="Прикрепить файл (до 5 МБ)">'+ic('clip')+'<input type="file" id="mgfl" hidden'+dis+'></label>')+
+    '<textarea id="mgi" rows="1" name="msg" enterkeyhint="send" data-lpignore="true" data-1p-ignore autocomplete="off" placeholder="'+(c.sys?'Только чтение':'Напишите сообщение…')+'"'+dis+'>'+esc(dr)+'</textarea>'+
+    '<label class="mg-ib mg-fl'+(c.sys?' off':'')+'" title="Прикрепить файл (до 5 МБ)">'+ic('clip')+'<input type="file" id="mgfl" hidden'+dis+'></label>'+
     '<button class="mg-snd" id="mgsd"'+dis+'>'+ic('send')+'</button></div>';
  const ti=$('#mgi');if(ti)grow(ti);
 }
@@ -397,22 +378,12 @@ function renderAll(){
 
 /* ---------- действия ---------- */
 function open(id){
-  const targetChat = C.find(z => z.id === id);
-  if(targetChat && targetChat.ai){
-    checkAiAccess(()=>{
-      sel=id;aOpen=0;eOpen=0;pf=null;err='';dr='';mi=-1;mOpen=0;menuOpen=0;ma='';pinI=-1;
-      sOpen=q?1:0;cq=q;
-      renderAll();
-    });
-    return;
-  }
-
-  sel=id;aOpen=0;eOpen=0;pf=null;err='';dr='';mi=-1;mOpen=0;menuOpen=0;ma='';pinI=-1;
+  sel=id;aOpen=0;eOpen=0;pf=null;err='';dr='';mi=-1;mOpen=0;menuOpen=0;ma='';pinI=-1;replyTo=null;
   sOpen=q?1:0;cq=q;
   renderAll();
   if(sOpen){const i=$('#mgcq');if(i)i.blur()}
 }
-function closeChat(){sel=null;sOpen=0;cq='';aOpen=0;mOpen=0;menuOpen=0;ma='';renderAll()}
+function closeChat(){sel=null;sOpen=0;cq='';aOpen=0;mOpen=0;menuOpen=0;ma='';replyTo=null;renderAll()}
 function setFs(v){
   fs=v?1:0;sec.classList.toggle('fs',!!fs);
   try{
@@ -464,7 +435,9 @@ sec.addEventListener('click',e=>{
   else if((x=b('[data-del]')))delMsg(x.dataset.del);
   else if((x=b('[data-unpin]')))pinMsg(x.dataset.unpin);
   else if((x=b('[data-jump]')))pinJump(x.dataset.jump);
-  else if(b('.mg-b[data-mid]')&&!b('.mg-f')&&!b('.mg-po')&&!b('.mg-act')){ma=ma===x.dataset.mid?'':x.dataset.mid;rMsgs(1)}
+  else if((x=b('[data-reply]'))){replyTo=x.dataset.reply;ma='';rFoot();const i=$('#mgi');if(i)i.focus()}
+  else if(b('#mgrmreply')){replyTo=null;rFoot()}
+  else if((x=b('.mg-b[data-mid]'))&&!b('.mg-f')&&!b('.mg-po')&&!b('.mg-act')){ma=ma===x.dataset.mid?'':x.dataset.mid;rMsgs(1)}
   else if(b('[data-code]')){const c=cur();if(c){navigator.clipboard&&navigator.clipboard.writeText(c.code);toast('Код скопирован: '+c.code)}}
   else if(b('#mgdel'))delAccModal();
   else if(b('#mgsd'))send();
@@ -531,7 +504,7 @@ const st3=document.createElement('style');st3.textContent=`
 .mg-pn button svg{width:16px;height:16px}
 .mg-b[data-mid]{cursor:pointer}
 .mg-b.flash{outline:2px solid #f5b81c}
-.mg-act{display:flex;gap:6px;margin-top:8px;animation:mgd .15s}
+.mg-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;animation:mgd .15s}
 .mg-act button{display:flex;gap:6px;align-items:center;height:30px;padding:0 12px;border-radius:10px;background:#fff;color:#34404e;font-weight:600;font-size:12px;box-shadow:0 1px 6px rgba(0,0,0,.12);border:0;cursor:pointer}
 .mg-act button.rd{color:#e5314a}
 .mg-act svg{width:15px;height:15px}
@@ -564,13 +537,13 @@ const au=document.createElement('div');au.id='mgau';au.hidden=true;sec.appendChi
 const tr=m=>/Invalid login/i.test(m)?'Неверная почта или пароль':/already/i.test(m)?'Такая почта уже зарегистрирована':/rate limit/i.test(m)?'Слишком много попыток, подожди минуту':m;
 function toast(t){let d=$('#mgtoast');if(!d){d=document.createElement('div');d.id='mgtoast';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:60;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
 const setName=(id,n)=>{n=n||'Участник';let k=n,i=2;while(Object.entries(nmap).some(([u,v])=>v===k&&u!==id))k=n+' '+i++;nmap[id]=k};
-const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,uid:r.user_id,cid:r.chat_id,pin:!!r.pinned,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
+const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,uid:r.user_id,cid:r.chat_id,pin:!!r.pinned,replyToId:r.reply_to||null,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
 async function loadAll(){
   const since=new Date(Date.now()-30*864e5).toISOString();
   const [a,b,d]=await Promise.all([
     sb.from('chats').select('id,title,invite_code,created_at'),
     sb.from('chat_members').select('chat_id,user_id'),
-    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,poll').gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
+    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,reply_to,poll').gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
   if(a.error||b.error||d.error){toast('Ошибка загрузки: '+(a.error||b.error||d.error).message);return}
   const ms=d.data.reverse(),ids=new Set([me.id]);
   b.data.forEach(x=>ids.add(x.user_id));ms.forEach(x=>ids.add(x.user_id));
@@ -578,15 +551,10 @@ async function loadAll(){
   await loadVotes();
   ME=nmap[me.id]||'Я';
   const un=Object.fromEntries(C.map(c=>[c.id,c.un||0]));
-  
-  const realChats = a.data.map(c=>{
+  C.splice(0,C.length,...a.data.map(c=>{
     const u=b.data.filter(x=>x.chat_id===c.id).map(x=>x.user_id),m=ms.filter(x=>x.chat_id===c.id).map(toM);
     if(!m.length)m.push({w:'sys',x:'Чат создан',t:Date.parse(c.created_at)});
-    return{id:c.id,code:c.invite_code,uids:u,title:c.title||'',un:un[c.id]||0,m:u.map(x=>nmap[x]||'Участник'),msgs:m}
-  });
-
-  const aiChat = C.find(z => z.ai);
-  C.splice(0,C.length, aiChat, ...realChats);
+    return{id:c.id,code:c.invite_code,uids:u,title:c.title||'',un:un[c.id]||0,m:u.map(x=>nmap[x]||'Участник'),msgs:m}}));
 }
 const link=c=>location.origin+location.pathname+'?join='+c.code;
 function copy(t){const ok=()=>toast('Ссылка скопирована. Отправь её тому, кого хочешь пригласить');if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,()=>prompt('Скопируй ссылку',t));else prompt('Скопируй ссылку',t)}
@@ -657,12 +625,12 @@ function dropMsg(id){for(const c of C){const n=c.msgs.length;c.msgs=c.msgs.filte
 function dots(){return'<button class="mg-ib'+(menuOpen?' on':'')+'" id="mgdots" title="Ещё">'+ic('dots')+'</button>'+(menuOpen?'<div class="mg-dd"><button id="mgpoll">'+ic('poll')+'Создать опрос</button></div>':'')}
 function rMem(){
   const c=cur(),b=$('#mgmem');
-  if(!c||c.sys||c.ai){b.className='mg-mp';b.innerHTML='';return}
+  if(!c||c.sys){b.className='mg-mp';b.innerHTML='';return}
   b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr" data-u="'+u+'" style="cursor:pointer"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
   b.classList.toggle('open',!!mOpen);
 }
 function rPins(){
-  const c=cur(),b=$('#mgpin'),P=c&&!c.ai?c.msgs.filter(m=>m.pin):[];
+  const c=cur(),b=$('#mgpin'),P=c?c.msgs.filter(m=>m.pin):[];
   if(!P.length){b.innerHTML='';return}
   if(pinI<0||pinI>=P.length)pinI=P.length-1;
   const m=P[pinI];
@@ -670,7 +638,13 @@ function rPins(){
 }
 function jump(id){const e=$('.mg-b[data-mid="'+id+'"]');if(!e)return;const b=$('#mgm');b.scrollTop=e.offsetTop-b.clientHeight/2+e.offsetHeight/2;e.classList.add('flash');setTimeout(()=>e.classList.remove('flash'),1500)}
 function pinJump(id){jump(id);const c=cur(),P=c.msgs.filter(m=>m.pin);pinI=(pinI-1+P.length)%P.length;rPins()}
-function actHTML(m,mine){return'<div class="mg-act">'+(mine?'<button class="rd" data-del="'+m.id+'">'+ic('trash')+'Удалить</button>':'')+'<button data-pin="'+m.id+'">'+ic('pin')+(m.pin?'Открепить':'Закрепить')+'</button></div>'}
+function actHTML(m,mine){
+  return'<div class="mg-act">'+
+    '<button data-reply="'+m.id+'">'+ic('reply')+'Ответить</button>'+
+    '<button data-pin="'+m.id+'">'+ic('pin')+(m.pin?'Открепить':'Закрепить')+'</button>'+
+    (mine?'<button class="rd" data-del="'+m.id+'">'+ic('trash')+'Удалить</button>':'')+
+  '</div>';
+}
 function pollHTML(m){
   const V=VT[m.id]||[],tot=new Set(V.map(v=>v.user_id)).size,mine=V.filter(v=>v.user_id===me.id).map(v=>v.opt);
   return'<div class="mg-po"><b>📊 '+esc(m.poll.q)+'</b><small>'+(m.poll.multi?'Можно выбрать несколько':'Один ответ')+'</small>'+
@@ -785,46 +759,14 @@ function live(){
    .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_members'},async()=>{await loadAll();rList();rHead();rMem();rMsgs()}).subscribe();
 }
 async function send(){
-  const c=cur();if(!c)return;
-  const x=dr.trim();if(!x&&!pf)return;
-
-  /* ---------- ТЕКСТОВЫЙ ИИ-БОТ С СОХРАНЕНИЕМ ---------- */
-  if(c.ai){
-    c.msgs.push({w:ME,x:x,t:Date.now()});
-    saveAiMsgs();
-    dr='';pf=null;err='';eOpen=0;
-    rFoot();rMsgs();rList();
-
-    const typingMsg = {w:'ИИ Бот',x:'*Думает...*',t:Date.now()};
-    c.msgs.push(typingMsg);
-    if(sel===c.id) rMsgs();
-
-    fetch(`https://text.pollinations.ai/${encodeURIComponent(x)}?model=openai`)
-      .then(res => res.text())
-      .then(aiReply => {
-        c.msgs = c.msgs.filter(m => m !== typingMsg);
-        c.msgs.push({w:'ИИ Бот',x:aiReply,t:Date.now()});
-        saveAiMsgs();
-        if(sel===c.id) rMsgs();
-        rList();
-      })
-      .catch(() => {
-        c.msgs = c.msgs.filter(m => m !== typingMsg);
-        c.msgs.push({w:'ИИ Бот',x:'Ой, что-то пошло не так при обращении к нейросети. Попробуй еще раз!',t:Date.now()});
-        saveAiMsgs();
-        if(sel===c.id) rMsgs();
-        rList();
-      });
-    return;
-  }
-  /* ---------------------------------------------------- */
-
-  const f=pf;dr='';pf=null;err='';eOpen=0;rFoot();
+  const c=cur();if(!c)return;const x=dr.trim();if(!x&&!pf)return;
+  const f=pf;const currentReply = replyTo;
+  dr='';pf=null;replyTo=null;err='';eOpen=0;rFoot();
   let p=null;
   if(f){const ex=(f.n.split('.').pop()||'').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
     const u=await sb.storage.from('chat-files').upload(c.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.'+ex,f.b,{contentType:f.b.type||'application/octet-stream'});
     if(u.error){err='Файл не загрузился: '+u.error.message;rFoot();return}p=u.data.path}
-  const r=await sb.from('messages').insert({chat_id:c.id,body:x||null,file_path:p,file_name:f?f.n:null}).select().single();
+  const r=await sb.from('messages').insert({chat_id:c.id,body:x||null,file_path:p,file_name:f?f.n:null,reply_to:currentReply||null}).select().single();
   if(r.error){err='Не отправилось: '+r.error.message;rFoot();return}
   push(r.data);const i=$('#mgi');if(i)i.focus();
 }
