@@ -96,7 +96,7 @@ document.querySelector('.main').appendChild(sec);
 sec.innerHTML='<div class="mg-cr"><a id="mg-home" style="cursor:pointer">Главная</a> &nbsp;|&nbsp; Мессенджер</div>'+
  '<h1 class="mg-h1">Мессенджер</h1>'+
  '<div class="mg-box" id="mgb"><aside class="mg-l">'+
- '<div class="mg-lh"><h2>Сообщения</h2><p>Существующие чаты.</p></div>'+
+ '<div class="mg-lh"><h2>Сообщения</h2><p>Одноклассники и друзья своего пола</p></div>'+
  '<label class="mg-s">'+ic('search')+'<input id="mgq" placeholder="Поиск по сообщениям" autocomplete="off"></label>'+
  '<div class="mg-tabs" id="mgtb"></div><div class="mg-list" id="mgl"></div></aside>'+
  '<section class="mg-r"><header class="mg-hd" id="mgh"></header><div class="mg-mp" id="mgmem"></div><div id="mgpin"></div><div id="mgsr"></div><div id="mgap"></div>'+
@@ -625,7 +625,7 @@ function seen(u){
   return'был(а) '+dm(t);
 }
 async function refreshSeen(){const c=cur();if(!c||!c.uids)return;((await sb.from('profiles').select('id,last_seen').in('id',c.uids)).data||[]).forEach(r=>LS[r.id]=Date.parse(r.last_seen))}
-const touch=()=>{if(sb&&me&&!document.hidden){LS[me.id]=Date.now();sb.rpc('touch_seen')}};
+const touch=()=>{if(sb&&me&&!document.hidden){LS[me.id]=Date.now();sb.rpc('touch_seen').then(r=>{if(r.error&&!touch.w){touch.w=1;toast('Статус «в сети» не обновляется: '+r.error.message)}})}};
 async function loadVotes(){const r=await sb.from('poll_votes').select('message_id,user_id,opt');VT={};(r.data||[]).forEach(v=>(VT[v.message_id]||(VT[v.message_id]=[])).push(v))}
 function findMsg(id){for(const c of C){const m=c.msgs.find(x=>String(x.id)===String(id));if(m)return m}}
 function dropMsg(id){for(const c of C){const n=c.msgs.length;c.msgs=c.msgs.filter(m=>String(m.id)!==String(id));if(c.msgs.length!==n){if(!c.msgs.length)c.msgs.push({w:'sys',x:'Сообщений нет',t:Date.now()});if(sel===c.id){rMsgs(1);rPins()}rList()}}}
