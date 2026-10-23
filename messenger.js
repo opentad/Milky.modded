@@ -1,4 +1,4 @@
-/* Милки — Мессенджер (полный оригинальный код + ИИ-бот с кодом доступа 30062014). */
+/* Милки — Мессенджер (полный код + текстовый ИИ-бот с сохранением истории и кодом доступа 30062014). */
 (function(){
 const $=(s,r=document)=>r.querySelector(s);
 let ME='Милколенок';const MAXM=20,MAXF=5*1024*1024;
@@ -39,15 +39,19 @@ const fsz=b=>b<1048576?Math.max(1,Math.round(b/1024))+' КБ':(b/1048576).toFixe
 const EM=['😀','😂','😍','😊','😎','🤔','😢','😡','👍','🙏','❤️','🔥','🎉','👌'];
 const RE=['Ок!','Поняла)','Хорошо 👍','Сейчас гляну','Договорились'];
 
-/* ---------- демо-данные ---------- */
+/* ---------- Загрузка сохраненной истории ИИ-бота ---------- */
+const savedAiMsgs = JSON.parse(localStorage.getItem('ai_bot_msgs') || 'null');
 const N=Date.now(),mn=60000,H=36e5,D=24*H;
+const defaultAiMsgs = [
+  {w:'ИИ Бот',x:'Привет! Я твой личный ИИ-помощник. Спрашивай о чем угодно, я отвечу!',t:N-D}
+];
+
 const CT=['Айша К.','Милана Р.','Зара Т.','Лейла Ш.','Амина Д.'];
 let uid=1;
 const C=[
  {id:'sys',sys:1,m:[ME],title:'Уведомления',un:1,msgs:[
   {w:'Система',x:'Расписание на октябрь утверждено. Изменить его можно будет с 1 ноября.',t:N-2*D}]},
- {id:'ai_bot',ai:1,m:[ME,'ИИ Бот'],title:'ИИ Помощник',un:0,msgs:[
-  {w:'ИИ Бот',x:'Привет! Я ИИ-ассистент. Могу ответить на вопросы или сгенерировать картинку по команде /img [текст].',t:N-D}]},
+ {id:'ai_bot',ai:1,m:[ME,'ИИ Бот'],title:'ИИ Помощник',un:0,msgs: savedAiMsgs || defaultAiMsgs},
  {id:'c1',m:[ME,'Айша К.'],un:2,msgs:[
   {w:'Айша К.',x:'Привет! Ты уже сделала ДЗ по алгебре?',t:N-3*D},
   {w:ME,x:'Привет, да, осталась последняя задача',t:N-3*D+6*mn},
@@ -66,12 +70,19 @@ const C=[
   {w:'Зара Т.',x:'Классно получилось, медузы красивые',t:N-2*D}]}
 ];
 
+function saveAiMsgs(){
+  const aiChat = C.find(z => z.ai);
+  if(aiChat) {
+    localStorage.setItem('ai_bot_msgs', JSON.stringify(aiChat.msgs));
+  }
+}
+
 /* ---------- состояние ---------- */
 let sel=null,q='',cq='',sOpen=0,aOpen=0,eOpen=0,tab='c',fs=0,pf=null,ns=new Set(),nt='',mi=-1,err='',dr='';
 const cur=()=>C.find(c=>c.id===sel);
 const nm=c=>c.m.length>2?(c.title||c.m.filter(x=>x!==ME).join(', ')):(c.m.filter(x=>x!==ME).join(', ')||c.title||'Новый чат');
 const last=c=>c.msgs[c.msgs.length-1];
-const tx=m=>m.x||(m.f?'📎 '+m.f.n:'')||(m.img?'🖼 [Картинка]':'');
+const tx=m=>m.x||(m.f?'📎 '+m.f.n:'');
 const hits=c=>{const ql=cq.toLowerCase(),r=[];if(sOpen&&ql)c.msgs.forEach((m,i)=>{if((m.x||'').toLowerCase().includes(ql))r.push(i)});return r};
 const RD=JSON.parse(localStorage.getItem('mgr')||'{}');
 let LIVE=0;
@@ -91,7 +102,7 @@ function badge(){
   }
 }
 
-/* ---------- проверка кода для ИИ ---------- */
+/* ---------- проверка кода для ИИ (30062014) ---------- */
 function checkAiAccess(callback){
   const hasAccess = localStorage.getItem('ai_unlocked') === 'true';
   if(hasAccess){ callback(); return; }
@@ -189,7 +200,6 @@ st.textContent=`
 .mg-r1.me{justify-content:flex-end}
 .mg-b{max-width:min(620px,78%);padding:11px 16px;border-radius:20px;background:#fff;border:1px solid var(--ln);font-size:14px;line-height:1.45}
 .mg-b p{white-space:pre-wrap;word-break:break-word;margin:0}
-.mg-b img{max-width:100%;border-radius:12px;margin-top:6px;display:block}
 .mg-b small{display:block;margin-top:5px;font-size:10.5px;opacity:.65}
 .mg-b em{display:block;font-style:normal;font-weight:600;font-size:12px;margin-bottom:3px}
 .me .mg-b{background:linear-gradient(135deg,#1ac9f5,#0ab0e8);border:0;color:#fff}
@@ -352,7 +362,7 @@ function rMsgs(keep){
       (me?'':'<span class="mg-a s" style="background:'+col(m.w)+'">'+(m.w==='ИИ Бот'?ic('bot'):ini(m.w))+'</span>')+
       '<div class="mg-b'+(hit[mi]===i?' cur':'')+'"'+(m.id?' data-mid="'+m.id+'"':'')+'>'+
       (!me&&c.m.length>2?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>'+(FI[m.uid]?'<span class="fio">'+esc(FI[m.uid])+'</span>':''):'')+
-      (m.poll?pollHTML(m):(m.img?'<img src="'+m.img+'" alt="AI Image">':'')+(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
+      (m.poll?pollHTML(m):(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
       (m.f?'<div class="mg-f"'+(m.f.p?' data-fp="'+esc(m.f.p)+'" style="cursor:pointer"':'')+'>'+ic('clip')+'<span>'+esc(m.f.n)+'</span><small>'+m.f.s+'</small></div>':'')+
       '<small>'+(m.pin?'📌 ':'')+dm(m.t)+' в '+hm(m.t)+'</small>'+(m.id&&ma===String(m.id)?actHTML(m,me):'')+'</div>'+
       (me?'<span class="mg-a s"><img src="ava.jpg" alt=""></span>':'')+'</div>';
@@ -371,7 +381,7 @@ function rFoot(){
     (pf?'<div class="mg-pf">'+ic('clip')+esc(pf.n)+' · '+pf.s+'<button id="mgpx">'+ic('close')+'</button></div>':'')+
     (err?'<div class="mg-er">'+err+'</div>':'')+
     '<div class="mg-fr"><button class="mg-sm" id="mgem"'+dis+'>'+ic('smile')+'</button>'+
-    '<textarea id="mgi" rows="1" name="msg" enterkeyhint="send" data-lpignore="true" autocomplete="off" placeholder="'+(c.sys?'Только чтение':c.ai?'Напишите сообщение или /img [запрос]…':'Напишите сообщение…')+'"'+dis+'>'+esc(dr)+'</textarea>'+
+    '<textarea id="mgi" rows="1" name="msg" enterkeyhint="send" data-lpignore="true" autocomplete="off" placeholder="'+(c.sys?'Только чтение':c.ai?'Напишите сообщение…':'Напишите сообщение…')+'"'+dis+'>'+esc(dr)+'</textarea>'+
     (c.ai?'':'<label class="mg-ib mg-fl'+(c.sys?' off':'')+'" title="Прикрепить файл (до 5 МБ)">'+ic('clip')+'<input type="file" id="mgfl" hidden'+dis+'></label>')+
     '<button class="mg-snd" id="mgsd"'+dis+'>'+ic('send')+'</button></div>';
  const ti=$('#mgi');if(ti)grow(ti);
@@ -416,36 +426,11 @@ function nav(d){
   const h=hits(c);if(!h.length)return;
   mi=(mi+d+h.length)%h.length;rMsgs();
 }
-function sendOld(){
-  const c=cur();if(!c||c.sys)return;
-  const x=dr.trim();if(!x&&!pf)return;
-  c.msgs.push({w:ME,x:x,f:pf,t:Date.now()});
-  dr='';pf=null;err='';eOpen=0;
-  rFoot();rMsgs();rList();
-  const i=$('#mgi');if(i)i.focus();
-  const o=c.m.filter(n=>n!==ME);
-  if(o.length)setTimeout(()=>{
-    if(!C.includes(c))return;
-    c.msgs.push({w:o[Math.floor(Math.random()*o.length)],x:RE[Math.floor(Math.random()*RE.length)],t:Date.now()});
-    if(sel===c.id)rMsgs();else c.un++;
-    rList();
-  },1500);
-}
 function addMember(n){
   const c=cur();if(!c||c.m.includes(n)||c.m.length>=MAXM)return;
   c.m.push(n);
   c.msgs.push({w:'sys',x:'В чат добавлен(а): '+n+'. Вся история переписки доступна.',t:Date.now()});
   rHead();rAdd();rMsgs();rList();
-}
-function createOld(){
-  const p=[...ns];if(!p.length)return;
-  let c=p.length===1?C.find(z=>!z.sys&&z.m.length===2&&z.m.includes(p[0])):null;
-  if(!c){
-    c={id:'n'+(uid++),m:[ME,...p],title:p.length>1?nt.trim():'',un:0,msgs:[{w:'sys',x:p.length>1?'Группа создана':'Личный чат создан',t:Date.now()}]};
-    C.push(c);
-  }
-  ns.clear();nt='';tab='c';q='';$('#mgq').value='';
-  open(c.id);
 }
 
 sec.addEventListener('click',e=>{
@@ -803,26 +788,36 @@ async function send(){
   const c=cur();if(!c)return;
   const x=dr.trim();if(!x&&!pf)return;
 
-  // Логика ИИ-бота (работает локально без базы для этого чата)
+  /* ---------- ТЕКСТОВЫЙ ИИ-БОТ С СОХРАНЕНИЕМ ---------- */
   if(c.ai){
     c.msgs.push({w:ME,x:x,t:Date.now()});
+    saveAiMsgs();
     dr='';pf=null;err='';eOpen=0;
     rFoot();rMsgs();rList();
-    setTimeout(()=>{
-      if(!C.includes(c))return;
-      if(x.startsWith('/img ')){
-        const promptText = x.replace('/img ', '').trim();
-        const encoded = encodeURIComponent(promptText);
-        const imgUrl = `https://image.pollinations.ai/prompt/${encoded}`;
-        c.msgs.push({w:'ИИ Бот',x:'Картинка по запросу: "'+promptText+'"',img:imgUrl,t:Date.now()});
-      } else {
-        c.msgs.push({w:'ИИ Бот',x:'Я получил твоё сообщение: "' + x + '". Напиши /img [описание], если хочешь сгенерировать картинку!',t:Date.now()});
-      }
-      if(sel===c.id) rMsgs();
-      rList();
-    }, 1000);
+
+    const typingMsg = {w:'ИИ Бот',x:'*Думает...*',t:Date.now()};
+    c.msgs.push(typingMsg);
+    if(sel===c.id) rMsgs();
+
+    fetch(`https://text.pollinations.ai/${encodeURIComponent(x)}?model=openai`)
+      .then(res => res.text())
+      .then(aiReply => {
+        c.msgs = c.msgs.filter(m => m !== typingMsg);
+        c.msgs.push({w:'ИИ Бот',x:aiReply,t:Date.now()});
+        saveAiMsgs();
+        if(sel===c.id) rMsgs();
+        rList();
+      })
+      .catch(() => {
+        c.msgs = c.msgs.filter(m => m !== typingMsg);
+        c.msgs.push({w:'ИИ Бот',x:'Ой, что-то пошло не так при обращении к нейросети. Попробуй еще раз!',t:Date.now()});
+        saveAiMsgs();
+        if(sel===c.id) rMsgs();
+        rList();
+      });
     return;
   }
+  /* ---------------------------------------------------- */
 
   const f=pf;dr='';pf=null;err='';eOpen=0;rFoot();
   let p=null;
