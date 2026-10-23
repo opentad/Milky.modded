@@ -815,7 +815,7 @@ setInterval(()=>{if(mOpen&&!document.hidden)refreshSeen().then(rMem)},30000);
  document.addEventListener('visibilitychange',()=>{const c=cur();if(!document.hidden&&c&&!sec.hidden){markRead(c);rList()}});
 const lib=document.createElement('script');lib.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 lib.onload=async()=>{
-  sb=window.supabase.createClient(SB_URL,SB_KEY);window.SB=sb;document.dispatchEvent(new Event('sb'));
+  sb=window.supabase.createClient(SB_URL,SB_KEY);window.SB=sb;document.dispatchEvent(new Event('sb'));window.SB=sb;document.dispatchEvent(new Event('sb'));
   const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
   sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;setTimeout(boot,0)}});
   if(J)MS.show('msg');else boot();
@@ -823,4 +823,5 @@ lib.onload=async()=>{
 lib.onerror=()=>{$('#mgb').hidden=true;au.hidden=false;au.textContent='Не удалось загрузить Supabase. Проверь интернет и обнови страницу.'};
 document.head.appendChild(lib);
 window.rMsg=()=>{if(sb)boot();else{$('#mgb').hidden=true;au.hidden=false;au.textContent='Загрузка…'}};
+ window.MG={async dm(u){const r=await sb.rpc('create_dm',{p_user:u});if(r.error){toast('Не получилось: '+r.error.message);return}await loadAll();tab='c';q='';open(r.data.id);MS.show('msg')}};
 })();
