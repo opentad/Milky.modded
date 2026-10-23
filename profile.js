@@ -31,22 +31,12 @@ const IC={
  bag:'M6 8h12l-1 11H7zM9 8V6a3 3 0 0 1 6 0v2',
  paint:'M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2 1.5-2h2a3 3 0 0 0 3-3A9 9 0 0 0 12 3z',
  mark:'M7 4h10v16l-5-4-5 4z',
- gift:'M4 10h16v10H4zM3 7h18v3H3zM12 7v13',
- img:'M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm12.5 5l-4.5-4.5L5 21'};
+ gift:'M4 10h16v10H4zM3 7h18v3H3zM12 7v13'};
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
 let nt=0;
 function note(t){const d=$('#pf-nt');d.textContent=t;d.hidden=false;clearTimeout(nt);nt=setTimeout(()=>d.hidden=true,4000)}
 const setHash=k=>{try{history.replaceState(null,'','#/@'+encodeURIComponent(k))}catch(e){}};
 new MutationObserver(()=>{if(sec.hidden&&location.hash.indexOf('#/@')===0)try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}).observe(sec,{attributes:true,attributeFilter:['hidden']});
-
-/* Подключаем шрифт Caveat из Google Fonts */
-if(!document.getElementById('gf-caveat')){
-  const link=document.createElement('link');
-  link.id='gf-caveat';
-  link.rel='stylesheet';
-  link.href='https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap';
-  document.head.appendChild(link);
-}
 
 const css=document.createElement('style');
 css.textContent=`
@@ -73,7 +63,7 @@ css.textContent=`
 .pf-ss>div:first-child{border-left:0;padding-left:0}
 .pf-ss b{display:block;font-size:21px;font-weight:800;color:var(--ptx)}
 .pf-ss small{color:var(--pmu);font-size:11.5px}
-.pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center;border:0;cursor:pointer}
+.pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center}
 .pf-b.g{background:var(--c2);color:var(--ptx)}
 .pf-b svg{width:18px;height:18px}
 .pf-bs{display:flex;gap:10px}
@@ -81,42 +71,27 @@ css.textContent=`
 .pf-g.o{grid-template-columns:minmax(0,1fr) 300px}
 .pf-x{background:#fff;border-radius:22px;padding:18px;box-shadow:var(--sh);margin-bottom:18px}
 .pf-mn{padding:10px}
-.pf-mi{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:14px;font-weight:700;color:var(--ptx);text-align:left;background:0;border:0}
+.pf-mi{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:14px;font-weight:700;color:var(--ptx);text-align:left}
 .pf-mi svg{width:20px;height:20px;flex:none}
 .pf-mi.on{background:var(--pkbg);color:var(--pkt)}
 .pf-mi.off{color:var(--pmu);cursor:default}
 .pf-mi small{margin-left:auto;font-size:11px;color:var(--pmu);font-weight:600}
-
-/* Стили редактора постов */
 .pf-comp{display:flex;gap:12px;align-items:flex-start}
 .pf-comp .in{flex:1;min-width:0}
-.pf-tb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px;background:var(--c2);padding:6px 10px;border-radius:12px}
-.pf-tb button,.pf-tb select{background:#fff;border:1px solid var(--pln);border-radius:8px;padding:4px 8px;font-size:13px;font-weight:700;color:var(--ptx);cursor:pointer;outline:0}
-.pf-tb select{padding:3px 6px}
-.pf-editor{min-height:90px;max-height:300px;overflow-y:auto;background:var(--c2);border-radius:16px;padding:14px;outline:0;color:var(--ptx);line-height:1.5;overflow-wrap:anywhere}
-.pf-editor[placeholder]:empty:before{content:attr(placeholder);color:var(--pmu);cursor:text}
-.pf-imgs-preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.pf-img-item{position:relative;width:80px;height:80px;border-radius:12px;overflow:hidden;border:1px solid var(--pln)}
-.pf-img-item img{width:100%;height:100%;object-fit:cover}
-.pf-img-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:50%;width:20px;height:20px;font-size:12px;display:grid;place-items:center;cursor:pointer}
-.pf-comp .r{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-
+.pf-comp textarea{width:100%;height:84px;resize:none;background:var(--c2);border:0;border-radius:16px;padding:14px;font:inherit;outline:0;color:var(--ptx)}
+.pf-comp .r{display:flex;justify-content:flex-end;margin-top:10px}
 .pf-ph{display:flex;gap:12px;align-items:center;margin-bottom:10px}
 .pf-ph b{display:block;color:var(--ptx)}.pf-ph small{color:var(--pmu);font-size:12px}
 .pf-a{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;background-size:cover;background-position:center;flex:none}
-.pf-p .pf-body{line-height:1.6;overflow-wrap:anywhere;color:var(--ptx)}
-.pf-p .pf-body p{margin:0 0 8px 0}
-.pf-post-imgs{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:12px;border-radius:16px;overflow:hidden}
-.pf-post-imgs img{width:100%;max-height:350px;object-fit:cover;border-radius:12px}
-
+.pf-p p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ptx)}
 .pf-ac{display:flex;gap:10px;margin-top:12px}
-.pf-ac button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--c2);color:var(--pmu);font-weight:700;border:0;cursor:pointer}
+.pf-ac button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--c2);color:var(--pmu);font-weight:700}
 .pf-ac button.on{color:var(--pk);background:var(--pkbg)}
 .pf-ac button.dg{background:#ffe3e8;color:#d6407f}
 .pf-ac svg{width:18px;height:18px}
 .pf-sh{display:flex;justify-content:space-between;margin-bottom:10px}
 .pf-sh h3{font-size:16px;font-weight:800;color:var(--ptx)}.pf-sh small{color:var(--pmu)}
-.pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx);background:0;border:0;cursor:pointer}
+.pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx)}
 .pf-mu{color:var(--pmu)}
 .pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
 .pf-em{color:var(--pmu);text-align:center;padding:24px 0}
@@ -131,7 +106,7 @@ css.textContent=`
 .pf-f textarea{height:96px;resize:none}
 .pf-cnt{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--pmu)}
 .pf-m{font-size:12px;margin-top:4px;color:#2fa876}.pf-m.e{color:#d6407f}
-.pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative;border:0;cursor:pointer}
+.pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative}
 .pf-sw i{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
 .pf-sw.on{background:var(--pk)}.pf-sw.on i{transform:translateX(24px)}
 @media(max-width:1100px){.pf-g,.pf-g.o{grid-template-columns:1fr}.pf-mn{display:flex;flex-wrap:wrap}.pf-mi{width:auto}.pf-f{grid-template-columns:1fr}}
@@ -166,12 +141,12 @@ async function render(u){
   const [lk,nm]=await Promise.all([
     ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
     all.length?SB.from('profiles').select('id,name,avatar_url').in('id',all):null,
-    window.CMT?CMT.load(SB,me,ids,()=>S&&draw()):null]);
+    CMT.load(SB,me,ids,()=>S&&draw())]);
   if(tk!==tok)return;
   const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
      liked:new Set(((lk&&lk.data)||[]).map(x=>x.post_id)),fol:fol.map(i=>M[i]).filter(Boolean),sub:sub.map(i=>M[i]).filter(Boolean),
-     ed:false,ev:{},fm:{},draft:'',attachedPhotos:[],cd:null};
+     ed:false,ev:{},fm:{},draft:'',cd:null};
   setHash(pr.data.nick||id);
   draw();
 }
@@ -186,24 +161,8 @@ function editHtml(){
     return `<div class="pf-f"><label><b>${f[1]}</b><small>${f[2]}</small></label><div><div class="pf-iw">${ctl}</div><div class="pf-m${m&&m.e?' e':''}">${m?esc(m.t):''}</div></div><button class="pf-b" data-s="${f[0]}">Сохранить</button></div>`}).join('')+
   `<div class="pf-f"><label><b>Комментарии</b><small>Можно запретить комментарии под своими публикациями</small></label><span></span><button class="pf-sw${p.comments_off?' on':''}" data-sw role="switch" aria-checked="${!!p.comments_off}" aria-label="Запретить комментарии"><i></i></button></div></div>`;
 }
-
-function parsePostBody(bodyRaw){
-  let text = bodyRaw, photos = [];
-  try {
-    if(bodyRaw.startsWith('{') && bodyRaw.endsWith('}')){
-      const parsed = JSON.parse(bodyRaw);
-      if(parsed && parsed.text !== undefined){
-        text = parsed.text;
-        photos = parsed.photos || [];
-      }
-    }
-  } catch(e){}
-  const imgsHtml = photos.length ? `<div class="pf-post-imgs">${photos.map(src=>`<img src="${esc(src)}" alt="Фото поста">`).join('')}</div>` : '';
-  return `<div class="pf-body">${text}</div>${imgsHtml}`;
-}
-
 function draw(){
-  const ed=$('#pf-editor');if(ed)S.draft=ed.innerHTML;
+  const ta=$('#pf-t');if(ta)S.draft=ta.value;
   sec.querySelectorAll('[data-k]').forEach(i=>S.ev[i.dataset.k]=i.value);
   const {p,mine}=S,tags=(p.tags||[]).filter(Boolean),sn=mine?'В сети':seen(p.last_seen);
   const btns=mine?`<button class="pf-b" data-edit>${ic('pen')}Редактировать профиль</button>`:
@@ -211,49 +170,6 @@ function draw(){
   const shown=p.name;
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
   const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}${mi('bag','Мои покупки')}${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
-
-  const editorHtml = mine ? `
-    <div class="pf-x pf-comp">
-      ${av(p,'pf-a')}
-      <div class="in">
-        <div class="pf-tb">
-          <button type="button" data-cmd="bold" title="Жирный"><b>B</b></button>
-          <button type="button" data-cmd="italic" title="Курсив"><i>I</i></button>
-          <select data-cmd="fontName" title="Шрифт">
-            <option value="">Шрифт</option>
-            <option value="Caveat">Caveat (рукописный)</option>
-            <option value="monospace">Моноширинный</option>
-            <option value="serif">С засечками</option>
-            <option value="sans-serif">Без засечек</option>
-          </select>
-          <select data-cmd="fontSize" title="Размер">
-            <option value="">Размер</option>
-            <option value="1">Мелкий</option>
-            <option value="3">Обычный</option>
-            <option value="5">Крупный</option>
-            <option value="7">Огромный</option>
-          </select>
-        </div>
-        <div id="pf-editor" class="pf-editor" contenteditable="true" placeholder="Что нового?">${S.draft}</div>
-        <div class="pf-imgs-preview" id="pf-imgs-prev">
-          ${S.attachedPhotos.map((src,idx)=>`
-            <div class="pf-img-item">
-              <img src="${esc(src)}">
-              <button class="pf-img-del" data-del-img="${idx}">✕</button>
-            </div>
-          `).join('')}
-        </div>
-        <div class="r">
-          <label class="pf-b g" style="padding:0 14px; height:38px; font-size:13px; cursor:pointer">
-            ${ic('img')} Фото
-            <input type="file" id="pf-file" accept="image/*" multiple hidden>
-          </label>
-          <button class="pf-b" data-pub>Опубликовать</button>
-        </div>
-      </div>
-    </div>
-  ` : '';
-
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
   <div class="pf-hd"><span class="pf-big" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>
    <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
@@ -261,9 +177,9 @@ function draw(){
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
   ${mine&&S.ed?editHtml():''}
   <div class="pf-g${mine?'':' o'}">${menu}<div>
-   ${editorHtml}
-   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<small>${dt(x.created_at)}</small></div></div>${parsePostBody(x.body)}
-     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${window.CMT?CMT.n(x.id):cn(x.post_comments)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${window.CMT?CMT.html(x.id,S.id,S.p.comments_off):''}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
+   ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea><div class="r"><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
+   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<small>${dt(x.created_at)}</small></div></div><p>${esc(x.body)}</p>
+     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
   </div><aside>${ppl('Подписки',S.sub,S.ng)}${ppl('Подписчики',S.fol,S.nf)}</aside></div>`);
 }
 
@@ -272,59 +188,9 @@ sec.addEventListener('input',e=>{
   if(k==='nick'){const v=i.value.replace(/[^A-Za-z0-9_]/g,'');if(v!==i.value)i.value=v}
   const c=$(`[data-c="${k}"]`);if(c)c.textContent=i.value.length+'/'+i.maxLength;
 });
-
-sec.addEventListener('change',e=>{
-  if(e.target.dataset&&e.target.dataset.cmd){
-    const cmd = e.target.dataset.cmd;
-    const val = e.target.value;
-    if(val) {
-      if(cmd === 'fontName') {
-        document.execCommand('styleWithCSS', false, true);
-        document.execCommand('fontName', false, val);
-        if(val === 'Caveat') {
-          const selection = window.getSelection();
-          if(selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            const span = document.createElement('span');
-            span.style.fontFamily = 'Caveat, cursive';
-            span.appendChild(range.extractContents());
-            range.insertNode(span);
-          }
-        }
-      } else {
-        document.execCommand(cmd, false, val);
-      }
-    }
-  }
-  if(e.target.id==='pf-file'){
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      if(!file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        S.attachedPhotos.push(ev.target.result);
-        draw();
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-});
-
 async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
-
-  if((x=b('[data-cmd]')) && x.tagName==='BUTTON'){
-    document.execCommand(x.dataset.cmd, false, null);
-    return;
-  }
-  if((x=b('[data-del-img]'))){
-    const idx = parseInt(x.dataset.delImg, 10);
-    S.attachedPhotos.splice(idx, 1);
-    draw();
-    return;
-  }
-
-  if(b('[data-go]'))window.MS&&MS.show('msg');
+  if(b('[data-go]'))MS.show('msg');
   else if((x=b('[data-open]')))render(x.dataset.open);
   else if(b('[data-edit]')){S.ed=true;draw();const el=$('.pf-ed');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(b('[data-x]')){S.ed=false;S.ev={};S.fm={};draw()}
@@ -358,21 +224,10 @@ async function act(e){
     if(r.error){S.fw=on;S.nf+=on?1:-1;draw();note('Не получилось: '+r.error.message)}
   }
   else if(b('[data-pub]')){
-    const ed=$('#pf-editor'), htmlBody=ed?ed.innerHTML.trim():'';
-    if(!htmlBody && !S.attachedPhotos.length) return;
-
-    const payload = JSON.stringify({
-      text: htmlBody,
-      photos: S.attachedPhotos
-    });
-
-    const r=await SB.from('posts').insert({body: payload}).select('id,body,created_at').single();
+    const ta=$('#pf-t'),body=ta.value.trim();if(!body)return;
+    const r=await SB.from('posts').insert({body}).select('id,body,created_at').single();
     if(r.error){note('Не опубликовалось: '+r.error.message);return}
-    S.draft='';
-    S.attachedPhotos=[];
-    S.posts.unshift({...r.data,post_likes:[{count:0}],post_comments:[{count:0}]});
-    S.np++;
-    draw();
+    S.draft='';S.posts.unshift({...r.data,post_likes:[{count:0}],post_comments:[{count:0}]});S.np++;draw();
   }
   else if((x=b('[data-like]'))){
     const p=S.posts.find(z=>z.id==x.dataset.like),on=S.liked.has(p.id);
