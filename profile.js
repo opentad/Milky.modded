@@ -139,7 +139,8 @@ async function render(u){
   const ids=ps.data.map(x=>x.id),fol=(fo.data||[]).map(x=>x.follower),sub=(su.data||[]).map(x=>x.followee),all=[...new Set([...fol,...sub])];
   const [lk,nm]=await Promise.all([
     ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
-    all.length?SB.from('profiles').select('id,name,avatar_url').in('id',all):null]);
+    all.length?SB.from('profiles').select('id,name,avatar_url').in('id',all):null,
+    CMT.load(SB,me,ids,()=>S&&draw())]);
   if(tk!==tok)return;
   const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
@@ -177,7 +178,7 @@ function draw(){
   <div class="pf-g${mine?'':' o'}">${menu}<div>
    ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea><div class="r"><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
    ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b><small>${dt(x.created_at)}</small></div></div><p>${esc(x.body)}</p>
-     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${cn(x.post_comments)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div></article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
+     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
   </div><aside>${ppl('Подписки',S.sub,S.ng)}${ppl('Подписчики',S.fol,S.nf)}</aside></div>`);
 }
 
