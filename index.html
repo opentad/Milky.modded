@@ -974,7 +974,9 @@ function rPick(){
 }
 function show(v){
   view=v;
-  $('#v-home').hidden=v!=='home';$('#v-pick').hidden=v!=='pick';$('#v-review').hidden=v!=='review';$('#v-hw').hidden=v!=='hw';$('#v-sim').hidden=v!=='sim';$('#v-hws').hidden=v!=='hws';if($('#v-msg'))$('#v-msg').hidden=v!=='msg';if(v==='msg'&&window.rMsg)window.rMsg();
+  document.querySelectorAll('.main>section').forEach(s=>s.hidden=s.id!=='v-'+v);
+if(v==='msg'&&window.rMsg)window.rMsg();
+if(window.RV&&RV[v])RV[v]();
 $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden=!(v==='home'||v==='hw'||v==='hws');
 if(v==='hws')window.rHws();
   if(v==='home')rHome();
@@ -1022,11 +1024,12 @@ const GR=[['Домашнее задание','Русский язык',5,'11 О�
 function rGr(){
   $('#gr').innerHTML=[...HWM.grades(),...GR].map(g=>`<div class="gc"><div class="gt"><div><small>${g[0]}</small><b>${g[1]}</b></div><div class="mark${g[2]===4?' m4':''}">${g[2]}</div></div><div class="gd"><div><small>Дата</small><b>${g[3]}</b></div><span>${ic('note')}</span></div></div>`).join('');
 }
-window.MS={show,ic,SUB,HW};
+window.MS={show,ic,SUB,HW};window.RV={};
 $('#tf').addEventListener('click',e=>{const b=e.target.closest('[data-tf]');if(b){tf=b.dataset.tf;rHome()}});
 HWM.onchange=()=>{rHw();rGr()};
 $('#drawer').addEventListener('click',e=>{const b=e.target.closest('.mi');if(!b)return;const t=b.textContent.replace(/^[\d+]+/,'').trim();
-  if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show(t==='Главная'?'home':'hws')}else if(t==='Мессенджер'){closeMenu();show('msg')}
+  if(t==='Главная'||t==='Домашняя работа'){closeMenu();mode='student';show(t==='Главная'?'home':'hws')}else if(t==='Мессенджер'){closeMenu();show('msg')}else if(t==='Профиль'){closeMenu();show('prof')}
+else if(t==='Лента'){closeMenu();show('feed')}
 });
 
 /* ---------- страница «Домашние задания» (как на school.милки.рф) ---------- */
