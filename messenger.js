@@ -320,7 +320,7 @@ function rMsgs(keep){
     h+='<div class="mg-r1'+(me?' me':'')+'">'+
       (me?'':'<span class="mg-a s" style="background:'+col(m.w)+'">'+ini(m.w)+'</span>')+
       '<div class="mg-b'+(hit[mi]===i?' cur':'')+'"'+(m.id?' data-mid="'+m.id+'"':'')+'>'+
-      (!me&&c.m.length>2?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>'+(FI[m.uid]?'<span class="fio">'+esc(FI[m.uid])+'</span>':''):'')+
+      (!me?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>'+(FI[m.uid]?'<span class="fio">'+esc(FI[m.uid])+'</span>':''):'')+
       (m.poll?pollHTML(m):(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
       (m.f?'<div class="mg-f"'+(m.f.p?' data-fp="'+esc(m.f.p)+'" style="cursor:pointer"':'')+'>'+ic('clip')+'<span>'+esc(m.f.n)+'</span><small>'+m.f.s+'</small></div>':'')+
       '<small>'+(m.pin?'📌 ':'')+dm(m.t)+' в '+hm(m.t)+'</small>'+(m.id&&ma===String(m.id)?actHTML(m,me):'')+'</div>'+
@@ -539,7 +539,7 @@ document.head.appendChild(st2);
 .mg.fs .mg-pv{background:rgba(255,255,255,.08)}
 .mg.fs .me .mg-pv{background:rgba(255,255,255,.18)}`;
 document.head.appendChild(st3);
- const st4=document.createElement('style');st4.textContent='.fio{display:block;font-size:9px;font-weight:400;opacity:.4;margin:-1px 0 3px;color:inherit}.mg-mr .fio{margin:0}';document.head.appendChild(st4);
+ const st4=document.createElement('style');st4.textContent='.fio{display:block;font-size:10px;font-weight:300;color:#9aa1a9;margin:-1px 0 3px}.mg-mr .fio{margin:0}';document.head.appendChild(st4);
 const st5=document.createElement('style');st5.textContent='.mg-fr{align-items:flex-end}.mg-fr textarea#mgi{flex:1;min-width:0;height:48px;max-height:140px;border:1px solid var(--ln);background:#f9fafc;border-radius:16px;padding:13px 18px;font:inherit;font-size:14px;line-height:1.4;outline:0;color:var(--tx);resize:none;overflow-y:auto}.mg.fs .mg-fr textarea#mgi{background:none;border:0;color:#fff}';document.head.appendChild(st5);
  const st6=document.createElement('style');st6.textContent=`
 § .mg-cr,§ .mg-h1,§ .mg-lh{display:none}
