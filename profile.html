@@ -1,265 +1,187 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Профиль</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#f6f7fa;--card:#fff;--card2:#f2f4f8;--ln:#e8ecf2;--tx:#34404e;--mu:#8d96a3;--pk:#f45b97;--pkbg:#ffeaf2;--pkt:#d6407f;--ok:#2fa876;--gold:#f5b81c;--sh:0 6px 30px rgba(0,0,0,.05)}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-[hidden]{display:none!important}
-body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;display:flex;min-height:100vh}
-button,input,textarea{font:inherit;color:inherit}
-button{background:none;border:0;cursor:pointer}
-button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--pk);outline-offset:2px}
-svg{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-
-.rail{width:72px;flex:none;position:sticky;top:0;height:100vh;background:#fff;border-radius:0 20px 20px 0;display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:34px;box-shadow:0 0 30px rgba(0,0,0,.05)}
-.rail b{font-size:24px;font-weight:800;color:#2d6a9f;margin-bottom:18px}
-.rail .ri{width:46px;height:46px;display:grid;place-items:center;color:#777;border-radius:14px}
-.rail .ri.on{background:#f1fcff;color:#17b3e6}
-
-.page{flex:1;min-width:0;padding:34px 40px 80px;max-width:1500px}
-.cover{position:relative;height:220px;border-radius:26px 26px 0 0;background:linear-gradient(120deg,#c8628f,#6b4fa8) center/cover}
-.cover button{position:absolute;right:20px;bottom:18px;display:flex;gap:8px;align-items:center;height:42px;padding:0 18px;border-radius:14px;background:rgba(13,16,23,.7);color:#fff;font-weight:700}
-.head{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;background:var(--card);border-radius:0 0 26px 26px;padding:0 28px 26px;box-shadow:var(--sh)}
-.av{width:150px;height:150px;border-radius:50%;margin-top:-56px;border:6px solid var(--card);background:#fde4e4 center/cover;flex:none}
-.who{flex:1;min-width:240px;padding-top:16px}
-.who h1{font-size:26px;font-weight:800;line-height:1.15}
-.nick{display:flex;gap:10px;align-items:center;margin:6px 0;color:var(--mu)}
-.badge{background:var(--pkbg);color:var(--pkt);border-radius:10px;padding:2px 10px;font-size:12px;font-weight:700}
-.status{margin:8px 0 12px}
-.tags{display:flex;flex-wrap:wrap;gap:8px}
-.tags span{background:var(--pkbg);color:var(--pkt);border-radius:14px;padding:5px 13px;font-size:12.5px;font-weight:600}
-.side{display:flex;gap:24px;align-items:center;padding-top:22px;flex-wrap:wrap}
-.stats{display:flex;gap:26px;text-align:center}
-.stats b{display:block;font-size:22px;font-weight:800}
-.stats small{color:var(--mu);font-size:11.5px}
-.btn{height:48px;padding:0 24px;border-radius:16px;background:var(--pk);color:#fff;font-weight:800;display:inline-flex;align-items:center;gap:8px}
-.btn.sq{width:48px;padding:0;justify-content:center;background:var(--card2);color:var(--tx)}
-.btn.gh{background:var(--card2);color:var(--tx)}
-
-.grid{display:grid;grid-template-columns:250px minmax(0,1fr) 340px;gap:22px;margin-top:22px;align-items:start}
-.box{background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--sh)}
-.menu button{display:flex;gap:14px;align-items:center;width:100%;height:50px;padding:0 12px;border-radius:14px;font-weight:700;text-align:left}
-.menu button:hover{background:var(--card2)}
-.menu .n{margin-left:auto;color:#a87000;font-size:13px}
-.menu .soon{margin-left:auto;font-size:10px;color:var(--mu);font-weight:600}
-.menu button.dis{color:var(--mu)}
-.comp{display:flex;gap:14px}
-.comp .mini{width:50px;height:50px;border-radius:50%;background:#fde4e4 center/cover;flex:none}
-.comp textarea{flex:1;height:84px;resize:none;background:var(--card2);border:0;border-radius:16px;padding:14px;outline-offset:0}
-.comp-b{display:flex;gap:10px;margin-top:12px;align-items:center}
-.comp-b .grow{flex:1}
-.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border-radius:18px;padding:6px;margin:18px 0}
-.tabs button{height:44px;border-radius:13px;color:var(--mu);font-weight:700}
-.tabs button.on{background:var(--pkbg);color:var(--pkt)}
-.post{margin-bottom:18px}
-.post .ph{display:flex;gap:12px;align-items:center;margin-bottom:12px}
-.post .ph b{display:block}.post .ph small{color:var(--mu);font-size:12px}
-.pin{margin-left:auto;background:var(--pkbg);color:var(--pkt);border-radius:10px;padding:3px 10px;font-size:11.5px;font-weight:700}
-.post p{line-height:1.6;white-space:pre-wrap}
-.post img{width:100%;border-radius:16px;margin-top:12px}
-.acts{display:flex;gap:10px;margin-top:14px}
-.acts button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--card2);color:var(--mu);font-weight:700}
-.acts button.on{color:var(--pk)}
-.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.sh h3{font-size:16px;font-weight:800}.sh small{color:var(--mu)}
-.row{display:flex;gap:10px}
-.row div{flex:1;min-width:0;text-align:center;font-size:12px;font-weight:600}
-.row i{display:block;aspect-ratio:1;border-radius:16px;background:#e9edf3 center/cover;margin-bottom:6px}
-.row span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.side-col>.box{margin-bottom:18px}
-.coinbox{display:flex;gap:14px;align-items:center;background:linear-gradient(120deg,#fff3d1,#fff)}
-.coin{width:62px;height:62px;border-radius:18px;background:radial-gradient(circle at 35% 30%,#ffe27a,#f0a500);flex:none}
-.coinbox small{color:#a87000;font-size:12px}.coinbox b{display:block;font-size:32px;font-weight:800;line-height:1.1}
-
-.mod{position:fixed;inset:0;background:rgba(15,25,35,.4);display:grid;place-items:center;padding:20px;z-index:20}
-.mbox{background:var(--card);border-radius:26px;padding:28px;width:min(720px,100%);max-height:92vh;overflow:auto}
-.mhd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.mhd h2{font-size:22px;font-weight:800}.mhd small{color:var(--mu)}
-.f{display:grid;grid-template-columns:170px 1fr auto;gap:14px;align-items:center;padding:16px 0;border-top:1px solid var(--ln)}
-.f label b{display:block}.f label small{color:var(--mu);font-size:12px}
-.f input,.f textarea{width:100%;background:var(--card2);border:1px solid var(--ln);border-radius:14px;padding:13px 15px;outline-offset:0}
-.f textarea{height:84px;resize:none}
-.f .cnt{font-size:12px;color:var(--mu);text-align:right;margin-top:4px}
-.f .err{color:#ff8a8a;font-size:12px;margin-top:4px}
-.f .okm{color:var(--ok);font-size:12px;margin-top:4px}
-.sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative;transition:background .15s}
-.sw i{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
-.sw.on{background:var(--pk)}.sw.on i{transform:translateX(24px)}
-.grid.other{grid-template-columns:minmax(0,1fr) 340px}.av.sq{border-radius:30px}
-@media(max-width:1100px){.grid,.grid.other{grid-template-columns:1fr}.f{grid-template-columns:1fr}}
-@media(max-width:640px){.page{padding:20px 14px 80px}.rail{display:none}.av{width:110px;height:110px;margin-top:-40px}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
-</head>
-<body>
-<nav class="rail" id="rail"></nav>
-<main class="page">
-  <div class="cover" id="cover"><button id="coverBtn"><svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16zM14 7l3 3"/></svg>Добавить обложку</button></div>
-  <section class="head">
-    <div class="av" id="av"></div>
-    <div class="who">
-      <h1 id="name"></h1>
-      <div class="nick"><span id="nick"></span><span class="badge" id="cls"></span><span class="badge" id="seen" hidden></span></div>
-      <div class="status" id="status"></div>
-      <div class="tags" id="tags"></div>
-    </div>
-    <div class="side">
-      <div class="stats" id="stats"></div>
-      <div id="btns" style="display:flex;gap:12px"></div>
-      
-    </div>
-  </section>
-
-  <div class="grid">
-    <aside class="box menu" id="menu"></aside>
-    <section>
-      <div class="box">
-        <div class="comp"><div class="mini" id="mini"></div><textarea id="newPost" placeholder="Что нового?" maxlength="2000"></textarea></div>
-        <div class="comp-b"><button class="btn gh" style="height:42px">Фото</button><button class="btn gh" style="height:42px">Опрос</button><span class="grow"></span><button class="btn" id="publish" style="height:42px">Опубликовать</button></div>
-      </div>
-      <div class="tabs"><button class="on">Все публикации</button><button>Медиа</button></div>
-      <div id="posts"></div>
-    </section>
-    <aside class="side-col" id="right"></aside>
-  </div>
-</main>
-
-<div class="mod" id="mod" hidden>
-  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="mt">
-    <div class="mhd"><div><h2 id="mt">Редактировать профиль</h2><small>Каждый параметр сохраняется отдельно</small></div><button class="btn sq" id="mclose" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-    <div id="fields"></div>
-  </div>
-</div>
-
-<script>
-/* ====== СЛОЙ API: подключи свой бэкенд здесь ======
-   Пока эндпоинты не отвечают, страница работает на демо-данных.
-   Поменяй пути в ROUTES под свой сервер. */
-const uid=new URLSearchParams(location.search).get('u'),isMe=!uid;   // ?u=ID открывает чужой профиль
-const API_BASE='';                       // например 'https://api.example.ru'
-const ROUTES={
-  me:()=>uid?`/api/profile/${uid}`:'/api/profile/me',              // GET  -> объект профиля
-  posts:()=>uid?`/api/profile/${uid}/posts`:'/api/profile/me/posts',     // GET  -> массив постов
-  saveField:()=>'/api/profile/me',       // PATCH {поле:значение}
-  publish:()=>'/api/posts',              // POST {text}
-  follow:()=>'/api/users/'+uid+'/follow',
-  like:id=>`/api/posts/${id}/like`       // POST
-};
-async function call(method,path,body){
-  const r=await fetch(API_BASE+path,{method,credentials:'include',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
-  if(!r.ok)throw new Error(r.status);
-  return r.json();
-}
-const DEMO={
-  me:{name:'Имя Фамилия Отчество',nick:'demo_user',cls:'7мим ба',status:'(´• ω •`)/ мои проекты',tags:['Вайбкодер','Копирайтер','Дизайн'],email:'demo@example.ru',phone:'',commentsOff:false,
-    posts:152,followers:128,following:11,coins:319,coinsMonth:'+98 / −0',avatar:'',cover:'',
-    guild:{name:'Гильдия лидеров и бизнесменов',rank:15},
-    friends:['Анна','Мария','Лейла'],subs:['Виолетта','Андрей','Аида'],fans:['Рамина','Мардон','Софья'],
-    market:[{t:'Дизайн-пак',p:10},{t:'Шаблон поста',p:10},{t:'Набор стикеров',p:12}]},
-  posts:[{id:1,pinned:true,date:'17.09.2026 12:30',text:'Первый пост! Здесь будет жить моя лента.',img:'',likes:3,liked:false}]
-};
-DEMO.other={name:'Имя Фамилия',nick:'other_user',cls:'7мим ба',seen:'Была 9 часов назад',status:')))',tags:['VIP persona'],posts:339,followers:0,following:22,subscribed:false,avatar:'',cover:'',guild:{name:'Гильдия лидеров и бизнесменов',rank:0},friends:['Анна','Айшат','Латифа'],subs:['Лейла','Мария','Софья'],fans:[],market:[]};
-const store={};
-async function load(){
-  try{store.me=await call('GET',ROUTES.me());store.posts=await call('GET',ROUTES.posts())}
-  catch(e){store.me=structuredClone(isMe?DEMO.me:DEMO.other);store.posts=structuredClone(DEMO.posts)}
-}
-async function saveField(k,v){
-  try{await call('PATCH',ROUTES.saveField(),{[k]:v})}catch(e){/* демо-режим: сохраняем локально */}
-  store.me[k]=v;
-}
-
-/* ====== ИНТЕРФЕЙС ====== */
-const $=s=>document.querySelector(s);
-const IC={
- home:'M3 11l9-7 9 7M5 10v10h14V10',chat:'M5 5h14v10H10l-5 4z',book:'M6 4h12v16H6zM9 4v7l3-2 3 2V4',
- tasks:'M4 7l2 2 3-3M12 7h8M4 17l2 2 3-3M12 17h8',box:'M4 5h16v4H4zM5 9v10h14V9M10 13h4',doc:'M7 3h7l5 5v13H7zM10 12h6M10 16h6',
- shop:'M5 4h14l2 5H3zM5 9v11h14V9',coin:'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM12 8v8M9 12h6',bag:'M6 8h12l1 12H5zM9 8V6a3 3 0 0 1 6 0v2',
- brush:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3v18',pen:'M4 20l4-1L19 8l-3-3L5 16z',mark:'M7 4h10v16l-5-4-5 4z',
- heart:'M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.4-7 10-7 10z',cmt:'M5 5h14v10H10l-5 4z',rep:'M4 9h13l-3-3M20 15H7l3 3'};
+/* Милки-соцсеть: профиль. Секция #v-prof, Supabase через window.SB (из messenger.js). */
+(function(){
+const sec=document.createElement('section');sec.id='v-prof';sec.hidden=true;
+document.querySelector('.main').appendChild(sec);
+const $=s=>sec.querySelector(s);
+const db=()=>window.SB;
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const PAL=['#f0a04b','#e5617a','#8774e1','#4fb9e6','#5cc08a','#e8793a','#4a8fd9'];
+const hs=t=>{let x=7;for(const c of t)x=(x*31+c.charCodeAt(0))>>>0;return x};
+const col=n=>PAL[hs(n||'?')%PAL.length];
+const ini=n=>(n||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const av=(p,c)=>`<span class="${c}" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.name))}</span>`;
+const p2=n=>String(n).padStart(2,'0');
+const dt=t=>{const d=new Date(t);return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes())};
+const seen=t=>{const d=Date.now()-Date.parse(t);if(!t||isNaN(d))return'';if(d<75000)return'В сети';const m=Math.floor(d/60000);if(m<60)return'Была '+m+' мин назад';const h=Math.floor(m/60);return h<24?'Была '+h+' ч назад':'Была '+Math.floor(h/24)+' дн назад'};
+const cn=x=>x&&x[0]?x[0].count:0;
+const IC={pen:'M4 20l4-1L19 8l-3-3L5 16z',heart:'M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.4-7 10-7 10z',cmt:'M5 5h14v10H10l-5 4z',trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7',dots:'M5 12h.01M12 12h.01M19 12h.01'};
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
-const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-const bg=u=>u?`style="background-image:url('${esc(u)}')"`:'';
+function note(t){let d=document.getElementById('pf-note');if(!d){d=document.createElement('div');d.id='pf-note';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:80;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
 
-function renderHead(){
-  const m=store.me;
-  $('#name').textContent=m.name;$('#nick').textContent='@'+m.nick;$('#cls').textContent=m.cls;
-  $('#status').textContent=m.status;
-  $('#tags').innerHTML=m.tags.map(t=>`<span>${esc(t)}</span>`).join('');
-  $('#stats').innerHTML=[['posts','публикаций'],['followers','подписчиков'],['following','подписок']].map(([k,l])=>`<div><b>${m[k]}</b><small>${l}</small></div>`).join('');
-  if(m.avatar){$('#av').style.backgroundImage=`url('${m.avatar}')`;$('#mini').style.backgroundImage=`url('${m.avatar}')`}
-  if(m.cover)$('#cover').style.backgroundImage=`url('${m.cover}')`;
-  $('#av').classList.toggle('sq',!isMe);$('#coverBtn').hidden=!isMe;$('#menu').hidden=!isMe;$('#newPost').closest('.box').hidden=!isMe;document.querySelector('.grid').classList.toggle('other',!isMe);
-  $('#seen').hidden=isMe||!m.seen;$('#seen').textContent=m.seen||'';
-  $('#btns').innerHTML=(isMe?`<button class="btn" id="edit">${ic('pen')}Редактировать профиль</button>`:`<button class="btn${m.subscribed?' gh':''}" id="follow">${m.subscribed?'Вы подписаны':'Подписаться'}</button><button class="btn gh" id="msg">${ic('cmt')}Написать</button>`)+`<button class="btn sq" aria-label="Ещё"><svg viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></button>`;
-}
-function renderMenu(){
-  const m=store.me;
-  $('#menu').innerHTML=[['coin','MilkyCoin',m.coins],['pen','Редактировать профиль','','edit'],['mark','Сохранённое','','soon'],['shop','Подарки','','soon']]
-   .map(([i,t,n,x])=>`<button${x==='soon'?' class="dis"':''}${x==='edit'?' data-edit':''}>${ic(i)}${t}${n?`<span class="n">${n}</span>`:''}${x==='soon'?'<span class="soon">скоро</span>':''}</button>`).join('');
-}
-function renderRight(){
-  const m=store.me,people=(t,a)=>`<div class="box"><div class="sh"><h3>${t}</h3><small>${a.length}</small></div><div class="row">${a.slice(0,3).map(n=>`<div><i></i><span>${esc(n)}</span></div>`).join('')}</div></div>`;
-  $('#right').innerHTML=`<div class="box"><div class="sh"><h3>Гильдия</h3></div><b>${esc(m.guild.name)}</b><br><small style="color:var(--mu)">${isMe?m.guild.rank+' место в рейтинге':'Участник гильдии'}</small></div>`+
-   people('Друзья',m.friends)+people('Подписки',m.subs)+people('Подписчики',m.fans)+
-   `<div class="box"><div class="sh"><h3>Маркет автора</h3><small>${m.market.length}</small></div>${m.market.map(x=>`<div class="sh"><span>${esc(x.t)}</span><small>${x.p} MilkyCoin</small></div>`).join('')}</div>`+
-   (isMe?`<div class="box coinbox"><div class="coin"></div><div><small>MilkyCoin</small><b>${m.coins}</b><small style="color:var(--mu)">За месяц ${m.coinsMonth}</small></div></div>`:'');
-}
-function renderPosts(){
-  $('#posts').innerHTML=store.posts.map(p=>`<article class="box post"><div class="ph"><div class="mini" style="width:48px;height:48px;border-radius:50%;background:#fde4e4 center/cover" ${bg(store.me.avatar)}></div><div><b>${esc(store.me.name)}</b><small>${esc(p.date)}</small></div>${p.pinned?'<span class="pin">Закреплено</span>':''}</div><p>${esc(p.text)}</p>${p.img?`<img src="${esc(p.img)}" alt="">`:''}<div class="acts"><button data-like="${p.id}" class="${p.liked?'on':''}">${ic('heart')}${p.likes}</button><button>${ic('cmt')}0</button><button>${ic('rep')}0</button></div></article>`).join('')||'<div class="box" style="color:var(--mu)">Публикаций пока нет. Напиши первую выше.</div>';
-}
-function nowStr(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`}
+const css=document.createElement('style');
+css.textContent=`
+#v-prof{--pk:#f45b97;--pkbg:#ffeaf2;--pkt:#d6407f;--c2:#f2f4f8;--sh:0 6px 30px rgba(0,0,0,.05);padding-bottom:70px}
+.pf-cv{height:210px;border-radius:26px 26px 0 0;background:linear-gradient(120deg,#c8628f,#6b4fa8) center/cover}
+.pf-hd{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;background:#fff;border-radius:0 0 26px 26px;padding:0 26px 24px;box-shadow:var(--sh)}
+.pf-big{width:130px;height:130px;border-radius:50%;margin-top:-50px;border:6px solid #fff;display:grid;place-items:center;color:#fff;font-size:42px;font-weight:700;background-size:cover;background-position:center;flex:none}
+.pf-big.o{border-radius:32px}
+.pf-w{flex:1;min-width:230px;padding-top:14px}
+.pf-w h2{font-size:24px;font-weight:800;line-height:1.2;color:var(--tx)}
+.pf-fio{font-size:12px;color:var(--mu);margin-top:2px}
+.pf-bd{display:inline-block;background:var(--pkbg);color:var(--pkt);border-radius:10px;padding:2px 10px;font-size:12px;font-weight:600;margin-top:8px}
+.pf-st{margin:10px 0;color:var(--tx)}
+.pf-tg{display:flex;flex-wrap:wrap;gap:8px}
+.pf-tg span{background:var(--pkbg);color:var(--pkt);border-radius:14px;padding:5px 13px;font-size:12.5px;font-weight:600}
+.pf-sd{display:flex;gap:22px;align-items:center;padding-top:20px;flex-wrap:wrap}
+.pf-ss{display:flex;gap:24px;text-align:center}
+.pf-ss b{display:block;font-size:21px;font-weight:800}
+.pf-ss small{color:var(--mu);font-size:11.5px}
+.pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+.pf-b.g{background:var(--c2);color:var(--tx)}
+.pf-b svg{width:18px;height:18px}
+.pf-bs{display:flex;gap:10px}
+.pf-g{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;margin-top:22px;align-items:start}
+.pf-x{background:#fff;border-radius:22px;padding:18px;box-shadow:var(--sh);margin-bottom:18px}
+.pf-comp textarea{width:100%;height:84px;resize:none;background:var(--c2);border:0;border-radius:16px;padding:14px;font:inherit;outline:0;color:var(--tx)}
+.pf-comp .r{display:flex;justify-content:flex-end;margin-top:10px}
+.pf-ph{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.pf-ph b{display:block}.pf-ph small{color:var(--mu);font-size:12px}
+.pf-a{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;background-size:cover;background-position:center;flex:none}
+.pf-p p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.pf-ac{display:flex;gap:10px;margin-top:12px}
+.pf-ac button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--c2);color:var(--mu);font-weight:700}
+.pf-ac button.on{color:var(--pk)}
+.pf-ac svg{width:18px;height:18px}
+.pf-sh{display:flex;justify-content:space-between;margin-bottom:10px}
+.pf-sh h3{font-size:16px;font-weight:800}.pf-sh small{color:var(--mu)}
+.pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600}
+.pf-mu{color:var(--mu)}
+.pf-em{color:var(--mu);text-align:center;padding:24px 0}
+.pf-ov{position:fixed;inset:0;z-index:70;background:rgba(15,25,35,.4);display:grid;place-items:center;padding:20px}
+.pf-md{background:#fff;border-radius:26px;padding:26px;width:min(700px,100%);max-height:92vh;overflow:auto}
+.pf-mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.pf-mh h3{font-size:22px;font-weight:800}.pf-mh small{color:var(--mu)}
+.pf-f{display:grid;grid-template-columns:160px 1fr auto;gap:14px;align-items:center;padding:16px 0;border-top:1px solid var(--ln)}
+.pf-f label b{display:block}.pf-f label small{color:var(--mu);font-size:12px}
+.pf-f input{width:100%;background:var(--c2);border:1px solid var(--ln);border-radius:14px;padding:13px 15px;font:inherit;outline:0;color:var(--tx)}
+.pf-m{font-size:12px;margin-top:4px;color:#2fa876}.pf-m.e{color:#d6407f}
+.pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative}
+.pf-sw i{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
+.pf-sw.on{background:var(--pk)}.pf-sw.on i{transform:translateX(24px)}
+@media(max-width:1000px){.pf-g{grid-template-columns:1fr}.pf-f{grid-template-columns:1fr}}
+@media(max-width:640px){.pf-big{width:104px;height:104px;margin-top:-38px}}`;
+document.head.appendChild(css);
 
-/* ====== МОДАЛКА РЕДАКТИРОВАНИЯ ====== */
-const FIELDS=[
- {k:'nick',l:'Никнейм',h:'От 5 до 15 символов: латиница, цифры и _',max:15,chk:v=>/^[A-Za-z0-9_]{5,15}$/.test(v)||'Нужно 5–15 символов: латиница, цифры и _'},
- {k:'status',l:'Строка статуса',h:'Показывается рядом с именем',max:120,area:0},
- {k:'tags',l:'Интересы',h:'Разделяйте запятыми',area:1,get:m=>m.tags.join(', '),set:v=>v.split(',').map(s=>s.trim()).filter(Boolean)},
- {k:'email',l:'Email',chk:v=>/^\S+@\S+\.\S+$/.test(v)||'Проверь адрес почты'},
- {k:'phone',l:'Телефон',chk:v=>!v||/^[+\d\s()-]{6,20}$/.test(v)||'Проверь номер телефона'}
-];
-function renderFields(){
-  const m=store.me;
-  $('#fields').innerHTML=FIELDS.map(f=>{const v=f.get?f.get(m):m[f.k];
-    return `<div class="f"><label><b>${f.l}</b>${f.h?`<small>${f.h}</small>`:''}</label><div>${f.area?`<textarea data-k="${f.k}">${esc(v)}</textarea>`:`<input data-k="${f.k}" value="${esc(v)}"${f.max?` maxlength="${f.max}"`:''}>`}${f.max?`<div class="cnt" data-c="${f.k}">${v.length}/${f.max}</div>`:''}<div data-m="${f.k}"></div></div><button class="btn" data-save="${f.k}" style="height:46px">Сохранить</button></div>`}).join('')+
-  `<div class="f"><label><b>Комментарии</b><small>Можно запретить комментарии под своими публикациями</small></label><span></span><button class="sw${m.commentsOff?' on':''}" id="swc" role="switch" aria-checked="${!!m.commentsOff}" aria-label="Запретить комментарии"><i></i></button></div>`;
+let tok=0,S=null;
+async function render(u){
+  const tk=++tok,SB=db();
+  if(!SB){sec.innerHTML='<div class="pf-x pf-em">Подключаемся к серверу…</div>';return}
+  const me=(await SB.auth.getUser()).data.user;if(tk!==tok)return;
+  if(!me){sec.innerHTML='<div class="pf-x pf-em">Чтобы открыть профиль, войди в аккаунт.<br><button class="pf-b" data-go="1" style="margin:14px auto 0">Войти</button></div>';return}
+  const id=u||me.id,mine=id===me.id;
+  const [pr,np,nf,ng,fw,ps,fo,su]=await Promise.all([
+    SB.from('profiles').select('id,name,fio,last_seen,status,tags,avatar_url,cover_url,comments_off').eq('id',id).maybeSingle(),
+    SB.from('posts').select('id',{count:'exact',head:true}).eq('user_id',id),
+    SB.from('follows').select('follower',{count:'exact',head:true}).eq('followee',id),
+    SB.from('follows').select('followee',{count:'exact',head:true}).eq('follower',id),
+    mine?null:SB.from('follows').select('follower').match({follower:me.id,followee:id}).maybeSingle(),
+    SB.from('posts').select('id,body,created_at,post_likes(count),post_comments(count)').eq('user_id',id).order('created_at',{ascending:false}).limit(50),
+    SB.from('follows').select('follower').eq('followee',id).limit(6),
+    SB.from('follows').select('followee').eq('follower',id).limit(6)]);
+  if(tk!==tok)return;
+  const bad=pr.error||ps.error;
+  if(bad||!pr.data){sec.innerHTML='<div class="pf-x pf-em">'+(bad?'Не удалось загрузить: '+esc(bad.message)+'. Проверь, что SQL выполнен.':'Профиль не найден.')+'</div>';return}
+  const ids=ps.data.map(x=>x.id),fol=(fo.data||[]).map(x=>x.follower),sub=(su.data||[]).map(x=>x.followee),all=[...new Set([...fol,...sub])];
+  const [lk,nm]=await Promise.all([
+    ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
+    all.length?SB.from('profiles').select('id,name,avatar_url').in('id',all):null]);
+  if(tk!==tok)return;
+  const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
+  S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
+     liked:new Set(((lk&&lk.data)||[]).map(x=>x.post_id)),fol:fol.map(i=>M[i]).filter(Boolean),sub:sub.map(i=>M[i]).filter(Boolean)};
+  draw();
 }
-const openMod=()=>{renderFields();$('#mod').hidden=false};
-const closeMod=()=>{$('#mod').hidden=true};
+const ppl=(t,a,n)=>`<div class="pf-x"><div class="pf-sh"><h3>${t}</h3><small>${n}</small></div>${a.map(u=>`<button class="pf-pp" data-open="${u.id}">${av(u,'pf-a')}<span>${esc(u.name)}</span></button>`).join('')||'<small class="pf-mu">Пока никого</small>'}</div>`;
+function draw(){
+  const {p,mine}=S,tags=(p.tags||[]).filter(Boolean),sn=mine?'':seen(p.last_seen);
+  const btns=mine?`<button class="pf-b" data-edit>${ic('pen')}Редактировать профиль</button>`:
+    `<button class="pf-b${S.fw?' g':''}" data-follow>${S.fw?'Вы подписаны':'Подписаться'}</button><button class="pf-b g" data-dm>${ic('cmt')}Написать</button>`;
+  sec.innerHTML=`<div class="pf-cv"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
+  <div class="pf-hd"><span class="pf-big${mine?'':' o'}" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.name))}</span>
+   <div class="pf-w"><h2>${esc(p.name)}</h2>${p.fio?`<div class="pf-fio">${esc(p.fio)}</div>`:''}${sn?`<span class="pf-bd">${sn}</span>`:''}
+    ${p.status?`<div class="pf-st">${esc(p.status)}</div>`:'<div class="pf-st"></div>'}${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}</div>
+   <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div>
+  <div class="pf-g"><div>
+   ${mine?`<div class="pf-x pf-comp"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?"></textarea><div class="r"><button class="pf-b" data-pub>Опубликовать</button></div></div>`:''}
+   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(p.name)}</b><small>${dt(x.created_at)}</small></div></div><p>${esc(x.body)}</p>
+     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${cn(x.post_comments)}</button>${mine?`<button data-del="${x.id}" aria-label="Удалить">${ic('trash')}</button>`:''}</div></article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
+  </div><aside>${ppl('Подписчики',S.fol,S.nf)}${ppl('Подписки',S.sub,S.ng)}</aside></div>`;
+}
 
-document.addEventListener('click',async e=>{
-  const t=e.target;
-  if(t.closest('#edit')||t.closest('[data-edit]'))openMod();
-  else if(t.closest('#follow')){const m=store.me;m.subscribed=!m.subscribed;m.followers+=m.subscribed?1:-1;renderHead();try{await call('POST',ROUTES.follow())}catch(err){}}
-  else if(t.closest('#mclose')||t===$('#mod'))closeMod();
-  else if(t.closest('[data-save]')){
-    const k=t.closest('[data-save]').dataset.save,f=FIELDS.find(x=>x.k===k),el=$(`[data-k="${k}"]`),msg=$(`[data-m="${k}"]`),v=el.value.trim();
-    const r=f.chk?f.chk(v):true;
-    if(r!==true){msg.className='err';msg.textContent=r;return}
-    await saveField(k,f.set?f.set(v):v);msg.className='okm';msg.textContent='Сохранено';renderHead();renderMenu();
+async function act(e){
+  const t=e.target,b=k=>t.closest(k),SB=db();let x;
+  if(b('[data-go]'))MS.show('msg');
+  else if((x=b('[data-open]')))render(x.dataset.open);
+  else if(b('[data-edit]'))edit();
+  else if(b('[data-dm]')){if(window.MG)MG.dm(S.id);else note('Личные сообщения скоро появятся')}
+  else if(b('[data-follow]')){
+    const on=S.fw;S.fw=!on;S.nf+=on?-1:1;draw();
+    const r=on?await SB.from('follows').delete().match({follower:S.me.id,followee:S.id}):await SB.from('follows').insert({followee:S.id});
+    if(r.error){S.fw=on;S.nf+=on?1:-1;draw();note('Не получилось: '+r.error.message)}
   }
-  else if(t.closest('#swc')){const b=t.closest('#swc'),on=!b.classList.contains('on');b.classList.toggle('on',on);b.setAttribute('aria-checked',on);saveField('commentsOff',on)}
-  else if(t.closest('#publish')){
-    const ta=$('#newPost'),text=ta.value.trim();if(!text)return;
-    let post={id:Date.now(),date:nowStr(),text,img:'',likes:0,liked:false};
-    try{post=await call('POST',ROUTES.publish(),{text})}catch(err){}
-    store.posts.unshift(post);store.me.posts++;ta.value='';renderPosts();renderHead();
+  else if(b('[data-pub]')){
+    const ta=$('#pf-t'),body=ta.value.trim();if(!body)return;
+    const r=await SB.from('posts').insert({body}).select('id,body,created_at').single();
+    if(r.error){note('Не опубликовалось: '+r.error.message);return}
+    S.posts.unshift({...r.data,post_likes:[{count:0}],post_comments:[{count:0}]});S.np++;draw();
   }
-  else if(t.closest('[data-like]')){
-    const p=store.posts.find(x=>x.id==t.closest('[data-like]').dataset.like);
-    p.liked=!p.liked;p.likes+=p.liked?1:-1;renderPosts();
-    try{await call('POST',ROUTES.like(p.id))}catch(err){}
+  else if((x=b('[data-like]'))){
+    const p=S.posts.find(z=>z.id==x.dataset.like),on=S.liked.has(p.id);
+    p.post_likes=[{count:cn(p.post_likes)+(on?-1:1)}];on?S.liked.delete(p.id):S.liked.add(p.id);draw();
+    const r=on?await SB.from('post_likes').delete().match({post_id:p.id,user_id:S.me.id}):await SB.from('post_likes').insert({post_id:p.id});
+    if(r.error)note('Не получилось: '+r.error.message);
   }
-});
-document.addEventListener('input',e=>{const k=e.target.dataset.k,c=k&&$(`[data-c="${k}"]`);if(c)c.textContent=e.target.value.length+'/'+e.target.maxLength});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMod()});
+  else if((x=b('[data-del]'))){
+    if(!confirm('Удалить публикацию?'))return;
+    const id=+x.dataset.del,r=await SB.from('posts').delete().eq('id',id);
+    if(r.error){note('Не удалось удалить');return}
+    S.posts=S.posts.filter(z=>z.id!==id);S.np--;draw();
+  }
+}
+sec.addEventListener('click',act);
 
-$('#rail').innerHTML='<b>M</b>'+['home','chat','book','tasks','box','doc','shop'].map(k=>`<button class="ri${k==='home'?' on':''}" aria-label="${k}">${ic(k)}</button>`).join('');
-load().then(()=>{renderHead();renderMenu();renderRight();renderPosts()});
-</script>
-</body>
-</html>
+function edit(){
+  const p=S.p,d=document.createElement('div');d.className='pf-ov';
+  const F=[['name','Имя в чате','От 2 до 30 символов',p.name||'',30],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0]];
+  d.innerHTML='<div class="pf-md" role="dialog" aria-modal="true"><div class="pf-mh"><div><h3>Редактировать профиль</h3><small>Каждый параметр сохраняется отдельно</small></div><button class="pf-b g" data-x aria-label="Закрыть">✕</button></div>'+
+   F.map(f=>`<div class="pf-f"><label><b>${f[1]}</b><small>${f[2]}</small></label><div><input data-k="${f[0]}" value="${esc(f[3])}"${f[4]?` maxlength="${f[4]}"`:''}><div class="pf-m" data-m="${f[0]}"></div></div><button class="pf-b" data-s="${f[0]}">Сохранить</button></div>`).join('')+
+   `<div class="pf-f"><label><b>Комментарии</b><small>Можно запретить комментарии под своими публикациями</small></label><span></span><button class="pf-sw${p.comments_off?' on':''}" data-sw role="switch" aria-checked="${!!p.comments_off}" aria-label="Запретить комментарии"><i></i></button></div></div>`;
+  document.body.appendChild(d);
+  const close=()=>{d.remove();document.removeEventListener('keydown',esc2)},esc2=e=>{if(e.key==='Escape')close()};
+  document.addEventListener('keydown',esc2);
+  d.addEventListener('click',async e=>{
+    const b=e.target.closest('[data-s]'),SB=db();
+    if(e.target===d||e.target.closest('[data-x]'))return close();
+    if(e.target.closest('[data-sw]')){
+      const sw=e.target.closest('[data-sw]'),on=!sw.classList.contains('on');
+      const r=await SB.rpc('update_profile',{p_comments_off:on});
+      if(r.error){note('Не получилось: '+r.error.message);return}
+      sw.classList.toggle('on',on);sw.setAttribute('aria-checked',on);S.p.comments_off=on;return;
+    }
+    if(!b)return;
+    const k=b.dataset.s,v=d.querySelector(`[data-k="${k}"]`).value.trim(),m=d.querySelector(`[data-m="${k}"]`);let arg;
+    if(k==='name'){if(v.length<2||v.length>30){m.className='pf-m e';m.textContent='От 2 до 30 символов';return}arg={p_name:v}}
+    else if(k==='status')arg={p_status:v};
+    else arg={p_tags:v.split(',').map(s=>s.trim()).filter(Boolean).slice(0,10)};
+    const r=await SB.rpc('update_profile',arg);
+    if(r.error){m.className='pf-m e';m.textContent='Не получилось: '+r.error.message;return}
+    if(k==='name')S.p.name=v;else if(k==='status')S.p.status=v;else S.p.tags=arg.p_tags;
+    m.className='pf-m';m.textContent='Сохранено';draw();
+  });
+}
+
+let want=null;
+window.PF={open:u=>{want=u||null;render(want)}};
+(window.RV=window.RV||{}).prof=()=>{want=null;render(null)};
+document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
+})();
