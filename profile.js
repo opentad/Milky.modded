@@ -261,3 +261,102 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
   },100);
 })();
 })();
+
+/* === Добавление прикрепления фото к постам (до 5 МБ) === */
+(function(){
+  const css = document.createElement('style');
+  css.textContent = `
+    .pf-photo-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 38px; padding: 0 12px; border-radius: 12px;
+      background: var(--c2); color: var(--pmu); font-weight: 700;
+      cursor: pointer; font-size: 13px; border: 0;
+    }
+    .pf-photo-btn:hover { background: #e2e8f0; color: var(--ptx); }
+    .pf-photo-preview {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 10px; font-size: 13px; color: var(--pmu);
+    }
+    .pf-photo-preview img {
+      width: 48px; height: 48px; border-radius: 8px; object-fit: cover;
+    }
+    .pf-photo-preview button {
+      border: 0; background: #ffe3e8; color: #d6407f;
+      padding: 4px 8px; border-radius: 6px; font-weight: 700; cursor: pointer;
+    }
+  `;
+  document.head.appendChild(css);
+
+  let selectedFile = null;
+  const sec = document.getElementById('v-prof');
+  if (!sec) return;
+
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Файл слишком большой! Максимальный размер — 5 МБ.');
+      fileInput.value = '';
+      return;
+    }
+
+    selectedFile = file;
+    updatePreview();
+  });
+
+  function updatePreview() {
+    let prev = sec.querySelector('.pf-photo-preview');
+    if (!selectedFile) {
+      if (prev) prev.remove();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (!prev) {
+        const rDiv = sec.querySelector('.pf-comp .r');
+        if (rDiv) {
+          prev = document.createElement('div');
+          prev.className = 'pf-photo-preview';
+          rDiv.parentNode.insertBefore(prev, rDiv);
+        }
+      }
+      if (prev) {
+        prev.innerHTML = `<img src="${e.target.result}"><span>${selectedFile.name}</span><button type="button" data-rm-photo>Удалить</button>`;
+      }
+    };
+    reader.readAsDataURL(selectedFile);
+  }
+
+  sec.addEventListener('click', e => {
+    const t = e.target;
+    if (t.closest('[data-add-photo]')) {
+      fileInput.click();
+    }
+    if (t.closest('[data-rm-photo]')) {
+      selectedFile = null;
+      fileInput.value = '';
+      updatePreview();
+    }
+  });
+
+  const observer = new MutationObserver(() => {
+    const compR = sec.querySelector('.pf-comp .r');
+    if (compR && !sec.querySelector('.pf-photo-btn')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pf-photo-btn';
+      btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg> Фото`;
+      btn.setAttribute('data-add-photo', '1');
+      compR.prepend(btn);
+      updatePreview();
+    }
+  });
+  observer.observe(sec, { childList: true, subtree: true });
+})();
