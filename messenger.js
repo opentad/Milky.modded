@@ -96,7 +96,7 @@ document.querySelector('.main').appendChild(sec);
 sec.innerHTML='<div class="mg-cr"><a id="mg-home" style="cursor:pointer">Главная</a> &nbsp;|&nbsp; Мессенджер</div>'+
  '<h1 class="mg-h1">Мессенджер</h1>'+
  '<div class="mg-box" id="mgb"><aside class="mg-l">'+
- '<div class="mg-lh"><h2>Сообщения</h2><p>Чаты</p></div>'+
+ '<div class="mg-lh"><h2>Сообщения</h2><p>Одноклассники и друзья своего пола</p></div>'+
  '<label class="mg-s">'+ic('search')+'<input id="mgq" placeholder="Поиск по сообщениям" autocomplete="off"></label>'+
  '<div class="mg-tabs" id="mgtb"></div><div class="mg-list" id="mgl"></div></aside>'+
  '<section class="mg-r"><header class="mg-hd" id="mgh"></header><div class="mg-mp" id="mgmem"></div><div id="mgpin"></div><div id="mgsr"></div><div id="mgap"></div>'+
@@ -431,6 +431,7 @@ sec.addEventListener('click',e=>{
    else if(b('#mgdots')){menuOpen=menuOpen?0:1;rHead()}
   else if(b('#mgpoll')){menuOpen=0;rHead();pollModal()}
   else if(b('.mg-hd>.mg-a')||b('.mg-hi')){const c=cur();if(c&&!c.sys){mOpen=mOpen?0:1;rMem();refreshSeen().then(rMem)}}
+   else if((x=b('[data-u]'))){if(window.PF){MS.show('prof');PF.open(x.dataset.u)}else toast('Профиль скоро появится')}
   else if((x=b('[data-vote]')))vote(x.dataset.vote,+x.dataset.o);
   else if((x=b('[data-pin]')))pinMsg(x.dataset.pin);
   else if((x=b('[data-del]')))delMsg(x.dataset.del);
@@ -624,7 +625,7 @@ function seen(u){
   return'был(а) '+dm(t);
 }
 async function refreshSeen(){const c=cur();if(!c||!c.uids)return;((await sb.from('profiles').select('id,last_seen').in('id',c.uids)).data||[]).forEach(r=>LS[r.id]=Date.parse(r.last_seen))}
-const touch=()=>{if(sb&&me&&!document.hidden){LS[me.id]=Date.now();sb.rpc('touch_seen')}};
+const touch=()=>{if(sb&&me&&!document.hidden){LS[me.id]=Date.now();sb.rpc('touch_seen').then(r=>{if(r.error&&!touch.w){touch.w=1;toast('Статус «в сети» не обновляется: '+r.error.message)}})}};
 async function loadVotes(){const r=await sb.from('poll_votes').select('message_id,user_id,opt');VT={};(r.data||[]).forEach(v=>(VT[v.message_id]||(VT[v.message_id]=[])).push(v))}
 function findMsg(id){for(const c of C){const m=c.msgs.find(x=>String(x.id)===String(id));if(m)return m}}
 function dropMsg(id){for(const c of C){const n=c.msgs.length;c.msgs=c.msgs.filter(m=>String(m.id)!==String(id));if(c.msgs.length!==n){if(!c.msgs.length)c.msgs.push({w:'sys',x:'Сообщений нет',t:Date.now()});if(sel===c.id){rMsgs(1);rPins()}rList()}}}
@@ -632,7 +633,7 @@ function dots(){return'<button class="mg-ib'+(menuOpen?' on':'')+'" id="mgdots" 
 function rMem(){
   const c=cur(),b=$('#mgmem');
   if(!c||c.sys){b.className='mg-mp';b.innerHTML='';return}
-  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
+  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr" data-u="'+u+'" style="cursor:pointer"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
   b.classList.toggle('open',!!mOpen);
 }
 function rPins(){
@@ -804,7 +805,7 @@ async function boot(){
   if(!C.some(z=>z.id===sel))sel=null;
   $('#mgb').hidden=false;
   const code=sessionStorage.getItem('mj');
-  if(code){sessionStorage.getItem('mj');history.replaceState(null,'',location.pathname);await join(code)}
+  if(code){sessionStorage.removeItem('mj');history.replaceState(null,'',location.pathname);await join(code)}
   else if(!sel&&matchMedia('(min-width:821px)').matches&&C.length)sel=[...C].sort((a,b)=>last(b).t-last(a).t)[0].id;
   renderAll();live();
 }
@@ -814,7 +815,7 @@ setInterval(()=>{if(mOpen&&!document.hidden)refreshSeen().then(rMem)},30000);
  document.addEventListener('visibilitychange',()=>{const c=cur();if(!document.hidden&&c&&!sec.hidden){markRead(c);rList()}});
 const lib=document.createElement('script');lib.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 lib.onload=async()=>{
-  sb=window.supabase.createClient(SB_URL,SB_KEY);
+  sb=window.supabase.createClient(SB_URL,SB_KEY);window.SB=sb;document.dispatchEvent(new Event('sb'));window.SB=sb;document.dispatchEvent(new Event('sb'));
   const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
   sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;setTimeout(boot,0)}});
   if(J)MS.show('msg');else boot();
@@ -822,4 +823,5 @@ lib.onload=async()=>{
 lib.onerror=()=>{$('#mgb').hidden=true;au.hidden=false;au.textContent='Не удалось загрузить Supabase. Проверь интернет и обнови страницу.'};
 document.head.appendChild(lib);
 window.rMsg=()=>{if(sb)boot();else{$('#mgb').hidden=true;au.hidden=false;au.textContent='Загрузка…'}};
+ window.MG={async dm(u){const r=await sb.rpc('create_dm',{p_user:u});if(r.error){toast('Не получилось: '+r.error.message);return}await loadAll();tab='c';q='';open(r.data.id);MS.show('msg')}};
 })();
