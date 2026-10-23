@@ -167,12 +167,22 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 @media(max-width:1100px){.row2{grid-template-columns:1fr}}
 @media(max-width:640px){.main{padding:30px 16px 0}.foot{margin:40px -16px 0;padding:28px 16px 40px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  .mh{display:none}
+@media(max-width:820px){
+ .rail{display:none}
+ body{flex-direction:column}
+ .mh{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:4px;height:56px;padding:0 8px;flex:none;background:#fff;border-radius:0 0 19px 19px;box-shadow:0 0 30px rgba(0,0,0,.05)}
+ .mh button{position:relative;flex:none;width:44px;height:44px;display:grid;place-items:center;color:var(--cy)}
+ .mh svg{width:24px;height:24px}
+ .mh .brand{font-size:19px;line-height:22px;margin-left:6px}
+ .mh .mc{margin-left:auto;display:flex;align-items:center;font-size:15px;color:#555}
+}
 </style>
 </head>
 <body>
 <div class="shade" id="shade"></div>
 <aside class="drawer" id="drawer"></aside>
-<nav class="rail" id="rail"></nav>
+<nav class="rail" id="rail"></nav><header class="mh" id="mh"></header>
 
 <main class="main">
   <!-- ГЛАВНАЯ -->
@@ -861,6 +871,9 @@ if(canHover){
 }
 $('#shade').addEventListener('click',closeMenu);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
+  $('#mh').innerHTML='<button id="mhm" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><span class="mc"><span class="coin"></span>227</span><button id="mhc" aria-label="Мессенджер">'+ic('chat')+'<span class="bd2 mgbd2" hidden>1</span></button>';
+$('#mhm').onclick=openMenu;
+$('#mhc').onclick=()=>{closeMenu();show('msg')};
 
 /* ---------- данные ---------- */
 const DAYS=['Пн','Вт','Ср','Чт','Сб'];                    // пятница — неучебный день
