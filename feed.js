@@ -84,14 +84,13 @@ const who=id=>st.nm[id]||{name:'Участник'};
 function posts(){
   let a=st.posts.filter(p=>(st.f==='all'||st.fol.has(p.user_id)||p.user_id===st.me.id)&&(!st.q||(p.body+' '+who(p.user_id).name).toLowerCase().includes(st.q)));
   if(st.s==='pop')a=[...a].sort((x,y)=>cn(y.post_likes)-cn(x.post_likes));
-  if(st.s==='disc')a=[...a].sort((x,y)=>(st.cm[y.id]||[]).length-(st.cm[x.id]||[]).length);
+  if(st.s==='disc')a=[...a].sort((x,y)=>(CMT.n(y.id)-CMT.n(x.id));
   $('#fd-l').innerHTML=a.map(p=>{
-    const w=who(p.user_id),cs=st.cm[p.id]||[];
+    const w=who(p.user_id);
     return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b><small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
     <div class="fd-bd"><p>${esc(p.body)}</p></div>
-    <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${cs.length}</button></div>
-    ${cs.length?`<div class="fd-cm">${cs.map(c=>`<div class="fd-c"><b>${esc(who(c.user_id).name)}</b><small class="fd-ct">${dt(c.created_at)}</small><div>${esc(c.body)}</div></div>`).join('')}</div>`:''}
-    ${w.comments_off?'<div class="fd-off">Автор отключил комментарии</div>':`<form class="fd-f"><input placeholder="Написать комментарий…" aria-label="Комментарий" maxlength="500"><button aria-label="Отправить">${ic('send')}</button></form>`}</article>`}).join('')
+    <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button></div>
+    ${CMT.html(p.id,p.user_id,w.comments_off)}</article>`}).join('')
     ||'<div class="fd-e">Здесь пока пусто. '+(st.f==='mine'?'Подпишись на кого-нибудь справа.':'Опубликуй первый пост в своём профиле.')+'</div>';
 }
 function people(){
@@ -112,15 +111,14 @@ async function load(){
   if(tk!==tok)return;
   if(ps.error){$('#fd-l').innerHTML='<div class="fd-e">Не удалось загрузить: '+esc(ps.error.message)+'. Проверь, что SQL выполнен.</div>';return}
   const ids=ps.data.map(x=>x.id);
-  const [lk,cm]=await Promise.all([
+  const [lk]=await Promise.all([
     ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
-    ids.length?SB.from('post_comments').select('id,post_id,user_id,body,created_at').in('post_id',ids).order('created_at').limit(400):null]);
-  const cms=(cm&&cm.data)||[],uids=[...new Set([...ps.data.map(x=>x.user_id),...cms.map(x=>x.user_id)])];
+    CMT.load(SB,me,ids,()=>posts())]);
+  const uids=[...new Set(ps.data.map(x=>x.user_id))];
   const nm=uids.length?await SB.from('profiles').select('id,name,avatar_url,comments_off,last_seen').in('id',uids):null;
   if(tk!==tok)return;
   st.me=me;st.posts=ps.data;st.people=pp.data||[];st.fol=new Set((fo.data||[]).map(x=>x.followee));
   st.liked=new Set(((lk&&lk.data)||[]).map(x=>x.post_id));
-  st.cm={};cms.forEach(c=>(st.cm[c.post_id]||(st.cm[c.post_id]=[])).push(c));
   st.nm=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   chips();posts();people();
 }
@@ -142,15 +140,6 @@ sec.addEventListener('click',async e=>{
     const r=await SB.from('follows').insert({followee:id});
     if(r.error){st.fol.delete(id);people();note('Не получилось: '+r.error.message)}
   }
-});
-sec.addEventListener('submit',async e=>{
-  e.preventDefault();
-  const inp=e.target.querySelector('input'),body=inp.value.trim();if(!body)return;
-  const id=pid(e.target),r=await db().from('post_comments').insert({post_id:id,body}).select('id,post_id,user_id,body,created_at').single();
-  if(r.error){note('Не отправилось: '+r.error.message);return}
-  (st.cm[id]||(st.cm[id]=[])).push(r.data);
-  if(!st.nm[st.me.id])st.nm[st.me.id]={name:'Вы'};
-  posts();
 });
 $('#fd-q').addEventListener('input',e=>{st.q=e.target.value.trim().toLowerCase();if(st.me)posts()});
 $('#fd-pq').addEventListener('input',e=>{st.pq=e.target.value.trim().toLowerCase();if(st.me)people()});
