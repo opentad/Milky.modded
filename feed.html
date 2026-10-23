@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лента</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7fa;--card:#fff;--card2:#f2f4f8;--ln:#e8ecf2;--tx:#34404e;--mu:#8d96a3;--pk:#f45b97;--pkbg:#ffeaf2;--pkt:#d6407f;--cy:#0ea5d6;--cybg:#e6f8fd;--sh:0 6px 30px rgba(0,0,0,.05)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;display:flex;min-height:100vh}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+a{color:inherit;text-decoration:none}
+svg{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.rail{width:72px;flex:none;position:sticky;top:0;height:100vh;background:#fff;border-radius:0 20px 20px 0;box-shadow:0 0 30px rgba(0,0,0,.05);display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:34px}
+.rail b{font-size:24px;font-weight:800;color:#2d6a9f;margin-bottom:18px}
+.rail .ri{width:46px;height:46px;display:grid;place-items:center;color:#777;border-radius:14px}
+.rail .ri.on{background:var(--cybg);color:var(--cy)}
+.page{flex:1;min-width:0;padding:34px 40px 80px;max-width:1500px}
+h1{font-size:34px;font-weight:800}
+.sub{color:var(--mu);margin:6px 0 22px}
+.bar{background:var(--card);border-radius:22px;padding:20px;box-shadow:var(--sh)}
+.search{display:flex;gap:12px;align-items:center;height:54px;padding:0 18px;border:1px solid var(--ln);border-radius:18px;color:var(--mu)}
+.search input{flex:1;border:0;outline:0;background:none;color:var(--tx)}
+.chips{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px}
+.chips div{display:flex;gap:10px;flex-wrap:wrap}
+.chips button{height:42px;padding:0 20px;border-radius:15px;background:var(--card2);color:#566170;font-weight:700}
+.chips button.on{background:var(--cybg);color:var(--cy)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;margin-top:28px;align-items:start}
+.post,.who{background:var(--card);border-radius:24px;box-shadow:var(--sh)}
+.post{margin-bottom:22px;overflow:hidden}
+.ph{display:flex;gap:14px;align-items:center;padding:20px 28px 14px}
+.pic{flex:none;border-radius:16px;background:#e9edf3 center/cover}
+.ph .pic{width:56px;height:56px}
+.ph b{display:block;font-size:17px}.ph small{color:var(--mu)}.ph small a{font-weight:700}
+.body{padding:0 28px 18px}
+.body p{line-height:1.65;font-size:16px;white-space:pre-wrap;overflow-wrap:anywhere}
+.body img{width:100%;border-radius:18px;margin-top:14px}
+.acts{display:flex;gap:10px;padding:14px 28px;border-top:1px solid var(--ln)}
+.acts button{display:flex;gap:8px;align-items:center;height:46px;padding:0 18px;border-radius:15px;background:var(--card2);color:#566170;font-weight:700}
+.acts button.on{color:var(--pk)}
+.cms{padding:0 28px}
+.cm{padding:10px 0;border-top:1px solid var(--ln)}.cm b{margin-right:6px}
+.cf{display:flex;gap:12px;padding:14px 28px 22px;border-top:1px solid var(--ln)}
+.cf input{flex:1;height:52px;border:1px solid var(--ln);border-radius:18px;padding:0 18px;outline-offset:0}
+.cf button{width:62px;height:52px;border-radius:18px;background:var(--cy);color:#fff;display:grid;place-items:center}
+.who{padding:22px}
+.who small.k{color:var(--cy);font-weight:700;display:block}
+.who h2{font-size:22px;font-weight:800;margin-bottom:14px}
+.who .search{height:48px;margin-bottom:8px}
+.pp{display:flex;gap:14px;align-items:center;padding:12px 0}
+.pp .pic{width:60px;height:60px}
+.pp div{flex:1;min-width:0}.pp b{display:block;font-size:15px}.pp small{color:var(--mu)}
+.pp .f{height:42px;padding:0 16px;border-radius:14px;background:var(--cybg);color:var(--cy);font-weight:700;flex:none}
+.pp .f.on{background:var(--card2);color:var(--mu)}
+.empty{background:var(--card);border-radius:24px;padding:28px;color:var(--mu);box-shadow:var(--sh)}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+@media(max-width:640px){.page{padding:20px 14px 80px}.rail{display:none}h1{font-size:28px}.ph,.body,.cms,.acts,.cf{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<nav class="rail" id="rail"></nav>
+<main class="page">
+  <h1>Лента</h1>
+  <p class="sub">Публикации учеников, клубов и гильдий в одном месте.</p>
+  <section class="bar">
+    <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg><input id="q" placeholder="Найти публикацию, автора, клуб или гильдию"></label>
+    <div class="chips"><div id="fl"></div><div id="so"></div></div>
+  </section>
+  <div class="grid">
+    <section id="posts"></section>
+    <aside class="who"><small class="k">Люди рядом</small><h2>Кого читать</h2>
+      <label class="search"><input id="pq" placeholder="Найти ученика"></label><div id="ppl"></div></aside>
+  </div>
+</main>
+<script>
+/* ====== СЛОЙ API: поменяй пути под свой сервер ====== */
+const API_BASE='';
+const ROUTES={
+  feed:(f,s,q)=>`/api/feed?filter=${f}&sort=${s}&q=${encodeURIComponent(q)}`, // GET -> массив постов
+  people:()=>'/api/people/recommended',                                          // GET -> массив людей
+  like:id=>`/api/posts/${id}/like`,                                              // POST
+  comment:id=>`/api/posts/${id}/comments`,                                       // POST {text}
+  follow:id=>`/api/users/${id}/follow`                                           // POST
+};
+async function call(method,path,body){
+  const r=await fetch(API_BASE+path,{method,credentials:'include',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  if(!r.ok)throw new Error(r.status);return r.json();
+}
+const DEMO={
+ posts:[
+  {id:1,uid:'u1',author:'Имя Фамилия',avatar:'',time:'Сегодня в 08:36',kind:'ученики',text:'Первая публикация в ленте. Сюда придут посты учеников, клубов и гильдий.',img:'',likes:0,liked:false,comments:[],reposts:0},
+  {id:2,uid:'u2',author:'Другой Ученик',avatar:'',time:'Сегодня в 08:35',kind:'клубы',text:'Вторая публикация, чтобы проверить фильтры и поиск.',img:'',likes:2,liked:false,comments:[{a:'Аня',t:'Класс!'}],reposts:1}],
+ people:[{id:'u1',name:'Имя Фамилия',avatar:'',note:'Из твоего класса',on:false},{id:'u2',name:'Другой Ученик',avatar:'',note:'Из твоего класса',on:false},{id:'u3',name:'Третий Ученик',avatar:'',note:'Из твоего класса',on:false}]};
+const st={f:'all',s:'new',q:'',pq:'',posts:[],people:[]};
+async function load(){
+  try{st.posts=await call('GET',ROUTES.feed(st.f,st.s,st.q));st.people=await call('GET',ROUTES.people())}
+  catch(e){st.posts=structuredClone(DEMO.posts);st.people=structuredClone(DEMO.people)}
+}
+
+/* ====== ИНТЕРФЕЙС ====== */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const IC={home:'M3 11l9-7 9 7M5 10v10h14V10',chat:'M5 5h14v10H10l-5 4z',book:'M6 4h12v16H6zM9 4v7l3-2 3 2V4',tasks:'M4 7l2 2 3-3M12 7h8M4 17l2 2 3-3M12 17h8',box:'M4 5h16v4H4zM5 9v10h14V9M10 13h4',doc:'M7 3h7l5 5v13H7zM10 12h6M10 16h6',shop:'M5 4h14l2 5H3zM5 9v11h14V9',heart:'M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.4-7 10-7 10z',cmt:'M5 5h14v10H10l-5 4z',rep:'M4 9h13l-3-3M20 15H7l3 3',send:'M4 12l16-8-6 16-3-7z'};
+const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
+const bg=u=>u?` style="background-image:url('${esc(u)}')"`:'';
+const FL=[['all','Всё'],['mine','Моя лента'],['ученики','Ученики'],['клубы','Клубы'],['гильдии','Гильдии']],SO=[['pop','Популярное'],['new','Новое'],['disc','Обсуждаемое']];
+function chips(){
+  $('#fl').innerHTML=FL.map(([k,l])=>`<button data-f="${k}" class="${st.f===k?'on':''}">${l}</button>`).join('');
+  $('#so').innerHTML=SO.map(([k,l])=>`<button data-s="${k}" class="${st.s===k?'on':''}">${l}</button>`).join('');
+}
+function visible(){
+  let a=st.posts.filter(p=>(st.f==='all'||st.f==='mine'||p.kind===st.f)&&(!st.q||(p.text+p.author).toLowerCase().includes(st.q)));
+  if(st.s==='pop')a=[...a].sort((x,y)=>y.likes-x.likes);
+  if(st.s==='disc')a=[...a].sort((x,y)=>y.comments.length-x.comments.length);
+  return a;
+}
+function posts(){
+  const a=visible();
+  $('#posts').innerHTML=a.map(p=>`<article class="post" data-id="${p.id}"><div class="ph"><a class="pic" href="profile.html?u=${esc(p.uid)}"${bg(p.avatar)}></a><div><b>${esc(p.author)}</b><small><a href="profile.html?u=${esc(p.uid)}">Профиль</a> · ${esc(p.time)}</small></div></div>
+   <div class="body"><p>${esc(p.text)}</p>${p.img?`<img src="${esc(p.img)}" alt="">`:''}</div>
+   <div class="acts"><button data-like class="${p.liked?'on':''}">${ic('heart')}${p.likes}</button><button>${ic('cmt')}${p.comments.length}</button><button>${ic('rep')}${p.reposts}</button></div>
+   ${p.comments.length?`<div class="cms">${p.comments.map(c=>`<div class="cm"><b>${esc(c.a)}</b>${esc(c.t)}</div>`).join('')}</div>`:''}
+   <form class="cf"><input placeholder="Написать комментарий…" aria-label="Комментарий" maxlength="500"><button aria-label="Отправить">${ic('send')}</button></form></article>`).join('')||'<div class="empty">Ничего не найдено. Измени фильтр или поисковый запрос.</div>';
+}
+function people(){
+  const a=st.people.filter(p=>!st.pq||p.name.toLowerCase().includes(st.pq));
+  $('#ppl').innerHTML=a.map(p=>`<div class="pp"><a class="pic" href="profile.html?u=${esc(p.id)}"${bg(p.avatar)}></a><div><b>${esc(p.name)}</b><small>${esc(p.note)}</small></div><button class="f${p.on?' on':''}" data-fw="${p.id}">${p.on?'Вы подписаны':'Подписаться'}</button></div>`).join('');
+}
+const find=el=>st.posts.find(p=>p.id==el.closest('.post').dataset.id);
+document.addEventListener('click',async e=>{
+  const t=e.target,b=k=>t.closest(k);
+  if(b('[data-f]')){st.f=b('[data-f]').dataset.f;await load();chips();posts()}
+  else if(b('[data-s]')){st.s=b('[data-s]').dataset.s;chips();posts()}
+  else if(b('[data-like]')){const p=find(t);p.liked=!p.liked;p.likes+=p.liked?1:-1;posts();try{await call('POST',ROUTES.like(p.id))}catch(err){}}
+  else if(b('[data-fw]')){const p=st.people.find(x=>x.id==b('[data-fw]').dataset.fw);p.on=!p.on;people();try{await call('POST',ROUTES.follow(p.id))}catch(err){}}
+});
+document.addEventListener('submit',async e=>{
+  e.preventDefault();const inp=e.target.querySelector('input'),text=inp.value.trim();if(!text)return;
+  const p=find(e.target);p.comments.push({a:'Вы',t:text});posts();
+  try{await call('POST',ROUTES.comment(p.id),{text})}catch(err){}
+});
+$('#q').addEventListener('input',e=>{st.q=e.target.value.trim().toLowerCase();posts()});
+$('#pq').addEventListener('input',e=>{st.pq=e.target.value.trim().toLowerCase();people()});
+$('#rail').innerHTML='<b>M</b>'+['home','chat','book','tasks','box','doc','shop'].map(k=>`<button class="ri${k==='home'?' on':''}" aria-label="${k}">${ic(k)}</button>`).join('');
+load().then(()=>{chips();posts();people()});
+</script>
+</body>
+</html>
