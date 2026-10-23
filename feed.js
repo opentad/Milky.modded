@@ -40,6 +40,7 @@ css.textContent=`
 .fd-p{margin-bottom:20px;overflow:hidden}
 .fd-ph{display:flex;gap:14px;align-items:center;padding:18px 24px 12px}
 .fd-ph b{display:block;font-size:16px;cursor:pointer}.fd-ph small{color:var(--mu)}
+.fd-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin:1px 0 2px}
 .fd-a{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:16px;background-size:cover;background-position:center;flex:none}
 .fd-bd{padding:0 24px 16px}.fd-bd p{line-height:1.65;font-size:15.5px;white-space:pre-wrap;overflow-wrap:anywhere}
 .fd-ac{display:flex;gap:10px;padding:12px 24px;border-top:1px solid var(--ln)}
@@ -87,7 +88,7 @@ function posts(){
   if(st.s==='disc')a=[...a].sort((x,y)=>CMT.n(y.id)-CMT.n(x.id));
   $('#fd-l').innerHTML=a.map(p=>{
     const w=who(p.user_id);
-    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b><small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
+    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(w.fio)}</span>`:''}<small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
     <div class="fd-bd"><p>${esc(p.body)}</p></div>
     <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button></div>
     ${CMT.html(p.id,p.user_id,w.comments_off)}</article>`}).join('')
@@ -116,7 +117,7 @@ async function load(){try{await load2()}catch(e){$('#fd-l').innerHTML='<div clas
     ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
     CMT.load(SB,me,ids,()=>posts())]);
   const uids=[...new Set(ps.data.map(x=>x.user_id))];
-  const nm=uids.length?await SB.from('profiles').select('id,name,avatar_url,comments_off,last_seen').in('id',uids):null;
+  const nm=uids.length?await SB.from('profiles').select('id,name,fio,avatar_url,comments_off,last_seen').in('id',uids):null;
   if(tk!==tok)return;
   st.me=me;st.posts=ps.data;st.people=pp.data||[];st.fol=new Set((fo.data||[]).map(x=>x.followee));
   st.liked=new Set(((lk&&lk.data)||[]).map(x=>x.post_id));
