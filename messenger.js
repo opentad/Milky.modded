@@ -540,6 +540,64 @@ document.head.appendChild(st2);
 document.head.appendChild(st3);
  const st4=document.createElement('style');st4.textContent='.fio{display:block;font-size:9px;font-weight:400;opacity:.4;margin:-1px 0 3px;color:inherit}.mg-mr .fio{margin:0}';document.head.appendChild(st4);
 const st5=document.createElement('style');st5.textContent='.mg-fr{align-items:flex-end}.mg-fr textarea#mgi{flex:1;min-width:0;height:48px;max-height:140px;border:1px solid var(--ln);background:#f9fafc;border-radius:16px;padding:13px 18px;font:inherit;font-size:14px;line-height:1.4;outline:0;color:var(--tx);resize:none;overflow-y:auto}.mg.fs .mg-fr textarea#mgi{background:none;border:0;color:#fff}';document.head.appendChild(st5);
+ const st6=document.createElement('style');st6.textContent=`
+§ .mg-cr,§ .mg-h1,§ .mg-lh{display:none}
+.mg:not(.z){padding-bottom:0;background:#fff;color:#222}
+§ .mg-box{height:calc(100vh - 40px);min-height:0;gap:0;grid-template-columns:minmax(300px,420px) 1fr;border-radius:18px;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,.08)}
+.mg.fs .mg-box{height:100vh;border-radius:0;box-shadow:none}
+§ .mg-l,§ .mg-r{border-radius:0;box-shadow:none;background:#fff}
+§ .mg-l{border-right:1px solid #e4e8ec}
+§ .mg-s{margin:10px 12px 0;height:42px;background:#f1f3f5;border-color:transparent;border-radius:21px;color:#8e959c}
+§ .mg-s input{color:#222}
+§ .mg-tabs{background:#f1f3f5;margin:10px 12px 4px}
+§ .mg-tabs button{color:#7d858c}
+§ .mg-tabs button.on{background:#fff;color:#222;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+§ .mg-list{padding:4px 8px 8px}
+§ .mg-c{border-radius:10px;padding:8px 10px}
+§ .mg-c:hover{background:#f4f5f7}
+§ .mg-c.on,§ .mg-c.on:hover{background:#8774e1}
+§ .mg-ci b{color:#222}
+§ .mg-c.on .mg-ci b{color:#fff}
+§ .mg-ci small,§ .mg-ct{color:#8e959c}
+§ .mg-c.on .mg-ci small,§ .mg-c.on .mg-ct{color:rgba(255,255,255,.85)}
+§ .mg-ct i{background:#8774e1}
+§ .mg-c.on .mg-ct i{background:#fff;color:#8774e1}
+§ .mg-hd{background:#fff;border-bottom:1px solid #e4e8ec;padding:10px 16px}
+§ .mg-hi b{color:#222;font-size:15px}
+§ .mg-hi small{color:#8774e1}
+§ .mg-ib,§ .mg-ib.x{background:none;color:#8e959c}
+§ .mg-ib.on{background:#f1f3f5;color:#222}
+§ .mg-sr,§ .mg-ap,§ .mg-mp,§ .mg-pn{background:#fff;border-color:#e4e8ec}
+§ .mg-sr input{background:#f1f3f5;border-color:transparent;color:#222}
+§ .mg-sr button{background:#f1f3f5;color:#222}
+§ .mg-ap small,§ .mg-ch{color:#8e959c}
+§ .mg-ch button{background:#f1f3f5;border-color:transparent;color:#222}
+§ .mg-m{background:#dfe7ec;padding:16px 8%}
+§ .mg-d span{background:rgba(0,0,0,.25);color:#fff}
+§ .mg-n{color:#6b747b}
+§ .mg-b{background:#fff;border:0;color:#222;border-radius:14px;padding:8px 12px}
+§ .me .mg-b{background:#eeffde}
+§ .me .mg-a{display:none}
+§ .mg-f{background:rgba(0,0,0,.06)}
+§ .mg-pv,§ .me .mg-pv{background:rgba(0,0,0,.06)}
+§ .me .mg-pv .fill{background:rgba(135,116,225,.3)}
+§ .mg-ft{background:#fff;border-top:1px solid #e4e8ec}
+§ .mg-fr textarea#mgi{background:none;border:0;color:#222}
+§ .mg-fl{order:-1}
+§ .mg-sm{order:2;color:#8e959c}
+§ .mg-snd{order:3;background:none;color:#8774e1;width:42px}
+§ .mg-snd:disabled{background:none;color:#c3c9ce}
+§ .mg-pf{background:#f1f3f5;color:#444}
+§ .mg-p{color:#222}
+§ .mg-p.on{background:#f1f3f5}
+§ .mg-nf input{background:#f1f3f5;border:0;color:#222}
+§ .mg-em2 button{background:none}
+@media(max-width:820px){
+ § .mg-box{grid-template-columns:1fr;height:calc(100vh - 150px)}
+ § .mg-m{padding:16px 12px}
+ .mg.fs .mg-box{height:100vh}
+}`.replace(/§/g,'.mg:not(.z)');
+document.head.appendChild(st6);
 const au=document.createElement('div');au.id='mgau';au.hidden=true;sec.appendChild(au);
 const tr=m=>/Invalid login/i.test(m)?'Неверная почта или пароль':/already/i.test(m)?'Такая почта уже зарегистрирована':/rate limit/i.test(m)?'Слишком много попыток, подожди минуту':m;
 function toast(t){let d=$('#mgtoast');if(!d){d=document.createElement('div');d.id='mgtoast';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:60;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
