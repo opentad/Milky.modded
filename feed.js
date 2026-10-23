@@ -16,6 +16,7 @@ const ini=n=>(n||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).jo
 const av=(p,c,id)=>`<button class="${c}" data-u="${id}" aria-label="Открыть профиль" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.name))}</button>`;
 const p2=n=>String(n).padStart(2,'0');
 const dt=t=>{const d=new Date(t),n=new Date(),hm=p2(d.getHours())+':'+p2(d.getMinutes());return d.toDateString()===n.toDateString()?'Сегодня в '+hm:p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+hm};
+const seen=t=>{const d=Date.now()-Date.parse(t);if(!t||isNaN(d))return'';if(d<75000)return'В сети';const m=Math.floor(d/60000);if(m<60)return'Была '+m+' мин назад';const h=Math.floor(m/60);return h<24?'Была '+h+' ч назад':'Была '+Math.floor(h/24)+' дн назад'};
 const cn=x=>x&&x[0]?x[0].count:0;
 const I={heart:'M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.4-7 10-7 10z',cmt:'M5 5h14v10H10l-5 4z',send:'M4 12l16-8-6 16-3-7z',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4'};
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${I[k]}"/></svg>`;
@@ -46,7 +47,7 @@ css.textContent=`
 .fd-ac button.on{color:var(--pk)}
 .fd-ac svg{width:18px;height:18px}
 .fd-cm{padding:0 24px}
-.fd-c{padding:9px 0;border-top:1px solid var(--ln);overflow-wrap:anywhere}.fd-c b{margin-right:6px}
+.fd-c{padding:9px 0;border-top:1px solid var(--ln);overflow-wrap:anywhere}.fd-c b{margin-right:6px}.fd-ct{color:var(--mu);font-size:11.5px}
 .fd-f{display:flex;gap:10px;padding:12px 24px 18px;border-top:1px solid var(--ln)}
 .fd-f input{flex:1;min-width:0;height:48px;border:1px solid var(--ln);border-radius:16px;padding:0 16px;font:inherit;outline:0;color:var(--tx)}
 .fd-f button{width:58px;height:48px;border-radius:16px;background:var(--cy2);color:#fff;display:grid;place-items:center}
@@ -86,16 +87,16 @@ function posts(){
   if(st.s==='disc')a=[...a].sort((x,y)=>(st.cm[y.id]||[]).length-(st.cm[x.id]||[]).length);
   $('#fd-l').innerHTML=a.map(p=>{
     const w=who(p.user_id),cs=st.cm[p.id]||[];
-    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b><small>${dt(p.created_at)}</small></div></div>
+    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b><small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
     <div class="fd-bd"><p>${esc(p.body)}</p></div>
     <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${cs.length}</button></div>
-    ${cs.length?`<div class="fd-cm">${cs.map(c=>`<div class="fd-c"><b>${esc(who(c.user_id).name)}</b>${esc(c.body)}</div>`).join('')}</div>`:''}
+    ${cs.length?`<div class="fd-cm">${cs.map(c=>`<div class="fd-c"><b>${esc(who(c.user_id).name)}</b><small class="fd-ct">${dt(c.created_at)}</small><div>${esc(c.body)}</div></div>`).join('')}</div>`:''}
     ${w.comments_off?'<div class="fd-off">Автор отключил комментарии</div>':`<form class="fd-f"><input placeholder="Написать комментарий…" aria-label="Комментарий" maxlength="500"><button aria-label="Отправить">${ic('send')}</button></form>`}</article>`}).join('')
     ||'<div class="fd-e">Здесь пока пусто. '+(st.f==='mine'?'Подпишись на кого-нибудь справа.':'Опубликуй первый пост в своём профиле.')+'</div>';
 }
 function people(){
   const a=st.people.filter(p=>!st.fol.has(p.id)&&(!st.pq||p.name.toLowerCase().includes(st.pq))).slice(0,8);
-  $('#fd-p').innerHTML=a.map(p=>`<div class="fd-r">${av(p,'fd-a',p.id)}<div><b data-u="${p.id}">${esc(p.name)}</b><small>Ученик</small></div><button class="f" data-fw="${p.id}">Подписаться</button></div>`).join('')||'<small style="color:var(--mu)">Некого предложить</small>';
+  $('#fd-p').innerHTML=a.map(p=>`<div class="fd-r">${av(p,'fd-a',p.id)}<div><b data-u="${p.id}">${esc(p.name)}</b><small>${seen(p.last_seen)||'Ученик'}</small></div><button class="f" data-fw="${p.id}">Подписаться</button></div>`).join('')||'<small style="color:var(--mu)">Некого предложить</small>';
 }
 async function load(){
   const tk=++tok;
@@ -107,7 +108,7 @@ async function load(){
   const [ps,fo,pp]=await Promise.all([
     SB.from('posts').select('id,user_id,body,created_at,post_likes(count)').order('created_at',{ascending:false}).limit(60),
     SB.from('follows').select('followee').eq('follower',me.id),
-    SB.from('profiles').select('id,name,avatar_url').neq('id',me.id).limit(40)]);
+    'id,name,avatar_url' на 'id,name,avatar_url,last_seen'('id',me.id).limit(40)]);
   if(tk!==tok)return;
   if(ps.error){$('#fd-l').innerHTML='<div class="fd-e">Не удалось загрузить: '+esc(ps.error.message)+'. Проверь, что SQL выполнен.</div>';return}
   const ids=ps.data.map(x=>x.id);
@@ -115,7 +116,7 @@ async function load(){
     ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
     ids.length?SB.from('post_comments').select('id,post_id,user_id,body,created_at').in('post_id',ids).order('created_at').limit(400):null]);
   const cms=(cm&&cm.data)||[],uids=[...new Set([...ps.data.map(x=>x.user_id),...cms.map(x=>x.user_id)])];
-  const nm=uids.length?await SB.from('profiles').select('id,name,avatar_url,comments_off').in('id',uids):null;
+  const nm=uids.length?await SB.from('profiles').select('id,name,avatar_url,comments_off,last_seen').in('id',uids):null;
   if(tk!==tok)return;
   st.me=me;st.posts=ps.data;st.people=pp.data||[];st.fol=new Set((fo.data||[]).map(x=>x.followee));
   st.liked=new Set(((lk&&lk.data)||[]).map(x=>x.post_id));
