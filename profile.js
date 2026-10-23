@@ -19,6 +19,8 @@ const ini=n=>(n||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).jo
 const av=(p,c)=>`<span class="${c}" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.fio||p.name))}</span>`;
 const p2=n=>String(n).padStart(2,'0');
 const dt=t=>{const d=new Date(t);return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes())};
+const ct=t=>{const d=new Date(t),n=new Date(),y=new Date(n),hm=p2(d.getHours())+':'+p2(d.getMinutes()),sm=(a,b)=>a.toDateString()===b.toDateString();
+  y.setDate(n.getDate()-1);return sm(d,n)?'Сегодня в '+hm:sm(d,y)?'Вчера в '+hm:p2(d.getDate())+'.'+p2(d.getMonth()+1)+' в '+hm};
 const seen=t=>{const d=Date.now()-Date.parse(t);if(!t||isNaN(d))return'';if(d<75000)return'В сети';const m=Math.floor(d/60000);if(m<60)return'Была '+m+' мин назад';const h=Math.floor(m/60);return h<24?'Была '+h+' ч назад':'Была '+Math.floor(h/24)+' дн назад'};
 const cn=x=>x&&x[0]?x[0].count:0;
 const IC={
@@ -26,6 +28,7 @@ const IC={
  heart:'M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.4-7 10-7 10z',
  cmt:'M5 5h14v10H10l-5 4z',
  trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7',
+ send:'M21 3L3 11l7 3 3 7zM10 14L21 3',
  cls:'M5 5h14v14H5zM8 9h8M8 13h5',
  coin:'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9.5 10h4a1.5 1.5 0 0 1 0 3h-3',
  bag:'M6 8h12l-1 11H7zM9 8V6a3 3 0 0 1 6 0v2',
@@ -35,7 +38,7 @@ const IC={
  img:'M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm12.5 5l-4.5-4.5L5 21'};
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
 let nt=0;
-function note(t){const d=$('#pf-nt');d.textContent=t;d.hidden=false;clearTimeout(nt);nt=setTimeout(()=>d.hidden=true,4000)}
+function note(t){const d=$('#pf-nt');d.textContent=t;d.hidden=false;clearTimeout(nt);nt=setTimeout(()=>d.hidden=true,5000)}
 const setHash=k=>{try{history.replaceState(null,'','#/@'+encodeURIComponent(k))}catch(e){}};
 new MutationObserver(()=>{if(sec.hidden&&location.hash.indexOf('#/@')===0)try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}).observe(sec,{attributes:true,attributeFilter:['hidden']});
 
@@ -73,7 +76,7 @@ css.textContent=`
 .pf-ss>div:first-child{border-left:0;padding-left:0}
 .pf-ss b{display:block;font-size:21px;font-weight:800;color:var(--ptx)}
 .pf-ss small{color:var(--pmu);font-size:11.5px}
-.pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center;border:0;cursor:pointer}
+.pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center}
 .pf-b.g{background:var(--c2);color:var(--ptx)}
 .pf-b svg{width:18px;height:18px}
 .pf-bs{display:flex;gap:10px}
@@ -81,13 +84,13 @@ css.textContent=`
 .pf-g.o{grid-template-columns:minmax(0,1fr) 300px}
 .pf-x{background:#fff;border-radius:22px;padding:18px;box-shadow:var(--sh);margin-bottom:18px}
 .pf-mn{padding:10px}
-.pf-mi{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:14px;font-weight:700;color:var(--ptx);text-align:left;background:0;border:0}
+.pf-mi{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:14px;font-weight:700;color:var(--ptx);text-align:left}
 .pf-mi svg{width:20px;height:20px;flex:none}
 .pf-mi.on{background:var(--pkbg);color:var(--pkt)}
 .pf-mi.off{color:var(--pmu);cursor:default}
 .pf-mi small{margin-left:auto;font-size:11px;color:var(--pmu);font-weight:600}
 
-/* Стили редактора и кнопок форматирования */
+/* Стили редактора постов */
 .pf-comp{display:flex;gap:12px;align-items:flex-start}
 .pf-comp .in{flex:1;min-width:0}
 .pf-tb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px;background:var(--c2);padding:6px 10px;border-radius:12px}
@@ -110,15 +113,35 @@ css.textContent=`
 .pf-post-imgs img{width:100%;max-height:350px;object-fit:cover;border-radius:12px}
 
 .pf-ac{display:flex;gap:10px;margin-top:12px}
-.pf-ac button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--c2);color:var(--pmu);font-weight:700;border:0;cursor:pointer}
+.pf-ac button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--c2);color:var(--pmu);font-weight:700}
 .pf-ac button.on{color:var(--pk);background:var(--pkbg)}
 .pf-ac button.dg{background:#ffe3e8;color:#d6407f}
 .pf-ac svg{width:18px;height:18px}
+.pf-cms{margin-top:14px;border-top:1px solid var(--pln);padding-top:16px}
+.pf-c{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.pf-ca{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;background-size:cover;background-position:center;flex:none}
+.pf-c.s .pf-ca{width:38px;height:38px;font-size:12px}
+.pf-cb{flex:1;min-width:0;background:var(--c2);border-radius:20px;padding:12px 16px}
+.pf-cb b{display:block;font-size:13.5px;color:var(--ptx)}
+.pf-cb p{margin:4px 0 8px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap;color:var(--ptx)}
+.pf-cm{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--pmu)}
+.pf-cm button{display:flex;gap:5px;align-items:center;font-size:12px;font-weight:700;color:var(--pmu)}
+.pf-cm button svg{width:17px;height:17px}
+.pf-cm button.on{color:var(--pk)}
+.pf-cm button.on svg path{fill:currentColor}
+.pf-cm button.dl{color:var(--pk)}
+.pf-rps{margin:0 0 4px 22px;padding-left:14px;border-left:3px solid var(--pkbg)}
+.pf-more{color:var(--pk);font-weight:700;font-size:13px;margin:0 0 14px}
+.pf-rpl{display:flex;justify-content:space-between;font-size:12px;color:var(--pmu);margin:0 0 8px}
+.pf-rpl button{color:var(--pk);font-weight:700}
+.pf-ci{display:flex;gap:12px;align-items:center}
+.pf-ci input{flex:1;min-width:0;height:54px;border:1px solid var(--pln);border-radius:18px;padding:0 18px;font:inherit;outline:0;background:#fff;color:var(--ptx)}
+.pf-ci button{width:62px;height:54px;border-radius:18px;background:#12b5e5;color:#fff;display:grid;place-items:center;flex:none}
+.pf-ci button svg{width:22px;height:22px}
 .pf-sh{display:flex;justify-content:space-between;margin-bottom:10px}
 .pf-sh h3{font-size:16px;font-weight:800;color:var(--ptx)}.pf-sh small{color:var(--pmu)}
-.pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx);background:0;border:0;cursor:pointer}
+.pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx)}
 .pf-mu{color:var(--pmu)}
-.pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
 .pf-em{color:var(--pmu);text-align:center;padding:24px 0}
 .pf-ed{margin-top:18px}
 .pf-eh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -131,11 +154,11 @@ css.textContent=`
 .pf-f textarea{height:96px;resize:none}
 .pf-cnt{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--pmu)}
 .pf-m{font-size:12px;margin-top:4px;color:#2fa876}.pf-m.e{color:#d6407f}
-.pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative;border:0;cursor:pointer}
+.pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative}
 .pf-sw i{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
 .pf-sw.on{background:var(--pk)}.pf-sw.on i{transform:translateX(24px)}
 @media(max-width:1100px){.pf-g,.pf-g.o{grid-template-columns:1fr}.pf-mn{display:flex;flex-wrap:wrap}.pf-mi{width:auto}.pf-f{grid-template-columns:1fr}}
-@media(max-width:640px){.pf-big{width:108px;height:108px;margin-top:-42px}.pf-cv{height:170px}.pf-ss>div{padding:0 12px}}`;
+@media(max-width:640px){.pf-big{width:108px;height:108px;margin-top:-42px}.pf-cv{height:170px}.pf-ss>div{padding:0 12px}.pf-rps{margin-left:10px;padding-left:8px}}`;
 document.head.appendChild(css);
 
 let tok=0,S=null;
@@ -165,16 +188,46 @@ async function render(u){
   const ids=ps.data.map(x=>x.id),fol=(fo.data||[]).map(x=>x.follower),sub=(su.data||[]).map(x=>x.followee),all=[...new Set([...fol,...sub])];
   const [lk,nm]=await Promise.all([
     ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
-    all.length?SB.from('profiles').select('id,name,avatar_url').in('id',all):null,
-    window.CMT?CMT.load(SB,me,ids,()=>S&&draw()):null]);
+    all.length?SB.from('profiles').select('id,name,avatar_url').in('id',all):null]);
   if(tk!==tok)return;
   const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
      liked:new Set(((lk&&lk.data)||[]).map(x=>x.post_id)),fol:fol.map(i=>M[i]).filter(Boolean),sub:sub.map(i=>M[i]).filter(Boolean),
-     ed:false,ev:{},fm:{},draft:'',attachedPhotos:[],cd:null};
+     ed:false,ev:{},fm:{},draft:'',attachedPhotos:[],cd:null,op:{},cm:{},cdr:{},rp:null,cdel:null};
   setHash(pr.data.nick||id);
   draw();
 }
+async function loadCm(pid){
+  const SB=db(),r=await SB.from('post_comments').select('id,body,user_id,parent_id,created_at').eq('post_id',pid).order('created_at',{ascending:true});
+  if(r.error){note('Не удалось загрузить комментарии: '+r.error.message);return}
+  const L=r.data||[],ids=L.map(c=>c.id),us=[...new Set([S.me.id,...L.map(c=>c.user_id).filter(Boolean)])];
+  const [pp,lk]=await Promise.all([
+    SB.from('profiles').select('id,name,fio,avatar_url').in('id',us),
+    ids.length?SB.from('comment_likes').select('comment_id,user_id').in('comment_id',ids):null]);
+  const lc={},lm=new Set();
+  ((lk&&lk.data)||[]).forEach(x=>{lc[x.comment_id]=(lc[x.comment_id]||0)+1;if(x.user_id===S.me.id)lm.add(x.comment_id)});
+  S.cm[pid]={L,P:Object.fromEntries(((pp&&pp.data)||[]).map(x=>[x.id,x])),lc,lm,all:false};
+}
+function cmHtml(pid){
+  const C=S.cm[pid];if(!C)return'<div class="pf-cms pf-mu">Загружаем…</div>';
+  const top=C.L.filter(c=>!c.parent_id),sh=C.all?top:top.slice(-3);
+  const item=(c,sub)=>{const u=C.P[c.user_id]||{name:'Ученик'},k=pid+':'+c.id;
+    return `<div class="pf-c${sub?' s':''}">${av(u,'pf-ca')}<div class="pf-cb"><b>${esc(u.fio||u.name)}</b><p>${esc(c.body)}</p><div class="pf-cm"><span>${ct(c.created_at)}</span><button data-rp="${k}">Ответить</button><button data-cl="${k}" class="${C.lm.has(c.id)?'on':''}">${ic('heart')}${C.lc[c.id]||0}</button>${c.user_id===S.me.id||S.mine?`<button data-cd="${k}" class="dl">${S.cdel===k?'Точно удалить?':'Удалить'}</button>`:''}</div></div></div>`};
+  const rows=sh.map(c=>{const rs=C.L.filter(z=>z.parent_id==c.id);return item(c,0)+(rs.length?`<div class="pf-rps">${rs.map(z=>item(z,1)).join('')}</div>`:'')}).join('');
+  const more=top.length>sh.length?`<button class="pf-more" data-all="${pid}">Показать все комментарии (${top.length})</button>`:'';
+  const rp=S.rp&&S.rp.pid==pid?`<div class="pf-rpl"><span>Ответ для ${esc(S.rp.name)}</span><button data-rx>Отмена</button></div>`:'';
+  const inp=S.p.comments_off?'<div class="pf-mu" style="font-size:13px">Автор отключил комментарии</div>':`${rp}<div class="pf-ci"><input data-ci="${pid}" maxlength="1000" placeholder="Написать комментарий…" value="${esc(S.cdr[pid]||'')}"><button data-cs="${pid}" aria-label="Отправить">${ic('send')}</button></div>`;
+  return `<div class="pf-cms">${more}${rows||'<div class="pf-mu" style="margin-bottom:12px">Комментариев пока нет</div>'}${inp}</div>`;
+}
+async function send(pid){
+  const i=$(`[data-ci="${pid}"]`),body=i?i.value.trim():'',C=S.cm[pid],p=S.posts.find(z=>z.id==pid);
+  if(!body||!C||!p)return;
+  const pa=S.rp&&S.rp.pid==pid?S.rp.id:null;
+  const r=await db().from('post_comments').insert({post_id:p.id,user_id:S.me.id,body,parent_id:pa}).select('id,body,user_id,parent_id,created_at').single();
+  if(r.error){note('Не отправилось: '+r.error.message);return}
+  C.L.push(r.data);S.cdr[pid]='';S.rp=null;p.post_comments=[{count:cn(p.post_comments)+1}];draw();
+}
+const gc=s=>{const a=s.split(':'),C=S.cm[a[0]],c=C&&C.L.find(z=>z.id==a[1]);return c?{C,c,pid:a[0]}:null};
 const ppl=(t,a,n)=>`<div class="pf-x"><div class="pf-sh"><h3>${t}</h3><small>${n}</small></div>${a.map(u=>`<button class="pf-pp" data-open="${u.id}">${av(u,'pf-a')}<span>${esc(u.name)}</span></button>`).join('')||'<small class="pf-mu">Пока никого</small>'}</div>`;
 const mi=(k,t)=>`<div class="pf-mi off">${ic(k)}<span>${t}</span><small>скоро</small></div>`;
 function editHtml(){
@@ -205,10 +258,11 @@ function parsePostBody(bodyRaw){
 function draw(){
   const ed=$('#pf-editor');if(ed)S.draft=ed.innerHTML;
   sec.querySelectorAll('[data-k]').forEach(i=>S.ev[i.dataset.k]=i.value);
+  sec.querySelectorAll('[data-ci]').forEach(i=>S.cdr[i.dataset.ci]=i.value);
   const {p,mine}=S,tags=(p.tags||[]).filter(Boolean),sn=mine?'В сети':seen(p.last_seen);
   const btns=mine?`<button class="pf-b" data-edit>${ic('pen')}Редактировать профиль</button>`:
     `<button class="pf-b${S.fw?' g':''}" data-follow>${S.fw?'Вы подписаны':'Подписаться'}</button><button class="pf-b g" data-dm>${ic('cmt')}Написать</button>`;
-  const shown=p.name;
+  const shown=p.fio||p.name;
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
   const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}${mi('bag','Мои покупки')}${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
 
@@ -220,17 +274,18 @@ function draw(){
           <button type="button" data-cmd="bold" title="Жирный"><b>B</b></button>
           <button type="button" data-cmd="italic" title="Курсив"><i>I</i></button>
           <select data-cmd="fontName" title="Шрифт">
-            <option value="inherit">Обычный шрифт</option>
-            <option value="Caveat, cursive">Caveat (рукописный)</option>
+            <option value="">Шрифт</option>
+            <option value="Caveat">Caveat (рукописный)</option>
             <option value="monospace">Моноширинный</option>
-            <option value="serif">Засечки (Serif)</option>
-            <option value="cursive">Курсивный (Cursive)</option>
+            <option value="serif">С засечками</option>
+            <option value="sans-serif">Без засечек</option>
           </select>
           <select data-cmd="fontSize" title="Размер">
-            <option value="3">Размер: нормальный</option>
-            <option value="1">Размер: мелкий</option>
-            <option value="5">Размер: крупный</option>
-            <option value="7">Размер: огромный</option>
+            <option value="">Размер</option>
+            <option value="1">Мелкий</option>
+            <option value="3">Обычный</option>
+            <option value="5">Крупный</option>
+            <option value="7">Огромный</option>
           </select>
         </div>
         <div id="pf-editor" class="pf-editor" contenteditable="true" placeholder="Что нового?">${S.draft}</div>
@@ -255,14 +310,14 @@ function draw(){
 
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
   <div class="pf-hd"><span class="pf-big" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>
-   <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
+   <div class="pf-w"><h2>${esc(shown)}</h2><div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
     <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
   ${mine&&S.ed?editHtml():''}
   <div class="pf-g${mine?'':' o'}">${menu}<div>
    ${editorHtml}
-   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<small>${dt(x.created_at)}</small></div></div>${parsePostBody(x.body)}
-     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${window.CMT?CMT.n(x.id):cn(x.post_comments)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${window.CMT?CMT.html(x.id,S.id,S.p.comments_off):''}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
+   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b><small>${dt(x.created_at)}</small></div></div>${parsePostBody(x.body)}
+     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button data-co="${x.id}" class="${S.op[x.id]?'on':''}">${ic('cmt')}${cn(x.post_comments)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${S.op[x.id]?cmHtml(x.id):''}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
   </div><aside>${ppl('Подписки',S.sub,S.ng)}${ppl('Подписчики',S.fol,S.nf)}</aside></div>`);
 }
 
@@ -271,10 +326,30 @@ sec.addEventListener('input',e=>{
   if(k==='nick'){const v=i.value.replace(/[^A-Za-z0-9_]/g,'');if(v!==i.value)i.value=v}
   const c=$(`[data-c="${k}"]`);if(c)c.textContent=i.value.length+'/'+i.maxLength;
 });
+sec.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.ci)send(e.target.dataset.ci)});
 
 sec.addEventListener('change',e=>{
   if(e.target.dataset&&e.target.dataset.cmd){
-    document.execCommand(e.target.dataset.cmd, false, e.target.value);
+    const cmd = e.target.dataset.cmd;
+    const val = e.target.value;
+    if(val) {
+      if(cmd === 'fontName') {
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('fontName', false, val);
+        if(val === 'Caveat') {
+          const selection = window.getSelection();
+          if(selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const span = document.createElement('span');
+            span.style.fontFamily = 'Caveat, cursive';
+            span.appendChild(range.extractContents());
+            range.insertNode(span);
+          }
+        }
+      } else {
+        document.execCommand(cmd, false, val);
+      }
+    }
   }
   if(e.target.id==='pf-file'){
     const files = Array.from(e.target.files);
@@ -304,7 +379,7 @@ async function act(e){
     return;
   }
 
-  if(b('[data-go]'))window.MS&&MS.show('msg');
+  if(b('[data-go]'))MS.show('msg');
   else if((x=b('[data-open]')))render(x.dataset.open);
   else if(b('[data-edit]')){S.ed=true;draw();const el=$('.pf-ed');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(b('[data-x]')){S.ed=false;S.ev={};S.fm={};draw()}
@@ -368,6 +443,38 @@ async function act(e){
     if(r.error){draw();note('Не удалось удалить');return}
     S.posts=S.posts.filter(z=>z.id!==id);S.np--;draw();
   }
+  else if((x=b('[data-co]'))){
+    const id=x.dataset.co;
+    if(S.op[id]){delete S.op[id];draw();return}
+    S.op[id]=1;
+    if(!S.cm[id]){draw();await loadCm(id);if(!S.cm[id])delete S.op[id]}
+    draw();
+  }
+  else if((x=b('[data-all]'))){S.cm[x.dataset.all].all=true;draw()}
+  else if(b('[data-rx]')){S.rp=null;draw()}
+  else if((x=b('[data-rp]'))){
+    const g=gc(x.dataset.rp);if(!g)return;const u=g.C.P[g.c.user_id]||{name:'Ученик'};
+    S.rp={pid:g.pid,id:g.c.parent_id||g.c.id,name:u.fio||u.name};draw();
+    const i=$(`[data-ci="${g.pid}"]`);if(i)i.focus();
+  }
+  else if((x=b('[data-cl]'))){
+    const g=gc(x.dataset.cl);if(!g)return;const {C,c}=g,on=C.lm.has(c.id);
+    C.lc[c.id]=(C.lc[c.id]||0)+(on?-1:1);on?C.lm.delete(c.id):C.lm.add(c.id);draw();
+    const r=on?await SB.from('comment_likes').delete().match({comment_id:c.id,user_id:S.me.id}):await SB.from('comment_likes').insert({comment_id:c.id,user_id:S.me.id});
+    if(r.error)note('Не получилось: '+r.error.message);
+  }
+  else if((x=b('[data-cd]'))){
+    const key=x.dataset.cd,g=gc(key);if(!g)return;
+    if(S.cdel!==key){S.cdel=key;draw();return}
+    S.cdel=null;
+    const r=await SB.from('post_comments').delete().eq('id',g.c.id);
+    if(r.error){draw();note('Не удалось удалить: '+r.error.message);return}
+    const n=g.C.L.filter(z=>z.id==g.c.id||z.parent_id==g.c.id).length,p=S.posts.find(z=>z.id==g.pid);
+    g.C.L=g.C.L.filter(z=>z.id!=g.c.id&&z.parent_id!=g.c.id);
+    if(p)p.post_comments=[{count:Math.max(0,cn(p.post_comments)-n)}];
+    draw();
+  }
+  else if((x=b('[data-cs]')))send(x.dataset.cs);
 }
 sec.addEventListener('click',act);
 
