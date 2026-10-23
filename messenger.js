@@ -431,6 +431,7 @@ sec.addEventListener('click',e=>{
    else if(b('#mgdots')){menuOpen=menuOpen?0:1;rHead()}
   else if(b('#mgpoll')){menuOpen=0;rHead();pollModal()}
   else if(b('.mg-hd>.mg-a')||b('.mg-hi')){const c=cur();if(c&&!c.sys){mOpen=mOpen?0:1;rMem();refreshSeen().then(rMem)}}
+   else if((x=b('[data-u]'))){if(window.PF){MS.show('prof');PF.open(x.dataset.u)}else toast('Профиль скоро появится')}
   else if((x=b('[data-vote]')))vote(x.dataset.vote,+x.dataset.o);
   else if((x=b('[data-pin]')))pinMsg(x.dataset.pin);
   else if((x=b('[data-del]')))delMsg(x.dataset.del);
@@ -632,7 +633,7 @@ function dots(){return'<button class="mg-ib'+(menuOpen?' on':'')+'" id="mgdots" 
 function rMem(){
   const c=cur(),b=$('#mgmem');
   if(!c||c.sys){b.className='mg-mp';b.innerHTML='';return}
-  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
+  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr" data-u="'+u+'" style="cursor:pointer"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
   b.classList.toggle('open',!!mOpen);
 }
 function rPins(){
@@ -814,7 +815,7 @@ setInterval(()=>{if(mOpen&&!document.hidden)refreshSeen().then(rMem)},30000);
  document.addEventListener('visibilitychange',()=>{const c=cur();if(!document.hidden&&c&&!sec.hidden){markRead(c);rList()}});
 const lib=document.createElement('script');lib.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 lib.onload=async()=>{
-  sb=window.supabase.createClient(SB_URL,SB_KEY);
+  sb=window.supabase.createClient(SB_URL,SB_KEY);window.SB=sb;document.dispatchEvent(new Event('sb'));
   const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
   sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;setTimeout(boot,0)}});
   if(J)MS.show('msg');else boot();
