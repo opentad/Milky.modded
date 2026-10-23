@@ -86,6 +86,7 @@ function markRead(c){RD[c.id]=Math.max(Date.now(),last(c).t);localStorage.setIte
     if(!d){r.style.position='relative';d=document.createElement('span');d.className='bd2';d.style.cssText='right:6px;top:6px;bottom:auto';r.appendChild(d)}
     d.textContent=t;d.hidden=!n;
   }
+  document.querySelectorAll('.mgbd2').forEach(d=>{d.textContent=t;d.hidden=!n});
   console.log('badge',n,'LIVE',LIVE);
 }
 
