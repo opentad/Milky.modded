@@ -633,7 +633,7 @@ function authView(msg){
   $('#mgb').hidden=true;au.hidden=false;
   au.innerHTML='<div class="mg-ac"><h2>'+(am==='in'?'Вход':'Регистрация')+'</h2>'+(sessionStorage.getItem('mj')?'<p class="mg-ai">Тебя пригласили в чат. Войди или зарегистрируйся, и мы сразу тебя добавим.</p>':'')+
   '<div class="mg-warn">НЕ ВВОДИТЬ ПАРОЛЬ ОТ НАСТОЯЩЕГО АККАУНТА MILKY SCHOOL</div><p class="mg-ai">Почта и пароль нужны только для идентификации и сохранения истории переписки.</p>'+
-  (am==='up'?'<input id="mgan" placeholder="Имя в чате" autocomplete="off"><input id="mgfio" placeholder="ФИО полностью: Иванова Мария Ивановна" autocomplete="off"><p class="mg-ai">ФИО нужно, чтобы понять, что ты из школы. Оно показывается мелким бледным текстом под именем.</p>':'')+
+  (am==='up'?'<input id="mgan" placeholder="Имя в чате" autocomplete="off"><input id="mgfio" placeholder="ФИО полностью" autocomplete="off"><p class="mg-ai">ФИО нужно, чтобы понять, что ты из школы. Оно показывается мелким бледным текстом под именем.</p>':'')+
   '<input id="mgae" type="email" placeholder="Почта" autocomplete="off"><input id="mgpw" type="password" placeholder="Пароль (от 6 символов)" autocomplete="off">'+
   '<div class="mg-er" id="mgaer">'+(msg||'')+'</div><button class="mg-go" id="mgag">'+(am==='in'?'Войти':'Зарегистрироваться')+'</button><button class="mg-go" id="mgsw" style="background:none;color:var(--bt);margin-top:4px">'+(am==='in'?'Нет аккаунта? Регистрация':'Уже есть аккаунт? Войти')+'</button></div>';
 }
