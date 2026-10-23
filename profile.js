@@ -93,6 +93,7 @@ css.textContent=`
 .pf-sh h3{font-size:16px;font-weight:800;color:var(--ptx)}.pf-sh small{color:var(--pmu)}
 .pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx)}
 .pf-mu{color:var(--pmu)}
+.pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
 .pf-em{color:var(--pmu);text-align:center;padding:24px 0}
 .pf-ed{margin-top:18px}
 .pf-eh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -166,18 +167,18 @@ function draw(){
   const {p,mine}=S,tags=(p.tags||[]).filter(Boolean),sn=mine?'В сети':seen(p.last_seen);
   const btns=mine?`<button class="pf-b" data-edit>${ic('pen')}Редактировать профиль</button>`:
     `<button class="pf-b${S.fw?' g':''}" data-follow>${S.fw?'Вы подписаны':'Подписаться'}</button><button class="pf-b g" data-dm>${ic('cmt')}Написать</button>`;
-  const shown=p.fio||p.name;
+  const shown=p.name;
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
   const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}${mi('bag','Мои покупки')}${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
   <div class="pf-hd"><span class="pf-big" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>
-   <div class="pf-w"><h2>${esc(shown)}</h2><div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
+   <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
     <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
   ${mine&&S.ed?editHtml():''}
   <div class="pf-g${mine?'':' o'}">${menu}<div>
    ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea><div class="r"><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
-   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b><small>${dt(x.created_at)}</small></div></div><p>${esc(x.body)}</p>
+   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<small>${dt(x.created_at)}</small></div></div><p>${esc(x.body)}</p>
      <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
   </div><aside>${ppl('Подписки',S.sub,S.ng)}${ppl('Подписчики',S.fol,S.nf)}</aside></div>`);
 }
