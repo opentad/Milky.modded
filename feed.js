@@ -108,7 +108,7 @@ async function load(){
   const [ps,fo,pp]=await Promise.all([
     SB.from('posts').select('id,user_id,body,created_at,post_likes(count)').order('created_at',{ascending:false}).limit(60),
     SB.from('follows').select('followee').eq('follower',me.id),
-    'id,name,avatar_url' на 'id,name,avatar_url,last_seen'('id',me.id).limit(40)]);
+    SB.from('profiles').select('id,name,avatar_url,last_seen').neq('id',me.id).limit(40)]);
   if(tk!==tok)return;
   if(ps.error){$('#fd-l').innerHTML='<div class="fd-e">Не удалось загрузить: '+esc(ps.error.message)+'. Проверь, что SQL выполнен.</div>';return}
   const ids=ps.data.map(x=>x.id);
