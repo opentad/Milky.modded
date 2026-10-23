@@ -1,4 +1,4 @@
-/* Милки — Мессенджер (только чистый код, чаты, Supabase и функция «Ответить»). */
+/* Милки — Мессенджер (только дизайн, демо-данные, без Supabase). */
 (function(){
 const $=(s,r=document)=>r.querySelector(s);
 let ME='Милколенок';const MAXM=20,MAXF=5*1024*1024;
@@ -14,11 +14,10 @@ const PA={
  up:'M6 15l6-6 6 6',
  down:'M6 9l6 6 6-6',
  back:'M15 6l-6 6 6 6',
- bell:'M12 3.8a5.2 5.2 0 0 0-5.2 5.2v3.1l-1.6 2.7c-.5.8.1 1.7 1 1.7h11.6c.9 0 1.5-.9 1-1.7l-1.6-2.7V9A5.2 5.2 0 0 0 12 3.8zM10 19a2.2 2.2 0 0 0 4 0',
- reply:'M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z'
+ bell:'M12 3.8a5.2 5.2 0 0 0-5.2 5.2v3.1l-1.6 2.7c-.5.8.1 1.7 1 1.7h11.6c.9 0 1.5-.9 1-1.7l-1.6-2.7V9A5.2 5.2 0 0 0 12 3.8zM10 19a2.2 2.2 0 0 0 4 0'
 };
 const ic=k=>'<svg viewBox="0 0 24 24"><path d="'+PA[k]+'"/></svg>';
-Object.assign(PA,{dots:'M12 5.5h.01M12 12h.01M12 18.5h.01',poll:'M5 20V11M12 20V4M19 20v-6',trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7M10 11v5M14 11v5',pin:'M9 4h6l-.8 5.5L17 13H7l2.8-3.5zM12 13v7'});
+ Object.assign(PA,{dots:'M12 5.5h.01M12 12h.01M12 18.5h.01',poll:'M5 20V11M12 20V4M19 20v-6',trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7M10 11v5M14 11v5',pin:'M9 4h6l-.8 5.5L17 13H7l2.8-3.5zM12 13v7'});
 const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const hl=(t,q)=>{
   if(!q)return esc(t);
@@ -66,20 +65,18 @@ const C=[
 
 /* ---------- состояние ---------- */
 let sel=null,q='',cq='',sOpen=0,aOpen=0,eOpen=0,tab='c',fs=0,pf=null,ns=new Set(),nt='',mi=-1,err='',dr='';
-let replyTo = null; // ID сообщения, на которое отвечаем
-
 const cur=()=>C.find(c=>c.id===sel);
 const nm=c=>c.m.length>2?(c.title||c.m.filter(x=>x!==ME).join(', ')):(c.m.filter(x=>x!==ME).join(', ')||c.title||'Новый чат');
 const last=c=>c.msgs[c.msgs.length-1];
 const tx=m=>m.x||(m.f?'📎 '+m.f.n:'');
 const hits=c=>{const ql=cq.toLowerCase(),r=[];if(sOpen&&ql)c.msgs.forEach((m,i)=>{if((m.x||'').toLowerCase().includes(ql))r.push(i)});return r};
-const RD=JSON.parse(localStorage.getItem('mgr')||'{}');
+ const RD=JSON.parse(localStorage.getItem('mgr')||'{}');
 let LIVE=0;
-let mOpen=0,menuOpen=0,pinI=-1,ma='',VT={},LS={},FI={};
+ let mOpen=0,menuOpen=0,pinI=-1,ma='',VT={},LS={},FI={};
 const unread=c=>LIVE?c.msgs.filter(m=>m.w!=='sys'&&m.w!==ME&&m.t>(RD[c.id]||0)).length:0;
 function markRead(c){RD[c.id]=Math.max(Date.now(),last(c).t);localStorage.setItem('mgr',JSON.stringify(RD))}
 
-function badge(){
+ function badge(){
   const n=C.reduce((s,c)=>s+(c.un||0),0),t=n>99?'99+':n;
   const b=document.querySelector('.mgbd');
   if(b){b.textContent=t;b.hidden=!n}
@@ -89,6 +86,7 @@ function badge(){
     if(!d){r.style.position='relative';d=document.createElement('span');d.className='bd2';d.style.cssText='right:6px;top:6px;bottom:auto';r.appendChild(d)}
     d.textContent=t;d.hidden=!n;
   }
+  console.log('badge',n,'LIVE',LIVE);
 }
 
 /* ---------- каркас ---------- */
@@ -98,7 +96,7 @@ document.querySelector('.main').appendChild(sec);
 sec.innerHTML='<div class="mg-cr"><a id="mg-home" style="cursor:pointer">Главная</a> &nbsp;|&nbsp; Мессенджер</div>'+
  '<h1 class="mg-h1">Мессенджер</h1>'+
  '<div class="mg-box" id="mgb"><aside class="mg-l">'+
- '<div class="mg-lh"><h2>Сообщения</h2><p>Одноклассники и друзья своего пола</p></div>'+
+ '<div class="mg-lh"><h2>Сообщения</h2><p>Чаты</p></div>'+
  '<label class="mg-s">'+ic('search')+'<input id="mgq" placeholder="Поиск по сообщениям" autocomplete="off"></label>'+
  '<div class="mg-tabs" id="mgtb"></div><div class="mg-list" id="mgl"></div></aside>'+
  '<section class="mg-r"><header class="mg-hd" id="mgh"></header><div class="mg-mp" id="mgmem"></div><div id="mgpin"></div><div id="mgsr"></div><div id="mgap"></div>'+
@@ -118,10 +116,10 @@ st.textContent=`
 .mg-s svg{width:18px;height:18px;flex:none}
 .mg-s input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:13.5px;color:var(--tx);background:none}
 .mg-tabs{display:flex;gap:4px;margin:14px 22px 8px;padding:5px;background:#eef3f8;border-radius:16px}
-.mg-tabs button{flex:1;height:38px;border-radius:12px;font-weight:600;font-size:13px;color:#8a929b;background:none;border:0;cursor:pointer}
+.mg-tabs button{flex:1;height:38px;border-radius:12px;font-weight:600;font-size:13px;color:#8a929b}
 .mg-tabs button.on{background:#fff;color:var(--bt);box-shadow:0 2px 10px rgba(0,0,0,.05)}
 .mg-list{flex:1;overflow-y:auto;padding:4px 12px 12px}
-.mg-c{display:flex;gap:12px;align-items:center;width:100%;padding:10px;border-radius:18px;text-align:left;background:none;border:0;cursor:pointer}
+.mg-c{display:flex;gap:12px;align-items:center;width:100%;padding:10px;border-radius:18px;text-align:left}
 .mg-c.on{background:#e6f6fd}
 .mg-a{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;overflow:hidden}
 .mg-a svg{width:20px;height:20px}
@@ -136,7 +134,7 @@ st.textContent=`
 .mg-hi{flex:1;min-width:0}
 .mg-hi b{display:block;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mg-hi small{display:block;font-size:12.5px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mg-ib{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:#8a929b;cursor:pointer;background:none;border:0}
+.mg-ib{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:#8a929b;cursor:pointer}
 .mg-ib svg{width:20px;height:20px}
 .mg-ib.on{background:var(--pl);color:var(--bt)}
 .mg-ib.x{background:#fff0f0;color:#e5314a}
@@ -145,12 +143,12 @@ st.textContent=`
 .mg-sr{display:flex;gap:8px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--ln)}
 .mg-sr input{flex:1;min-width:0;height:38px;border:1px solid #e3e8ee;border-radius:12px;padding:0 14px;font:inherit;font-size:13px;outline:0}
 .mg-sr span{font-size:12px;color:var(--mu);min-width:34px;text-align:center}
-.mg-sr button{width:34px;height:34px;border-radius:10px;background:var(--pl);color:var(--bt);display:grid;place-items:center;border:0;cursor:pointer}
+.mg-sr button{width:34px;height:34px;border-radius:10px;background:var(--pl);color:var(--bt);display:grid;place-items:center}
 .mg-sr button svg{width:16px;height:16px}
 .mg-ap{padding:10px 20px;border-bottom:1px solid var(--ln);background:#f8fcfe}
 .mg-ap small{display:block;font-size:12px;color:var(--mu);margin-bottom:8px}
 .mg-ch{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--mu)}
-.mg-ch button{border-radius:16px;padding:7px 14px;background:#fff;border:1px solid #cfe9f3;color:var(--bt);font-weight:600;font-size:12.5px;cursor:pointer}
+.mg-ch button{border-radius:16px;padding:7px 14px;background:#fff;border:1px solid #cfe9f3;color:var(--bt);font-weight:600;font-size:12.5px}
 .mg-m{position:relative;flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
 .mg-d{text-align:center}
 .mg-d span{display:inline-block;background:#eef1f4;color:#7a838c;border-radius:12px;padding:3px 12px;font-size:11.5px;font-weight:500}
@@ -158,52 +156,41 @@ st.textContent=`
 .mg-r1{display:flex;gap:10px;align-items:flex-end}
 .mg-r1.me{justify-content:flex-end}
 .mg-b{max-width:min(620px,78%);padding:11px 16px;border-radius:20px;background:#fff;border:1px solid var(--ln);font-size:14px;line-height:1.45}
-.mg-b p{white-space:pre-wrap;word-break:break-word;margin:0}
+.mg-b p{white-space:pre-wrap;word-break:break-word}
 .mg-b small{display:block;margin-top:5px;font-size:10.5px;opacity:.65}
 .mg-b em{display:block;font-style:normal;font-weight:600;font-size:12px;margin-bottom:3px}
 .me .mg-b{background:linear-gradient(135deg,#1ac9f5,#0ab0e8);border:0;color:#fff}
 .mg-b.cur{outline:2px solid #f5b81c}
 .mg-b mark{background:#ffe27a;color:#34404e;border-radius:4px;padding:0 2px}
-
-/* Стиль для цитирования (ответа на сообщение) */
-.mg-reply-preview{background:rgba(0,0,0,0.05);border-left:3px solid var(--bt);padding:4px 8px;border-radius:4px;font-size:12px;margin-bottom:6px;cursor:pointer}
-.me .mg-reply-preview{background:rgba(255,255,255,0.2);border-left-color:#fff}
-.mg-reply-preview b{display:block;font-size:11px;opacity:0.9}
-
 .mg-f{display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.07);border-radius:12px;padding:8px 10px;margin-top:4px;font-size:13px}
 .mg-f svg{width:16px;height:16px;flex:none}
 .mg-f small{margin:0}
 .mg-em{margin:auto;text-align:center;color:var(--mu);font-size:14px}
 .mg-ft{border-top:1px solid var(--ln);padding:12px 20px}
-.mg-fr{display:flex;gap:10px;align-items:flex-end}
-.mg-fr textarea#mgi{flex:1;min-width:0;height:48px;max-height:140px;border:1px solid var(--ln);background:#f9fafc;border-radius:16px;padding:13px 18px;font:inherit;font-size:14px;line-height:1.4;outline:0;color:var(--tx);resize:none;overflow-y:auto}
-.mg-sm,.mg-snd{flex:none;width:42px;height:42px;display:grid;place-items:center;background:none;border:0;cursor:pointer}
-.mg-sm{color:#f5b81c}
-.mg-snd{background:var(--cy);color:#fff;border-radius:16px;width:52px;height:48px}
+.mg-fr{display:flex;gap:10px;align-items:center}
+.mg-fr input#mgi{flex:1;min-width:0;height:48px;border:1px solid var(--ln);background:#f9fafc;border-radius:16px;padding:0 18px;font:inherit;font-size:14px;outline:0;color:var(--tx)}
+.mg-sm{flex:none;width:42px;height:42px;display:grid;place-items:center;color:#f5b81c}
+.mg-sm svg{width:24px;height:24px}
+.mg-snd{flex:none;width:52px;height:48px;border-radius:16px;background:var(--cy);color:#fff;display:grid;place-items:center}
+.mg-snd svg{width:22px;height:22px}
 .mg-snd:disabled{background:#e9eef2;color:#a9b2bb}
 .mg-em2{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
-.mg-em2 button{font-size:22px;width:38px;height:38px;border-radius:10px;background:none;border:0;cursor:pointer}
+.mg-em2 button{font-size:22px;width:38px;height:38px;border-radius:10px}
 .mg-pf{display:flex;gap:8px;align-items:center;font-size:12.5px;color:#566170;background:var(--pl);border-radius:12px;padding:6px 10px;margin-bottom:8px}
 .mg-pf svg{width:15px;height:15px;flex:none}
-.mg-pf button{margin-left:auto;color:#9aa5b0;background:none;border:0;cursor:pointer}
-
-/* Плашка ответа над полем ввода */
-.mg-replying-bar{display:flex;align-items:center;gap:8px;background:#f0f4f8;padding:6px 12px;border-radius:12px;margin-bottom:8px;font-size:12.5px;color:#34404e}
-.mg-replying-bar b{color:var(--bt)}
-.mg-replying-bar button{margin-left:auto;background:none;border:0;cursor:pointer;color:#9aa5b0}
-
+.mg-pf button{margin-left:auto;color:#9aa5b0}
 .mg-er{font-size:12.5px;color:#d97706;margin-bottom:8px;font-weight:600}
 .mg-nf{padding:6px 10px}
 .mg-nf p{font-size:12.5px;color:var(--mu);margin:6px 0 10px;line-height:1.4}
 .mg-nf input{width:100%;height:42px;border:1px solid #e3e8ee;border-radius:14px;padding:0 14px;font:inherit;font-size:13px;outline:0;margin-bottom:8px}
-.mg-p{display:flex;gap:10px;align-items:center;width:100%;padding:8px 10px;border-radius:14px;font-size:13.5px;font-weight:500;text-align:left;background:none;border:0;cursor:pointer}
+.mg-p{display:flex;gap:10px;align-items:center;width:100%;padding:8px 10px;border-radius:14px;font-size:13.5px;font-weight:500;text-align:left}
 .mg-p.on{background:#e6f6fd}
 .mg-p em{margin-left:auto;font-style:normal;color:var(--ok);font-weight:700}
 .mg-p .mg-a{width:34px;height:34px;font-size:12px}
-.mg-go{display:block;width:100%;height:44px;border-radius:14px;background:var(--cy);color:#fff;font-weight:700;margin-top:10px;border:0;cursor:pointer}
+.mg-go{display:block;width:100%;height:44px;border-radius:14px;background:var(--cy);color:#fff;font-weight:700;margin-top:10px}
 .mg-go:disabled{background:#e9eef2;color:#a9b2bb}
 
-/* режим «во весь экран» */
+/* режим «во весь экран»: как в Telegram */
 .mg.fs{position:fixed;inset:0;z-index:40;background:#181818;color:#e8e8e8;padding:0;overflow:hidden}
 .mg.fs .mg-cr,.mg.fs .mg-h1,.mg.fs .mg-lh{display:none}
 .mg.fs .mg-box{height:100vh;min-height:0;gap:0;grid-template-columns:minmax(300px,420px) 1fr}
@@ -242,12 +229,15 @@ st.textContent=`
 .mg.fs .me .mg-a{display:none}
 .mg.fs .mg-f{background:rgba(255,255,255,.1)}
 .mg.fs .mg-ft{background:#212121;border-top:1px solid #0f0f0f}
-.mg.fs .mg-fr textarea#mgi{background:none;border:0;color:#fff}
+.mg.fs .mg-fr input#mgi{background:none;border:0;color:#fff}
 .mg.fs .mg-fl{order:-1}
 .mg.fs .mg-sm{order:2;color:#9a9a9a}
 .mg.fs .mg-snd{order:3;background:none;color:#8774e1;width:42px}
 .mg.fs .mg-pf{background:#2c2c2c;color:#ddd}
-.mg.fs .mg-replying-bar{background:#2c2c2c;color:#fff}
+.mg.fs .mg-p{color:#fff}
+.mg.fs .mg-p.on{background:#2c2c2c}
+.mg.fs .mg-nf input{background:#2c2c2c;border:0;color:#fff}
+.mg.fs .mg-em2 button{background:none}
 
 @media(max-width:820px){
  .mg-box{grid-template-columns:1fr;height:calc(100vh - 150px)}
@@ -267,6 +257,13 @@ function rList(){
  C.forEach(c=>c.un=unread(c));badge();
   const box=$('#mgl');
   if(tab==='n'){box.innerHTML=newTab();return}
+  if(false){
+    box.innerHTML='<div class="mg-nf"><p>Выбери одного человека — получится личный чат. Выбери нескольких — получится группа. Новые участники потом видят всю историю.</p>'+
+      (ns.size>1?'<input id="mgnt" placeholder="Название группы (необязательно)" value="'+esc(nt)+'" autocomplete="off">':'')+
+      CT.map(n=>'<button class="mg-p'+(ns.has(n)?' on':'')+'" data-p="'+esc(n)+'"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+esc(n)+'<em>'+(ns.has(n)?'✓':'')+'</em></button>').join('')+
+      '<button class="mg-go" id="mgcr"'+(ns.size?'':' disabled')+'>Создать '+(ns.size>1?'группу':'чат')+'</button></div>';
+    return;
+  }
   const ql=q.toLowerCase();
   const L=C.filter(c=>!ql||nm(c).toLowerCase().includes(ql)||c.msgs.some(m=>(m.x||'').toLowerCase().includes(ql)))
     .sort((a,b)=>last(b).t-last(a).t);
@@ -300,10 +297,12 @@ function rBar(){
   b.innerHTML='<div class="mg-sr"><input id="mgcq" placeholder="Поиск по этому чату" autocomplete="off" value="'+esc(cq)+'"><span id="mgcn"></span>'+
     '<button id="mgup" title="Раньше">'+ic('up')+'</button><button id="mgdn" title="Позже">'+ic('down')+'</button></div>';
 }
-function rAdd(){
+function rAdd(){return rInv();
   const c=cur(),a=$('#mgap');
   if(!c||!aOpen||c.sys){a.innerHTML='';return}
-  return rInv();
+  const av=CT.filter(n=>!c.m.includes(n));
+  a.innerHTML='<div class="mg-ap"><small>Добавить в чат. Новый участник увидит всю переписку с самого начала.'+(c.m.length===2?' Личный чат станет групповым.':'')+'</small><div class="mg-ch">'+
+    (c.m.length>=MAXM?'Достигнут лимит участников':(av.map(n=>'<button data-add="'+esc(n)+'">+ '+esc(n)+'</button>').join('')||'Все уже в чате'))+'</div></div>';
 }
 function rMsgs(keep){
   const c=cur(),b=$('#mgm'),s0=b.scrollTop;
@@ -317,21 +316,10 @@ function rMsgs(keep){
     if(d!==day){day=d;h+='<div class="mg-d"><span>'+dm(m.t)+'</span></div>'}
     if(m.w==='sys'){h+='<div class="mg-n">'+esc(m.x)+'</div>';return}
     const me=m.w===ME;
-    
-    // Ищем оригинальное сообщение для цитаты, если это ответ
-    let replyBlock = '';
-    if(m.replyToId){
-      const original = c.msgs.find(x => String(x.id) === String(m.replyToId));
-      if(original){
-        replyBlock = '<div class="mg-reply-preview" data-jump="'+original.id+'"><b>'+esc(original.w)+'</b><span>'+esc(tx(original))+'</span></div>';
-      }
-    }
-
     h+='<div class="mg-r1'+(me?' me':'')+'">'+
       (me?'':'<span class="mg-a s" style="background:'+col(m.w)+'">'+ini(m.w)+'</span>')+
       '<div class="mg-b'+(hit[mi]===i?' cur':'')+'"'+(m.id?' data-mid="'+m.id+'"':'')+'>'+
       (!me&&c.m.length>2?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>'+(FI[m.uid]?'<span class="fio">'+esc(FI[m.uid])+'</span>':''):'')+
-      replyBlock+
       (m.poll?pollHTML(m):(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
       (m.f?'<div class="mg-f"'+(m.f.p?' data-fp="'+esc(m.f.p)+'" style="cursor:pointer"':'')+'>'+ic('clip')+'<span>'+esc(m.f.n)+'</span><small>'+m.f.s+'</small></div>':'')+
       '<small>'+(m.pin?'📌 ':'')+dm(m.t)+' в '+hm(m.t)+'</small>'+(m.id&&ma===String(m.id)?actHTML(m,me):'')+'</div>'+
@@ -347,18 +335,7 @@ function rFoot(){
   if(!c){f.innerHTML='';f.hidden=true;return}
   f.hidden=false;
   const dis=c.sys?' disabled':'';
-  
-  // Плашка ответа над полем ввода
-  let replyBarHTML = '';
-  if(replyTo){
-    const orig = c.msgs.find(x => String(x.id) === String(replyTo));
-    if(orig){
-      replyBarHTML = '<div class="mg-replying-bar">'+ic('reply')+'<div>Ответ на: <b>'+esc(orig.w)+'</b> — '+esc(tx(orig))+'</div><button id="mgrmreply">'+ic('close')+'</button></div>';
-    }
-  }
-
   f.innerHTML=(eOpen?'<div class="mg-em2">'+EM.map(e=>'<button data-e="'+e+'">'+e+'</button>').join('')+'</div>':'')+
-    replyBarHTML+
     (pf?'<div class="mg-pf">'+ic('clip')+esc(pf.n)+' · '+pf.s+'<button id="mgpx">'+ic('close')+'</button></div>':'')+
     (err?'<div class="mg-er">'+err+'</div>':'')+
     '<div class="mg-fr"><button class="mg-sm" id="mgem"'+dis+'>'+ic('smile')+'</button>'+
@@ -368,7 +345,7 @@ function rFoot(){
  const ti=$('#mgi');if(ti)grow(ti);
 }
 
-function grow(t){t.style.height='48px';t.style.height=Math.min(t.scrollHeight+2,140)+'px'}
+ function grow(t){t.style.height='48px';t.style.height=Math.min(t.scrollHeight+2,140)+'px'}
  
 function renderAll(){
   const c=cur();if(c&&!sec.hidden)markRead(c);
@@ -378,12 +355,12 @@ function renderAll(){
 
 /* ---------- действия ---------- */
 function open(id){
-  sel=id;aOpen=0;eOpen=0;pf=null;err='';dr='';mi=-1;mOpen=0;menuOpen=0;ma='';pinI=-1;replyTo=null;
+  sel=id;aOpen=0;eOpen=0;pf=null;err='';dr='';mi=-1;mOpen=0;menuOpen=0;ma='';pinI=-1;
   sOpen=q?1:0;cq=q;
   renderAll();
   if(sOpen){const i=$('#mgcq');if(i)i.blur()}
 }
-function closeChat(){sel=null;sOpen=0;cq='';aOpen=0;mOpen=0;menuOpen=0;ma='';replyTo=null;renderAll()}
+function closeChat(){sel=null;sOpen=0;cq='';aOpen=0;mOpen=0;menuOpen=0;ma='';renderAll()}
 function setFs(v){
   fs=v?1:0;sec.classList.toggle('fs',!!fs);
   try{
@@ -397,17 +374,42 @@ function nav(d){
   const h=hits(c);if(!h.length)return;
   mi=(mi+d+h.length)%h.length;rMsgs();
 }
+ function sendOld(){
+  const c=cur();if(!c||c.sys)return;
+  const x=dr.trim();if(!x&&!pf)return;
+  c.msgs.push({w:ME,x:x,f:pf,t:Date.now()});
+  dr='';pf=null;err='';eOpen=0;
+  rFoot();rMsgs();rList();
+  const i=$('#mgi');if(i)i.focus();
+  const o=c.m.filter(n=>n!==ME);
+  if(o.length)setTimeout(()=>{
+    if(!C.includes(c))return;
+    c.msgs.push({w:o[Math.floor(Math.random()*o.length)],x:RE[Math.floor(Math.random()*RE.length)],t:Date.now()});
+    if(sel===c.id)rMsgs();else c.un++;
+    rList();
+  },1500);
+}
 function addMember(n){
   const c=cur();if(!c||c.m.includes(n)||c.m.length>=MAXM)return;
   c.m.push(n);
   c.msgs.push({w:'sys',x:'В чат добавлен(а): '+n+'. Вся история переписки доступна.',t:Date.now()});
   rHead();rAdd();rMsgs();rList();
 }
+function createOld(){
+  const p=[...ns];if(!p.length)return;
+  let c=p.length===1?C.find(z=>!z.sys&&z.m.length===2&&z.m.includes(p[0])):null;
+  if(!c){
+    c={id:'n'+(uid++),m:[ME,...p],title:p.length>1?nt.trim():'',un:0,msgs:[{w:'sys',x:p.length>1?'Группа создана':'Личный чат создан',t:Date.now()}]};
+    C.push(c);
+  }
+  ns.clear();nt='';tab='c';q='';$('#mgq').value='';
+  open(c.id);
+}
 
 sec.addEventListener('click',e=>{
   const t=e.target,b=k=>t.closest(k);let x;
-  if(typeof enablePush === 'function') enablePush();
-  if(menuOpen&&!b('#mgdots')&&!b('#mgpoll')){menuOpen=0;rHead()}
+ enablePush();
+ if(menuOpen&&!b('#mgdots')&&!b('#mgpoll')){menuOpen=0;rHead()}
   if(b('#mg-home'))MS.show('home');
   else if(b('#mgfs'))setFs(!fs);
   else if(b('#mgx')||b('#mgbk'))closeChat();
@@ -426,20 +428,17 @@ sec.addEventListener('click',e=>{
   else if(b('[data-inv]')){const c=cur();if(c)copy(link(c))}
   else if(b('#mgjn'))join($('#mgjc').value);
   else if(b('#mgout'))sb.auth.signOut();
-  else if(b('#mgdots')){menuOpen=menuOpen?0:1;rHead()}
+   else if(b('#mgdots')){menuOpen=menuOpen?0:1;rHead()}
   else if(b('#mgpoll')){menuOpen=0;rHead();pollModal()}
   else if(b('.mg-hd>.mg-a')||b('.mg-hi')){const c=cur();if(c&&!c.sys){mOpen=mOpen?0:1;rMem();refreshSeen().then(rMem)}}
-  else if((x=b('[data-u]'))){if(window.PF){MS.show('prof');PF.open(x.dataset.u)}else toast('Профиль скоро появится')}
   else if((x=b('[data-vote]')))vote(x.dataset.vote,+x.dataset.o);
   else if((x=b('[data-pin]')))pinMsg(x.dataset.pin);
   else if((x=b('[data-del]')))delMsg(x.dataset.del);
   else if((x=b('[data-unpin]')))pinMsg(x.dataset.unpin);
   else if((x=b('[data-jump]')))pinJump(x.dataset.jump);
-  else if((x=b('[data-reply]'))){replyTo=x.dataset.reply;ma='';rFoot();const i=$('#mgi');if(i)i.focus()}
-  else if(b('#mgrmreply')){replyTo=null;rFoot()}
   else if((x=b('.mg-b[data-mid]'))&&!b('.mg-f')&&!b('.mg-po')&&!b('.mg-act')){ma=ma===x.dataset.mid?'':x.dataset.mid;rMsgs(1)}
-  else if(b('[data-code]')){const c=cur();if(c){navigator.clipboard&&navigator.clipboard.writeText(c.code);toast('Код скопирован: '+c.code)}}
-  else if(b('#mgdel'))delAccModal();
+   else if(b('[data-code]')){const c=cur();if(c){navigator.clipboard&&navigator.clipboard.writeText(c.code);toast('Код скопирован: '+c.code)}}
+    else if(b('#mgdel'))delAccModal();
   else if(b('#mgsd'))send();
   else if(b('#mgpx')){pf=null;rFoot()}
 });
@@ -455,15 +454,22 @@ sec.addEventListener('keydown',e=>{
   if(e.target.id==='mgi'){if(!e.shiftKey){e.preventDefault();send()}}
   else if(e.target.id==='mgcq'){e.preventDefault();nav(-1)}
 });
+sec.addEventListener('change',e=>{
+  if(e.target.id!=='mgfl'||1)return;
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>MAXF){err='Файл больше 5 МБ — выбери поменьше';pf=null}
+  else{err='';pf={n:f.name,s:fsz(f.size)}}
+  rFoot();
+});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&fs&&!sec.hidden)setFs(false)});
 document.addEventListener('fullscreenchange',()=>{if(fs&&!document.fullscreenElement){fs=0;sec.classList.remove('fs');rHead()}});
 
+/* первый чат открыт сразу, как на макете (на узком экране — список) */
 if(window.matchMedia('(min-width:821px)').matches){
   const f=[...C].sort((a,b)=>last(b).t-last(a).t).find(c=>!c.sys);
   if(f)sel=f.id;
 }
 renderAll();
-
 /* ===== SUPABASE ===== */
 const SB_URL='https://sjwvrljmqpbopbxqkhkl.supabase.co',SB_KEY='sb_publishable_mWqrZq0Vw65Ahk7ZIbtlNQ_owreCtcj';
 let sb=null,me=null,ch=null,am='in';const nmap={};
@@ -475,12 +481,12 @@ const st2=document.createElement('style');st2.textContent=`
 .mg-warn{background:#fff0f0;color:#d61f3a;border:1.5px solid #f5b5bd;border-radius:14px;padding:12px 14px;font-weight:800;font-size:13px;text-align:center;margin:6px 0 10px}
 .mg-ai{font-size:12.5px;color:var(--mu);line-height:1.45;margin-bottom:14px}`;
 document.head.appendChild(st2);
-const st3=document.createElement('style');st3.textContent=`
+ const st3=document.createElement('style');st3.textContent=`
 .mg-hd{position:relative}
 .mg-hd>.mg-a,.mg-hi{cursor:pointer}
 #mgdots svg{stroke-width:3.2}
 .mg-dd{position:absolute;right:100px;top:62px;z-index:8;background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.18);padding:6px;min-width:200px;animation:mgd .15s}
-.mg-dd button{display:flex;gap:10px;align-items:center;width:100%;height:42px;padding:0 14px;border-radius:12px;font-weight:600;font-size:13.5px;color:#34404e;background:none;border:0;cursor:pointer}
+.mg-dd button{display:flex;gap:10px;align-items:center;width:100%;height:42px;padding:0 14px;border-radius:12px;font-weight:600;font-size:13.5px;color:#34404e}
 .mg-dd button:hover{background:var(--pl)}
 .mg-dd svg{width:18px;height:18px;color:var(--bt)}
 @keyframes mgd{from{opacity:0;transform:translateY(-6px)}}
@@ -500,16 +506,16 @@ const st3=document.createElement('style');st3.textContent=`
 .mg-pn div{flex:1;min-width:0}
 .mg-pn b{display:block;font-size:12.5px;color:var(--bt)}
 .mg-pn small{display:block;font-size:13px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mg-pn button{flex:none;width:32px;height:32px;border-radius:10px;color:#9aa5b0;display:grid;place-items:center;background:none;border:0;cursor:pointer}
+.mg-pn button{flex:none;width:32px;height:32px;border-radius:10px;color:#9aa5b0;display:grid;place-items:center}
 .mg-pn button svg{width:16px;height:16px}
 .mg-b[data-mid]{cursor:pointer}
 .mg-b.flash{outline:2px solid #f5b81c}
-.mg-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;animation:mgd .15s}
-.mg-act button{display:flex;gap:6px;align-items:center;height:30px;padding:0 12px;border-radius:10px;background:#fff;color:#34404e;font-weight:600;font-size:12px;box-shadow:0 1px 6px rgba(0,0,0,.12);border:0;cursor:pointer}
+.mg-act{display:flex;gap:6px;margin-top:8px;animation:mgd .15s}
+.mg-act button{display:flex;gap:6px;align-items:center;height:30px;padding:0 12px;border-radius:10px;background:#fff;color:#34404e;font-weight:600;font-size:12px;box-shadow:0 1px 6px rgba(0,0,0,.12)}
 .mg-act button.rd{color:#e5314a}
 .mg-act svg{width:15px;height:15px}
 .mg-po{min-width:240px}
-.mg-pv{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;height:38px;padding:0 12px;margin-top:6px;border-radius:12px;background:rgba(0,0,0,.06);overflow:hidden;text-align:left;font-size:13px;border:0;cursor:pointer}
+.mg-pv{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;height:38px;padding:0 12px;margin-top:6px;border-radius:12px;background:rgba(0,0,0,.06);overflow:hidden;text-align:left;font-size:13px}
 .mg-pv .fill{position:absolute;left:0;top:0;bottom:0;background:rgba(10,209,248,.28);transition:width .3s}
 .mg-pv .t,.mg-pv .n{position:relative}
 .mg-pv.on{font-weight:700}
@@ -518,11 +524,11 @@ const st3=document.createElement('style');st3.textContent=`
 .mg-pm{background:#fff;color:#34404e;border-radius:22px;padding:24px;width:min(420px,100%);max-height:90vh;overflow:auto}
 .mg-pm h3{font-size:19px;font-weight:800;margin-bottom:12px}
 .mg-pm input[type=text],.mg-pm input:not([type]){width:100%;height:44px;border:1px solid #e3e8ee;border-radius:14px;padding:0 14px;font:inherit;font-size:14px;outline:0;margin-bottom:8px}
-.mg-pm .pa{color:var(--bt);font-weight:600;margin:4px 0 10px;background:none;border:0;cursor:pointer}
+.mg-pm .pa{color:var(--bt);font-weight:600;margin:4px 0 10px}
 .mg-pm .pc{display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:8px}
 .mg-pm .pe{color:#d97706;font-size:12.5px;font-weight:600;min-height:16px}
 .mg-pm .pb{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
-.mg-pm .pb button{height:40px;padding:0 20px;border-radius:14px;font-weight:700;background:#eef3f8;border:0;cursor:pointer}
+.mg-pm .pb button{height:40px;padding:0 20px;border-radius:14px;font-weight:700;background:#eef3f8}
 .mg-pm .pb .ok{background:var(--cy);color:#fff}
 .mg-pm .pb .ok:disabled{opacity:.5}
 .mg.fs .mg-mp{background:#212121}
@@ -531,24 +537,24 @@ const st3=document.createElement('style');st3.textContent=`
 .mg.fs .mg-pv{background:rgba(255,255,255,.08)}
 .mg.fs .me .mg-pv{background:rgba(255,255,255,.18)}`;
 document.head.appendChild(st3);
-const st4=document.createElement('style');st4.textContent='.fio{display:block;font-size:9px;font-weight:400;opacity:.4;margin:-1px 0 3px;color:inherit}.mg-mr .fio{margin:0}';document.head.appendChild(st4);
+ const st4=document.createElement('style');st4.textContent='.fio{display:block;font-size:9px;font-weight:400;opacity:.4;margin:-1px 0 3px;color:inherit}.mg-mr .fio{margin:0}';document.head.appendChild(st4);
 const st5=document.createElement('style');st5.textContent='.mg-fr{align-items:flex-end}.mg-fr textarea#mgi{flex:1;min-width:0;height:48px;max-height:140px;border:1px solid var(--ln);background:#f9fafc;border-radius:16px;padding:13px 18px;font:inherit;font-size:14px;line-height:1.4;outline:0;color:var(--tx);resize:none;overflow-y:auto}.mg.fs .mg-fr textarea#mgi{background:none;border:0;color:#fff}';document.head.appendChild(st5);
 const au=document.createElement('div');au.id='mgau';au.hidden=true;sec.appendChild(au);
 const tr=m=>/Invalid login/i.test(m)?'Неверная почта или пароль':/already/i.test(m)?'Такая почта уже зарегистрирована':/rate limit/i.test(m)?'Слишком много попыток, подожди минуту':m;
 function toast(t){let d=$('#mgtoast');if(!d){d=document.createElement('div');d.id='mgtoast';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:60;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
 const setName=(id,n)=>{n=n||'Участник';let k=n,i=2;while(Object.entries(nmap).some(([u,v])=>v===k&&u!==id))k=n+' '+i++;nmap[id]=k};
-const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,uid:r.user_id,cid:r.chat_id,pin:!!r.pinned,replyToId:r.reply_to||null,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
+const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,uid:r.user_id,cid:r.chat_id,pin:!!r.pinned,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
 async function loadAll(){
   const since=new Date(Date.now()-30*864e5).toISOString();
   const [a,b,d]=await Promise.all([
     sb.from('chats').select('id,title,invite_code,created_at'),
     sb.from('chat_members').select('chat_id,user_id'),
-    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,reply_to,poll').gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
+    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,poll').gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
   if(a.error||b.error||d.error){toast('Ошибка загрузки: '+(a.error||b.error||d.error).message);return}
   const ms=d.data.reverse(),ids=new Set([me.id]);
   b.data.forEach(x=>ids.add(x.user_id));ms.forEach(x=>ids.add(x.user_id));
   ((await sb.from('profiles').select('id,name,last_seen,fio').in('id',[...ids])).data||[]).forEach(r=>{LS[r.id]=Date.parse(r.last_seen);FI[r.id]=r.fio||'';if(!nmap[r.id])setName(r.id,r.name)});
-  await loadVotes();
+await loadVotes();
   ME=nmap[me.id]||'Я';
   const un=Object.fromEntries(C.map(c=>[c.id,c.un||0]));
   C.splice(0,C.length,...a.data.map(c=>{
@@ -572,7 +578,7 @@ function authView(msg){
   '<input id="mgae" type="email" placeholder="Почта" autocomplete="off"><input id="mgpw" type="password" placeholder="Пароль (от 6 символов)" autocomplete="off">'+
   '<div class="mg-er" id="mgaer">'+(msg||'')+'</div><button class="mg-go" id="mgag">'+(am==='in'?'Войти':'Зарегистрироваться')+'</button><button class="mg-go" id="mgsw" style="background:none;color:var(--bt);margin-top:4px">'+(am==='in'?'Нет аккаунта? Регистрация':'Уже есть аккаунт? Войти')+'</button></div>';
 }
-function checkFio(s){
+ function checkFio(s){
   const PAT=/(ович|евич|ьич|ич|овна|евна|ьевна|ична|инична|ыч|оглы|кызы|кизи|улы|угли)$/i;
   const SUR=/(ов|ова|ёв|ёва|ев|ева|ин|ина|ын|ына|ский|ская|цкий|цкая|ой|ый|ий|ая|ко|енко|ук|юк|ян|дзе|ли|ых|их|ан|ец|ик)$/i;
   const w=(s||'').trim().replace(/\s+/g,' ').split(' ');
@@ -588,7 +594,7 @@ au.addEventListener('click',async e=>{
   if(!e.target.closest('#mgag'))return;
   const em=$('#mgae').value.trim(),pw=$('#mgpw').value,nn=am==='up'?$('#mgan').value.trim():'',bad=t=>{$('#mgaer').textContent=t};
   if(!em||pw.length<6)return bad('Введи почту и пароль (от 6 символов)');
-  let fio='';
+ let fio='';
   if(am==='up'){
     if(nn.length<2)return bad('Введи имя в чате');
     const f=checkFio($('#mgfio').value);if(f.err)return bad(f.err);fio=f.v;
@@ -599,14 +605,14 @@ au.addEventListener('click',async e=>{
 });
 au.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=$('#mgag');if(b)b.click()}});
 
-function notify(c,m){
+ function notify(c,m){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
   if(m.w==='sys'||(!document.hidden&&sel===c.id))return;
   const n=new Notification(nm(c),{body:m.w+': '+tx(m),tag:c.id});
   n.onclick=()=>{window.focus();MS.show('msg');open(c.id);n.close()};
 }
 
-const mw=n=>n%10===1&&n%100!==11?'минуту':([2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'минуты':'минут');
+ const mw=n=>n%10===1&&n%100!==11?'минуту':([2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'минуты':'минут');
 function seen(u){
   if(u===me.id)return'В сети';
   const t=LS[u];if(!t)return'давно не был(а) в сети';
@@ -618,7 +624,7 @@ function seen(u){
   return'был(а) '+dm(t);
 }
 async function refreshSeen(){const c=cur();if(!c||!c.uids)return;((await sb.from('profiles').select('id,last_seen').in('id',c.uids)).data||[]).forEach(r=>LS[r.id]=Date.parse(r.last_seen))}
-const touch=()=>{if(sb&&me&&!document.hidden){LS[me.id]=Date.now();sb.rpc('touch_seen').then(r=>{if(r.error&&!touch.w){touch.w=1;toast('Статус «в сети» не обновляется: '+r.error.message)}})}};
+const touch=()=>{if(sb&&me&&!document.hidden){LS[me.id]=Date.now();sb.rpc('touch_seen')}};
 async function loadVotes(){const r=await sb.from('poll_votes').select('message_id,user_id,opt');VT={};(r.data||[]).forEach(v=>(VT[v.message_id]||(VT[v.message_id]=[])).push(v))}
 function findMsg(id){for(const c of C){const m=c.msgs.find(x=>String(x.id)===String(id));if(m)return m}}
 function dropMsg(id){for(const c of C){const n=c.msgs.length;c.msgs=c.msgs.filter(m=>String(m.id)!==String(id));if(c.msgs.length!==n){if(!c.msgs.length)c.msgs.push({w:'sys',x:'Сообщений нет',t:Date.now()});if(sel===c.id){rMsgs(1);rPins()}rList()}}}
@@ -626,7 +632,7 @@ function dots(){return'<button class="mg-ib'+(menuOpen?' on':'')+'" id="mgdots" 
 function rMem(){
   const c=cur(),b=$('#mgmem');
   if(!c||c.sys){b.className='mg-mp';b.innerHTML='';return}
-  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr" data-u="'+u+'" style="cursor:pointer"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
+  b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
   b.classList.toggle('open',!!mOpen);
 }
 function rPins(){
@@ -638,13 +644,7 @@ function rPins(){
 }
 function jump(id){const e=$('.mg-b[data-mid="'+id+'"]');if(!e)return;const b=$('#mgm');b.scrollTop=e.offsetTop-b.clientHeight/2+e.offsetHeight/2;e.classList.add('flash');setTimeout(()=>e.classList.remove('flash'),1500)}
 function pinJump(id){jump(id);const c=cur(),P=c.msgs.filter(m=>m.pin);pinI=(pinI-1+P.length)%P.length;rPins()}
-function actHTML(m,mine){
-  return'<div class="mg-act">'+
-    '<button data-reply="'+m.id+'">'+ic('reply')+'Ответить</button>'+
-    '<button data-pin="'+m.id+'">'+ic('pin')+(m.pin?'Открепить':'Закрепить')+'</button>'+
-    (mine?'<button class="rd" data-del="'+m.id+'">'+ic('trash')+'Удалить</button>':'')+
-  '</div>';
-}
+function actHTML(m,mine){return'<div class="mg-act">'+(mine?'<button class="rd" data-del="'+m.id+'">'+ic('trash')+'Удалить</button>':'')+'<button data-pin="'+m.id+'">'+ic('pin')+(m.pin?'Открепить':'Закрепить')+'</button></div>'}
 function pollHTML(m){
   const V=VT[m.id]||[],tot=new Set(V.map(v=>v.user_id)).size,mine=V.filter(v=>v.user_id===me.id).map(v=>v.opt);
   return'<div class="mg-po"><b>📊 '+esc(m.poll.q)+'</b><small>'+(m.poll.multi?'Можно выбрать несколько':'Один ответ')+'</small>'+
@@ -704,7 +704,7 @@ function pollModal(){
 }
 sec.addEventListener('contextmenu',e=>{const x=e.target.closest('.mg-b[data-mid]');if(x&&!e.target.closest('.mg-f')){e.preventDefault();ma=x.dataset.mid;rMsgs(1)}});
 
-function delAccModal(){
+ function delAccModal(){
   const d=document.createElement('div');
   d.style.cssText='position:fixed;inset:0;z-index:70;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:20px';
   d.innerHTML='<div class="mg-pm"><h3 style="color:#e5314a">Удалить аккаунт?</h3><p style="font-size:14px;line-height:1.5;margin-bottom:14px">Это действие <b>невозвратно</b>. Будут удалены твой аккаунт, все твои сообщения и участие во всех чатах. Восстановить их будет нельзя.</p><div class="pe" id="de"></div><div class="pb"><button id="dcn">Отмена</button><button class="ok" id="dok" style="background:#e5314a">Удалить навсегда</button></div></div>';
@@ -721,7 +721,7 @@ function delAccModal(){
   });
 }
 
-const VAPID='BAOfbFU4uplaxZ4OZTlNsHUVipnCzQm5i-_jOLrl0YWDuhKQXDqDGFxR1FeISQGgOpnwijoJsBrY15GrcIsksJo';
+ const VAPID='BAOfbFU4uplaxZ4OZTlNsHUVipnCzQm5i-_jOLrl0YWDuhKQXDqDGFxR1FeISQGgOpnwijoJsBrY15GrcIsksJo';
 const b64=s=>{const r=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
 let pushOn=0;
 async function enablePush(){
@@ -744,7 +744,7 @@ function push(r){
   if(!c){loadAll().then(rList);return}
   if(c.msgs.some(m=>m.id===r.id))return;
   const m=toM(r);c.msgs.push(m);
-  if(r.user_id!==me.id)notify(c,m);
+if(r.user_id!==me.id)notify(c,m);
   if(sel===c.id&&!sec.hidden&&!document.hidden)markRead(c);
   if(sel===c.id)rMsgs();
   rList();
@@ -760,13 +760,12 @@ function live(){
 }
 async function send(){
   const c=cur();if(!c)return;const x=dr.trim();if(!x&&!pf)return;
-  const f=pf;const currentReply = replyTo;
-  dr='';pf=null;replyTo=null;err='';eOpen=0;rFoot();
+  const f=pf;dr='';pf=null;err='';eOpen=0;rFoot();
   let p=null;
   if(f){const ex=(f.n.split('.').pop()||'').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
     const u=await sb.storage.from('chat-files').upload(c.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.'+ex,f.b,{contentType:f.b.type||'application/octet-stream'});
     if(u.error){err='Файл не загрузился: '+u.error.message;rFoot();return}p=u.data.path}
-  const r=await sb.from('messages').insert({chat_id:c.id,body:x||null,file_path:p,file_name:f?f.n:null,reply_to:currentReply||null}).select().single();
+  const r=await sb.from('messages').insert({chat_id:c.id,body:x||null,file_path:p,file_name:f?f.n:null}).select().single();
   if(r.error){err='Не отправилось: '+r.error.message;rFoot();return}
   push(r.data);const i=$('#mgi');if(i)i.focus();
 }
@@ -805,17 +804,17 @@ async function boot(){
   if(!C.some(z=>z.id===sel))sel=null;
   $('#mgb').hidden=false;
   const code=sessionStorage.getItem('mj');
-  if(code){sessionStorage.removeItem('mj');history.replaceState(null,'',location.pathname);await join(code)}
+  if(code){sessionStorage.getItem('mj');history.replaceState(null,'',location.pathname);await join(code)}
   else if(!sel&&matchMedia('(min-width:821px)').matches&&C.length)sel=[...C].sort((a,b)=>last(b).t-last(a).t)[0].id;
   renderAll();live();
 }
-setInterval(touch,30000);
+ setInterval(touch,30000);
 document.addEventListener('visibilitychange',touch);
 setInterval(()=>{if(mOpen&&!document.hidden)refreshSeen().then(rMem)},30000);
-document.addEventListener('visibilitychange',()=>{const c=cur();if(!document.hidden&&c&&!sec.hidden){markRead(c);rList()}});
+ document.addEventListener('visibilitychange',()=>{const c=cur();if(!document.hidden&&c&&!sec.hidden){markRead(c);rList()}});
 const lib=document.createElement('script');lib.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 lib.onload=async()=>{
-  sb=window.supabase.createClient(SB_URL,SB_KEY);window.SB=sb;document.dispatchEvent(new Event('sb'));
+  sb=window.supabase.createClient(SB_URL,SB_KEY);
   const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
   sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;setTimeout(boot,0)}});
   if(J)MS.show('msg');else boot();
@@ -823,5 +822,4 @@ lib.onload=async()=>{
 lib.onerror=()=>{$('#mgb').hidden=true;au.hidden=false;au.textContent='Не удалось загрузить Supabase. Проверь интернет и обнови страницу.'};
 document.head.appendChild(lib);
 window.rMsg=()=>{if(sb)boot();else{$('#mgb').hidden=true;au.hidden=false;au.textContent='Загрузка…'}};
-window.MG={async dm(u){const r=await sb.rpc('create_dm',{p_user:u});if(r.error){toast('Не получилось: '+r.error.message);return}await loadAll();tab='c';q='';open(r.data.id);MS.show('msg')}};
 })();
