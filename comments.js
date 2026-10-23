@@ -35,15 +35,16 @@ css.textContent=`
 .cm-f input{flex:1;min-width:0;height:46px;border:1px solid var(--ln);border-radius:16px;padding:0 16px;font:inherit;outline:0;color:var(--tx);background:#fff}
 .cm-f button{width:56px;height:46px;border-radius:16px;background:#f45b97;color:#fff;display:grid;place-items:center;flex:none}
 .cm-f svg{width:20px;height:20px}
-.cm-off{color:var(--mu);font-size:13px}`;
+.cm-off{color:var(--mu);font-size:13px}
+.cm-fio{display:block;font-size:10px;font-weight:300;color:#9aa1a9;margin-top:1px}`;
 document.head.appendChild(css);
 
 const form=(pid,par)=>`<form class="cm-f" data-pid="${pid}" data-par="${par||''}"><input placeholder="${par?'Ответить…':'Написать комментарий…'}" maxlength="500" aria-label="Комментарий"><button aria-label="Отправить">${SEND}</button></form>`;
 function item(c,post,off){
-  const n=st.nm[c.user_id]||{name:'Участник'},name=n.fio||n.name,L=st.lk[c.id]||[],on=L.includes(st.me.id),
+  const n=st.nm[c.user_id]||{name:'Участник'},name=n.name,L=st.lk[c.id]||[],on=L.includes(st.me.id),
     can=c.user_id===st.me.id||post.owner===st.me.id,kids=(st.c[post.id]||[]).filter(k=>k.parent_id===c.id);
   return `<div class="cm-i" data-cid="${c.id}"><button class="cm-a" data-cu="${c.user_id}" aria-label="Профиль" style="background-color:${PAL[hs(name)%7]};${n.avatar_url?`background-image:url('${esc(n.avatar_url)}')`:''}">${n.avatar_url?'':esc(ini(name))}</button>
-  <div class="cm-bw"><div class="cm-b"><b data-cu="${c.user_id}">${esc(name)}</b><p>${esc(c.body)}</p>
+  <div class="cm-bw"><div class="cm-b"><b data-cu="${c.user_id}">${esc(name)}</b>${n.fio?`<span class="cm-fio">${esc(n.fio)}</span>`:''}<p>${esc(c.body)}</p>
   <div class="cm-m"><span>${dt(c.created_at)}</span>${off?'':'<button data-cr>Ответить</button>'}<button data-cl class="${on?'on':''}">${HEART}${L.length}</button>${can?'<button class="dg" data-cd>Удалить</button>':''}</div></div>
   ${st.rep===String(c.id)&&!off?form(post.id,c.id):''}${kids.length?`<div class="cm-k">${kids.map(k=>item(k,post,off)).join('')}</div>`:''}</div></div>`;
 }
