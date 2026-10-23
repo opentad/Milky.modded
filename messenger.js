@@ -598,6 +598,21 @@ const st5=document.createElement('style');st5.textContent='.mg-fr{align-items:fl
  .mg.fs .mg-box{height:100vh}
 }`.replace(/§/g,'.mg:not(.z)');
 document.head.appendChild(st6);
+ const st7=document.createElement('style');st7.textContent=`
+#v-msg.mg{position:fixed;left:var(--rw,0px);top:0;right:0;bottom:0;width:auto;max-width:none;margin:0;padding:0;z-index:5;background:#fff}
+#v-msg.mg .mg-box{height:100%;min-height:0;border-radius:0;box-shadow:none}
+#v-msg.mg.fs{left:0}
+@media(max-width:820px){
+ #v-msg.mg{left:0;top:var(--ht,64px)}
+ #v-msg.mg.fs{top:0}
+}`;
+document.head.appendChild(st7);
+function fit(){
+  const r=document.getElementById('rail'),h=document.querySelector('header,.top,.topbar');
+  sec.style.setProperty('--rw',(r&&innerWidth>820?Math.round(r.getBoundingClientRect().right):0)+'px');
+  sec.style.setProperty('--ht',(h?Math.round(h.getBoundingClientRect().bottom):64)+'px');
+}
+fit();addEventListener('resize',fit);
 const au=document.createElement('div');au.id='mgau';au.hidden=true;sec.appendChild(au);
 const tr=m=>/Invalid login/i.test(m)?'Неверная почта или пароль':/already/i.test(m)?'Такая почта уже зарегистрирована':/rate limit/i.test(m)?'Слишком много попыток, подожди минуту':m;
 function toast(t){let d=$('#mgtoast');if(!d){d=document.createElement('div');d.id='mgtoast';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:60;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
