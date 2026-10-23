@@ -84,7 +84,7 @@ const who=id=>st.nm[id]||{name:'Участник'};
 function posts(){
   let a=st.posts.filter(p=>(st.f==='all'||st.fol.has(p.user_id)||p.user_id===st.me.id)&&(!st.q||(p.body+' '+who(p.user_id).name).toLowerCase().includes(st.q)));
   if(st.s==='pop')a=[...a].sort((x,y)=>cn(y.post_likes)-cn(x.post_likes));
-  if(st.s==='disc')a=[...a].sort((x,y)=>(CMT.n(y.id)-CMT.n(x.id));
+  if(st.s==='disc')a=[...a].sort((x,y)=>CMT.n(y.id)-CMT.n(x.id));
   $('#fd-l').innerHTML=a.map(p=>{
     const w=who(p.user_id);
     return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b><small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
