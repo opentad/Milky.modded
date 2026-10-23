@@ -97,7 +97,8 @@ function people(){
   const a=st.people.filter(p=>!st.fol.has(p.id)&&(!st.pq||p.name.toLowerCase().includes(st.pq))).slice(0,8);
   $('#fd-p').innerHTML=a.map(p=>`<div class="fd-r">${av(p,'fd-a',p.id)}<div><b data-u="${p.id}">${esc(p.name)}</b><small>${seen(p.last_seen)||'Ученик'}</small></div><button class="f" data-fw="${p.id}">Подписаться</button></div>`).join('')||'<small style="color:var(--mu)">Некого предложить</small>';
 }
-async function load(){
+async function load(){try{await load2()}catch(e){$('#fd-l').innerHTML='<div class="fd-e">Ошибка: '+esc(e.message)+'</div>'}}
+  async function load2(){
   const tk=++tok;
   $('#fd-l').innerHTML='<div class="fd-e">Загружаем…</div>';
   const SB=await getSB();if(tk!==tok)return;
