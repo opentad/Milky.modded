@@ -35,7 +35,7 @@
     m: ['Задание 1: числовая прямая', 'Задание 2: мишени', 'Задание 3: полоски', 'Задание 4: деление', 'Задание 5: сравнение'],
     mount(r, c) {
       const f = document.createElement('iframe');
-      f.src = 'learn/algebra/algebra1/chislovaya-doroga.html';
+      f.src = 'learn/algebra/algebra1';
       f.allow = 'fullscreen';
       f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:18px';
       r.appendChild(f);
