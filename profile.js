@@ -37,6 +37,8 @@ const IC={
  gift:'M4 10h16v10H4zM3 7h18v3H3zM12 7v13',
  img:'M5 5h14v14H5zM8 9.5h.01M5 17l4.5-4.5 3 3 2.5-2.5 4 4'};
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
+  IC.cam='M4 8h3l1.5-2h7L17 8h3v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z';
+IC.star='M12 4l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z';
 let nt=0;
 function note(t){const d=$('#pf-nt');d.textContent=t;d.hidden=false;clearTimeout(nt);nt=setTimeout(()=>d.hidden=true,4000)}
 const setHash=k=>{try{history.replaceState(null,'','#/@'+encodeURIComponent(k))}catch(e){}};
@@ -140,9 +142,32 @@ css.textContent=`
 .pf-p-card-body{display:flex;justify-content:space-between;align-items:center}
 .pf-p-card-title{font-weight:700;font-size:15px;color:var(--ptx)}
 .pf-p-card-kind{font-size:11px;color:var(--pkt);background:var(--pkbg);padding:2px 8px;border-radius:8px;font-weight:600}
+.pf-dp{border-radius:20px;overflow:hidden;background:var(--c2);margin-bottom:16px}
+.pf-dp-cv{height:150px;background:linear-gradient(120deg,#e58bb3,#8f78c9) center/cover}
+.pf-dp-row{display:flex;align-items:flex-end;gap:14px;padding:0 18px 16px}
+.pf-dp-av{position:relative;flex:none;width:92px;height:92px;margin-top:-36px;border-radius:50%;border:5px solid #fff;display:grid;place-items:center;color:#fff;font-size:30px;font-weight:700;background-size:cover;background-position:center;cursor:pointer;overflow:hidden}
+.pf-dp-av.sq{border-radius:20px}
+.pf-dp-av:after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.pf-dp-av svg{position:absolute;z-index:1;width:30px;height:30px;color:#fff}
+.pf-dp-nm{font-weight:800;font-size:18px;color:var(--ptx);padding-bottom:6px;min-width:0;overflow-wrap:anywhere}
+.pf-dp-pl{display:block;width:150px;height:auto;aspect-ratio:500/166;border-radius:8px;object-fit:cover}
+.pf-dt{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.pf-dt-i{display:flex;align-items:center;gap:10px;padding:14px;border-radius:16px;border:1.5px solid var(--pln);background:transparent;font:inherit;color:var(--ptx);cursor:pointer;text-align:left}
+.pf-dt-i svg{width:22px;height:22px;flex:none}
+.pf-dt-i small{margin-left:auto;font-size:11px;color:var(--pmu)}
+.pf-dt-i.on{border-color:var(--pk);background:var(--pkbg);color:var(--pkt)}
+.pf-th{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--pln)}
+.pf-p-card img{object-fit:contain;background:#eef1f6}
+[data-theme=dark] #v-prof{--c2:#232a36;--pkbg:#3a2433;--pkt:#ff8fbd;--ptx:#e8ecf3;--pmu:#9aa5b5;--pln:#2d3544}
+[data-theme=dark] #v-prof .pf-hd,[data-theme=dark] #v-prof .pf-x,[data-theme=dark] #v-prof .pf-modal{background:#1b212b}
+[data-theme=dark] #v-prof .pf-modal-close{background:#2d3544;color:#e8ecf3}
+[data-theme=dark] #v-prof .pf-big,[data-theme=dark] #v-prof .pf-dp-av{border-color:#1b212b}
+[data-theme=dark] #v-prof .pf-p-card{background:#232a36;border-color:#2d3544}
+[data-theme=dark] #v-prof .pf-p-card img{background:#1b212b}
 @media(max-width:1100px){.pf-g,.pf-g.o{grid-template-columns:1fr}.pf-mn{display:flex;flex-wrap:wrap}.pf-mi{width:auto}.pf-f{grid-template-columns:1fr}}
 @media(max-width:640px){.pf-big{width:108px;height:108px;margin-top:-42px}.pf-cv{height:170px}.pf-ss>div{padding:0 12px}}`;
 document.head.appendChild(css);
+  document.documentElement.dataset.theme=localStorage.getItem('mk_theme')==='dark'?'dark':'light';
 
 let tok=0,S=null;
 const COLS='id,name,fio,nick,last_seen,status,tags,avatar_url,cover_url,comments_off,plate_url,ava_square';
@@ -177,7 +202,7 @@ async function render(u){
   const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
      liked:new Set(((lk&&lk.data)||[]).map(x=>x.post_id)),fol:fol.map(i=>M[i]).filter(Boolean),sub:sub.map(i=>M[i]).filter(Boolean),
-     ed:false,purchasesModal:false,purchasesList:[],ev:{},fm:{},draft:'',cd:null,crop:null,pimg:null};
+     ed:false,dsg:false,dk:'status',purchasesList:[],ev:{},fm:{},draft:'',cd:null,crop:null,pimg:null};
   setHash(pr.data.nick||id);
   draw();
 }
@@ -201,9 +226,24 @@ function cropHtml(){
   return `<div class="pf-x pf-cr"><h3>Фото профиля</h3><small>Двигай фото пальцем. Квадрат: большое фото в профиле. Пунктирный круг: маленькие аватарки.</small><canvas id="pf-cv" width="${VIEW}" height="${VIEW}"></canvas><input type="range" id="pf-z" min="0" max="100" value="${c.t}" aria-label="Масштаб"><div class="r"><button class="pf-b g" data-cx>Отмена</button><button class="pf-b" data-csv${c.busy?' disabled':''}>${c.busy?'Загружаем…':'Сохранить фото'}</button></div></div>`;
 }
 
-function purchasesModalHtml(){
-  const list = S.purchasesList || [];
-  const KINDS = { banner: 'Баннер', status: 'Статус / Плашка' };
+function designHtml(){
+  const p=S.p,k=S.dk||'status',list=(S.purchasesList||[]).filter(x=>x.kind===k),dark=localStorage.getItem('mk_theme')==='dark';
+  const cards=list.map(it=>{
+    const on=k==='banner'?p.cover_url===it.image_url:p.plate_url===it.image_url;
+    return `<div class="pf-p-card"><img src="${esc(it.image_url)}" alt=""><div class="pf-p-card-title">${esc(it.title)}</div>`+
+      (on?`<button class="pf-b g" style="width:100%;height:38px" data-remove-equipped="${k}">Снять</button>`
+         :`<button class="pf-b" style="width:100%;height:38px" data-equip-item="${it.id}" data-kind="${k}" data-url="${esc(it.image_url)}">Установить</button>`)+`</div>`}).join('');
+  const tile=(kk,ico,t)=>`<button class="pf-dt-i${k===kk?' on':''}" data-dk="${kk}">${ic(ico)}<b>${t}</b><small>Выбрать из покупок</small></button>`;
+  return `<div class="pf-modal-bg" id="pfDsg"><div class="pf-modal">
+    <div class="pf-modal-head"><div><h3>Оформление</h3><small class="pf-mu">Настройте вид своей страницы</small></div><button class="pf-modal-close" data-close-dsg>✕</button></div>
+    <div class="pf-dp"><div class="pf-dp-cv"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
+      <div class="pf-dp-row"><span class="pf-dp-av${p.ava_square?' sq':''}" data-ava role="button" aria-label="Загрузить фото" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.name))}${ic('cam')}</span>
+      <div class="pf-dp-nm">${esc(p.name)}</div>${p.plate_url?`<img class="pf-dp-pl" src="${esc(p.plate_url)}" alt="">`:''}</div></div>
+    <div class="pf-dt">${tile('status','star','Статус')}${tile('banner','img','Баннеры')}</div>
+    ${cards?`<div class="pf-p-grid">${cards}</div>`:`<div class="pf-em">Пока нет купленных ${k==='banner'?'баннеров':'статусов'}. Загляни в маркетплейс</div>`}
+    <div class="pf-th"><div><b>Тема</b><small class="pf-mu" style="display:block">Светлая или тёмная</small></div><div class="pf-bs"><button class="pf-b${dark?' g':''}" data-thm="light">Светлая</button><button class="pf-b${dark?'':' g'}" data-thm="dark">Тёмная</button></div></div>
+  </div></div>`;
+}
   
   const cards = list.map(item => {
     const isCurrentBanner = item.kind === 'banner' && S.p.cover_url === item.image_url;
@@ -281,7 +321,7 @@ function openCrop(f){
     if(k<1){const t=document.createElement('canvas');t.width=Math.round(img.width*k);t.height=Math.round(img.height*k);t.getContext('2d').drawImage(img,0,0,t.width,t.height);src=t}
     const min=2*CR/Math.min(src.width,src.height);
     S.crop={img:src,min,s:min,t:0,x:VIEW/2-src.width*min/2,y:VIEW/2-src.height*min/2,busy:false};
-    clampC(S.crop);draw();
+    S.dsg=false;clampC(S.crop);draw();
     const el=$('.pf-cr');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   };
   img.onerror=()=>{URL.revokeObjectURL(u);note('Не удалось открыть картинку')};
@@ -321,7 +361,7 @@ function draw(){
     `<button class="pf-b${S.fw?' g':''}" data-follow>${S.fw?'Вы подписаны':'Подписаться'}</button><button class="pf-b g" data-dm>${ic('cmt')}Написать</button><button class="pf-b g" data-pmore aria-label="Ещё">⋯</button>`;
   const shown=p.name;
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
-  const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}<button class="pf-mi" data-open-purchases>${ic('bag')}<span>Мои покупки</span></button>${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
+  const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}<button class="pf-mi" data-open-dsg>${ic('paint')}<span>Оформление</span></button><button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
   <div class="pf-hd"><div class="pf-ava"><span class="pf-big${mine?' pf-me':''}${p.ava_square?' sq':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:''}</div>
    <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
@@ -329,7 +369,7 @@ function draw(){
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
   ${mine&&S.crop?cropHtml():''}
   ${mine&&S.ed?editHtml():''}
-  ${mine&&S.purchasesModal?purchasesModalHtml():''}
+  ${mine&&S.dsg?designHtml():''}
   <div class="pf-g${mine?'':' o'}">${menu}<div>
    ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea>${S.pimg?`<div class="pf-pv"><img src="${esc(S.pimg.url)}" alt=""><button class="pf-b g" data-prm>Убрать фото</button></div>`:''}<div class="r"><button class="pf-b g" data-pph>${ic('img')}Фото</button><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
    ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<small>${dt(x.created_at)}</small></div></div>${x.body.trim()?`<p>${esc(x.body)}</p>`:''}${x.image_url?`<img class="pf-pimg" src="${esc(x.image_url)}" alt="" loading="lazy">`:''}
@@ -383,15 +423,17 @@ const endDr=()=>{dr=null};
 sec.addEventListener('pointerup',endDr);sec.addEventListener('pointercancel',endDr);
 
 async function loadUserPurchases(){
-  const SB = db(); if(!SB || !S || !S.me) return;
-  const p = await SB.from('purchases').select('item_id').eq('buyer', S.me.id);
-  const ids = (p.data || []).map(x => x.item_id);
-  if (!ids.length) {
-    S.purchasesList = [];
-    S.purchasesModal = true;
-    draw();
-    return;
+  const SB=db();if(!SB||!S||!S.me)return;
+  const p=await SB.from('purchases').select('item_id').eq('buyer',S.me.id);
+  if(p.error){note('Не удалось загрузить покупки: '+p.error.message);return}
+  const ids=(p.data||[]).map(x=>x.item_id);let list=[];
+  if(ids.length){
+    const r=await SB.from('market_items').select('*').in('id',ids).order('id',{ascending:false});
+    if(r.error){note('Не удалось загрузить покупки: '+r.error.message);return}
+    list=r.data||[];
   }
+  S.purchasesList=list;S.dk='status';S.dsg=true;draw();
+}
   const r = await SB.from('market_items').select('*').in('id', ids).order('id', { ascending: false });
   S.purchasesList = r.data || [];
   S.purchasesModal = true;
@@ -400,18 +442,16 @@ async function loadUserPurchases(){
 
 async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
+  if(t.id==='pfDsg'){S.dsg=false;draw();return}
   if(b('[data-go]'))MS.show('msg');
     else if(b('[data-pmore]')){if(window.MOD)MOD.menu('profile',S.id,S.id,()=>render(S.id))}
   else if((x=b('[data-pm]'))){const pp=S.posts.find(z=>z.id==x.dataset.pm);if(window.MOD&&pp)MOD.menu('post',pp.id,S.id,()=>render(S.id))}
   else if(b('[data-ava]')){const f=$('#pf-file');f.value='';f.click()}
   else if(b('[data-avarm]'))rmAva();
-  else if(b('[data-open-purchases]')){
-    loadUserPurchases();
-  }
-  else if(b('[data-close-purchases]')){
-    S.purchasesModal = false;
-    draw();
-  }
+ else if(b('[data-open-dsg]'))loadUserPurchases();
+  else if(b('[data-close-dsg]')){S.dsg=false;draw()}
+  else if((x=b('[data-dk]'))){S.dk=x.dataset.dk;draw()}
+  else if((x=b('[data-thm]'))){const th=x.dataset.thm;localStorage.setItem('mk_theme',th);document.documentElement.dataset.theme=th;draw()}
   else if((x=b('[data-equip-item]'))){
     const kind = x.dataset.kind, url = x.dataset.url;
     const updateData = kind === 'banner' ? { cover_url: url } : { plate_url: url };
