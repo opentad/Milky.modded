@@ -3,20 +3,22 @@
 const H0=location.hash;
 const sec=document.createElement('section');sec.id='v-prof';sec.hidden=true;
 document.querySelector('.main').appendChild(sec);
-sec.innerHTML='<div class="pf-nt" id="pf-nt" hidden></div><div id="pf-c"></div>';
+sec.innerHTML='<div class="pf-nt" id="pf-nt" hidden></div><div id="pf-c"></div><input type="file" id="pf-file" accept="image/*" hidden><input type="file" id="pf-pfile" accept="image/*" hidden>';
 const $=s=>sec.querySelector(s);
 const put=h=>{$('#pf-c').innerHTML=h};
 const db=()=>window.SB;
 const SBU='https://sjwvrljmqpbopbxqkhkl.supabase.co',SBK='sb_publishable_mWqrZq0Vw65Ahk7ZIbtlNQ_owreCtcj';
+const BKT='avatars',VIEW=300,CR=130,OUT=800;
 function getSB(){return new Promise(res=>{let n=0;const t=setInterval(()=>{
   if(!window.SB&&window.supabase)window.SB=window.supabase.createClient(SBU,SBK);
   if(window.SB){clearInterval(t);res(window.SB)}else if(++n>60){clearInterval(t);res(null)}},100)})}
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const SF=window.SF||(f=>String(f||'').trim().split(/\s+/).slice(0,2).join(' '));
 const PAL=['#f0a04b','#e5617a','#8774e1','#4fb9e6','#5cc08a','#e8793a','#4a8fd9'];
 const hs=t=>{let x=7;for(const c of t)x=(x*31+c.charCodeAt(0))>>>0;return x};
 const col=n=>PAL[hs(n||'?')%PAL.length];
 const ini=n=>(n||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
-const av=(p,c)=>`<span class="${c}" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.fio||p.name))}</span>`;
+const av=(p,c)=>`<span class="${c}" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.name))}</span>`;
 const p2=n=>String(n).padStart(2,'0');
 const dt=t=>{const d=new Date(t);return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes())};
 const seen=t=>{const d=Date.now()-Date.parse(t);if(!t||isNaN(d))return'';if(d<75000)return'В сети';const m=Math.floor(d/60000);if(m<60)return'Была '+m+' мин назад';const h=Math.floor(m/60);return h<24?'Была '+h+' ч назад':'Была '+Math.floor(h/24)+' дн назад'};
@@ -31,7 +33,8 @@ const IC={
  bag:'M6 8h12l-1 11H7zM9 8V6a3 3 0 0 1 6 0v2',
  paint:'M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2s0-2 1.5-2h2a3 3 0 0 0 3-3A9 9 0 0 0 12 3z',
  mark:'M7 4h10v16l-5-4-5 4z',
- gift:'M4 10h16v10H4zM3 7h18v3H3zM12 7v13'};
+ gift:'M4 10h16v10H4zM3 7h18v3H3zM12 7v13',
+ img:'M5 5h14v14H5zM8 9.5h.01M5 17l4.5-4.5 3 3 2.5-2.5 4 4'};
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
 let nt=0;
 function note(t){const d=$('#pf-nt');d.textContent=t;d.hidden=false;clearTimeout(nt);nt=setTimeout(()=>d.hidden=true,4000)}
@@ -49,9 +52,15 @@ css.textContent=`
 .pf-cv:after{width:340px;height:340px;right:-60px;top:-120px}
 .pf-cv.img:before,.pf-cv.img:after{display:none}
 .pf-hd{position:relative;display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;background:#fff;border-radius:0 0 26px 26px;padding:0 26px 22px;box-shadow:var(--sh)}
+.pf-ava{flex:none;width:140px;position:relative;z-index:2}
 .pf-big{position:relative;z-index:2;width:140px;height:140px;border-radius:50%;margin-top:-60px;border:6px solid #fff;display:grid;place-items:center;color:#fff;font-size:44px;font-weight:700;background-size:cover;background-position:center;flex:none;box-shadow:0 0 0 3px var(--pkbg)}
+.pf-big.pf-me{cursor:pointer}
+.pf-big.sq{border-radius:28px}
+.pf-pl{display:block;width:160px;aspect-ratio:500/166;margin:-30px 0 0 -10px;position:relative;z-index:3;border-radius:10px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+button.pf-pl{background:#fff;border:2px dashed var(--pk);color:var(--pkt);font-weight:700;font-size:12px}
 .pf-w{flex:1 1 300px;min-width:0;padding-top:14px}
 .pf-w h2{font-size:25px;font-weight:800;line-height:1.2;color:var(--ptx)}
+.pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
 .pf-nk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;color:var(--pmu);font-size:13px}
 .pf-bd{display:inline-block;background:var(--pkbg);color:var(--pkt);border-radius:10px;padding:2px 10px;font-size:12px;font-weight:600}
 .pf-st{margin:10px 0;color:var(--ptx);overflow-wrap:anywhere}
@@ -65,6 +74,7 @@ css.textContent=`
 .pf-ss small{color:var(--pmu);font-size:11.5px}
 .pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center}
 .pf-b.g{background:var(--c2);color:var(--ptx)}
+.pf-b:disabled{opacity:.6}
 .pf-b svg{width:18px;height:18px}
 .pf-bs{display:flex;gap:10px}
 .pf-g{display:grid;grid-template-columns:250px minmax(0,1fr) 300px;gap:22px;margin-top:22px;align-items:start}
@@ -93,10 +103,6 @@ css.textContent=`
 .pf-sh h3{font-size:16px;font-weight:800;color:var(--ptx)}.pf-sh small{color:var(--pmu)}
 .pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx)}
 .pf-mu{color:var(--pmu)}
-.pf-ava{flex:none;width:140px;position:relative;z-index:2}
-.pf-pl{display:block;width:160px;aspect-ratio:500/166;margin:-30px 0 0 -10px;position:relative;z-index:3;border-radius:10px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.18)}
-button.pf-pl{background:#fff;border:2px dashed var(--pk);color:var(--pkt);font-weight:700;font-size:12px}
-.pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
 .pf-em{color:var(--pmu);text-align:center;padding:24px 0}
 .pf-ed{margin-top:18px}
 .pf-eh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -112,12 +118,22 @@ button.pf-pl{background:#fff;border:2px dashed var(--pk);color:var(--pkt);font-w
 .pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative}
 .pf-sw i{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
 .pf-sw.on{background:var(--pk)}.pf-sw.on i{transform:translateX(24px)}
+.pf-cr{margin-top:18px;text-align:center}
+.pf-cr h3{font-size:18px;font-weight:800;color:var(--ptx)}
+.pf-cr small{display:block;color:var(--pmu);margin-top:2px}
+.pf-cr canvas{display:block;width:300px;max-width:100%;height:auto;aspect-ratio:1;margin:12px auto;border-radius:18px;touch-action:none;cursor:grab;background:#e9edf3}
+.pf-cr input[type=range]{width:min(300px,90%);accent-color:var(--pk)}
+.pf-cr .r{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.pf-comp .r{gap:10px}
+.pf-pv{display:flex;gap:12px;align-items:center;margin-top:10px}
+.pf-pv img{width:64px;height:64px;border-radius:12px;object-fit:cover}
+.pf-pimg{display:block;max-width:100%;border-radius:14px;margin-top:10px}
 @media(max-width:1100px){.pf-g,.pf-g.o{grid-template-columns:1fr}.pf-mn{display:flex;flex-wrap:wrap}.pf-mi{width:auto}.pf-f{grid-template-columns:1fr}}
 @media(max-width:640px){.pf-big{width:108px;height:108px;margin-top:-42px}.pf-cv{height:170px}.pf-ss>div{padding:0 12px}}`;
 document.head.appendChild(css);
 
 let tok=0,S=null;
-const COLS='id,name,fio,nick,last_seen,status,tags,avatar_url,cover_url,comments_off,plate_url';
+const COLS='id,name,fio,nick,last_seen,status,tags,avatar_url,cover_url,comments_off,plate_url,ava_square';
 async function render(u){
   const tk=++tok;
   put('<div class="pf-x pf-em">Загружаем…</div>');
@@ -135,7 +151,7 @@ async function render(u){
     SB.from('follows').select('follower',{count:'exact',head:true}).eq('followee',id),
     SB.from('follows').select('followee',{count:'exact',head:true}).eq('follower',id),
     mine?null:SB.from('follows').select('follower').match({follower:me.id,followee:id}).maybeSingle(),
-    SB.from('posts').select('id,body,created_at,post_likes(count),post_comments(count)').eq('user_id',id).order('created_at',{ascending:false}).limit(50),
+    SB.from('posts').select('id,body,image_url,created_at,post_likes(count),post_comments(count)').eq('user_id',id).order('created_at',{ascending:false}).limit(50),
     SB.from('follows').select('follower').eq('followee',id).limit(6),
     SB.from('follows').select('followee').eq('follower',id).limit(6)]);
   if(tk!==tok)return;
@@ -149,7 +165,7 @@ async function render(u){
   const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
      liked:new Set(((lk&&lk.data)||[]).map(x=>x.post_id)),fol:fol.map(i=>M[i]).filter(Boolean),sub:sub.map(i=>M[i]).filter(Boolean),
-     ed:false,ev:{},fm:{},draft:'',cd:null};
+     ed:false,ev:{},fm:{},draft:'',cd:null,crop:null,pimg:null};
   setHash(pr.data.nick||id);
   draw();
 }
@@ -159,10 +175,75 @@ function editHtml(){
   const p=S.p,ev=S.ev;
   const F=[['nick','Никнейм','От 5 до 15 символов: латиница, цифры и _',p.nick||'',15],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0,1],['name','Имя в чате','От 2 до 30 символов',p.name||'',30],['plate','Плашка статуса','Ссылка на PNG 500×166 (начинается с https://)',p.plate_url||'',300]];
   return `<div class="pf-x pf-ed"><div class="pf-eh"><div><h3>Редактировать профиль</h3><small>Каждый параметр сохраняется отдельно</small></div><button class="pf-b g" data-x>Готово</button></div>`+
+  `<div class="pf-f"><label><b>Фото профиля</b><small>Выбери фото и обрежь по кругу</small></label><span class="pf-mu">${p.avatar_url?'Фото загружено':'Пока нет фото'}</span><div class="pf-bs"><button class="pf-b" data-ava>Выбрать фото</button>${p.avatar_url?'<button class="pf-b g" data-avarm>Убрать</button>':''}</div></div>`+
+  `<div class="pf-f"><label><b>Форма фото</b><small>Как показывать большое фото в профиле</small></label><span></span><div class="pf-bs"><button class="pf-b${p.ava_square?' g':''}" data-shape="0">Круг</button><button class="pf-b${p.ava_square?'':' g'}" data-shape="1">Квадрат</button></div></div>`+
   F.map(f=>{const v=ev[f[0]]!=null?ev[f[0]]:f[3],m=S.fm[f[0]];
     const ctl=f[5]?`<textarea data-k="${f[0]}">${esc(v)}</textarea>`:`<input data-k="${f[0]}" value="${esc(v)}" maxlength="${f[4]}"><span class="pf-cnt" data-c="${f[0]}">${v.length}/${f[4]}</span>`;
     return `<div class="pf-f"><label><b>${f[1]}</b><small>${f[2]}</small></label><div><div class="pf-iw">${ctl}</div><div class="pf-m${m&&m.e?' e':''}">${m?esc(m.t):''}</div></div><button class="pf-b" data-s="${f[0]}">Сохранить</button></div>`}).join('')+
   `<div class="pf-f"><label><b>Комментарии</b><small>Можно запретить комментарии под своими публикациями</small></label><span></span><button class="pf-sw${p.comments_off?' on':''}" data-sw role="switch" aria-checked="${!!p.comments_off}" aria-label="Запретить комментарии"><i></i></button></div></div>`;
+}
+function cropHtml(){
+  const c=S.crop;
+  return `<div class="pf-x pf-cr"><h3>Фото профиля</h3><small>Двигай фото пальцем. Квадрат: большое фото в профиле. Пунктирный круг: маленькие аватарки (чат, лента). Затемнённые углы в круглых не видны</small><canvas id="pf-cv" width="${VIEW}" height="${VIEW}"></canvas><input type="range" id="pf-z" min="0" max="100" value="${c.t}" aria-label="Масштаб"><div class="r"><button class="pf-b g" data-cx>Отмена</button><button class="pf-b" data-csv${c.busy?' disabled':''}>${c.busy?'Загружаем…':'Сохранить фото'}</button></div></div>`;
+}
+function paint(){
+  const cv=$('#pf-cv');if(!cv||!S||!S.crop)return;
+  const c=S.crop,x=cv.getContext('2d');
+  x.clearRect(0,0,VIEW,VIEW);
+  x.drawImage(c.img,c.x,c.y,c.img.width*c.s,c.img.height*c.s);
+  const m=VIEW/2-CR,s2=2*CR;
+  x.save();x.fillStyle='rgba(0,0,0,.6)';x.beginPath();x.rect(0,0,VIEW,VIEW);x.rect(m,m,s2,s2);x.fill('evenodd');
+  x.fillStyle='rgba(0,0,0,.28)';x.beginPath();x.rect(m,m,s2,s2);x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2,true);x.fill('evenodd');x.restore();
+  x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(m,m,s2,s2);
+  x.save();x.setLineDash([6,5]);x.globalAlpha=.85;x.beginPath();x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2);x.stroke();x.restore();
+}
+function clampC(c){
+  const m=VIEW/2-CR,iw=c.img.width*c.s,ih=c.img.height*c.s;
+  c.x=Math.min(m,Math.max(VIEW-m-iw,c.x));
+  c.y=Math.min(m,Math.max(VIEW-m-ih,c.y));
+}
+function zoom(t){
+  const c=S.crop,ox=(VIEW/2-c.x)/c.s,oy=(VIEW/2-c.y)/c.s;
+  c.t=t;c.s=c.min*(1+3*t/100);
+  c.x=VIEW/2-ox*c.s;c.y=VIEW/2-oy*c.s;
+  clampC(c);paint();
+}
+function openCrop(f){
+  if(!f||!S||!S.mine)return;
+  if(!/^image\//.test(f.type)){note('Выбери картинку: JPG или PNG');return}
+  const u=URL.createObjectURL(f),img=new Image();
+  img.onload=()=>{
+    URL.revokeObjectURL(u);
+    const k=Math.min(1,2400/Math.max(img.width,img.height));let src=img;
+    if(k<1){const t=document.createElement('canvas');t.width=Math.round(img.width*k);t.height=Math.round(img.height*k);t.getContext('2d').drawImage(img,0,0,t.width,t.height);src=t}
+    const min=2*CR/Math.min(src.width,src.height);
+    S.crop={img:src,min,s:min,t:0,x:VIEW/2-src.width*min/2,y:VIEW/2-src.height*min/2,busy:false};
+    clampC(S.crop);draw();
+    const el=$('.pf-cr');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  };
+  img.onerror=()=>{URL.revokeObjectURL(u);note('Не удалось открыть картинку')};
+  img.src=u;
+}
+async function saveAva(){
+  const c=S&&S.crop,SB=db();if(!c||c.busy)return;
+  c.busy=true;draw();
+  const o=document.createElement('canvas');o.width=o.height=OUT;
+  const sw=2*CR/c.s;
+  o.getContext('2d').drawImage(c.img,(VIEW/2-CR-c.x)/c.s,(VIEW/2-CR-c.y)/c.s,sw,sw,0,0,OUT,OUT);
+  const blob=await new Promise(r=>o.toBlob(r,'image/jpeg',.88));
+  const path=S.id+'.jpg';
+  const u=await SB.storage.from(BKT).upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
+  if(u.error){c.busy=false;draw();note('Не загрузилось: '+u.error.message);return}
+  const url=SB.storage.from(BKT).getPublicUrl(path).data.publicUrl+'?v='+Date.now();
+  const r=await SB.rpc('set_avatar',{p_url:url});
+  if(r.error){c.busy=false;draw();note('Не сохранилось: '+r.error.message);return}
+  S.p.avatar_url=url;S.crop=null;draw();note('Фото обновлено');
+}
+async function rmAva(){
+  const SB=db(),r=await SB.rpc('set_avatar',{p_url:''});
+  if(r.error){note('Не получилось: '+r.error.message);return}
+  SB.storage.from(BKT).remove([S.id+'.jpg']);
+  S.p.avatar_url=null;draw();note('Фото убрано');
 }
 function draw(){
   const ta=$('#pf-t');if(ta)S.draft=ta.value;
@@ -174,26 +255,72 @@ function draw(){
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
   const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}${mi('bag','Мои покупки')}${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
-  <div class="pf-hd"><div class="pf-ava"><span class="pf-big"style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:(mine?'<button class="pf-pl" data-edit>+ Установить статус</button>':'')}</div>
-   <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
+  <div class="pf-hd"><div class="pf-ava"><span class="pf-big${mine?' pf-me':''}${p.ava_square?' sq':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:(mine?'<button class="pf-pl" data-edit>+ Установить статус</button>':'')}</div>
+   <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
     <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
+  ${mine&&S.crop?cropHtml():''}
   ${mine&&S.ed?editHtml():''}
   <div class="pf-g${mine?'':' o'}">${menu}<div>
-   ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea><div class="r"><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
-   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<small>${dt(x.created_at)}</small></div></div><p>${esc(x.body)}</p>
+   ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea>${S.pimg?`<div class="pf-pv"><img src="${esc(S.pimg.url)}" alt=""><button class="pf-b g" data-prm>Убрать фото</button></div>`:''}<div class="r"><button class="pf-b g" data-pph>${ic('img')}Фото</button><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
+   ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<small>${dt(x.created_at)}</small></div></div>${x.body.trim()?`<p>${esc(x.body)}</p>`:''}${x.image_url?`<img class="pf-pimg" src="${esc(x.image_url)}" alt="" loading="lazy">`:''}
      <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button>${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
   </div><aside>${ppl('Подписки',S.sub,S.ng)}${ppl('Подписчики',S.fol,S.nf)}</aside></div>`);
+  if(S.crop)paint();
 }
 
 sec.addEventListener('input',e=>{
+  if(e.target.id==='pf-z'&&S&&S.crop){zoom(+e.target.value);return}
   const i=e.target,k=i.dataset&&i.dataset.k;if(!k)return;
   if(k==='nick'){const v=i.value.replace(/[^A-Za-z0-9_]/g,'');if(v!==i.value)i.value=v}
   const c=$(`[data-c="${k}"]`);if(c)c.textContent=i.value.length+'/'+i.maxLength;
 });
+function shrinkImg(f,max){
+  return new Promise((res,rej)=>{
+    const u=URL.createObjectURL(f),im=new Image();
+    im.onload=()=>{URL.revokeObjectURL(u);const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>b?res(b):rej(new Error('сжатие')),'image/jpeg',.82)};
+    im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('не картинка'))};
+    im.src=u;
+  });
+}
+sec.addEventListener('change',async e=>{
+  if(e.target.id==='pf-file'){openCrop(e.target.files[0]);return}
+  if(e.target.id!=='pf-pfile')return;
+  const f=e.target.files[0];if(!f||!S||!S.mine)return;
+  if(!/^image\//.test(f.type)){note('Выбери картинку: JPG или PNG');return}
+  try{
+    const b=await shrinkImg(f,1280);
+    if(S.pimg)URL.revokeObjectURL(S.pimg.url);
+    S.pimg={blob:b,url:URL.createObjectURL(b)};draw();
+  }catch(err){note('Не удалось открыть картинку')}
+});
+let dr=null;
+sec.addEventListener('pointerdown',e=>{
+  const cv=e.target.closest&&e.target.closest('#pf-cv');if(!cv||!S||!S.crop)return;
+  try{cv.setPointerCapture(e.pointerId)}catch(err){}
+  dr={x:e.clientX,y:e.clientY};
+});
+sec.addEventListener('pointermove',e=>{
+  if(!dr||!S||!S.crop)return;
+  const cv=$('#pf-cv');if(!cv)return;
+  const k=VIEW/cv.getBoundingClientRect().width,c=S.crop;
+  c.x+=(e.clientX-dr.x)*k;c.y+=(e.clientY-dr.y)*k;
+  dr={x:e.clientX,y:e.clientY};clampC(c);paint();
+});
+const endDr=()=>{dr=null};
+sec.addEventListener('pointerup',endDr);sec.addEventListener('pointercancel',endDr);
 async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
   if(b('[data-go]'))MS.show('msg');
+  else if(b('[data-ava]')){const f=$('#pf-file');f.value='';f.click()}
+  else if(b('[data-avarm]'))rmAva();
+  else if((x=b('[data-shape]'))){
+    const sq=x.dataset.shape==='1',r=await SB.rpc('set_ava_shape',{p_sq:sq});
+    if(r.error){note('Не получилось: '+r.error.message);return}
+    S.p.ava_square=sq;draw();
+  }
+  else if(b('[data-cx]')){S.crop=null;draw()}
+  else if(b('[data-csv]'))saveAva();
   else if((x=b('[data-open]')))render(x.dataset.open);
   else if(b('[data-edit]')){S.ed=true;draw();const el=$('.pf-ed');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(b('[data-x]')){S.ed=false;S.ev={};S.fm={};draw()}
@@ -232,11 +359,23 @@ async function act(e){
     const r=on?await SB.from('follows').delete().match({follower:S.me.id,followee:S.id}):await SB.from('follows').insert({followee:S.id});
     if(r.error){S.fw=on;S.nf+=on?1:-1;draw();note('Не получилось: '+r.error.message)}
   }
+  else if(b('[data-pph]')){const f=$('#pf-pfile');f.value='';f.click()}
+  else if(b('[data-prm]')){if(S.pimg)URL.revokeObjectURL(S.pimg.url);S.pimg=null;draw()}
   else if(b('[data-pub]')){
-    const ta=$('#pf-t'),body=ta.value.trim();if(!body)return;
-    const r=await SB.from('posts').insert({body}).select('id,body,created_at').single();
-    if(r.error){note('Не опубликовалось: '+r.error.message);return}
-    S.draft='';S.posts.unshift({...r.data,post_likes:[{count:0}],post_comments:[{count:0}]});S.np++;draw();
+    const ta=$('#pf-t'),body=ta.value.trim();if(!body&&!S.pimg)return;
+    const btn=b('[data-pub]');btn.disabled=true;btn.textContent='Публикуем…';
+    let path=null,url=null;
+    if(S.pimg){
+      path=S.me.id+'/'+Date.now()+'.jpg';
+      const u=await SB.storage.from('posts').upload(path,S.pimg.blob,{contentType:'image/jpeg',cacheControl:'3600'});
+      if(u.error){draw();note('Фото не загрузилось: '+u.error.message);return}
+      url=SB.storage.from('posts').getPublicUrl(path).data.publicUrl;
+    }
+    const r=await SB.from('posts').insert({body:body||' ',image_url:url}).select('id,body,image_url,created_at').single();
+    if(r.error){if(path)SB.storage.from('posts').remove([path]);draw();note('Не опубликовалось: '+r.error.message);return}
+    if(S.pimg)URL.revokeObjectURL(S.pimg.url);
+    S.pimg=null;ta.value='';S.draft='';
+    S.posts.unshift({...r.data,post_likes:[{count:0}],post_comments:[{count:0}]});S.np++;draw();
   }
   else if((x=b('[data-like]'))){
     const p=S.posts.find(z=>z.id==x.dataset.like),on=S.liked.has(p.id);
@@ -247,9 +386,11 @@ async function act(e){
   else if((x=b('[data-del]'))){
     const id=+x.dataset.del;
     if(S.cd!==id){S.cd=id;draw();return}
-    const r=await SB.from('posts').delete().eq('id',id);
+    const pp=S.posts.find(z=>z.id===id),r=await SB.from('posts').delete().eq('id',id);
     S.cd=null;
     if(r.error){draw();note('Не удалось удалить');return}
+    const fp=pp&&pp.image_url?(pp.image_url.split('/posts/')[1]||''):'';
+    if(fp)SB.storage.from('posts').remove([decodeURIComponent(fp.split('?')[0])]);
     S.posts=S.posts.filter(z=>z.id!==id);S.np--;draw();
   }
 }
@@ -269,271 +410,4 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
     else if(++n>100)clearInterval(t);
   },100);
 })();
-})();
-
-/* === Ультра-простой вариант: фото в Base64 прямо в тело поста без бакетов === */
-(function(){
-  const css = document.createElement('style');
-  css.textContent = `
-    .pf-photo-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      height: 38px; padding: 0 12px; border-radius: 12px;
-      background: var(--c2); color: var(--pmu); font-weight: 700;
-      cursor: pointer; font-size: 13px; border: 0;
-    }
-    .pf-photo-btn:hover { background: #e2e8f0; color: var(--ptx); }
-    .pf-photo-preview {
-      display: flex; align-items: center; gap: 10px;
-      margin-top: 10px; font-size: 13px; color: var(--pmu);
-    }
-    .pf-photo-preview img {
-      width: 48px; height: 48px; border-radius: 8px; object-fit: cover;
-    }
-    .pf-photo-preview button {
-      border: 0; background: #ffe3e8; color: #d6407f;
-      padding: 4px 8px; border-radius: 6px; font-weight: 700; cursor: pointer;
-    }
-    .pf-p img.post-attached-img {
-      max-width: 100%; border-radius: 14px; margin-top: 10px; display: block;
-    }
-  `;
-  document.head.appendChild(css);
-
-  let selectedBase64 = null;
-  let selectedFileName = '';
-  const sec = document.getElementById('v-prof');
-  if (!sec) return;
-
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = 'image/*';
-  fileInput.style.display = 'none';
-  document.body.appendChild(fileInput);
-
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Файл слишком большой! Максимальный размер — 5 МБ.');
-      fileInput.value = '';
-      return;
-    }
-
-    selectedFileName = file.name;
-    const reader = new FileReader();
-    reader.onload = e => {
-      selectedBase64 = e.target.result; // Это готовая картинка в виде строки
-      updatePreview();
-    };
-    reader.readAsDataURL(file);
-  });
-
-  function updatePreview() {
-    let prev = sec.querySelector('.pf-photo-preview');
-    if (!selectedBase64) {
-      if (prev) prev.remove();
-      return;
-    }
-    if (!prev) {
-      const rDiv = sec.querySelector('.pf-comp .r');
-      if (rDiv) {
-        prev = document.createElement('div');
-        prev.className = 'pf-photo-preview';
-        rDiv.parentNode.insertBefore(prev, rDiv);
-      }
-    }
-    if (prev) {
-      prev.innerHTML = `<img src="${selectedBase64}"><span>${selectedFileName}</span><button type="button" data-rm-photo>Удалить</button>`;
-    }
-  }
-
-  sec.addEventListener('click', e => {
-    const t = e.target;
-    if (t.closest('[data-add-photo]')) {
-      fileInput.click();
-    }
-    if (t.closest('[data-rm-photo]')) {
-      selectedBase64 = null;
-      selectedFileName = '';
-      fileInput.value = '';
-      updatePreview();
-    }
-  });
-
-  const observer = new MutationObserver(() => {
-    const compR = sec.querySelector('.pf-comp .r');
-    if (compR && !sec.querySelector('.pf-photo-btn')) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'pf-photo-btn';
-      btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg> Фото`;
-      btn.setAttribute('data-add-photo', '1');
-      compR.prepend(btn);
-      updatePreview();
-    }
-  });
-  observer.observe(sec, { childList: true, subtree: true });
-
-  // Перехватываем публикацию и пишем картинку прямо в текст поста
-  sec.addEventListener('click', async e => {
-    const pubBtn = e.target.closest('[data-pub]');
-    if (!pubBtn) return;
-
-    const ta = sec.querySelector('#pf-t');
-    const body = ta ? ta.value.trim() : '';
-    if (!body && !selectedBase64) return;
-
-    // Если фото выбрано, добавляем его HTML-тегом прямо в текст поста
-    let finalBody = body;
-    if (selectedBase64) {
-      finalBody += `<br><img src="${selectedBase64}" class="post-attached-img">`;
-    }
-
-    e.stopImmediatePropagation();
-    e.preventDefault();
-
-    pubBtn.disabled = true;
-    pubBtn.textContent = 'Публикация...';
-
-    try {
-      const SB = window.SB;
-      const { data, error } = await SB.from('posts').insert({ body: finalBody }).select('id,body,created_at').single();
-      if (error) throw error;
-
-      selectedBase64 = null;
-      selectedFileName = '';
-      fileInput.value = '';
-      if (ta) ta.value = '';
-      updatePreview();
-      
-      if (typeof render === 'function') render();
-    } catch (err) {
-      alert('Ошибка публикации: ' + (err.message || err));
-      pubBtn.disabled = false;
-      pubBtn.textContent = 'Опубликовать';
-    }
-  }, true);
-})();
-
-
-
-/* === Добавление загрузки аватара в бакет 'posts' (без изменения остального кода) === */
-(function(){
-  const css = document.createElement('style');
-  css.textContent = `
-    .pf-avatar-upload-wrap { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
-    .pf-avatar-preview-img { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid var(--pln); }
-  `;
-  document.head.appendChild(css);
-
-  let selectedAvatarFile = null;
-  const sec = document.getElementById('v-prof');
-  if (!sec) return;
-
-  const avatarInput = document.createElement('input');
-  avatarInput.type = 'file';
-  avatarInput.accept = 'image/*';
-  avatarInput.style.display = 'none';
-  document.body.appendChild(avatarInput);
-
-  avatarInput.addEventListener('change', () => {
-    const file = avatarInput.files[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Файл слишком большой! Максимальный размер — 5 МБ.');
-      avatarInput.value = '';
-      return;
-    }
-
-    selectedAvatarFile = file;
-    const previewImg = sec.querySelector('.pf-avatar-preview-img');
-    const nameSpan = sec.querySelector('.pf-avatar-file-name');
-    const reader = new FileReader();
-    reader.onload = e => {
-      if (previewImg) { previewImg.src = e.target.result; previewImg.style.display = 'block'; }
-      if (nameSpan) nameSpan.textContent = file.name;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  sec.addEventListener('click', async e => {
-    const t = e.target;
-    if (t.closest('[data-pick-avatar]')) {
-      avatarInput.click();
-    }
-
-    const saveBtn = t.closest('[data-s="avatar_url"]');
-    if (!saveBtn) return;
-
-    if (!selectedAvatarFile) {
-      alert('Сначала выберите файл картинки!');
-      return;
-    }
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Загрузка...';
-
-    try {
-      const SB = window.SB;
-      if (!SB) throw new Error('Нет связи с сервером');
-
-      const user = (await SB.auth.getUser()).data.user;
-      if (!user) throw new Error('Не выполнен вход');
-
-      const fileExt = selectedAvatarFile.name.split('.').pop();
-      const fileName = `avatar_${user.id}_${Date.now()}.${fileExt}`;
-
-      // Загружаем в бакет 'posts'
-      const { error: uploadErr } = await SB.storage.from('posts').upload(fileName, selectedAvatarFile, { upsert: true });
-      if (uploadErr) throw uploadErr;
-
-      const { data: pubData } = SB.storage.from('posts').getPublicUrl(fileName);
-      const avatarUrl = pubData.publicUrl;
-
-      const { error: rpcErr } = await SB.rpc('update_profile', { p_avatar_url: avatarUrl });
-      if (rpcErr) throw rpcErr;
-
-      if (typeof S !== 'undefined' && S.p) {
-        S.p.avatar_url = avatarUrl;
-      }
-      selectedAvatarFile = null;
-      avatarInput.value = '';
-      
-      if (typeof draw === 'function') draw();
-      if (typeof render === 'function') render(user.id);
-
-    } catch (err) {
-      alert('Не удалось загрузить аватар: ' + (err.message || err));
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'Сохранить';
-    }
-  });
-
-  const observer = new MutationObserver(() => {
-    const editContainer = sec.querySelector('.pf-ed');
-    if (editContainer && !sec.querySelector('[data-pick-avatar]')) {
-      const currentAvatar = (typeof S !== 'undefined' && S.p && S.p.avatar_url) || '';
-      
-      const avatarFieldHtml = `
-        <div class="pf-f">
-          <label><b>Аватар профиля</b><small>Картинка до 5 МБ</small></label>
-          <div>
-            <div class="pf-avatar-upload-wrap">
-              <img src="${currentAvatar || ''}" class="pf-avatar-preview-img" ${!currentAvatar ? 'style="display:none"' : ''}>
-              <button type="button" class="pf-b g" data-pick-avatar>Выбрать файл</button>
-              <span class="pf-avatar-file-name pf-mu" style="font-size: 12px;">${currentAvatar ? 'Текущий аватар' : 'Файл не выбран'}</span>
-            </div>
-          </div>
-          <button type="button" class="pf-b" data-s="avatar_url">Сохранить</button>
-        </div>
-      `;
-      const lastChild = editContainer.lastElementChild;
-      if (lastChild) {
-        lastChild.insertAdjacentHTML('beforebegin', avatarFieldHtml);
-      }
-    }
-  });
-  observer.observe(sec, { childList: true, subtree: true });
 })();
