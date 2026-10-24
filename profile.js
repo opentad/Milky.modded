@@ -415,3 +415,139 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
     }
   }, true);
 })();
+
+
+
+/* === Добавление загрузки аватара в профиль (до 5 МБ) === */
+(function(){
+  // Добавляем стили для кнопки выбора аватара в окне редактирования
+  const css = document.createElement('style');
+  css.textContent = `
+    .pf-avatar-upload-wrap { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+    .pf-avatar-preview-img { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid var(--pln); }
+  `;
+  document.head.appendChild(css);
+
+  let selectedAvatarFile = null;
+
+  const sec = document.getElementById('v-prof');
+  if (!sec) return;
+
+  // Создаем скрытый input для выбора изображения
+  const avatarInput = document.createElement('input');
+  avatarInput.type = 'file';
+  avatarInput.accept = 'image/*';
+  avatarInput.style.display = 'none';
+  document.body.appendChild(avatarInput);
+
+  avatarInput.addEventListener('change', () => {
+    const file = avatarInput.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Файл слишком большой! Максимальный размер — 5 МБ.');
+      avatarInput.value = '';
+      return;
+    }
+
+    selectedAvatarFile = file;
+    
+    // Показываем превью выбранной картинки прямо в форме
+    const previewImg = sec.querySelector('.pf-avatar-preview-img');
+    const nameSpan = sec.querySelector('.pf-avatar-file-name');
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (previewImg) previewImg.src = e.target.result;
+      if (nameSpan) nameSpan.textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Перехватываем клики внутри секции профиля
+  sec.addEventListener('click', async e => {
+    const t = e.target;
+
+    // Клик по кнопке "Выбрать фото"
+    if (t.closest('[data-pick-avatar]')) {
+      avatarInput.click();
+    }
+
+    // Сохранение аватара
+    const saveBtn = t.closest('[data-s="avatar_url"]');
+    if (!saveBtn) return;
+
+    if (!selectedAvatarFile) {
+      alert('Сначала выберите файл картинки!');
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Загрузка...';
+
+    try {
+      const SB = window.SB;
+      if (!SB) throw new Error('Нет связи с сервером');
+
+      const user = (await SB.auth.getUser()).data.user;
+      if (!user) throw new Error('Не выполнен вход');
+
+      const fileExt = selectedAvatarFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      // Загружаем в бакет 'avatars'
+      const { error: uploadErr } = await SB.storage.from('avatars').upload(fileName, selectedAvatarFile, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      // Получаем публичную ссылку на картинку
+      const { data: pubData } = SB.storage.from('avatars').getPublicUrl(fileName);
+      const avatarUrl = pubData.publicUrl;
+
+      // Обновляем колонку avatar_url в таблице profiles через RPC функцию update_profile
+      const { error: rpcErr } = await SB.rpc('update_profile', { p_avatar_url: avatarUrl });
+      if (rpcErr) throw rpcErr;
+
+      // Успешно! Обновляем данные в стейте и перерисовываем профиль
+      if (typeof S !== 'undefined' && S.p) {
+        S.p.avatar_url = avatarUrl;
+      }
+      selectedAvatarFile = null;
+      avatarInput.value = '';
+      
+      if (typeof draw === 'function') draw();
+      if (typeof render === 'function') render(user.id);
+
+    } catch (err) {
+      alert('Не удалось загрузить аватар: ' + (err.message || err));
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Сохранить';
+    }
+  });
+
+  // Внедряем поле выбора аватара в форму редактирования профиля через MutationObserver
+  const observer = new MutationObserver(() => {
+    const editContainer = sec.querySelector('.pf-ed');
+    if (editContainer && !sec.querySelector('[data-pick-avatar]')) {
+      const currentAvatar = (typeof S !== 'undefined' && S.p && S.p.avatar_url) || '';
+      
+      const avatarFieldHtml = `
+        <div class="pf-f">
+          <label><b>Аватар профиля</b><small>Картинка до 5 МБ</small></label>
+          <div>
+            <div class="pf-avatar-upload-wrap">
+              <img src="${currentAvatar || ''}" class="pf-avatar-preview-img" ${!currentAvatar ? 'style="display:none"' : ''}>
+              <button type="button" class="pf-b g" data-pick-avatar>Выбрать файл</button>
+              <span class="pf-avatar-file-name pf-mu" style="font-size: 12px;">${currentAvatar ? 'Текущий аватар' : 'Файл не выбран'}</span>
+            </div>
+          </div>
+          <button type="button" class="pf-b" data-s="avatar_url">Сохранить</button>
+        </div>
+      `;
+      // Вставляем перед последним элементом формы (переключателем комментариев)
+      const lastChild = editContainer.lastElementChild;
+      if (lastChild) {
+        lastChild.insertAdjacentHTML('beforebegin', avatarFieldHtml);
+      }
+    }
+  });
+  observer.observe(sec, { childList: true, subtree: true });
+})();
