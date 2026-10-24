@@ -9,8 +9,6 @@ const put=h=>{$('#pf-c').innerHTML=h};
 const db=()=>window.SB;
 const SBU='https://sjwvrljmqpbopbxqkhkl.supabase.co',SBK='sb_publishable_mWqrZq0Vw65Ahk7ZIbtlNQ_owreCtcj';
 const BKT='avatars',VIEW=300,CR=130,OUT=800;
-const B_W=750, B_H=230;
-const C_W=320, C_H=Math.round(320*(230/750));
 
 function getSB(){return new Promise(res=>{let n=0;const t=setInterval(()=>{
   if(!window.SB&&window.supabase)window.SB=window.supabase.createClient(SBU,SBK);
@@ -74,7 +72,7 @@ css.textContent=`
 .pf-ss>div:first-child{border-left:0;padding-left:0}
 .pf-ss b{display:block;font-size:21px;font-weight:800;color:var(--ptx)}
 .pf-ss small{color:var(--pmu);font-size:11.5px}
-.pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+.pf-b{height:46px;padding:0 22px;border-radius:15px;background:var(--pk);color:#fff;font-weight:700;display:inline-flex;gap:8px;align-items:center;justify-content:center;cursor:pointer;border:0}
 .pf-b.g{background:var(--c2);color:var(--ptx)}
 .pf-b:disabled{opacity:.6}
 .pf-b svg{width:18px;height:18px}
@@ -97,13 +95,13 @@ css.textContent=`
 .pf-a{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;background-size:cover;background-position:center;flex:none}
 .pf-p p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ptx)}
 .pf-ac{display:flex;gap:10px;margin-top:12px}
-.pf-ac button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--c2);color:var(--pmu);font-weight:700}
+.pf-ac button{display:flex;gap:7px;align-items:center;height:38px;padding:0 14px;border-radius:12px;background:var(--c2);color:var(--pmu);font-weight:700;border:0;cursor:pointer}
 .pf-ac button.on{color:var(--pk);background:var(--pkbg)}
 .pf-ac button.dg{background:#ffe3e8;color:#d6407f}
 .pf-ac svg{width:18px;height:18px}
 .pf-sh{display:flex;justify-content:space-between;margin-bottom:10px}
 .pf-sh h3{font-size:16px;font-weight:800;color:var(--ptx)}.pf-sh small{color:var(--pmu)}
-.pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx)}
+.pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx);background:transparent;border:0;cursor:pointer}
 .pf-mu{color:var(--pmu)}
 .pf-em{color:var(--pmu);text-align:center;padding:24px 0}
 .pf-ed{margin-top:18px}
@@ -117,7 +115,7 @@ css.textContent=`
 .pf-f textarea{height:96px;resize:none}
 .pf-cnt{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--pmu)}
 .pf-m{font-size:12px;margin-top:4px;color:#2fa876}.pf-m.e{color:#d6407f}
-.pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative}
+.pf-sw{width:54px;height:30px;border-radius:15px;background:#cfd5df;position:relative;border:0;cursor:pointer}
 .pf-sw i{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
 .pf-sw.on{background:var(--pk)}.pf-sw.on i{transform:translateX(24px)}
 .pf-cr{margin-top:18px;text-align:center}
@@ -130,6 +128,17 @@ css.textContent=`
 .pf-pv{display:flex;gap:12px;align-items:center;margin-top:10px}
 .pf-pv img{width:64px;height:64px;border-radius:12px;object-fit:cover}
 .pf-pimg{display:block;max-width:100%;border-radius:14px;margin-top:10px}
+.pf-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;justify-content:center;align-items:center;padding:16px}
+.pf-modal{background:#fff;border-radius:24px;width:100%;max-width:680px;max-height:85vh;overflow:auto;padding:24px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.pf-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.pf-modal-head h3{margin:0;font-size:22px;font-weight:800}
+.pf-modal-close{border:0;background:#f0f2f5;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;font-weight:700}
+.pf-p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.pf-p-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.pf-p-card img{width:100%;height:100px;object-fit:cover;border-radius:12px}
+.pf-p-card-body{display:flex;justify-content:space-between;align-items:center}
+.pf-p-card-title{font-weight:700;font-size:15px;color:var(--ptx)}
+.pf-p-card-kind{font-size:11px;color:var(--pkt);background:var(--pkbg);padding:2px 8px;border-radius:8px;font-weight:600}
 @media(max-width:1100px){.pf-g,.pf-g.o{grid-template-columns:1fr}.pf-mn{display:flex;flex-wrap:wrap}.pf-mi{width:auto}.pf-f{grid-template-columns:1fr}}
 @media(max-width:640px){.pf-big{width:108px;height:108px;margin-top:-42px}.pf-cv{height:170px}.pf-ss>div{padding:0 12px}}`;
 document.head.appendChild(css);
@@ -167,12 +176,13 @@ async function render(u){
   const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
      liked:new Set(((lk&&lk.data)||[]).map(x=>x.post_id)),fol:fol.map(i=>M[i]).filter(Boolean),sub:sub.map(i=>M[i]).filter(Boolean),
-     ed:false,ev:{},fm:{},draft:'',cd:null,crop:null,pimg:null};
+     ed:false,purchasesModal:false,purchasesList:[],ev:{},fm:{},draft:'',cd:null,crop:null,pimg:null};
   setHash(pr.data.nick||id);
   draw();
 }
 const ppl=(t,a,n)=>`<div class="pf-x"><div class="pf-sh"><h3>${t}</h3><small>${n}</small></div>${a.map(u=>`<button class="pf-pp" data-open="${u.id}">${av(u,'pf-a')}<span>${esc(u.name)}</span></button>`).join('')||'<small class="pf-mu">Пока никого</small>'}</div>`;
 const mi=(k,t)=>`<div class="pf-mi off">${ic(k)}<span>${t}</span><small>скоро</small></div>`;
+
 function editHtml(){
   const p=S.p,ev=S.ev;
   const F=[['nick','Никнейм','От 5 до 15 символов: латиница, цифры и _',p.nick||'',15],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0,1],['name','Имя в чате','От 2 до 30 символов',p.name||'',30]];
@@ -188,6 +198,43 @@ function editHtml(){
 function cropHtml(){
   const c=S.crop;
   return `<div class="pf-x pf-cr"><h3>Фото профиля</h3><small>Двигай фото пальцем. Квадрат: большое фото в профиле. Пунктирный круг: маленькие аватарки.</small><canvas id="pf-cv" width="${VIEW}" height="${VIEW}"></canvas><input type="range" id="pf-z" min="0" max="100" value="${c.t}" aria-label="Масштаб"><div class="r"><button class="pf-b g" data-cx>Отмена</button><button class="pf-b" data-csv${c.busy?' disabled':''}>${c.busy?'Загружаем…':'Сохранить фото'}</button></div></div>`;
+}
+
+function purchasesModalHtml(){
+  const list = S.purchasesList || [];
+  const KINDS = { banner: 'Баннер', status: 'Статус / Плашка' };
+  
+  const cards = list.map(item => {
+    const isCurrentBanner = item.kind === 'banner' && S.p.cover_url === item.image_url;
+    const isCurrentPlate = item.kind === 'status' && S.p.plate_url === item.image_url;
+    const isActive = isCurrentBanner || isCurrentPlate;
+
+    return `<div class="pf-p-card">
+      <img src="${esc(item.image_url)}" alt="">
+      <div class="pf-p-card-body">
+        <div>
+          <div class="pf-p-card-title">${esc(item.title)}</div>
+          <span class="pf-p-card-kind">${KINDS[item.kind] || 'Товар'}</span>
+        </div>
+      </div>
+      <div>
+        ${isActive 
+          ? `<button class="pf-b g" style="width:100%;height:38px;" data-remove-equipped="${item.kind}">Снять</button>` 
+          : `<button class="pf-b" style="width:100%;height:38px;" data-equip-item="${item.id}" data-kind="${item.kind}" data-url="${esc(item.image_url)}">Установить</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="pf-modal-bg" id="pfPurchasesModal">
+    <div class="pf-modal">
+      <div class="pf-modal-head">
+        <h3>Мои покупки</h3>
+        <button class="pf-modal-close" data-close-purchases>✕</button>
+      </div>
+      ${list.length ? `<div class="pf-p-grid">${cards}</div>` : '<div class="pf-em">У вас пока нет купленных товаров из маркетплейса</div>'}
+    </div>
+  </div>`;
 }
 
 function paint(){
@@ -249,20 +296,17 @@ async function saveCropResult(){
   o.getContext('2d').drawImage(c.img,(VIEW/2-CR-c.x)/c.s,(VIEW/2-CR-c.y)/c.s,sw,sw,0,0,OUT,OUT);
 
   const blob=await new Promise(r=>o.toBlob(r,'image/jpeg',.88));
-  let url;
-  try{
-    const fd=new FormData();fd.append('file',blob);fd.append('upload_preset','milk_img');
-    const rs=await fetch('https://api.cloudinary.com/v1_1/z8gpeqex/image/upload',{method:'POST',body:fd});
-    const js=await rs.json();if(!js.secure_url)throw new Error(js.error&&js.error.message||'ошибка');
-    url=js.secure_url;
-  }catch(err){c.busy=false;draw();note('Не загрузилось: '+err.message);return}
-  const r=await SB.rpc('set_avatar',{p_url:url});
+  const path=S.id+'.jpg';
+  const u=await SB.storage.from(BKT).upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
+  if(u.error){c.busy=false;draw();note('Не загрузилось: '+u.error.message);return}
+  const url=SB.storage.from(BKT).getPublicUrl(path).data.publicUrl+'?v='+Date.now();
+  const r=await SB.from('profiles').update({avatar_url:url}).eq('id',S.id);
   if(r.error){c.busy=false;draw();note('Не сохранилось: '+r.error.message);return}
   S.p.avatar_url=url;S.crop=null;draw();note('Фото обновлено');
 }
 
 async function rmAva(){
-  const SB=db(),r=await SB.rpc('set_avatar',{p_url:''});
+  const SB=db(),r=await SB.from('profiles').update({avatar_url:''}).eq('id',S.id);
   if(r.error){note('Не получилось: '+r.error.message);return}
   SB.storage.from(BKT).remove([S.id+'.jpg']);
   S.p.avatar_url=null;draw();note('Фото убрано');
@@ -276,7 +320,7 @@ function draw(){
     `<button class="pf-b${S.fw?' g':''}" data-follow>${S.fw?'Вы подписаны':'Подписаться'}</button><button class="pf-b g" data-dm>${ic('cmt')}Написать</button>`;
   const shown=p.name;
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
-  const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}<button class="pf-mi" data-market-purchases>${ic('bag')}<span>Мои покупки</span></button>${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
+  const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}<button class="pf-mi" data-open-purchases>${ic('bag')}<span>Мои покупки</span></button>${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
   <div class="pf-hd"><div class="pf-ava"><span class="pf-big${mine?' pf-me':''}${p.ava_square?' sq':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:''}</div>
    <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
@@ -284,6 +328,7 @@ function draw(){
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
   ${mine&&S.crop?cropHtml():''}
   ${mine&&S.ed?editHtml():''}
+  ${mine&&S.purchasesModal?purchasesModalHtml():''}
   <div class="pf-g${mine?'':' o'}">${menu}<div>
    ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea>${S.pimg?`<div class="pf-pv"><img src="${esc(S.pimg.url)}" alt=""><button class="pf-b g" data-prm>Убрать фото</button></div>`:''}<div class="r"><button class="pf-b g" data-pph>${ic('img')}Фото</button><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
    ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<small>${dt(x.created_at)}</small></div></div>${x.body.trim()?`<p>${esc(x.body)}</p>`:''}${x.image_url?`<img class="pf-pimg" src="${esc(x.image_url)}" alt="" loading="lazy">`:''}
@@ -336,23 +381,60 @@ sec.addEventListener('pointermove',e=>{
 const endDr=()=>{dr=null};
 sec.addEventListener('pointerup',endDr);sec.addEventListener('pointercancel',endDr);
 
+async function loadUserPurchases(){
+  const SB = db(); if(!SB || !S || !S.me) return;
+  const p = await SB.from('purchases').select('item_id').eq('buyer', S.me.id);
+  const ids = (p.data || []).map(x => x.item_id);
+  if (!ids.length) {
+    S.purchasesList = [];
+    S.purchasesModal = true;
+    draw();
+    return;
+  }
+  const r = await SB.from('market_items').select('*').in('id', ids).order('id', { ascending: false });
+  S.purchasesList = r.data || [];
+  S.purchasesModal = true;
+  draw();
+}
+
 async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
   if(b('[data-go]'))MS.show('msg');
   else if(b('[data-ava]')){const f=$('#pf-file');f.value='';f.click()}
   else if(b('[data-avarm]'))rmAva();
-  else if(b('[data-market-purchases]')){
-    if(window.MS && MS.show) {
-      MS.show('market');
-      if(window.Market && typeof window.Market.openPurchases === 'function') {
-        window.Market.openPurchases();
-      }
+  else if(b('[data-open-purchases]')){
+    loadUserPurchases();
+  }
+  else if(b('[data-close-purchases]')){
+    S.purchasesModal = false;
+    draw();
+  }
+  else if((x=b('[data-equip-item]'))){
+    const kind = x.dataset.kind, url = x.dataset.url;
+    const updateData = kind === 'banner' ? { cover_url: url } : { plate_url: url };
+    const r = await SB.from('profiles').update(updateData).eq('id', S.me.id);
+    if(r.error) {
+      note('Ошибка при установке: ' + r.error.message);
     } else {
-      note('Откройте маркетплейс');
+      if(kind === 'banner') S.p.cover_url = url; else S.p.plate_url = url;
+      draw();
+      note((kind === 'banner' ? 'Баннер' : 'Плашка') + ' успешно установлен!');
+    }
+  }
+  else if((x=b('[data-remove-equipped]'))){
+    const kind = x.dataset.removeEquipped;
+    const updateData = kind === 'banner' ? { cover_url: '' } : { plate_url: '' };
+    const r = await SB.from('profiles').update(updateData).eq('id', S.me.id);
+    if(r.error) {
+      note('Ошибка: ' + r.error.message);
+    } else {
+      if(kind === 'banner') S.p.cover_url = ''; else S.p.plate_url = '';
+      draw();
+      note((kind === 'banner' ? 'Баннер' : 'Плашка') + ' снят');
     }
   }
   else if((x=b('[data-shape]'))){
-    const sq=x.dataset.shape==='1',r=await SB.rpc('set_ava_shape',{p_sq:sq});
+    const sq=x.dataset.shape==='1',r=await SB.from('profiles').update({ava_square:sq}).eq('id',S.id);
     if(r.error){note('Не получилось: '+r.error.message);return}
     S.p.ava_square=sq;draw();
   }
@@ -363,7 +445,7 @@ async function act(e){
   else if(b('[data-x]')){S.ed=false;S.ev={};S.fm={};draw()}
   else if(b('[data-dm]')){if(window.MG)MG.dm(S.id);else note('Личные сообщения скоро появятся')}
   else if(b('[data-sw]')){
-    const on=!S.p.comments_off,r=await SB.rpc('update_profile',{p_comments_off:on});
+    const on=!S.p.comments_off,r=await SB.from('profiles').update({comments_off:on}).eq('id',S.id);
     if(r.error){note('Не получилось: '+r.error.message);return}
     S.p.comments_off=on;draw();
   }
@@ -372,16 +454,16 @@ async function act(e){
     const bad=m=>{S.ev[k]=inp.value;S.fm[k]={t:m,e:1};draw()};
     if(k==='nick'){
       if(!/^[A-Za-z0-9_]{5,15}$/.test(v))return bad('5–15 символов: латиница, цифры и _');
-      r=await SB.rpc('set_nick',{p_nick:v});
+      r=await SB.from('profiles').update({nick:v}).eq('id',S.id);
       if(r.error)return bad(r.error.code==='23505'?'Этот ник уже занят':'Не получилось: '+r.error.message);
       S.p.nick=v;setHash(v);
     }else{
-      if(k==='name'){if(v.length<2||v.length>30)return bad('От 2 до 30 символов');arg={p_name:v}}
-      else if(k==='status')arg={p_status:v};
-      else arg={p_tags:v.split(',').map(s=>s.trim()).filter(Boolean).slice(0,10)};
-      r=await SB.rpc('update_profile',arg);
+      if(k==='name'){if(v.length<2||v.length>30)return bad('От 2 до 30 символов');arg={name:v}}
+      else if(k==='status')arg={status:v};
+      else arg={tags:v.split(',').map(s=>s.trim()).filter(Boolean).slice(0,10)};
+      r=await SB.from('profiles').update(arg).eq('id',S.id);
       if(r.error)return bad('Не получилось: '+r.error.message);
-      if(k==='name')S.p.name=v;else if(k==='status')S.p.status=v;else S.p.tags=arg.p_tags;
+      if(k==='name')S.p.name=v;else if(k==='status')S.p.status=v;else S.p.tags=arg.tags;
     }
     delete S.ev[k];S.fm[k]={t:'Сохранено',e:0};draw();
   }
@@ -397,12 +479,10 @@ async function act(e){
     const btn=b('[data-pub]');btn.disabled=true;btn.textContent='Публикуем…';
     let path=null,url=null;
     if(S.pimg){
-      try{
-        const fd=new FormData();fd.append('file',S.pimg.blob);fd.append('upload_preset','milk_img');
-        const rs=await fetch('https://api.cloudinary.com/v1_1/z8gpeqex/image/upload',{method:'POST',body:fd});
-        const js=await rs.json();if(!js.secure_url)throw new Error(js.error&&js.error.message||'ошибка');
-        url=js.secure_url;
-      }catch(err){draw();note('Фото не загрузилось: '+err.message);return}
+      path=S.me.id+'/'+Date.now()+'.jpg';
+      const u=await SB.storage.from('posts').upload(path,S.pimg.blob,{contentType:'image/jpeg',cacheControl:'3600'});
+      if(u.error){draw();note('Фото не загрузилось: '+u.error.message);return}
+      url=SB.storage.from('posts').getPublicUrl(path).data.publicUrl;
     }
     const r=await SB.from('posts').insert({body:body||' ',image_url:url}).select('id,body,image_url,created_at').single();
     if(r.error){if(path)SB.storage.from('posts').remove([path]);draw();note('Не опубликовалось: '+r.error.message);return}
