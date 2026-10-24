@@ -240,12 +240,12 @@
         const btn = $('itSend'); btn.disabled = true; btn.textContent = 'Загрузка…';
         try {
           const blob = await compress(f, kind, crop);
-          const path = u.id + '/' + Date.now() + '.webp';
-          const up = await sb.storage.from('market').upload(path, blob, { contentType: 'image/webp', cacheControl: '31536000' });
-          if (up.error) throw up.error;
-          const url = sb.storage.from('market').getPublicUrl(path).data.publicUrl;
+          const fd = new FormData(); fd.append('file', blob); fd.append('upload_preset', 'milk_img');
+          const rs = await fetch('https://api.cloudinary.com/v1_1/z8gpeqex/image/upload', { method: 'POST', body: fd });
+          const js = await rs.json(); if (!js.secure_url) throw new Error(js.error && js.error.message || 'ошибка');
+          const url = js.secure_url;
           const ins = await sb.from('market_items').insert({ title, price, kind, image_url: url, status: 'pending' });
-          if (ins.error) { sb.storage.from('market').remove([path]); throw ins.error; }
+          if (ins.error) throw ins.error;
           alert('Отправлено на модерацию');
           $('itTitle').value = ''; $('itPrice').value = ''; close();
           self.loadMyItems(); 
