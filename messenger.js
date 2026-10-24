@@ -17,7 +17,7 @@ const PA={
  bell:'M12 3.8a5.2 5.2 0 0 0-5.2 5.2v3.1l-1.6 2.7c-.5.8.1 1.7 1 1.7h11.6c.9 0 1.5-.9 1-1.7l-1.6-2.7V9A5.2 5.2 0 0 0 12 3.8zM10 19a2.2 2.2 0 0 0 4 0'
 };
 const ic=k=>'<svg viewBox="0 0 24 24"><path d="'+PA[k]+'"/></svg>';
- Object.assign(PA,{dots:'M12 5.5h.01M12 12h.01M12 18.5h.01',poll:'M5 20V11M12 20V4M19 20v-6',trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7M10 11v5M14 11v5',pin:'M9 4h6l-.8 5.5L17 13H7l2.8-3.5zM12 13v7'});
+ Object.assign(PA,{dots:'M12 5.5h.01M12 12h.01M12 18.5h.01',poll:'M5 20V11M12 20V4M19 20v-6',trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7M10 11v5M14 11v5',pin:'M9 4h6l-.8 5.5L17 13H7l2.8-3.5zM12 13v7',copy:'M9 9h10v11H9zM15 9V4H5v11h4'});
 const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const hl=(t,q)=>{
   if(!q)return esc(t);
@@ -434,6 +434,7 @@ sec.addEventListener('click',e=>{
   else if(b('.mg-hd>.mg-a')||b('.mg-hi')){const c=cur();if(c&&!c.sys){mOpen=mOpen?0:1;rMem();refreshSeen().then(rMem)}}
    else if((x=b('[data-u]'))){if(window.PF){MS.show('prof');PF.open(x.dataset.u)}else toast('Профиль скоро появится')}
   else if((x=b('[data-vote]')))vote(x.dataset.vote,+x.dataset.o);
+  else if((x=b('[data-copy]')))copyMsg(x.dataset.copy);
   else if((x=b('[data-pin]')))pinMsg(x.dataset.pin);
   else if((x=b('[data-del]')))delMsg(x.dataset.del);
   else if((x=b('[data-unpin]')))pinMsg(x.dataset.unpin);
@@ -719,7 +720,7 @@ function rPins(){
 }
 function jump(id){const e=$('.mg-b[data-mid="'+id+'"]');if(!e)return;const b=$('#mgm');b.scrollTop=e.offsetTop-b.clientHeight/2+e.offsetHeight/2;e.classList.add('flash');setTimeout(()=>e.classList.remove('flash'),1500)}
 function pinJump(id){jump(id);const c=cur(),P=c.msgs.filter(m=>m.pin);pinI=(pinI-1+P.length)%P.length;rPins()}
-function actHTML(m,mine){return'<div class="mg-act">'+(mine?'<button class="rd" data-del="'+m.id+'">'+ic('trash')+'Удалить</button>':'')+'<button data-pin="'+m.id+'">'+ic('pin')+(m.pin?'Открепить':'Закрепить')+'</button></div>'}
+function actHTML(m,mine){return'<div class="mg-act"><button data-copy="'+m.id+'">'+ic('copy')+'Скопировать</button>'+(mine?'<button class="rd" data-del="'+m.id+'">'+ic('trash')+'Удалить</button>':'')+'<button data-pin="'+m.id+'">'+ic('pin')+(m.pin?'Открепить':'Закрепить')+'</button></div>'}
 function pollHTML(m){
   const V=VT[m.id]||[],tot=new Set(V.map(v=>v.user_id)).size,mine=V.filter(v=>v.user_id===me.id).map(v=>v.opt);
   return'<div class="mg-po"><b>📊 '+esc(m.poll.q)+'</b><small>'+(m.poll.multi?'Можно выбрать несколько':'Один ответ')+'</small>'+
@@ -745,6 +746,13 @@ async function pinMsg(id){
   const r=await sb.rpc('pin_message',{p_id:m.id,p_val:v});
   if(r.error){toast('Не получилось: '+r.error.message);return}
   m.pin=v;ma='';if(v)pinI=-1;rMsgs(1);rPins();
+}
+function copyMsg(id){
+  const m=findMsg(id);if(!m)return;
+  const t=m.poll?m.poll.q:(m.x||(m.f?m.f.n:''));
+  const ok=()=>{ma='';rMsgs(1);toast('Скопировано')};
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,()=>toast('Не удалось скопировать'));
+  else{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){toast('Не удалось скопировать')}a.remove()}
 }
 async function delMsg(id){
   const m=findMsg(id);if(!m||!confirm('Удалить сообщение?'))return;
