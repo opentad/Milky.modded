@@ -48,7 +48,15 @@
   const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 const COIN = '<i style="display:inline-block;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f2a900);vertical-align:-3px"></i>';
 const CART_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>';
-const CART_KEY = 'mk_cart', CART_MAX = 50, PAGE = 15;
+const CART_KEY = 'mk_cart', CART_MAX = 50, PAGE = 16;
+  const FILTER_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18l-7 8.2V19l-4 2v-8.8z"/></svg>';
+const PLUS_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h2l2.2 10h9.6L18 7.5"/><circle cx="8.5" cy="19" r="1.4"/><circle cx="15.5" cy="19" r="1.4"/><path d="M16 1.5v5M13.5 4h5"/></svg>';
+const SORTS = { pop: 'По популярности', new: 'Сначала новые', cheap: 'Сначала дешёвые', exp: 'Сначала дорогие' };
+if (!document.getElementById('mk-css')) {
+  const s = document.createElement('style'); s.id = 'mk-css';
+  s.textContent = '.mk-g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}@media(max-width:900px){.mk-g4{grid-template-columns:repeat(2,1fr)}}';
+  document.head.appendChild(s);
+}
 const GRID = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px';
 const BACK = '<button onclick="Market.show(\'shop\')" style="padding:10px 18px;border:0;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06);font-weight:700;cursor:pointer">← Назад</button>';
 const cart = {
@@ -64,6 +72,8 @@ async function authors(items) {
   items.forEach(i => i._a = M[i.user_id] || '');
   return items;
 }
+
+  const mix = a => shuffle(a).map(i => [i, Math.random() + ((i.sold || 0) < 3 ? 0.6 : 0)]).sort((x, y) => y[1] - x[1]).map(x => x[0]);
 
   window.Market = {
     _me: null, _bought: new Set(), _lists: { status: [], banner: [] }, _coins: 0, _view: 'shop', _kind: 'status',
@@ -253,9 +263,9 @@ $('btnCart').onclick = () => self.openCart();
       this.loadItems();
     },
 
-    card: function (it, actions, badge) {
+    card: function (it, actions, badge, ov) {
   return `<div style="background:#fff;border-radius:22px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:10px;overflow:hidden">
-    <div style="height:150px;background:#f4f6f8;border-radius:14px;display:grid;place-items:center;overflow:hidden;padding:6px">
+    <div style="position:relative;height:150px;background:#f4f6f8;border-radius:14px;display:grid;place-items:center;overflow:hidden;padding:6px">${ov || ''}
       <img src="${esc(it.image_url)}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px">
     </div>
     <div style="min-width:0">
@@ -270,8 +280,12 @@ act: function (i) {
   const dis = t => `<button disabled style="padding:10px 16px;border:0;border-radius:12px;background:#cfd5df;color:#fff;font-weight:700">${t}</button>`;
   if (this._me && i.user_id === this._me.id) return dis('Ваш товар');
   if (this._bought.has(i.id)) return dis('Куплено');
+  return `<button onclick="Market.buy(${i.id})" style="padding:10px 16px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Купить</button>`;
+},
+    plus: function (i) {
+  if ((this._me && i.user_id === this._me.id) || this._bought.has(i.id)) return '';
   const inC = cart.get().includes(i.id);
-  return `<span style="display:flex;gap:6px"><button onclick="Market.toCart(${i.id})" aria-label="В корзину" style="width:40px;height:40px;border:1px solid #00bcf2;border-radius:12px;background:${inC ? '#00bcf2' : '#fff'};color:${inC ? '#fff' : '#00a5d6'};cursor:pointer">${inC ? '✓' : CART_SVG.replace('22', '18')}</button><button onclick="Market.buy(${i.id})" style="padding:10px 16px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Купить</button></span>`;
+  return `<button onclick="Market.toCart(${i.id})" aria-label="В корзину" style="position:absolute;top:8px;right:8px;width:38px;height:38px;border:0;border-radius:50%;background:${inC ? '#2ec4b6' : 'rgba(255,255,255,.95)'};color:${inC ? '#fff' : '#00a5d6'};box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer;display:grid;place-items:center;z-index:2">${inC ? '✓' : PLUS_SVG}</button>`;
 },
 loadItems: async function () {
   const el = document.getElementById('pgShop'), sb = getSupabase(); if (!el || !sb) return;
@@ -284,24 +298,81 @@ loadItems: async function () {
     this._bought = new Set((p.data || []).map(x => x.item_id));
   }
   const all = await authors(r.data || []);
-  this._lists = { status: shuffle(all.filter(i => i.kind !== 'banner')), banner: shuffle(all.filter(i => i.kind === 'banner')) };
+  this._lists = { status: mix(all.filter(i => i.kind !== 'banner')), banner: mix(all.filter(i => i.kind === 'banner')) };
   this.refresh();
 },
 renderShop: function () {
   const el = document.getElementById('pgShop'); if (!el) return;
   const sec = (kind, title, all) => `
     <div style="display:flex;justify-content:space-between;align-items:center;margin:28px 0 14px"><h3 style="font-size:28px;font-weight:400;margin:0">${title}</h3><button onclick="Market.loadItems()" style="padding:8px 14px;border:0;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06);cursor:pointer">↻ Обновить</button></div>
-    <div style="${GRID}">${this._lists[kind].slice(0, PAGE).map(i => this.card(i, this.act(i))).join('') || '<p style="color:#888">Пока нет товаров</p>'}</div>
+    <div class="mk-g4">${this._lists[kind].slice(0, PAGE).map(i => this.card(i, this.act(i), '', this.plus(i))).join('') || '<p style="color:#888">Пока нет товаров</p>'}</div>
     <div style="text-align:center;margin-top:18px"><button onclick="Market.openList('${kind}')" style="padding:12px 40px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:14px;cursor:pointer;font-size:16px">${all}</button></div>`;
   el.innerHTML = sec('status', 'Статусы', 'Все статусы') + sec('banner', 'Баннеры', 'Все баннеры');
 },
 openList: function (kind) {
-  this._kind = kind; this.show('list');
+  this._kind = kind; this._f = { q: '', min: '', max: '', hide: false, nw: false, sort: 'pop' };
+  this.show('list');
   document.getElementById('pgList').innerHTML = `${BACK}<h3 style="font-size:28px;font-weight:400;margin:16px 0">${kind === 'status' ? 'Все статусы' : 'Все баннеры'}</h3>
-    <div style="${GRID}">${this._lists[kind].map(i => this.card(i, this.act(i))).join('') || '<p style="color:#888">Пока нет товаров</p>'}</div>`;
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+    <input oninput="Market.setQ(this.value)" placeholder="Поиск по названию или автору" style="flex:1;min-width:0;padding:13px 16px;border:1px solid #e1e6ee;border-radius:14px;background:#fff;font:inherit;outline:0">
+    <button onclick="Market.openFilters()" aria-label="Фильтры" style="flex:none;width:48px;height:48px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00bcf2;cursor:pointer;display:grid;place-items:center">${FILTER_SVG}</button>
+    <div style="position:relative;flex:none">
+      <button onclick="Market.sortMenu()" style="height:48px;padding:0 18px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00a5d6;font:inherit;cursor:pointer;white-space:nowrap">Сортировка: <span id="mkSortT">${SORTS.pop}</span> ›</button>
+      <div id="mkSortM" style="display:none;position:absolute;right:0;top:54px;z-index:50;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:6px;min-width:220px">
+        ${Object.keys(SORTS).map(k => `<div onclick="Market.setSort('${k}')" style="padding:11px 14px;border-radius:10px;cursor:pointer">${SORTS[k]}</div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div id="mkListGrid" class="mk-g4"></div>`;
+  this.drawList();
+},
+drawList: function () {
+  const el = document.getElementById('mkListGrid'); if (!el) return;
+  const f = this._f, q = f.q.trim().toLowerCase(), mn = +f.min || 0, mx = +f.max || Infinity;
+  const a = this._lists[this._kind].filter(i => {
+    const p = i.price || 10;
+    return (!q || (i.title + ' ' + (i._a || '')).toLowerCase().includes(q)) && p >= mn && p <= mx
+      && !(f.hide && this._bought.has(i.id)) && !(f.nw && i.sold);
+  });
+  const S = { pop: (x, y) => (y.sold || 0) - (x.sold || 0), new: (x, y) => y.id - x.id, cheap: (x, y) => (x.price || 10) - (y.price || 10), exp: (x, y) => (y.price || 10) - (x.price || 10) };
+  a.sort(S[f.sort]);
+  el.innerHTML = a.map(i => this.card(i, this.act(i), '', this.plus(i))).join('') || '<p style="color:#888;grid-column:1/-1">Ничего не найдено</p>';
+},
+setQ: function (v) { this._f.q = v; this.drawList(); },
+sortMenu: function () { const m = document.getElementById('mkSortM'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; },
+setSort: function (k) {
+  this._f.sort = k; document.getElementById('mkSortT').textContent = SORTS[k];
+  document.getElementById('mkSortM').style.display = 'none'; this.drawList();
+},
+openFilters: function () {
+  const f = this._f, o = document.createElement('div'); o.id = 'mkFlt';
+  o.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;justify-content:center;align-items:center;padding:16px';
+  const inp = 'flex:1;min-width:0;padding:12px;border:1px solid #ddd;border-radius:12px;font:inherit';
+  const lab = 'display:flex;gap:10px;align-items:center;margin-top:16px;cursor:pointer';
+  o.innerHTML = `<div style="background:#fff;border-radius:22px;width:100%;max-width:420px;padding:24px;position:relative">
+    <button onclick="document.getElementById('mkFlt').remove()" aria-label="Закрыть" style="position:absolute;right:16px;top:16px;border:0;background:#f0f0f0;width:34px;height:34px;border-radius:50%;cursor:pointer">✕</button>
+    <h3 style="margin:0 0 18px;font-size:22px">Фильтры</h3>
+    <div style="color:#8a94a3;font-size:13px;margin-bottom:6px">Цена</div>
+    <div style="display:flex;gap:10px"><input id="flMin" type="number" min="0" placeholder="от" value="${esc(f.min)}" style="${inp}"><input id="flMax" type="number" min="0" placeholder="до" value="${esc(f.max)}" style="${inp}"></div>
+    <label style="${lab}"><input id="flHide" type="checkbox" ${f.hide ? 'checked' : ''}> Скрыть купленные</label>
+    <label style="${lab}"><input id="flNew" type="checkbox" ${f.nw ? 'checked' : ''}> Только новинки (ещё не покупали)</label>
+    <div style="display:flex;gap:10px;margin-top:24px">
+      <button onclick="Market.resetFilters()" style="flex:1;padding:13px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00a5d6;font-weight:700;cursor:pointer">Сбросить</button>
+      <button onclick="Market.applyFilters()" style="flex:1;padding:13px;border:0;border-radius:14px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Применить</button>
+    </div></div>`;
+  document.body.appendChild(o);
+},
+applyFilters: function () {
+  const g = id => document.getElementById(id);
+  Object.assign(this._f, { min: g('flMin').value, max: g('flMax').value, hide: g('flHide').checked, nw: g('flNew').checked });
+  g('mkFlt').remove(); this.drawList();
+},
+resetFilters: function () {
+  Object.assign(this._f, { min: '', max: '', hide: false, nw: false });
+  document.getElementById('mkFlt').remove(); this.drawList();
 },
 refresh: function () {
-  if (this._view === 'list') this.openList(this._kind);
+  if (this._view === 'list') this.drawList();
   else if (this._view === 'cart') this.openCart();
   else this.renderShop();
   this.badge();
