@@ -813,6 +813,8 @@ mount(r,c){const f=document.createElement('iframe');f.src='vysadka.html';f.allow
   const h=e=>{if(e.data==='vysadka:done')c.ok(0)};addEventListener('message',h);
   return()=>{removeEventListener('message',h);f.remove()}}};
 
+  window.HWX={D,SIM};
+
 /* ---------- публичный интерфейс ---------- */
 window.HWM={
   onchange:null,
@@ -1135,6 +1137,7 @@ function openIsland(){const f=document.createElement('div');f.style.cssText='pos
 rCl();rHw();rGr();show('home');
 })();
 </script>
+  <script src="hw-extra.js"></script>
   <script src="messenger.js?v=11"></script>
 <script src="comments.js?v=10"></script>
 <script src="profile.js?v=11"></script>
