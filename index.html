@@ -926,7 +926,7 @@ const AVA='<img src="ava.jpg" alt="">';
 $('#rail').innerHTML='<button class="logo" aria-label="Меню">M</button><button class="ava" aria-label="Меню">'+AVA+'</button><hr class="h1">'+
   RAIL.map((k,i)=>`<button class="ri${i?'':' first'}" aria-label="${k}">${ic(k)}</button>`).join('')+'<hr class="h2">';
 $('#drawer').innerHTML='<div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><div class="ava">'+AVA+'</div><div class="dname" id="dname"></div>'+
-  `<div class="coins"><span><span class="coin"></span>227</span><span class="bell">${ic('bell')}<span class="bd2">1</span></span></div>`+
+  `<div class="coins"><span><span class="coin"></span><span class="cn">…</span></span><span class="bell">${ic('bell')}<span class="bd2">1</span></span></div>`+
   MENU.map(g=>`<div class="dv"></div><div class="sl">${g[0]}</div>`+g[1].map(m=>`<button class="mi"${m[2]?` style="color:${m[2]}"`:''}><span style="position:relative;display:block">${ic(m[0])}${m[3]?`<span class="bd2${m[3]==='cy'?' cy':''}${m[1]==='Мессенджер'?' mgbd':''}" style="right:-7px;bottom:-7px"${m[1]==='Мессенджер'?' hidden':''}>1</span>`:''}</span>${m[1]}</button>`).join('')).join('');
 $('#chat').innerHTML=ic('talk');
 
@@ -942,7 +942,7 @@ if(canHover){
 }
 $('#shade').addEventListener('click',closeMenu);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
-  $('#mh').innerHTML='<button id="mhm" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><span class="mc"><span class="coin"></span>227</span><button id="mhc" aria-label="Мессенджер">'+ic('chat')+'<span class="bd2 mgbd2" hidden>1</span></button>';
+  $('#mh').innerHTML='<button id="mhm" aria-label="Меню"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="brand">МИЛКИ<i></i><small>ШКОЛА</small></div><span class="mc"><span class="coin"></span><span class="cn">…</span></span><button id="mhc" aria-label="Мессенджер">'+ic('chat')+'<span class="bd2 mgbd2" hidden>1</span></button>';
 $('#mhm').onclick=openMenu;
 $('#mhc').onclick=()=>{closeMenu();show('msg')};
 
