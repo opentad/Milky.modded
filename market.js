@@ -50,6 +50,10 @@ const COIN = '<i style="display:inline-block;width:17px;height:17px;border-radiu
 const CART_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>';
 const CART_KEY = 'mk_cart', CART_MAX = 50, PAGE = 16;
   const FILTER_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18l-7 8.2V19l-4 2v-8.8z"/></svg>';
+  const SEARCH_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>';
+const BECOME = `<div style="margin:0 0 8px;border-radius:24px;padding:26px 28px;background:linear-gradient(120deg,#00bcf2,#7b6cf6);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+  <div><div style="font-size:24px;font-weight:700">Стань креатором</div><div style="opacity:.92;margin-top:6px">Рисуй баннеры и статусы, продавай их и зарабатывай MilkyCoin</div></div>
+  <button onclick="Market.becomeCreator()" style="padding:14px 26px;border:0;border-radius:14px;background:#fff;color:#0b5f8a;font-weight:700;cursor:pointer">Стать креатором за 30 ${COIN}</button></div>`;
 const PLUS_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h2l2.2 10h9.6L18 7.5"/><circle cx="8.5" cy="19" r="1.4"/><circle cx="15.5" cy="19" r="1.4"/><path d="M16 1.5v5M13.5 4h5"/></svg>';
 const SORTS = { pop: 'По популярности', new: 'Сначала новые', cheap: 'Сначала дешёвые', exp: 'Сначала дорогие' };
 if (!document.getElementById('mk-css')) {
@@ -84,6 +88,8 @@ show: function (p) {
   if (p !== this._view) { window.scrollTo(0, 0); const m = document.querySelector('.main'); if (m) m.scrollTop = 0; }
   this._view = p;
 },
+    const D = { mkSearchBtn: 'inline-flex', mkTools: 'flex', btnCart: 'block' };
+Object.keys(D).forEach(id => { const e = document.getElementById(id); if (e) e.style.display = p === 'list' ? 'none' : D[id]; });
 badge: function () {
   const n = cart.get().length, e = document.getElementById('mkCartN'); if (!e) return;
   e.textContent = n; e.style.display = n ? 'block' : 'none';
@@ -106,14 +112,16 @@ badge: function () {
 
       <div style="padding:24px;max-width:1100px;margin:0 auto;font-family:inherit;color:var(--text,#333)">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-    <h2 style="margin:0;font-size:28px;font-weight:400">Маркетплейс</h2>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <button id="mkSearchBtn" onclick="Market.openList('all')" style="display:inline-flex;gap:8px;align-items:center;height:44px;padding:0 18px;border:0;border-radius:14px;background:#fff;color:#0b5f8a;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.06)">${SEARCH_SVG}Поиск</button>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div id="mkTools" style="display:flex;gap:10px;align-items:center">
       <button id="btnMod" style="display:none;padding:10px 18px;border:0;border-radius:12px;background:#ffb703;font-weight:700;cursor:pointer">Модерация</button>
-      <button id="btnOpenCreator" style="padding:10px 18px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Кабинет креатора</button>
-      <div style="background:#fff;border-radius:14px;padding:10px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)"><span id="mkCoins">…</span> ${COIN}</div>
-      <button id="btnCart" aria-label="Корзина" style="position:relative;width:44px;height:44px;border:0;border-radius:14px;background:#fff;color:#0b5f8a;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.06)">${CART_SVG}<span id="mkCartN" style="display:none;position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:#e63946;color:#fff;font-size:12px;font-weight:700;line-height:20px;padding:0 5px">0</span></button>
+      <button id="btnOpenCreator" style="display:none;padding:10px 18px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Кабинет креатора</button>
     </div>
+    <div style="background:#fff;border-radius:14px;padding:10px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)"><span id="mkCoins">…</span> ${COIN}</div>
+    <button id="btnCart" aria-label="Корзина" style="position:relative;width:44px;height:44px;border:0;border-radius:14px;background:#fff;color:#0b5f8a;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.06)">${CART_SVG}<span id="mkCartN" style="display:none;position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:#e63946;color:#fff;font-size:12px;font-weight:700;line-height:20px;padding:0 5px">0</span></button>
   </div>
+</div>
 
   <div id="pgShop"></div>
   <div id="pgList" style="display:none"></div>
@@ -293,12 +301,14 @@ loadItems: async function () {
   const r = await sb.from('market_items').select('*').eq('status', 'approved').order('id', { ascending: false }).limit(600);
   if (r.error) { el.innerHTML = '<p style="color:red">' + esc(r.error.message) + '</p>'; return; }
   this._me = me; this._bought = new Set();
+  const cr = me ? await sb.from('profiles').select('is_creator').eq('id', me.id).maybeSingle() : null;
+this._creator = !!(cr && cr.data && cr.data.is_creator);
   if (me) {
     const p = await sb.from('purchases').select('item_id').eq('buyer', me.id);
     this._bought = new Set((p.data || []).map(x => x.item_id));
   }
   const all = await authors(r.data || []);
-  this._lists = { status: mix(all.filter(i => i.kind !== 'banner')), banner: mix(all.filter(i => i.kind === 'banner')) };
+  this._lists = { status: mix(all.filter(i => i.kind !== 'banner')), banner: mix(all.filter(i => i.kind === 'banner')), all: mix(all.slice()) };
   this.refresh();
 },
 renderShop: function () {
@@ -307,13 +317,14 @@ renderShop: function () {
     <div style="display:flex;justify-content:space-between;align-items:center;margin:28px 0 14px"><h3 style="font-size:28px;font-weight:400;margin:0">${title}</h3><button onclick="Market.loadItems()" style="padding:8px 14px;border:0;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06);cursor:pointer">↻ Обновить</button></div>
     <div class="mk-g4">${this._lists[kind].slice(0, PAGE).map(i => this.card(i, this.act(i), '', this.plus(i))).join('') || '<p style="color:#888">Пока нет товаров</p>'}</div>
     <div style="text-align:center;margin-top:18px"><button onclick="Market.openList('${kind}')" style="padding:12px 40px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:14px;cursor:pointer;font-size:16px">${all}</button></div>`;
-  el.innerHTML = sec('status', 'Статусы', 'Все статусы') + sec('banner', 'Баннеры', 'Все баннеры');
+  const bc = document.getElementById('btnOpenCreator'); if (bc) bc.style.display = this._creator ? '' : 'none';
+el.innerHTML = (this._creator ? '' : BECOME) + sec('status', 'Статусы', 'Все статусы') + sec('banner', 'Баннеры', 'Все баннеры');
 },
 openList: function (kind) {
   this._kind = kind; this._f = { q: '', min: '', max: '', hide: false, nw: false, sort: 'pop' };
   this.show('list');
-  document.getElementById('pgList').innerHTML = `${BACK}<h3 style="font-size:28px;font-weight:400;margin:16px 0">${kind === 'status' ? 'Все статусы' : 'Все баннеры'}</h3>
-  <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+  document.getElementById('pgList').innerHTML = `${BACK}
+<div style="display:flex;gap:10px;align-items:center;margin:16px 0">
     <input oninput="Market.setQ(this.value)" placeholder="Поиск по названию или автору" style="flex:1;min-width:0;padding:13px 16px;border:1px solid #e1e6ee;border-radius:14px;background:#fff;font:inherit;outline:0">
     <button onclick="Market.openFilters()" aria-label="Фильтры" style="flex:none;width:48px;height:48px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00bcf2;cursor:pointer;display:grid;place-items:center">${FILTER_SVG}</button>
     <div style="position:relative;flex:none">
@@ -416,6 +427,15 @@ buy: async function (id) {
   if (!this._me) return alert('Сначала войди в аккаунт');
   if (!confirm('Купить этот товар?')) return;
   if (await this.pay([id])) { alert('Куплено!'); this.refresh(); }
+},
+  becomeCreator: async function () {
+  if (!this._me) return alert('Сначала войди в аккаунт');
+  if (this._coins < 30) return alert('Не хватает монет: нужно 30, у вас ' + this._coins);
+  if (!confirm('Стать креатором? Спишется 30 MilkyCoin.')) return;
+  const r = await getSupabase().rpc('become_creator');
+  if (r.error) return alert(r.error.message);
+  this.setCoins(r.data); this._creator = true; this.renderShop();
+  alert('Теперь вы креатор! Кабинет сверху справа.');
 },
 checkout: async function () {
   const ids = cart.get(); if (!ids.length) return;
