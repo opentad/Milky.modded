@@ -249,10 +249,13 @@ async function saveCropResult(){
   o.getContext('2d').drawImage(c.img,(VIEW/2-CR-c.x)/c.s,(VIEW/2-CR-c.y)/c.s,sw,sw,0,0,OUT,OUT);
 
   const blob=await new Promise(r=>o.toBlob(r,'image/jpeg',.88));
-  const path=S.id+'.jpg';
-  const u=await SB.storage.from(BKT).upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
-  if(u.error){c.busy=false;draw();note('Не загрузилось: '+u.error.message);return}
-  const url=SB.storage.from(BKT).getPublicUrl(path).data.publicUrl+'?v='+Date.now();
+  let url;
+  try{
+    const fd=new FormData();fd.append('file',blob);fd.append('upload_preset','milk_img');
+    const rs=await fetch('https://api.cloudinary.com/v1_1/z8gpeqex/image/upload',{method:'POST',body:fd});
+    const js=await rs.json();if(!js.secure_url)throw new Error(js.error&&js.error.message||'ошибка');
+    url=js.secure_url;
+  }catch(err){c.busy=false;draw();note('Не загрузилось: '+err.message);return}
   const r=await SB.rpc('set_avatar',{p_url:url});
   if(r.error){c.busy=false;draw();note('Не сохранилось: '+r.error.message);return}
   S.p.avatar_url=url;S.crop=null;draw();note('Фото обновлено');
