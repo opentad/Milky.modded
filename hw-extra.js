@@ -52,7 +52,8 @@
   const LIST = [
     ['numroad', 'Алгебра', '', '30 Октября 20:00']
   ];
-  LIST.forEach(w => { if (!MS.HW.some(x => x[0] === w[0])) MS.HW.push(w); });
+  MS.HW.splice(0, MS.HW.length);
+  LIST.forEach(w => MS.HW.push(w));
 
   if (window.HWM && typeof window.HWM.onchange === 'function') window.HWM.onchange();
 })();
