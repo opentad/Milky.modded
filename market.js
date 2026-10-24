@@ -62,7 +62,7 @@ if (!document.getElementById('mk-css')) {
   document.head.appendChild(s);
 }
 const GRID = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px';
-const BACK = '<button onclick="Market.show(\'shop\')" style="padding:10px 18px;border:0;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06);font-weight:700;cursor:pointer">← Назад</button>';
+const BACK = '<button onclick="Market.show(\'shop\')" aria-label="Назад" style="width:44px;height:44px;border:0;background:transparent;color:#00bcf2;cursor:pointer;display:grid;place-items:center;padding:0"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>';
 const cart = {
   get() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) { return []; } },
   set(a) { localStorage.setItem(CART_KEY, JSON.stringify(a)); Market.badge(); }
@@ -86,8 +86,7 @@ open: function () { this.renderUI(); this.show('shop'); this.badge(); this.loadC
     show: function (p) {
   const map = { shop: 'pgShop', list: 'pgList', cart: 'pgCart', creator: 'creatorPanel', mod: 'modPanel' };
   Object.keys(map).forEach(k => { const e = document.getElementById(map[k]); if (e) e.style.display = k === p ? 'block' : 'none'; });
-  const D = { mkSearchBtn: 'inline-flex', mkTools: 'flex', btnCart: 'block' };
-  Object.keys(D).forEach(id => { const e = document.getElementById(id); if (e) e.style.display = p === 'list' ? 'none' : D[id]; });
+  const hd = document.getElementById('mkHead'); if (hd) hd.style.display = p === 'list' ? 'none' : 'flex';
   if (p !== this._view) { window.scrollTo(0, 0); const m = document.querySelector('.main'); if (m) m.scrollTop = 0; }
   this._view = p;
 },
@@ -112,8 +111,8 @@ badge: function () {
       c.innerHTML = `
 
       <div style="padding:24px;max-width:1100px;margin:0 auto;font-family:inherit;color:var(--text,#333)">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-  <button id="mkSearchBtn" onclick="Market.openList('all')" style="display:inline-flex;gap:8px;align-items:center;height:42px;padding:0 18px;border:1px solid #e6e9ef;border-radius:14px;background:#fff;color:#9aa1a9;font:inherit;font-weight:300;font-size:15px;letter-spacing:.2px;cursor:pointer">${SEARCH_SVG}Поиск...</button>
+  <div id="mkHead" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+  <button id="mkSearchBtn" onclick="Market.openList('all')" style="display:inline-flex;gap:8px;align-items:center;height:42px;min-width:220px;padding:0 20px;border:1px solid #e6e9ef;border-radius:14px;background:#fff;color:#9aa1a9;font:inherit;font-weight:300;font-size:15px;letter-spacing:.2px;cursor:pointer">${SEARCH_SVG}Поиск...</button>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <div id="mkTools" style="display:flex;gap:10px;align-items:center">
       <button id="btnMod" style="display:none;padding:10px 18px;border:0;border-radius:12px;background:#ffb703;font-weight:700;cursor:pointer">Модерация</button>
@@ -328,19 +327,20 @@ openList: function (kind) {
   this._kind = kind; this._f = { q: '', min: '', max: '', hide: false, nw: false, sort: 'pop' };
   this.show('list');
   document.getElementById('pgList').innerHTML = `${BACK}
-<div style="display:flex;gap:10px;align-items:center;margin:16px 0">
-    <input oninput="Market.setQ(this.value)" placeholder="Поиск по названию или автору" style="flex:1;min-width:0;padding:13px 16px;border:1px solid #e1e6ee;border-radius:14px;background:#fff;font:inherit;outline:0">
-    <button onclick="Market.openFilters()" aria-label="Фильтры" style="flex:none;width:48px;height:48px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00bcf2;cursor:pointer;display:grid;place-items:center">${FILTER_SVG}</button>
-    <div style="position:relative;flex:none">
-      <button onclick="Market.sortMenu()" style="height:48px;padding:0 18px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00a5d6;font:inherit;cursor:pointer;white-space:nowrap">Сортировка: <span id="mkSortT">${SORTS.pop}</span> ›</button>
-      <div id="mkSortM" style="display:none;position:absolute;right:0;top:54px;z-index:50;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:6px;min-width:220px">
-        ${Object.keys(SORTS).map(k => `<div onclick="Market.setSort('${k}')" style="padding:11px 14px;border-radius:10px;cursor:pointer">${SORTS[k]}</div>`).join('')}
-      </div>
+<div style="display:flex;gap:10px;align-items:center;margin:4px 0 10px">
+  <input oninput="Market.setQ(this.value)" placeholder="Поиск по названию или автору" style="flex:1;min-width:0;padding:13px 16px;border:1px solid #e1e6ee;border-radius:14px;background:#fff;font:inherit;outline:0">
+  <button onclick="Market.openFilters()" aria-label="Фильтры" style="flex:none;width:48px;height:48px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00bcf2;cursor:pointer;display:grid;place-items:center">${FILTER_SVG}</button>
+  <div style="position:relative;flex:none">
+    <button onclick="Market.sortMenu()" style="height:48px;padding:0 18px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00a5d6;font:inherit;cursor:pointer;white-space:nowrap">Сортировка: <span id="mkSortT">${SORTS.pop}</span> ›</button>
+    <div id="mkSortM" style="display:none;position:absolute;right:0;top:54px;z-index:50;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:6px;min-width:220px">
+      ${Object.keys(SORTS).map(k => `<div onclick="Market.setSort('${k}')" style="padding:11px 14px;border-radius:10px;cursor:pointer">${SORTS[k]}</div>`).join('')}
     </div>
   </div>
-  <div id="mkListGrid" class="mk-g4"></div>`;
-  this.drawList();
-},
+  <button onclick="Market.openCart()" aria-label="Корзина" style="position:relative;flex:none;width:48px;height:48px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00bcf2;cursor:pointer;display:grid;place-items:center">${CART_SVG}<span id="mkCartN2" style="display:${cart.get().length ? 'block' : 'none'};position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:#e63946;color:#fff;font-size:12px;font-weight:700;line-height:20px;padding:0 5px">${cart.get().length}</span></button>
+</div>
+<div style="display:flex;justify-content:flex-end;margin-bottom:14px"><div style="background:#fff;border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)"><span id="mkCoins2">${this._coins}</span> ${COIN}</div></div>
+<div id="mkListGrid" class="mk-g4"></div>`;
+  },
 drawList: function () {
   const el = document.getElementById('mkListGrid'); if (!el) return;
   const f = this._f, q = f.q.trim().toLowerCase(), mn = +f.min || 0, mx = +f.max || Infinity;
