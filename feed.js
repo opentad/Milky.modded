@@ -9,6 +9,7 @@ function getSB(){return new Promise(res=>{let n=0;const t=setInterval(()=>{
   if(!window.SB&&window.supabase)window.SB=window.supabase.createClient(SBU,SBK);
   if(window.SB){clearInterval(t);res(window.SB)}else if(++n>60){clearInterval(t);res(null)}},100)})}
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const SF=window.SF||(f=>String(f||'').trim().split(/\s+/).slice(0,2).join(' '));
 const PAL=['#f0a04b','#e5617a','#8774e1','#4fb9e6','#5cc08a','#e8793a','#4a8fd9'];
 const hs=t=>{let x=7;for(const c of t)x=(x*31+c.charCodeAt(0))>>>0;return x};
 const col=n=>PAL[hs(n||'?')%PAL.length];
@@ -43,6 +44,7 @@ css.textContent=`
 .fd-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin:1px 0 2px}
 .fd-a{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:16px;background-size:cover;background-position:center;flex:none}
 .fd-bd{padding:0 24px 16px}.fd-bd p{line-height:1.65;font-size:15.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.fd-pimg{display:block;max-width:100%;border-radius:16px;margin-top:10px}
 .fd-ac{display:flex;gap:10px;padding:12px 24px;border-top:1px solid var(--ln)}
 .fd-ac button{display:flex;gap:8px;align-items:center;height:42px;padding:0 16px;border-radius:14px;background:var(--c2);color:#566170;font-weight:700}
 .fd-ac button.on{color:var(--pk)}
@@ -88,8 +90,8 @@ function posts(){
   if(st.s==='disc')a=[...a].sort((x,y)=>CMT.n(y.id)-CMT.n(x.id));
   $('#fd-l').innerHTML=a.map(p=>{
     const w=who(p.user_id);
-    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(w.fio)}</span>`:''}<small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
-    <div class="fd-bd"><p>${esc(p.body)}</p></div>
+    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(SF(w.fio))}</span>`:''}<small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
+    <div class="fd-bd">${p.body.trim()?`<p>${esc(p.body)}</p>`:''}${p.image_url?`<img class="fd-pimg" src="${esc(p.image_url)}" alt="" loading="lazy">`:''}</div>
     <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button></div>
     ${CMT.html(p.id,p.user_id,w.comments_off)}</article>`}).join('')
     ||'<div class="fd-e">Здесь пока пусто. '+(st.f==='mine'?'Подпишись на кого-нибудь справа.':'Опубликуй первый пост в своём профиле.')+'</div>';
@@ -107,7 +109,7 @@ async function load(){try{await load2()}catch(e){$('#fd-l').innerHTML='<div clas
   const me=(await SB.auth.getUser()).data.user;if(tk!==tok)return;
   if(!me){$('#fd-l').innerHTML='<div class="fd-e">Чтобы увидеть ленту, войди в аккаунт.<br><button data-go="1" style="margin:14px auto 0;display:block;height:44px;padding:0 24px;border-radius:14px;background:var(--pk);color:#fff;font-weight:700">Войти</button></div>';$('#fd-p').innerHTML='';return}
   const [ps,fo,pp]=await Promise.all([
-    SB.from('posts').select('id,user_id,body,created_at,post_likes(count)').order('created_at',{ascending:false}).limit(60),
+    SB.from('posts').select('id,user_id,body,image_url,created_at,post_likes(count)').order('created_at',{ascending:false}).limit(60),
     SB.from('follows').select('followee').eq('follower',me.id),
     SB.from('profiles').select('id,name,avatar_url,last_seen').neq('id',me.id).limit(40)]);
   if(tk!==tok)return;
