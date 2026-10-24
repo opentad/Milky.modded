@@ -394,10 +394,12 @@ async function act(e){
     const btn=b('[data-pub]');btn.disabled=true;btn.textContent='Публикуем…';
     let path=null,url=null;
     if(S.pimg){
-      path=S.me.id+'/'+Date.now()+'.jpg';
-      const u=await SB.storage.from('posts').upload(path,S.pimg.blob,{contentType:'image/jpeg',cacheControl:'3600'});
-      if(u.error){draw();note('Фото не загрузилось: '+u.error.message);return}
-      url=SB.storage.from('posts').getPublicUrl(path).data.publicUrl;
+      try{
+        const fd=new FormData();fd.append('file',S.pimg.blob);fd.append('upload_preset','milk_img');
+        const rs=await fetch('https://api.cloudinary.com/v1_1/z8gpeqex/image/upload',{method:'POST',body:fd});
+        const js=await rs.json();if(!js.secure_url)throw new Error(js.error&&js.error.message||'ошибка');
+        url=js.secure_url;
+      }catch(err){draw();note('Фото не загрузилось: '+err.message);return}
     }
     const r=await SB.from('posts').insert({body:body||' ',image_url:url}).select('id,body,image_url,created_at').single();
     if(r.error){if(path)SB.storage.from('posts').remove([path]);draw();note('Не опубликовалось: '+r.error.message);return}
