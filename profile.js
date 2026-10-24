@@ -483,7 +483,7 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
       if (!user) throw new Error('Не выполнен вход');
 
       const fileExt = selectedAvatarFile.name.split('.').pop();
-      const fileName = `avatars/${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `avatar_${user.id}_${Date.now()}.${fileExt}`;
 
       // Загружаем в бакет 'posts'
       const { error: uploadErr } = await SB.storage.from('posts').upload(fileName, selectedAvatarFile, { upsert: true });
