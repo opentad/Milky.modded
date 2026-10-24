@@ -245,39 +245,6 @@ function designHtml(){
   </div></div>`;
 }
   
-  const cards = list.map(item => {
-    const isCurrentBanner = item.kind === 'banner' && S.p.cover_url === item.image_url;
-    const isCurrentPlate = item.kind === 'status' && S.p.plate_url === item.image_url;
-    const isActive = isCurrentBanner || isCurrentPlate;
-
-    return `<div class="pf-p-card">
-      <img src="${esc(item.image_url)}" alt="">
-      <div class="pf-p-card-body">
-        <div>
-          <div class="pf-p-card-title">${esc(item.title)}</div>
-          <span class="pf-p-card-kind">${KINDS[item.kind] || 'Товар'}</span>
-        </div>
-      </div>
-      <div>
-        ${isActive 
-          ? `<button class="pf-b g" style="width:100%;height:38px;" data-remove-equipped="${item.kind}">Снять</button>` 
-          : `<button class="pf-b" style="width:100%;height:38px;" data-equip-item="${item.id}" data-kind="${item.kind}" data-url="${esc(item.image_url)}">Установить</button>`
-        }
-      </div>
-    </div>`;
-  }).join('');
-
-  return `<div class="pf-modal-bg" id="pfPurchasesModal">
-    <div class="pf-modal">
-      <div class="pf-modal-head">
-        <h3>Мои покупки</h3>
-        <button class="pf-modal-close" data-close-purchases>✕</button>
-      </div>
-      ${list.length ? `<div class="pf-p-grid">${cards}</div>` : '<div class="pf-em">У вас пока нет купленных товаров из маркетплейса</div>'}
-    </div>
-  </div>`;
-}
-
 function paint(){
   const cv=$('#pf-cv');if(!cv||!S||!S.crop)return;
   const c=S.crop,x=cv.getContext('2d');
@@ -433,11 +400,6 @@ async function loadUserPurchases(){
     list=r.data||[];
   }
   S.purchasesList=list;S.dk='status';S.dsg=true;draw();
-}
-  const r = await SB.from('market_items').select('*').in('id', ids).order('id', { ascending: false });
-  S.purchasesList = r.data || [];
-  S.purchasesModal = true;
-  draw();
 }
 
 async function act(e){
