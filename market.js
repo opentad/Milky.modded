@@ -30,6 +30,7 @@
     open: function () {
       this.renderUI();
       this.loadItems();
+      this.loadCoins();
     },
 
     hide: function () {
@@ -47,7 +48,10 @@
       c.hidden = false; c.style.display = 'block';
       c.innerHTML = `
       <div style="padding:24px;max-width:1100px;margin:0 auto;font-family:inherit;color:var(--text,#333)">
-        <h2 style="margin:0 0 20px;font-size:28px;font-weight:400">Маркетплейс</h2>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <h2 style="margin:0;font-size:28px;font-weight:400">Маркетплейс</h2>
+          <div style="background:#fff;border-radius:14px;padding:8px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)">Баланс: <span id="mkCoins">…</span> 🪙</div>
+        </div>
 
         <div style="background:linear-gradient(120deg,#cdeeff,#e6f6ff);border-radius:24px;padding:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
           <div style="font-size:22px;font-weight:600;color:#0b5f8a">Личный кабинет креатора</div>
@@ -221,10 +225,38 @@
     },
     loadItems: async function () {
       const el = document.getElementById('marketCatalog'), sb = getSupabase(); if (!el || !sb) return;
+      const me = (await sb.auth.getUser()).data.user;
       const r = await sb.from('market_items').select('*').eq('status', 'approved').order('id', { ascending: false });
       if (r.error) { el.innerHTML = '<p style="color:red">' + r.error.message + '</p>'; return; }
-      el.innerHTML = (r.data || []).map(i => this.card(i, `<button style="padding:10px 20px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700">Купить</button>`)).join('')
-        || '<p style="color:#888">Пока нет товаров</p>';
+      let bought = new Set();
+      if (me) {
+        const p = await sb.from('purchases').select('item_id').eq('buyer', me.id);
+        bought = new Set((p.data || []).map(x => x.item_id));
+      }
+      const btn = (t, on, dis) => `<button ${dis ? 'disabled' : ''} onclick="${on}" style="padding:10px 20px;border:0;border-radius:12px;background:${dis ? '#cfd5df' : '#00bcf2'};color:#fff;font-weight:700">${t}</button>`;
+      el.innerHTML = (r.data || []).map(i => this.card(i,
+        me && i.user_id === me.id ? btn('Ваш товар', '', true)
+        : bought.has(i.id) ? btn('Куплено', '', true)
+        : btn('Купить', `Market.buy(${i.id})`)
+      )).join('') || '<p style="color:#888">Пока нет товаров</p>';
+    },
+    loadCoins: async function () {
+      const sb = getSupabase(); if (!sb) return;
+      const me = (await sb.auth.getUser()).data.user; if (!me) return;
+      const r = await sb.from('profiles').select('coins').eq('id', me.id).maybeSingle();
+      this.setCoins(r.data ? r.data.coins : 0);
+    },
+    setCoins: function (n) {
+      const el = document.getElementById('mkCoins'); if (el) el.textContent = n;
+      document.dispatchEvent(new CustomEvent('coins', { detail: n }));
+    },
+    buy: async function (id) {
+      if (!confirm('Купить этот товар?')) return;
+      const r = await getSupabase().rpc('buy_item', { p_item: id });
+      if (r.error) return alert(r.error.message);
+      this.setCoins(r.data);
+      alert('Куплено!');
+      this.loadItems();
     },
     loadMyItems: async function () {
       const el = document.getElementById('myItems'), sb = getSupabase(); if (!el || !sb) return;
