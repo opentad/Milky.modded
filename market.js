@@ -407,7 +407,7 @@ openCart: async function () {
     const r = await sb.from('market_items').select('*').in('id', ids).eq('status', 'approved');
     items = (r.data || []).filter(i => !this._bought.has(i.id) && !(this._me && i.user_id === this._me.id));
     await authors(items);
-  }
+  },
   cart.set(items.map(i => i.id));
   const total = items.reduce((s, i) => s + (i.price || 0), 0), enough = total <= this._coins;
   el.innerHTML = `${BACK}<h3 style="font-size:28px;font-weight:400;margin:16px 0">Корзина <span style="font-size:16px;color:#8a94a3">${items.length}/${CART_MAX}</span></h3>` + (items.length ? `
@@ -434,12 +434,24 @@ buy: async function (id) {
 },
   becomeCreator: async function () {
   if (!this._me) return alert('Сначала войди в аккаунт');
+    await this.loadCoins();
   if (this._coins < 30) return alert('Не хватает монет: нужно 30, у вас ' + this._coins);
   if (!confirm('Стать креатором? Спишется 30 MilkyCoin.')) return;
   const r = await getSupabase().rpc('become_creator');
   if (r.error) return alert(r.error.message);
   this.setCoins(r.data); this._creator = true; this.renderShop();
   alert('Теперь вы креатор! Кабинет сверху справа.');
+},
+    loadCoins: async function () {
+  const sb = getSupabase(); if (!sb) return;
+  const me = (await sb.auth.getUser()).data.user; if (!me) return;
+  const r = await sb.from('profiles').select('coins').eq('id', me.id).maybeSingle();
+  this.setCoins(r.data ? r.data.coins : 0);
+},
+setCoins: function (n) {
+  this._coins = +n || 0;
+  const el = document.getElementById('mkCoins'); if (el) el.textContent = n;
+  document.dispatchEvent(new CustomEvent('coins', { detail: n }));
 },
 checkout: async function () {
   const ids = cart.get(); if (!ids.length) return;
