@@ -180,6 +180,77 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 </style>
 </head>
 <body>
+
+
+
+
+  <!-- === Модальное окно "Что нового?" === -->
+<div id="changelog-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+  <div style="background: #fff; width: 90%; max-width: 420px; border-radius: 24px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); font-family: inherit; color: var(--tx, #1f2937);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="font-size: 20px; font-weight: 800; margin: 0;">че у нас новенького на фейк платформе</h3>
+      <button id="changelog-close" style="border: 0; background: var(--c2, #f2f4f8); width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--mu, #7a8594);">✕</button>
+    </div>
+    <p style="font-size: 14px; color: var(--mu, #7a8594); margin-bottom: 20px;"> чуть там чуть сям вот что мы сделали:</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+      <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <div style="font-size: 13px; color: var(--mu, #7a8594); margin-top: 2px;">статусы (ссылку ставьте туда, зайдите в профиль и нажмите "редактировать профиль")</div>
+          <div style="font-size: 13px; color: var(--mu, #7a8594); margin-top: 2px;">авы (авы пока не ставятся, сори :Р)</div>
+          <div style="font-size: 13px; color: var(--mu, #7a8594); margin-top: 2px;">фото в пост (они тоже пока не ставятся, сори :Р)</div>
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 12px; align-items: flex-start;">
+        <div style="background: #e2e8f0; color: #1f2937; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; font-size: 18px; flex: none;">🚀</div>
+        <div>
+
+          <div style="font-size: 13px; color: var(--mu, #7a8594); margin-top: 2px;">если что то не пашет, пишите карычу в ленте xD </div>
+          <div style="font-size: 13px; color: var(--mu, #7a8594); margin-top: 2px;">p.s. я ваще не знаю, что работает а что нет LOL вахаха увидимся</div>
+        </div>
+      </div>
+    </div>
+
+    <button id="changelog-ok" style="width: 100%; height: 46px; border: 0; background: var(--pk, #f45b97); color: #fff; font-weight: 700; border-radius: 14px; cursor: pointer; font-size: 15px;">Круто, поняли!</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Укажи текущую верстку/версию обновления
+  const CURRENT_VERSION = 'milky_update_1.1';
+  
+  // Проверяем, видел ли пользователь это обновление
+  const seenVersion = localStorage.getItem('seen_changelog_version');
+  
+  if (seenVersion !== CURRENT_VERSION) {
+    // Показываем модалку с задержкой в 1 секунду, чтобы страница успела отрисоваться
+    setTimeout(() => {
+      const modal = document.getElementById('changelog-modal');
+      if (modal) modal.style.display = 'flex';
+    }, 1000);
+  }
+
+  // Кнопки закрытия
+  function closeChangelog() {
+    const modal = document.getElementById('changelog-modal');
+    if (modal) modal.style.display = 'none';
+    localStorage.setItem('seen_changelog_version', CURRENT_VERSION);
+  }
+
+  document.addEventListener('click', e => {
+    if (e.target.id === 'changelog-ok' || e.target.id === 'changelog-close' || e.target.id === 'changelog-modal') {
+      // Закрываем только если кликнули по крестику, кнопке или фону вне карточки
+      if (e.target.id === 'changelog-modal' && e.target !== document.querySelector('#changelog-modal > div')) return;
+      closeChangelog();
+    }
+  });
+})();
+</script>
+
+
+
+  
 <div class="shade" id="shade"></div>
 <aside class="drawer" id="drawer"></aside>
 <nav class="rail" id="rail"></nav><header class="mh" id="mh"></header>
