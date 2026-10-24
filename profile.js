@@ -183,6 +183,7 @@ async function render(u){
   if(tk!==tok)return;
   if(pr.error||!pr.data){put('<div class="pf-x pf-em">'+(pr.error?'Не удалось загрузить: '+esc(pr.error.message)+'. Проверь, что SQL выполнен.':'Профиль не найден.')+'</div>');return}
   const id=pr.data.id,mine=id===me.id;
+  const md=await SB.from('moderators').select('user_id').eq('user_id',me.id).maybeSingle();
   const [np,nf,ng,fw,ps,fo,su]=await Promise.all([
     SB.from('posts').select('id',{count:'exact',head:true}).eq('user_id',id),
     SB.from('follows').select('follower',{count:'exact',head:true}).eq('followee',id),
