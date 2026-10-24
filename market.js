@@ -80,16 +80,17 @@ async function authors(items) {
   const mix = a => shuffle(a).map(i => [i, Math.random() + ((i.sold || 0) < 3 ? 0.6 : 0)]).sort((x, y) => y[1] - x[1]).map(x => x[0]);
 
   window.Market = {
-    _me: null, _bought: new Set(), _lists: { status: [], banner: [] }, _coins: 0, _view: 'shop', _kind: 'status',
+    _me: null, _bought: new Set(), _lists: { status: [], banner: [], all: [] }, _coins: 0, _view: 'shop', _kind: 'status',
 open: function () { this.renderUI(); this.show('shop'); this.badge(); this.loadCoins(); },
-show: function (p) {
+
+    show: function (p) {
   const map = { shop: 'pgShop', list: 'pgList', cart: 'pgCart', creator: 'creatorPanel', mod: 'modPanel' };
   Object.keys(map).forEach(k => { const e = document.getElementById(map[k]); if (e) e.style.display = k === p ? 'block' : 'none'; });
+  const D = { mkSearchBtn: 'inline-flex', mkTools: 'flex', btnCart: 'block' };
+  Object.keys(D).forEach(id => { const e = document.getElementById(id); if (e) e.style.display = p === 'list' ? 'none' : D[id]; });
   if (p !== this._view) { window.scrollTo(0, 0); const m = document.querySelector('.main'); if (m) m.scrollTop = 0; }
   this._view = p;
 },
-    const D = { mkSearchBtn: 'inline-flex', mkTools: 'flex', btnCart: 'block' };
-Object.keys(D).forEach(id => { const e = document.getElementById(id); if (e) e.style.display = p === 'list' ? 'none' : D[id]; });
 badge: function () {
   const n = cart.get().length, e = document.getElementById('mkCartN'); if (!e) return;
   e.textContent = n; e.style.display = n ? 'block' : 'none';
@@ -191,6 +192,9 @@ badge: function () {
 };
 $('btnMod').onclick = () => { self.show('mod'); self.loadModerationQueue(); };
 $('btnCart').onclick = () => self.openCart();
+      $('btnAddItem').onclick = () => { $('creatorModal').style.display = 'flex'; };
+const close = () => { $('creatorModal').style.display = 'none'; reset(); };
+$('btnCloseCreator').onclick = close; $('itCancel').onclick = close;
 
       function reset() {
         crop = null; $('itFile').value = ''; $('itFile').disabled = !$('itKind').value;
