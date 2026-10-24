@@ -3,12 +3,15 @@
 const H0=location.hash;
 const sec=document.createElement('section');sec.id='v-prof';sec.hidden=true;
 document.querySelector('.main').appendChild(sec);
-sec.innerHTML='<div class="pf-nt" id="pf-nt" hidden></div><div id="pf-c"></div><input type="file" id="pf-file" accept="image/*" hidden><input type="file" id="pf-pfile" accept="image/*" hidden>';
+sec.innerHTML='<div class="pf-nt" id="pf-nt" hidden></div><div id="pf-c"></div><input type="file" id="pf-file" accept="image/*" hidden><input type="file" id="pf-cover-file" accept="image/*" hidden><input type="file" id="pf-pfile" accept="image/*" hidden>';
 const $=s=>sec.querySelector(s);
 const put=h=>{$('#pf-c').innerHTML=h};
 const db=()=>window.SB;
 const SBU='https://sjwvrljmqpbopbxqkhkl.supabase.co',SBK='sb_publishable_mWqrZq0Vw65Ahk7ZIbtlNQ_owreCtcj';
 const BKT='avatars',VIEW=300,CR=130,OUT=800;
+const B_W=750, B_H=230;
+const C_W=320, C_H=Math.round(320*(230/750));
+
 function getSB(){return new Promise(res=>{let n=0;const t=setInterval(()=>{
   if(!window.SB&&window.supabase)window.SB=window.supabase.createClient(SBU,SBK);
   if(window.SB){clearInterval(t);res(window.SB)}else if(++n>60){clearInterval(t);res(null)}},100)})}
@@ -176,39 +179,68 @@ function editHtml(){
   const F=[['nick','Никнейм','От 5 до 15 символов: латиница, цифры и _',p.nick||'',15],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0,1],['name','Имя в чате','От 2 до 30 символов',p.name||'',30],['plate','Плашка статуса','Ссылка на PNG 500×166 (начинается с https://)',p.plate_url||'',300]];
   return `<div class="pf-x pf-ed"><div class="pf-eh"><div><h3>Редактировать профиль</h3><small>Каждый параметр сохраняется отдельно</small></div><button class="pf-b g" data-x>Готово</button></div>`+
   `<div class="pf-f"><label><b>Фото профиля</b><small>Выбери фото и обрежь по кругу</small></label><span class="pf-mu">${p.avatar_url?'Фото загружено':'Пока нет фото'}</span><div class="pf-bs"><button class="pf-b" data-ava>Выбрать фото</button>${p.avatar_url?'<button class="pf-b g" data-avarm>Убрать</button>':''}</div></div>`+
+  `<div class="pf-f"><label><b>Баннер профиля</b><small>Размер 750×230 пикселей</small></label><span class="pf-mu">${p.cover_url?'Баннер загружен':'Пока нет баннера'}</span><div class="pf-bs"><button class="pf-b" data-cover-btn>Выбрать баннер</button>${p.cover_url?'<button class="pf-b g" data-cover-rm>Убрать</button>':''}</div></div>`+
   `<div class="pf-f"><label><b>Форма фото</b><small>Как показывать большое фото в профиле</small></label><span></span><div class="pf-bs"><button class="pf-b${p.ava_square?' g':''}" data-shape="0">Круг</button><button class="pf-b${p.ava_square?'':' g'}" data-shape="1">Квадрат</button></div></div>`+
   F.map(f=>{const v=ev[f[0]]!=null?ev[f[0]]:f[3],m=S.fm[f[0]];
     const ctl=f[5]?`<textarea data-k="${f[0]}">${esc(v)}</textarea>`:`<input data-k="${f[0]}" value="${esc(v)}" maxlength="${f[4]}"><span class="pf-cnt" data-c="${f[0]}">${v.length}/${f[4]}</span>`;
     return `<div class="pf-f"><label><b>${f[1]}</b><small>${f[2]}</small></label><div><div class="pf-iw">${ctl}</div><div class="pf-m${m&&m.e?' e':''}">${m?esc(m.t):''}</div></div><button class="pf-b" data-s="${f[0]}">Сохранить</button></div>`}).join('')+
   `<div class="pf-f"><label><b>Комментарии</b><small>Можно запретить комментарии под своими публикациями</small></label><span></span><button class="pf-sw${p.comments_off?' on':''}" data-sw role="switch" aria-checked="${!!p.comments_off}" aria-label="Запретить комментарии"><i></i></button></div></div>`;
 }
+
 function cropHtml(){
-  const c=S.crop;
-  return `<div class="pf-x pf-cr"><h3>Фото профиля</h3><small>Двигай фото пальцем. Квадрат: большое фото в профиле. Пунктирный круг: маленькие аватарки (чат, лента). Затемнённые углы в круглых не видны</small><canvas id="pf-cv" width="${VIEW}" height="${VIEW}"></canvas><input type="range" id="pf-z" min="0" max="100" value="${c.t}" aria-label="Масштаб"><div class="r"><button class="pf-b g" data-cx>Отмена</button><button class="pf-b" data-csv${c.busy?' disabled':''}>${c.busy?'Загружаем…':'Сохранить фото'}</button></div></div>`;
+  const c=S.crop, isCover = c.type === 'cover';
+  return `<div class="pf-x pf-cr"><h3>${isCover?'Баннер профиля':'Фото профиля'}</h3><small>${isCover?'Двигай картинку, чтобы настроить область баннера (750×230)':'Двигай фото пальцем. Квадрат: большое фото в профиле. Пунктирный круг: маленькие аватарки.'}</small><canvas id="pf-cv" width="${VIEW}" height="${VIEW}"></canvas><input type="range" id="pf-z" min="0" max="100" value="${c.t}" aria-label="Масштаб"><div class="r"><button class="pf-b g" data-cx>Отмена</button><button class="pf-b" data-csv${c.busy?' disabled':''}>${c.busy?'Загружаем…':(isCover?'Сохранить баннер':'Сохранить фото')}</button></div></div>`;
 }
+
 function paint(){
   const cv=$('#pf-cv');if(!cv||!S||!S.crop)return;
-  const c=S.crop,x=cv.getContext('2d');
+  const c=S.crop,x=cv.getContext('2d'), isCover = c.type === 'cover';
   x.clearRect(0,0,VIEW,VIEW);
   x.drawImage(c.img,c.x,c.y,c.img.width*c.s,c.img.height*c.s);
-  const m=VIEW/2-CR,s2=2*CR;
-  x.save();x.fillStyle='rgba(0,0,0,.6)';x.beginPath();x.rect(0,0,VIEW,VIEW);x.rect(m,m,s2,s2);x.fill('evenodd');
-  x.fillStyle='rgba(0,0,0,.28)';x.beginPath();x.rect(m,m,s2,s2);x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2,true);x.fill('evenodd');x.restore();
-  x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(m,m,s2,s2);
-  x.save();x.setLineDash([6,5]);x.globalAlpha=.85;x.beginPath();x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2);x.stroke();x.restore();
+
+  x.save();
+  x.fillStyle='rgba(0,0,0,.6)';
+  x.beginPath();
+  x.rect(0,0,VIEW,VIEW);
+
+  if(isCover){
+    const rx = (VIEW - C_W) / 2, ry = (VIEW - C_H) / 2;
+    x.rect(rx, ry, C_W, C_H);
+    x.fill('evenodd');
+    x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(rx, ry, C_W, C_H);
+  } else {
+    const m=VIEW/2-CR,s2=2*CR;
+    x.rect(m,m,s2,s2);
+    x.fill('evenodd');
+    x.fillStyle='rgba(0,0,0,.28)';x.beginPath();x.rect(m,m,s2,s2);x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2,true);x.fill('evenodd');
+    x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(m,m,s2,s2);
+    x.setLineDash([6,5]);x.globalAlpha=.85;x.beginPath();x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2);x.stroke();
+  }
+  x.restore();
 }
+
 function clampC(c){
-  const m=VIEW/2-CR,iw=c.img.width*c.s,ih=c.img.height*c.s;
-  c.x=Math.min(m,Math.max(VIEW-m-iw,c.x));
-  c.y=Math.min(m,Math.max(VIEW-m-ih,c.y));
+  const isCover = c.type === 'cover';
+  const iw=c.img.width*c.s, ih=c.img.height*c.s;
+  if(isCover){
+    const rx = (VIEW - C_W) / 2, ry = (VIEW - C_H) / 2;
+    c.x=Math.min(rx, Math.max(VIEW - rx - iw, c.x));
+    c.y=Math.min(ry, Math.max(VIEW - ry - ih, c.y));
+  } else {
+    const m=VIEW/2-CR;
+    c.x=Math.min(m,Math.max(VIEW-m-iw,c.x));
+    c.y=Math.min(m,Math.max(VIEW-m-ih,c.y));
+  }
 }
+
 function zoom(t){
   const c=S.crop,ox=(VIEW/2-c.x)/c.s,oy=(VIEW/2-c.y)/c.s;
   c.t=t;c.s=c.min*(1+3*t/100);
   c.x=VIEW/2-ox*c.s;c.y=VIEW/2-oy*c.s;
   clampC(c);paint();
 }
-function openCrop(f){
+
+function openCrop(f, type='ava'){
   if(!f||!S||!S.mine)return;
   if(!/^image\//.test(f.type)){note('Выбери картинку: JPG или PNG');return}
   const u=URL.createObjectURL(f),img=new Image();
@@ -216,35 +248,67 @@ function openCrop(f){
     URL.revokeObjectURL(u);
     const k=Math.min(1,2400/Math.max(img.width,img.height));let src=img;
     if(k<1){const t=document.createElement('canvas');t.width=Math.round(img.width*k);t.height=Math.round(img.height*k);t.getContext('2d').drawImage(img,0,0,t.width,t.height);src=t}
-    const min=2*CR/Math.min(src.width,src.height);
-    S.crop={img:src,min,s:min,t:0,x:VIEW/2-src.width*min/2,y:VIEW/2-src.height*min/2,busy:false};
+    
+    let min;
+    if(type==='cover'){
+      min=Math.max(C_W/src.width, C_H/src.height);
+    } else {
+      min=2*CR/Math.min(src.width,src.height);
+    }
+    
+    S.crop={img:src,type,min,s:min,t:0,x:VIEW/2-src.width*min/2,y:VIEW/2-src.height*min/2,busy:false};
     clampC(S.crop);draw();
     const el=$('.pf-cr');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   };
   img.onerror=()=>{URL.revokeObjectURL(u);note('Не удалось открыть картинку')};
   img.src=u;
 }
-async function saveAva(){
+
+async function saveCropResult(){
   const c=S&&S.crop,SB=db();if(!c||c.busy)return;
   c.busy=true;draw();
-  const o=document.createElement('canvas');o.width=o.height=OUT;
-  const sw=2*CR/c.s;
-  o.getContext('2d').drawImage(c.img,(VIEW/2-CR-c.x)/c.s,(VIEW/2-CR-c.y)/c.s,sw,sw,0,0,OUT,OUT);
+  const isCover = c.type === 'cover';
+  const o=document.createElement('canvas');
+  
+  if(isCover){
+    o.width = B_W; o.height = B_H;
+    const rx = (VIEW - C_W) / 2, ry = (VIEW - C_H) / 2;
+    o.getContext('2d').drawImage(c.img, (rx - c.x) / c.s, (ry - c.y) / c.s, C_W / c.s, C_H / c.s, 0, 0, B_W, B_H);
+  } else {
+    o.width = o.height = OUT;
+    const sw=2*CR/c.s;
+    o.getContext('2d').drawImage(c.img,(VIEW/2-CR-c.x)/c.s,(VIEW/2-CR-c.y)/c.s,sw,sw,0,0,OUT,OUT);
+  }
+
   const blob=await new Promise(r=>o.toBlob(r,'image/jpeg',.88));
-  const path=S.id+'.jpg';
+  const path = isCover ? (S.id+'_cover.jpg') : (S.id+'.jpg');
+  
   const u=await SB.storage.from(BKT).upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
   if(u.error){c.busy=false;draw();note('Не загрузилось: '+u.error.message);return}
   const url=SB.storage.from(BKT).getPublicUrl(path).data.publicUrl+'?v='+Date.now();
-  const r=await SB.rpc('set_avatar',{p_url:url});
+  
+  const r = isCover ? await SB.rpc('set_cover',{p_url:url}) : await SB.rpc('set_avatar',{p_url:url});
   if(r.error){c.busy=false;draw();note('Не сохранилось: '+r.error.message);return}
-  S.p.avatar_url=url;S.crop=null;draw();note('Фото обновлено');
+  
+  if(isCover) S.p.cover_url=url; else S.p.avatar_url=url;
+  S.crop=null;draw();
+  note(isCover ? 'Баннер обновлен' : 'Фото обновлено');
 }
+
+async function rmCover(){
+  const SB=db(), r=await SB.rpc('set_cover',{p_url:''});
+  if(r.error){note('Не получилось: '+r.error.message);return}
+  SB.storage.from(BKT).remove([S.id+'_cover.jpg']);
+  S.p.cover_url=null;draw();note('Баннер убран');
+}
+
 async function rmAva(){
   const SB=db(),r=await SB.rpc('set_avatar',{p_url:''});
   if(r.error){note('Не получилось: '+r.error.message);return}
   SB.storage.from(BKT).remove([S.id+'.jpg']);
   S.p.avatar_url=null;draw();note('Фото убрано');
 }
+
 function draw(){
   const ta=$('#pf-t');if(ta)S.draft=ta.value;
   sec.querySelectorAll('[data-k]').forEach(i=>S.ev[i.dataset.k]=i.value);
@@ -275,6 +339,7 @@ sec.addEventListener('input',e=>{
   if(k==='nick'){const v=i.value.replace(/[^A-Za-z0-9_]/g,'');if(v!==i.value)i.value=v}
   const c=$(`[data-c="${k}"]`);if(c)c.textContent=i.value.length+'/'+i.maxLength;
 });
+
 function shrinkImg(f,max){
   return new Promise((res,rej)=>{
     const u=URL.createObjectURL(f),im=new Image();
@@ -283,8 +348,10 @@ function shrinkImg(f,max){
     im.src=u;
   });
 }
+
 sec.addEventListener('change',async e=>{
-  if(e.target.id==='pf-file'){openCrop(e.target.files[0]);return}
+  if(e.target.id==='pf-file'){openCrop(e.target.files[0],'ava');return}
+  if(e.target.id==='pf-cover-file'){openCrop(e.target.files[0],'cover');return}
   if(e.target.id!=='pf-pfile')return;
   const f=e.target.files[0];if(!f||!S||!S.mine)return;
   if(!/^image\//.test(f.type)){note('Выбери картинку: JPG или PNG');return}
@@ -294,6 +361,7 @@ sec.addEventListener('change',async e=>{
     S.pimg={blob:b,url:URL.createObjectURL(b)};draw();
   }catch(err){note('Не удалось открыть картинку')}
 });
+
 let dr=null;
 sec.addEventListener('pointerdown',e=>{
   const cv=e.target.closest&&e.target.closest('#pf-cv');if(!cv||!S||!S.crop)return;
@@ -309,18 +377,21 @@ sec.addEventListener('pointermove',e=>{
 });
 const endDr=()=>{dr=null};
 sec.addEventListener('pointerup',endDr);sec.addEventListener('pointercancel',endDr);
+
 async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
   if(b('[data-go]'))MS.show('msg');
   else if(b('[data-ava]')){const f=$('#pf-file');f.value='';f.click()}
+  else if(b('[data-cover-btn]')){const f=$('#pf-cover-file');f.value='';f.click()}
   else if(b('[data-avarm]'))rmAva();
+  else if(b('[data-cover-rm]'))rmCover();
   else if((x=b('[data-shape]'))){
     const sq=x.dataset.shape==='1',r=await SB.rpc('set_ava_shape',{p_sq:sq});
     if(r.error){note('Не получилось: '+r.error.message);return}
     S.p.ava_square=sq;draw();
   }
   else if(b('[data-cx]')){S.crop=null;draw()}
-  else if(b('[data-csv]'))saveAva();
+  else if(b('[data-csv]'))saveCropResult();
   else if((x=b('[data-open]')))render(x.dataset.open);
   else if(b('[data-edit]')){S.ed=true;draw();const el=$('.pf-ed');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
   else if(b('[data-x]')){S.ed=false;S.ev={};S.fm={};draw()}
