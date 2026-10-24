@@ -1042,10 +1042,12 @@ function rCl(){
   $('#cl-bar').style.width=(done.size/CL.length*100)+'%';
 }
 $('#cl').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;done.has(i)?done.delete(i):done.add(i);rCl()});
-const HW=[['isl','Введение','','20 Октября 20:00'],['phys','Физика','','15 Октября 20:00'],['bio','Биология','','13 Октября 20:00'],['alg','Алгебра','','15 Октября 20:00'],['geom','Геометрия','','14 Октября 20:00'],['inf','Информатика','','13 Октября 20:00']];
+const HW_ALL=[['phys','Физика','','15 Октября 20:00'],['bio','Биология','','13 Октября 20:00'],['alg','Алгебра','','15 Октября 20:00'],['geom','Геометрия','','14 Октября 20:00'],['inf','Информатика','','13 Октября 20:00']];
+const HIDE_HW=true; // true — все ДЗ скрыты, false — показать
+const HW=HIDE_HW?[]:HW_ALL;
 function rHw(){
   $('#hw').innerHTML=HW.map(w=>{const s=HWM.st(w[0]);const bt=s==='graded'?'<button class="go ok" data-hw="'+w[0]+'">Оценка 5 ✓</button>':s==='review'?'<button class="go" data-hw="'+w[0]+'" style="background:#eef1f4;color:#6b7580">На проверке</button>':'<button class="go" data-hw="'+w[0]+'">Открыть ›</button>';
-    return `<div class="it"><div class="ico">${ic('note')}</div><div><b>${w[1]}${w[2]?`<span class="tag2">${w[2]}</span>`:''}</b><small>Сдать до <strong>${w[3]}</strong></small></div>${bt}</div>`}).join('');
+    return `<div class="it"><div class="ico">${ic('note')}</div><div><b>${w[1]}${w[2]?`<span class="tag2">${w[2]}</span>`:''}</b><small>Сдать до <strong>${w[3]}</strong></small></div>${bt}</div>`}).join('')||'<div class="fr">Задания скоро появятся 🌿</div>';
 }
 $('#hw').addEventListener('click',e=>{const b=e.target.closest('[data-hw]');if(b)HWM.open(b.dataset.hw)});
 const GR=[['Домашнее задание','Русский язык',5,'11 Октября'],['Домашнее задание','География',4,'10 Октября'],['Домашнее задание','Физика',5,'10 Октября'],['Оценка на уроке','Биология',5,'10 Октября']];
