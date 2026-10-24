@@ -45,12 +45,39 @@
   }
   const KINDS = { status: 'Статусы', banner: 'Баннеры' };
 
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+const COIN = '<i style="display:inline-block;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f2a900);vertical-align:-3px"></i>';
+const CART_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>';
+const CART_KEY = 'mk_cart', CART_MAX = 50, PAGE = 15;
+const GRID = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px';
+const BACK = '<button onclick="Market.show(\'shop\')" style="padding:10px 18px;border:0;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06);font-weight:700;cursor:pointer">← Назад</button>';
+const cart = {
+  get() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) { return []; } },
+  set(a) { localStorage.setItem(CART_KEY, JSON.stringify(a)); Market.badge(); }
+};
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+async function authors(items) {
+  const sb = getSupabase(), ids = [...new Set(items.map(i => i.user_id))];
+  if (!sb || !ids.length) return items;
+  const r = await sb.from('profiles').select('id,name').in('id', ids);
+  const M = Object.fromEntries((r.data || []).map(x => [x.id, x.name]));
+  items.forEach(i => i._a = M[i.user_id] || '');
+  return items;
+}
+
   window.Market = {
-    open: function () {
-      this.renderUI();
-      this.loadItems();
-      this.loadCoins();
-    },
+    _me: null, _bought: new Set(), _lists: { status: [], banner: [] }, _coins: 0, _view: 'shop', _kind: 'status',
+open: function () { this.renderUI(); this.show('shop'); this.badge(); this.loadCoins(); },
+show: function (p) {
+  const map = { shop: 'pgShop', list: 'pgList', cart: 'pgCart', creator: 'creatorPanel', mod: 'modPanel' };
+  Object.keys(map).forEach(k => { const e = document.getElementById(map[k]); if (e) e.style.display = k === p ? 'block' : 'none'; });
+  if (p !== this._view) { window.scrollTo(0, 0); const m = document.querySelector('.main'); if (m) m.scrollTop = 0; }
+  this._view = p;
+},
+badge: function () {
+  const n = cart.get().length, e = document.getElementById('mkCartN'); if (!e) return;
+  e.textContent = n; e.style.display = n ? 'block' : 'none';
+},
 
     hide: function () {
       const el = document.getElementById('v-market');
@@ -66,36 +93,36 @@
       }
       c.hidden = false; c.style.display = 'block';
       c.innerHTML = `
+
       <div style="padding:24px;max-width:1100px;margin:0 auto;font-family:inherit;color:var(--text,#333)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-          <h2 style="margin:0;font-size:28px;font-weight:400">Маркетплейс</h2>
-          <div style="background:#fff;border-radius:14px;padding:8px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)">Баланс: <span id="mkCoins">…</span> 🪙</div>
-        </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+    <h2 style="margin:0;font-size:28px;font-weight:400">Маркетплейс</h2>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button id="btnMod" style="display:none;padding:10px 18px;border:0;border-radius:12px;background:#ffb703;font-weight:700;cursor:pointer">Модерация</button>
+      <button id="btnOpenCreator" style="padding:10px 18px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Кабинет креатора</button>
+      <div style="background:#fff;border-radius:14px;padding:10px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)"><span id="mkCoins">…</span> ${COIN}</div>
+      <button id="btnCart" aria-label="Корзина" style="position:relative;width:44px;height:44px;border:0;border-radius:14px;background:#fff;color:#0b5f8a;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.06)">${CART_SVG}<span id="mkCartN" style="display:none;position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:#e63946;color:#fff;font-size:12px;font-weight:700;line-height:20px;padding:0 5px">0</span></button>
+    </div>
+  </div>
 
-        <div style="background:linear-gradient(120deg,#cdeeff,#e6f6ff);border-radius:24px;padding:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
-          <div style="font-size:22px;font-weight:600;color:#0b5f8a">Личный кабинет креатора</div>
-          <div style="display:flex;gap:10px">
-            <button id="btnMod" style="display:none;padding:12px 22px;border:0;border-radius:12px;background:#ffb703;font-weight:700;cursor:pointer">Модерация</button>
-            <button id="btnOpenCreator" style="padding:12px 28px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Войти</button>
-          </div>
-        </div>
+  <div id="pgShop"></div>
+  <div id="pgList" style="display:none"></div>
+  <div id="pgCart" style="display:none"></div>
 
-        <h3 style="margin:28px 0 14px;font-size:20px">Товары</h3>
-        <div id="marketCatalog" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
+  <div id="creatorPanel" style="display:none">
+    ${BACK}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 14px;flex-wrap:wrap;gap:10px">
+      <h3 style="margin:0;font-size:28px;font-weight:400">Кабинет креатора</h3>
+      <button id="btnAddItem" style="padding:10px 18px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:12px;cursor:pointer">+ Добавить товар</button>
+    </div>
+    <div id="myItems" style="${GRID}"></div>
+  </div>
 
-        <div id="creatorPanel" style="display:none;margin-top:28px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <h3 style="margin:0;font-size:22px">Панель управления Креатора</h3>
-            <button id="btnAddItem" style="padding:10px 18px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:12px;cursor:pointer">+ Добавить товар</button>
-          </div>
-          <div id="myItems" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
-        </div>
-
-        <div id="modPanel" style="display:none;margin-top:28px">
-          <h3 style="font-size:20px">Очередь модерации</h3>
-          <div id="moderationQueue" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
-        </div>
-
+  <div id="modPanel" style="display:none">
+    ${BACK}
+    <h3 style="margin:16px 0 14px;font-size:28px;font-weight:400">Очередь модерации</h3>
+    <div id="moderationQueue" style="${GRID}"></div>
+  </div>
         <div id="creatorModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;justify-content:center;align-items:center">
           <div style="background:#fff;border-radius:20px;width:92%;max-width:560px;max-height:92vh;overflow:auto;padding:26px;position:relative">
             <button id="btnCloseCreator" style="position:absolute;right:16px;top:16px;border:0;background:#f0f0f0;width:32px;height:32px;border-radius:50%;cursor:pointer">✕</button>
@@ -140,15 +167,12 @@
       const VIEW = 300, CW = 300, CH = Math.round(300 * 230 / 750);
 
       $('btnOpenCreator').onclick = async () => {
-        const sb = getSupabase(), u = sb && (await sb.auth.getUser()).data.user;
-        if (!u) return alert('Сначала войди в аккаунт');
-        const p = $('creatorPanel'); p.style.display = 'block';
-        self.loadMyItems(); p.scrollIntoView({ behavior: 'smooth' });
-      };
-      $('btnMod').onclick = () => { $('modPanel').style.display = 'block'; self.loadModerationQueue(); };
-      $('btnAddItem').onclick = () => { $('creatorModal').style.display = 'flex'; };
-      const close = () => { $('creatorModal').style.display = 'none'; reset(); };
-      $('btnCloseCreator').onclick = close; $('itCancel').onclick = close;
+  const sb = getSupabase(), u = sb && (await sb.auth.getUser()).data.user;
+  if (!u) return alert('Сначала войди в аккаунт');
+  self.show('creator'); self.loadMyItems();
+};
+$('btnMod').onclick = () => { self.show('mod'); self.loadModerationQueue(); };
+$('btnCart').onclick = () => self.openCart();
 
       function reset() {
         crop = null; $('itFile').value = ''; $('itFile').disabled = !$('itKind').value;
@@ -230,58 +254,109 @@
     },
 
     card: function (it, actions, badge) {
-      const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
-      return `<div style="background:#fff;border-radius:22px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:10px;aspect-ratio:1/1;overflow:hidden">
-        <div style="flex:1;min-height:0;background:#f4f6f8;border-radius:14px;display:grid;place-items:center;overflow:hidden;padding:6px">
-          <img src="${esc(it.image_url)}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px">
-        </div>
-        <div style="flex:none;min-width:0">
-          <span style="font-size:11px;border:1px solid #00bcf2;color:#00a5d6;border-radius:12px;padding:2px 9px">${KINDS[it.kind] || 'Статусы'}</span>
-          ${badge || ''}
-          <div style="font-size:16px;margin:6px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title)}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:19px">${it.price || 10} 🪙</b>${actions}</div>
-        </div></div>`;
-    },
-    
-    loadItems: async function () {
-      const el = document.getElementById('marketCatalog'), sb = getSupabase(); if (!el || !sb) return;
-      const me = (await sb.auth.getUser()).data.user;
-      const r = await sb.from('market_items').select('*').eq('status', 'approved').order('id', { ascending: false });
-      if (r.error) { el.innerHTML = '<p style="color:red">' + r.error.message + '</p>'; return; }
-      let bought = new Set();
-      if (me) {
-        const p = await sb.from('purchases').select('item_id').eq('buyer', me.id);
-        bought = new Set((p.data || []).map(x => x.item_id));
-      }
-      const btn = (t, on, dis) => `<button ${dis ? 'disabled' : ''} onclick="${on}" style="padding:10px 20px;border:0;border-radius:12px;background:${dis ? '#cfd5df' : '#00bcf2'};color:#fff;font-weight:700">${t}</button>`;
-      el.innerHTML = (r.data || []).map(i => this.card(i,
-        me && i.user_id === me.id ? btn('Ваш товар', '', true)
-        : bought.has(i.id) ? btn('Куплено', '', true)
-        : btn('Купить', `Market.buy(${i.id})`)
-      )).join('') || '<p style="color:#888">Пока нет товаров</p>';
-    },
-    loadCoins: async function () {
-      const sb = getSupabase(); if (!sb) return;
-      const me = (await sb.auth.getUser()).data.user; if (!me) return;
-      const r = await sb.from('profiles').select('coins').eq('id', me.id).maybeSingle();
-      this.setCoins(r.data ? r.data.coins : 0);
-    },
-    setCoins: function (n) {
-      const el = document.getElementById('mkCoins'); if (el) el.textContent = n;
-      document.dispatchEvent(new CustomEvent('coins', { detail: n }));
-    },
-    buy: async function (id) {
-      if (!confirm('Купить этот товар?')) return;
-      const r = await getSupabase().rpc('buy_item', { p_item: id });
-      if (r.error) return alert(r.error.message);
-      this.setCoins(r.data);
-      alert('Куплено!');
-      this.loadItems();
-    },
+  return `<div style="background:#fff;border-radius:22px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:10px;overflow:hidden">
+    <div style="height:150px;background:#f4f6f8;border-radius:14px;display:grid;place-items:center;overflow:hidden;padding:6px">
+      <img src="${esc(it.image_url)}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px">
+    </div>
+    <div style="min-width:0">
+      <span style="font-size:11px;border:1px solid #00bcf2;color:#00a5d6;border-radius:12px;padding:2px 9px">${KINDS[it.kind] || 'Статусы'}</span>${badge || ''}
+      <div style="font-size:16px;margin:6px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title)}</div>
+      <div style="font-size:12px;color:#8a94a3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it._a || '')}</div>
+      <div style="font-size:12px;color:#8a94a3;margin-bottom:6px">${it.sold ? 'Продано: ' + it.sold : 'Новинка'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:19px">${it.price || 10} ${COIN}</b>${actions}</div>
+    </div></div>`;
+},
+act: function (i) {
+  const dis = t => `<button disabled style="padding:10px 16px;border:0;border-radius:12px;background:#cfd5df;color:#fff;font-weight:700">${t}</button>`;
+  if (this._me && i.user_id === this._me.id) return dis('Ваш товар');
+  if (this._bought.has(i.id)) return dis('Куплено');
+  const inC = cart.get().includes(i.id);
+  return `<span style="display:flex;gap:6px"><button onclick="Market.toCart(${i.id})" aria-label="В корзину" style="width:40px;height:40px;border:1px solid #00bcf2;border-radius:12px;background:${inC ? '#00bcf2' : '#fff'};color:${inC ? '#fff' : '#00a5d6'};cursor:pointer">${inC ? '✓' : CART_SVG.replace('22', '18')}</button><button onclick="Market.buy(${i.id})" style="padding:10px 16px;border:0;border-radius:12px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Купить</button></span>`;
+},
+loadItems: async function () {
+  const el = document.getElementById('pgShop'), sb = getSupabase(); if (!el || !sb) return;
+  const me = (await sb.auth.getUser()).data.user;
+  const r = await sb.from('market_items').select('*').eq('status', 'approved').order('id', { ascending: false }).limit(600);
+  if (r.error) { el.innerHTML = '<p style="color:red">' + esc(r.error.message) + '</p>'; return; }
+  this._me = me; this._bought = new Set();
+  if (me) {
+    const p = await sb.from('purchases').select('item_id').eq('buyer', me.id);
+    this._bought = new Set((p.data || []).map(x => x.item_id));
+  }
+  const all = await authors(r.data || []);
+  this._lists = { status: shuffle(all.filter(i => i.kind !== 'banner')), banner: shuffle(all.filter(i => i.kind === 'banner')) };
+  this.refresh();
+},
+renderShop: function () {
+  const el = document.getElementById('pgShop'); if (!el) return;
+  const sec = (kind, title, all) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:28px 0 14px"><h3 style="font-size:28px;font-weight:400;margin:0">${title}</h3><button onclick="Market.loadItems()" style="padding:8px 14px;border:0;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06);cursor:pointer">↻ Обновить</button></div>
+    <div style="${GRID}">${this._lists[kind].slice(0, PAGE).map(i => this.card(i, this.act(i))).join('') || '<p style="color:#888">Пока нет товаров</p>'}</div>
+    <div style="text-align:center;margin-top:18px"><button onclick="Market.openList('${kind}')" style="padding:12px 40px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:14px;cursor:pointer;font-size:16px">${all}</button></div>`;
+  el.innerHTML = sec('status', 'Статусы', 'Все статусы') + sec('banner', 'Баннеры', 'Все баннеры');
+},
+openList: function (kind) {
+  this._kind = kind; this.show('list');
+  document.getElementById('pgList').innerHTML = `${BACK}<h3 style="font-size:28px;font-weight:400;margin:16px 0">${kind === 'status' ? 'Все статусы' : 'Все баннеры'}</h3>
+    <div style="${GRID}">${this._lists[kind].map(i => this.card(i, this.act(i))).join('') || '<p style="color:#888">Пока нет товаров</p>'}</div>`;
+},
+refresh: function () {
+  if (this._view === 'list') this.openList(this._kind);
+  else if (this._view === 'cart') this.openCart();
+  else this.renderShop();
+  this.badge();
+},
+toCart: function (id) {
+  if (!this._me) return alert('Сначала войди в аккаунт');
+  let a = cart.get();
+  if (a.includes(id)) a = a.filter(x => x !== id);
+  else { if (a.length >= CART_MAX) return alert('В корзине максимум ' + CART_MAX + ' товаров'); a.push(id); }
+  cart.set(a); this.refresh();
+},
+openCart: async function () {
+  const sb = getSupabase(), el = document.getElementById('pgCart'); if (!sb || !el) return;
+  this.show('cart'); el.innerHTML = '<p style="color:#888">Загрузка…</p>';
+  const ids = cart.get(); let items = [];
+  if (ids.length) {
+    const r = await sb.from('market_items').select('*').in('id', ids).eq('status', 'approved');
+    items = (r.data || []).filter(i => !this._bought.has(i.id) && !(this._me && i.user_id === this._me.id));
+    await authors(items);
+  }
+  cart.set(items.map(i => i.id));
+  const total = items.reduce((s, i) => s + (i.price || 0), 0), enough = total <= this._coins;
+  el.innerHTML = `${BACK}<h3 style="font-size:28px;font-weight:400;margin:16px 0">Корзина <span style="font-size:16px;color:#8a94a3">${items.length}/${CART_MAX}</span></h3>` + (items.length ? `
+    <div style="${GRID}">${items.map(i => this.card(i, `<button onclick="Market.toCart(${i.id})" style="padding:10px 16px;border:0;border-radius:12px;background:#e63946;color:#fff;font-weight:700;cursor:pointer">Убрать</button>`)).join('')}</div>
+    <div style="margin-top:20px;background:#fff;border-radius:20px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 6px 24px rgba(0,0,0,.05)">
+      <div><b style="font-size:22px">Итого: ${total} ${COIN}</b>${enough ? '' : '<div style="color:#e63946;font-size:13px;margin-top:4px">Не хватает монет (у вас ' + this._coins + ')</div>'}</div>
+      <div style="display:flex;gap:10px"><button onclick="Market.clearCart()" style="padding:12px 20px;border:0;border-radius:12px;background:#ffe3e8;color:#d6407f;font-weight:700;cursor:pointer">Очистить</button><button onclick="Market.checkout()" ${enough ? '' : 'disabled'} style="padding:12px 24px;border:0;border-radius:12px;background:${enough ? '#00bcf2' : '#cfd5df'};color:#fff;font-weight:700;cursor:pointer">Оплатить всё</button></div>
+    </div>` : '<p style="color:#888">Корзина пуста</p>');
+},
+clearCart: function () { if (confirm('Очистить корзину?')) { cart.set([]); this.openCart(); } },
+pay: async function (ids) {
+  const r = await getSupabase().rpc('buy_items', { p_items: ids });
+  if (r.error) { alert(r.error.message); return false; }
+  this.setCoins(r.data); ids.forEach(x => this._bought.add(x));
+  cart.set(cart.get().filter(x => !ids.includes(x)));
+  const sold = [...this._lists.status, ...this._lists.banner];
+  sold.forEach(i => { if (ids.includes(i.id)) i.sold = (i.sold || 0) + 1; });
+  return true;
+},
+buy: async function (id) {
+  if (!this._me) return alert('Сначала войди в аккаунт');
+  if (!confirm('Купить этот товар?')) return;
+  if (await this.pay([id])) { alert('Куплено!'); this.refresh(); }
+},
+checkout: async function () {
+  const ids = cart.get(); if (!ids.length) return;
+  if (!confirm('Оплатить товаров: ' + ids.length + '?')) return;
+  if (await this.pay(ids)) { alert('Куплено!'); this.openCart(); }
+},
+  
     loadMyItems: async function () {
       const el = document.getElementById('myItems'), sb = getSupabase(); if (!el || !sb) return;
       const u = (await sb.auth.getUser()).data.user;
       const r = await sb.from('market_items').select('*').eq('user_id', u.id).order('id', { ascending: false });
+      await authors(r.data || []);
       const B = { approved: ['Продаётся', '#2e9e3e'], pending: ['На модерации', '#e6a100'] };
       el.innerHTML = (r.data || []).map(i => {
         const b = B[i.status] || B.pending;
