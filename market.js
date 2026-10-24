@@ -91,8 +91,11 @@ open: function () { this.renderUI(); this.show('shop'); this.badge(); this.loadC
   this._view = p;
 },
 badge: function () {
-  const n = cart.get().length, e = document.getElementById('mkCartN'); if (!e) return;
-  e.textContent = n; e.style.display = n ? 'block' : 'none';
+  const n = cart.get().length;
+  ['mkCartN', 'mkCartN2'].forEach(id => {
+    const e = document.getElementById(id); if (!e) return;
+    e.textContent = n; e.style.display = n ? 'block' : 'none';
+  });
 },
 
     hide: function () {
@@ -450,7 +453,7 @@ buy: async function (id) {
 },
 setCoins: function (n) {
   this._coins = +n || 0;
-  const el = document.getElementById('mkCoins'); if (el) el.textContent = n;
+  document.querySelectorAll('#mkCoins,#mkCoins2').forEach(e => e.textContent = n);
   document.dispatchEvent(new CustomEvent('coins', { detail: n }));
 },
 checkout: async function () {
