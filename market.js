@@ -23,7 +23,6 @@
   document.addEventListener('coins', e => Coins.set(e.detail));
   setInterval(() => Coins.refresh(), 60000);
 
-  const MAXW = { status: 500, banner: 750 };
   function compress(file, kind, crop) {
     return new Promise((res, rej) => {
       const u = URL.createObjectURL(file), im = new Image();
@@ -51,15 +50,6 @@
       this.renderUI();
       this.loadItems();
       this.loadCoins();
-    },
-
-    openPurchases: function () {
-      this.renderUI();
-      const el = document.getElementById('creatorPanel');
-      if (el) el.style.display = 'block';
-      this.loadMyPurchases();
-      const cat = document.getElementById('v-market');
-      if (cat) cat.scrollIntoView({ behavior: 'smooth' });
     },
 
     hide: function () {
@@ -97,10 +87,6 @@
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
             <h3 style="margin:0;font-size:22px">Панель управления Креатора</h3>
             <button id="btnAddItem" style="padding:10px 18px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:12px;cursor:pointer">+ Добавить товар</button>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:16px">
-            <button id="tabMyItems" style="padding:8px 16px;border:0;border-radius:10px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Мои товары</button>
-            <button id="tabMyPurchases" style="padding:8px 16px;border:0;border-radius:10px;background:#eee;color:#333;font-weight:700;cursor:pointer">Мои покупки</button>
           </div>
           <div id="myItems" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px"></div>
         </div>
@@ -156,35 +142,11 @@
       $('btnOpenCreator').onclick = async () => {
         const sb = getSupabase(), u = sb && (await sb.auth.getUser()).data.user;
         if (!u) return alert('Сначала войди в аккаунт');
-        const pr = await sb.from('profiles').select('is_creator').eq('id', u.id).maybeSingle();
-        if (!(pr.data && pr.data.is_creator)) {
-          if (!confirm('Стать креатором? Взнос 30 коинов, списывается один раз.')) return;
-          const b = await sb.rpc('become_creator');
-          if (b.error) return alert(b.error.message);
-          self.setCoins(b.data);
-        }
         const p = $('creatorPanel'); p.style.display = 'block';
         self.loadMyItems(); p.scrollIntoView({ behavior: 'smooth' });
       };
-      
-      $('tabMyItems').onclick = () => {
-        $('tabMyItems').style.background = '#00bcf2'; $('tabMyItems').style.color = '#fff';
-        $('tabMyPurchases').style.background = '#eee'; $('tabMyPurchases').style.color = '#333';
-        self.loadMyItems();
-      };
-      $('tabMyPurchases').onclick = () => {
-        $('tabMyPurchases').style.background = '#00bcf2'; $('tabMyPurchases').style.color = '#fff';
-        $('tabMyItems').style.background = '#eee'; $('tabMyItems').style.color = '#333';
-        self.loadMyPurchases();
-      };
-
       $('btnMod').onclick = () => { $('modPanel').style.display = 'block'; self.loadModerationQueue(); };
-      $('btnAddItem').onclick = async () => {
-        const sb = getSupabase(), u = (await sb.auth.getUser()).data.user;
-        const n = await sb.from('market_items').select('id', { count: 'exact', head: true }).eq('user_id', u.id);
-        if ((n.count || 0) >= 5) return alert('Лимит: не больше 5 работ (баннеры и статусы вместе). Удали одну, чтобы добавить новую.');
-        $('creatorModal').style.display = 'flex';
-      };
+      $('btnAddItem').onclick = () => { $('creatorModal').style.display = 'flex'; };
       const close = () => { $('creatorModal').style.display = 'none'; reset(); };
       $('btnCloseCreator').onclick = close; $('itCancel').onclick = close;
 
@@ -246,18 +208,18 @@
 
       $('itSend').onclick = async () => {
         const title = $('itTitle').value.trim(), price = +$('itPrice').value, kind = $('itKind').value, f = $('itFile').files[0];
-        if (!title || (price >= 8) || !kind || !f) return alert('Заполни название, цену, тип и файл');
+        if (!title || !(price > 0) || !kind || !f) return alert('Заполни название, цену, тип и файл');
         const sb = getSupabase(), u = (await sb.auth.getUser()).data.user;
         if (!u) return alert('Войди в аккаунт');
         const btn = $('itSend'); btn.disabled = true; btn.textContent = 'Загрузка…';
         try {
           const blob = await compress(f, kind, crop);
-          const fd = new FormData(); fd.append('file', blob); fd.append('upload_preset', 'milk_img');
-          const rs = await fetch('https://api.cloudinary.com/v1_1/z8gpeqex/image/upload', { method: 'POST', body: fd });
-          const js = await rs.json(); if (!js.secure_url) throw new Error(js.error && js.error.message || 'ошибка');
-          const url = js.secure_url;
+          const path = u.id + '/' + Date.now() + '.webp';
+          const up = await sb.storage.from('market').upload(path, blob, { contentType: 'image/webp', cacheControl: '31536000' });
+          if (up.error) throw up.error;
+          const url = sb.storage.from('market').getPublicUrl(path).data.publicUrl;
           const ins = await sb.from('market_items').insert({ title, price, kind, image_url: url, status: 'pending' });
-          if (ins.error) throw ins.error;
+          if (ins.error) { sb.storage.from('market').remove([path]); throw ins.error; }
           alert('Отправлено на модерацию');
           $('itTitle').value = ''; $('itPrice').value = ''; close();
           self.loadMyItems(); 
@@ -325,35 +287,6 @@
         return this.card(i, `<button onclick="Market.removeItem(${i.id})" style="padding:10px 18px;border:0;border-radius:12px;background:#d62839;color:#fff;font-weight:700">Удалить</button>`,
           `<span style="font-size:11px;color:#fff;background:${b[1]};border-radius:10px;padding:2px 9px;margin-left:6px">${b[0]}</span>`);
       }).join('') || '<p style="color:#888;grid-column:1/-1">У вас пока нет товаров</p>';
-    },
-    loadMyPurchases: async function () {
-      const el = document.getElementById('myItems'), sb = getSupabase(); if (!el || !sb) return;
-      const u = (await sb.auth.getUser()).data.user; if (!u) return;
-      const p = await sb.from('purchases').select('item_id').eq('buyer', u.id);
-      const ids = (p.data || []).map(x => x.item_id);
-      if (!ids.length) {
-        el.innerHTML = '<p style="color:#888;grid-column:1/-1">У вас пока нет купленных товаров</p>';
-        return;
-      }
-      const r = await sb.from('market_items').select('*').in('id', ids).order('id', { ascending: false });
-      el.innerHTML = (r.data || []).map(i => {
-        const applyAction = i.kind === 'banner' 
-          ? `Market.applyCover('${i.image_url}')` 
-          : `Market.applyPlate('${i.image_url}')`;
-        return this.card(i, `<button onclick="${applyAction}" style="padding:10px 18px;border:0;border-radius:12px;background:#2ec4b6;color:#fff;font-weight:700">Установить</button>`);
-      }).join('') || '<p style="color:#888;grid-column:1/-1">У вас пока нет купленных товаров</p>';
-    },
-    applyCover: async function (url) {
-      const sb = getSupabase();
-      const r = await sb.rpc('set_cover', { p_url: url });
-      if (r.error) return alert(r.error.message);
-      alert('Баннер успешно установлен в профиль!');
-    },
-    applyPlate: async function (url) {
-      const sb = getSupabase();
-      const r = await sb.rpc('set_plate', { p_url: url });
-      if (r.error) return alert(r.error.message);
-      alert('Статус (плашка) успешно установлен в профиль!');
     },
     loadModerationQueue: async function () {
       const el = document.getElementById('moderationQueue'), sb = getSupabase(); if (!el || !sb || !this.isMod) return;
