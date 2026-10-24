@@ -883,6 +883,7 @@ async function boot(){
   if(!sb)return;
   if(!me){if(ch){sb.removeChannel(ch);ch=null}C.splice(0);sel=null;LIVE=0;badge();authView();return}
   au.hidden=true;au.innerHTML='';$('#mgb').hidden=true;
+  if(me.user_metadata&&me.user_metadata.fio){const rf=await sb.rpc('set_fio',{p_fio:me.user_metadata.fio});if(rf.error)toast('ФИО не сохранилось: '+rf.error.message)}
   await loadAll();LIVE=1;touch();if(me.user_metadata&&me.user_metadata.fio)sb.rpc('set_fio',{p_fio:me.user_metadata.fio});
   if(!C.some(z=>z.id===sel))sel=null;
   $('#mgb').hidden=false;
