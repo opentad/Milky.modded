@@ -48,6 +48,7 @@ css.textContent=`
 #v-prof svg path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pf-nt{background:#fff0f5;color:var(--pkt);border-radius:14px;padding:10px 16px;margin-bottom:12px;font-size:13px;font-weight:600}
 .pf-cv{height:230px;border-radius:26px 26px 0 0;background:linear-gradient(120deg,#e58bb3,#8f78c9) center/cover;position:relative;overflow:hidden}
+.pf-cv.img{background-size:cover;background-position:center;image-rendering:-webkit-optimize-contrast}
 .pf-cv:before,.pf-cv:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.16)}
 .pf-cv:before{width:90px;height:90px;left:44%;top:60px}
 .pf-cv:after{width:340px;height:340px;right:-60px;top:-120px}
@@ -57,7 +58,7 @@ css.textContent=`
 .pf-big{position:relative;z-index:2;width:140px;height:140px;border-radius:50%;margin-top:-60px;border:6px solid #fff;display:grid;place-items:center;color:#fff;font-size:44px;font-weight:700;background-size:cover;background-position:center;flex:none;box-shadow:0 0 0 3px var(--pkbg)}
 .pf-big.pf-me{cursor:pointer}
 .pf-big.sq{border-radius:28px}
-.pf-pl{display:block;width:160px;aspect-ratio:500/166;margin:-30px 0 0 -10px;position:relative;z-index:3;border-radius:10px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.pf-pl{display:block;width:180px;height:auto;aspect-ratio:500/166;margin:-34px 0 0 -10px;position:relative;z-index:3;border-radius:10px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.18);image-rendering:-webkit-optimize-contrast}
 .pf-w{flex:1 1 300px;min-width:0;padding-top:14px}
 .pf-w h2{font-size:25px;font-weight:800;line-height:1.2;color:var(--ptx)}
 .pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
@@ -418,7 +419,7 @@ async function act(e){
     } else {
       if(kind === 'banner') S.p.cover_url = url; else S.p.plate_url = url;
       draw();
-      note((kind === 'banner' ? 'Баннер' : 'Плашка') + ' успешно установлен!');
+      note((kind === 'banner' ? 'Баннер' : 'Плашка') + ' успешно установлен и сохранен на сервере!');
     }
   }
   else if((x=b('[data-remove-equipped]'))){
