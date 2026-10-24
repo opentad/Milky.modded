@@ -996,6 +996,7 @@ function rPick(){
 function show(v){
   
   view=v;
+  if(window.PGON)try{localStorage.setItem('mpage',v)}catch(e){}
   document.querySelectorAll('.main>section').forEach(s=>s.hidden=s.id!=='v-'+v);
 if(v==='msg'&&window.rMsg)window.rMsg();
 if(v==='market'&&window.Market) window.Market.open();
@@ -1139,5 +1140,15 @@ rCl();rHw();rGr();show('home');
 <script src="profile.js?v=11"></script>
 <script src="feed.js?v=10"></script>
 <script src="market.js?v=11"></script>
+  <script>
+(function(){
+  const p=localStorage.getItem('mpage');
+  window.PGON=true;
+  addEventListener('load',()=>{
+    if(location.hash.indexOf('#/@')===0)return;
+    if(['feed','market','prof'].includes(p))MS.show(p);
+  });
+})();
+</script>
 </body>
 </html>
