@@ -50,7 +50,7 @@ const COIN = '<i style="display:inline-block;width:17px;height:17px;border-radiu
 const CART_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>';
 const CART_KEY = 'mk_cart', CART_MAX = 50, PAGE = 16;
   const FILTER_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18l-7 8.2V19l-4 2v-8.8z"/></svg>';
-  const SEARCH_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>';
+  const SEARCH_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>';
 const BECOME = `<div style="margin:0 0 8px;border-radius:24px;padding:26px 28px;background:linear-gradient(120deg,#00bcf2,#7b6cf6);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
   <div><div style="font-size:24px;font-weight:700">Стань креатором</div><div style="opacity:.92;margin-top:6px">Рисуй баннеры и статусы, продавай их и зарабатывай MilkyCoin</div></div>
   <button onclick="Market.becomeCreator()" style="padding:14px 26px;border:0;border-radius:14px;background:#fff;color:#0b5f8a;font-weight:700;cursor:pointer">Стать креатором за 30 ${COIN}</button></div>`;
@@ -113,7 +113,7 @@ badge: function () {
 
       <div style="padding:24px;max-width:1100px;margin:0 auto;font-family:inherit;color:var(--text,#333)">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-  <button id="mkSearchBtn" onclick="Market.openList('all')" style="display:inline-flex;gap:8px;align-items:center;height:44px;padding:0 18px;border:0;border-radius:14px;background:#fff;color:#0b5f8a;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.06)">${SEARCH_SVG}Поиск</button>
+  <button id="mkSearchBtn" onclick="Market.openList('all')" style="display:inline-flex;gap:8px;align-items:center;height:42px;padding:0 18px;border:1px solid #e6e9ef;border-radius:14px;background:#fff;color:#9aa1a9;font:inherit;font-weight:300;font-size:15px;letter-spacing:.2px;cursor:pointer">${SEARCH_SVG}Поиск...</button>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <div id="mkTools" style="display:flex;gap:10px;align-items:center">
       <button id="btnMod" style="display:none;padding:10px 18px;border:0;border-radius:12px;background:#ffb703;font-weight:700;cursor:pointer">Модерация</button>
