@@ -53,12 +53,21 @@
       this.loadCoins();
     },
 
+    openPurchases: function () {
+      this.renderUI();
+      const el = document.getElementById('creatorPanel');
+      if (el) el.style.display = 'block';
+      this.loadMyPurchases();
+      const cat = document.getElementById('v-market');
+      if (cat) cat.scrollIntoView({ behavior: 'smooth' });
+    },
+
     hide: function () {
       const el = document.getElementById('v-market');
       if (el) el.style.display = 'none';
     },
 
-      isMod: false,
+    isMod: false,
     renderUI: function () {
       let c = document.getElementById('v-market');
       if (!c) {
@@ -68,7 +77,7 @@
       c.hidden = false; c.style.display = 'block';
       c.innerHTML = `
       <div style="padding:24px;max-width:1100px;margin:0 auto;font-family:inherit;color:var(--text,#333)">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
           <h2 style="margin:0;font-size:28px;font-weight:400">Маркетплейс</h2>
           <div style="background:#fff;border-radius:14px;padding:8px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)">Баланс: <span id="mkCoins">…</span> 🪙</div>
         </div>
@@ -88,6 +97,10 @@
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
             <h3 style="margin:0;font-size:22px">Панель управления Креатора</h3>
             <button id="btnAddItem" style="padding:10px 18px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:12px;cursor:pointer">+ Добавить товар</button>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:16px">
+            <button id="tabMyItems" style="padding:8px 16px;border:0;border-radius:10px;background:#00bcf2;color:#fff;font-weight:700;cursor:pointer">Мои товары</button>
+            <button id="tabMyPurchases" style="padding:8px 16px;border:0;border-radius:10px;background:#eee;color:#333;font-weight:700;cursor:pointer">Мои покупки</button>
           </div>
           <div id="myItems" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px"></div>
         </div>
@@ -146,6 +159,18 @@
         const p = $('creatorPanel'); p.style.display = 'block';
         self.loadMyItems(); p.scrollIntoView({ behavior: 'smooth' });
       };
+      
+      $('tabMyItems').onclick = () => {
+        $('tabMyItems').style.background = '#00bcf2'; $('tabMyItems').style.color = '#fff';
+        $('tabMyPurchases').style.background = '#eee'; $('tabMyPurchases').style.color = '#333';
+        self.loadMyItems();
+      };
+      $('tabMyPurchases').onclick = () => {
+        $('tabMyPurchases').style.background = '#00bcf2'; $('tabMyPurchases').style.color = '#fff';
+        $('tabMyItems').style.background = '#eee'; $('tabMyItems').style.color = '#333';
+        self.loadMyPurchases();
+      };
+
       $('btnMod').onclick = () => { $('modPanel').style.display = 'block'; self.loadModerationQueue(); };
       $('btnAddItem').onclick = () => { $('creatorModal').style.display = 'flex'; };
       const close = () => { $('creatorModal').style.display = 'none'; reset(); };
@@ -289,6 +314,35 @@
           `<span style="font-size:11px;color:#fff;background:${b[1]};border-radius:10px;padding:2px 9px;margin-left:6px">${b[0]}</span>`);
       }).join('') || '<p style="color:#888;grid-column:1/-1">У вас пока нет товаров</p>';
     },
+    loadMyPurchases: async function () {
+      const el = document.getElementById('myItems'), sb = getSupabase(); if (!el || !sb) return;
+      const u = (await sb.auth.getUser()).data.user; if (!u) return;
+      const p = await sb.from('purchases').select('item_id').eq('buyer', u.id);
+      const ids = (p.data || []).map(x => x.item_id);
+      if (!ids.length) {
+        el.innerHTML = '<p style="color:#888;grid-column:1/-1">У вас пока нет купленных товаров</p>';
+        return;
+      }
+      const r = await sb.from('market_items').select('*').in('id', ids).order('id', { ascending: false });
+      el.innerHTML = (r.data || []).map(i => {
+        const applyAction = i.kind === 'banner' 
+          ? `Market.applyCover('${i.image_url}')` 
+          : `Market.applyPlate('${i.image_url}')`;
+        return this.card(i, `<button onclick="${applyAction}" style="padding:10px 18px;border:0;border-radius:12px;background:#2ec4b6;color:#fff;font-weight:700">Установить</button>`);
+      }).join('') || '<p style="color:#888;grid-column:1/-1">У вас пока нет купленных товаров</p>';
+    },
+    applyCover: async function (url) {
+      const sb = getSupabase();
+      const r = await sb.rpc('set_cover', { p_url: url });
+      if (r.error) return alert(r.error.message);
+      alert('Баннер успешно установлен в профиль!');
+    },
+    applyPlate: async function (url) {
+      const sb = getSupabase();
+      const r = await sb.rpc('set_plate', { p_url: url });
+      if (r.error) return alert(r.error.message);
+      alert('Статус (плашка) успешно установлен в профиль!');
+    },
     loadModerationQueue: async function () {
       const el = document.getElementById('moderationQueue'), sb = getSupabase(); if (!el || !sb || !this.isMod) return;
       const r = await sb.from('market_items').select('*').eq('status', 'pending').order('id');
@@ -310,7 +364,6 @@
       const p = it && it.image_url && it.image_url.split('/market/')[1];
       if (p) sb.storage.from('market').remove([decodeURIComponent(p.split('?')[0])]);
       this.loadMyItems(); this.loadModerationQueue(); this.loadItems();
-    },
-    
+    }
   };
 })();
