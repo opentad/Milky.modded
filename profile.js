@@ -262,7 +262,7 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
 })();
 })();
 
-/* === Добавление прикрепления фото к постам (до 5 МБ) === */
+/* === Ультра-простой вариант: фото в Base64 прямо в тело поста без бакетов === */
 (function(){
   const css = document.createElement('style');
   css.textContent = `
@@ -284,10 +284,14 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
       border: 0; background: #ffe3e8; color: #d6407f;
       padding: 4px 8px; border-radius: 6px; font-weight: 700; cursor: pointer;
     }
+    .pf-p img.post-attached-img {
+      max-width: 100%; border-radius: 14px; margin-top: 10px; display: block;
+    }
   `;
   document.head.appendChild(css);
 
-  let selectedFile = null;
+  let selectedBase64 = null;
+  let selectedFileName = '';
   const sec = document.getElementById('v-prof');
   if (!sec) return;
 
@@ -307,31 +311,32 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
       return;
     }
 
-    selectedFile = file;
-    updatePreview();
+    selectedFileName = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      selectedBase64 = e.target.result; // Это готовая картинка в виде строки
+      updatePreview();
+    };
+    reader.readAsDataURL(file);
   });
 
   function updatePreview() {
     let prev = sec.querySelector('.pf-photo-preview');
-    if (!selectedFile) {
+    if (!selectedBase64) {
       if (prev) prev.remove();
       return;
     }
-    const reader = new FileReader();
-    reader.onload = e => {
-      if (!prev) {
-        const rDiv = sec.querySelector('.pf-comp .r');
-        if (rDiv) {
-          prev = document.createElement('div');
-          prev.className = 'pf-photo-preview';
-          rDiv.parentNode.insertBefore(prev, rDiv);
-        }
+    if (!prev) {
+      const rDiv = sec.querySelector('.pf-comp .r');
+      if (rDiv) {
+        prev = document.createElement('div');
+        prev.className = 'pf-photo-preview';
+        rDiv.parentNode.insertBefore(prev, rDiv);
       }
-      if (prev) {
-        prev.innerHTML = `<img src="${e.target.result}"><span>${selectedFile.name}</span><button type="button" data-rm-photo>Удалить</button>`;
-      }
-    };
-    reader.readAsDataURL(selectedFile);
+    }
+    if (prev) {
+      prev.innerHTML = `<img src="${selectedBase64}"><span>${selectedFileName}</span><button type="button" data-rm-photo>Удалить</button>`;
+    }
   }
 
   sec.addEventListener('click', e => {
@@ -340,7 +345,8 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
       fileInput.click();
     }
     if (t.closest('[data-rm-photo]')) {
-      selectedFile = null;
+      selectedBase64 = null;
+      selectedFileName = '';
       fileInput.value = '';
       updatePreview();
     }
@@ -359,4 +365,44 @@ document.addEventListener('sb',()=>{if(!sec.hidden)render(want)});
     }
   });
   observer.observe(sec, { childList: true, subtree: true });
+
+  // Перехватываем публикацию и пишем картинку прямо в текст поста
+  sec.addEventListener('click', async e => {
+    const pubBtn = e.target.closest('[data-pub]');
+    if (!pubBtn) return;
+
+    const ta = sec.querySelector('#pf-t');
+    const body = ta ? ta.value.trim() : '';
+    if (!body && !selectedBase64) return;
+
+    // Если фото выбрано, добавляем его HTML-тегом прямо в текст поста
+    let finalBody = body;
+    if (selectedBase64) {
+      finalBody += `<br><img src="${selectedBase64}" class="post-attached-img">`;
+    }
+
+    e.stopImmediatePropagation();
+    e.preventDefault();
+
+    pubBtn.disabled = true;
+    pubBtn.textContent = 'Публикация...';
+
+    try {
+      const SB = window.SB;
+      const { data, error } = await SB.from('posts').insert({ body: finalBody }).select('id,body,created_at').single();
+      if (error) throw error;
+
+      selectedBase64 = null;
+      selectedFileName = '';
+      fileInput.value = '';
+      if (ta) ta.value = '';
+      updatePreview();
+      
+      if (typeof render === 'function') render();
+    } catch (err) {
+      alert('Ошибка публикации: ' + (err.message || err));
+      pubBtn.disabled = false;
+      pubBtn.textContent = 'Опубликовать';
+    }
+  }, true);
 })();
