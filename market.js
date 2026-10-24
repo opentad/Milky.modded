@@ -156,6 +156,13 @@
       $('btnOpenCreator').onclick = async () => {
         const sb = getSupabase(), u = sb && (await sb.auth.getUser()).data.user;
         if (!u) return alert('Сначала войди в аккаунт');
+        const pr = await sb.from('profiles').select('is_creator').eq('id', u.id).maybeSingle();
+        if (!(pr.data && pr.data.is_creator)) {
+          if (!confirm('Стать креатором? Взнос 30 коинов, списывается один раз.')) return;
+          const b = await sb.rpc('become_creator');
+          if (b.error) return alert(b.error.message);
+          self.setCoins(b.data);
+        }
         const p = $('creatorPanel'); p.style.display = 'block';
         self.loadMyItems(); p.scrollIntoView({ behavior: 'smooth' });
       };
@@ -172,7 +179,12 @@
       };
 
       $('btnMod').onclick = () => { $('modPanel').style.display = 'block'; self.loadModerationQueue(); };
-      $('btnAddItem').onclick = () => { $('creatorModal').style.display = 'flex'; };
+      $('btnAddItem').onclick = async () => {
+        const sb = getSupabase(), u = (await sb.auth.getUser()).data.user;
+        const n = await sb.from('market_items').select('id', { count: 'exact', head: true }).eq('user_id', u.id);
+        if ((n.count || 0) >= 5) return alert('Лимит: не больше 5 работ (баннеры и статусы вместе). Удали одну, чтобы добавить новую.');
+        $('creatorModal').style.display = 'flex';
+      };
       const close = () => { $('creatorModal').style.display = 'none'; reset(); };
       $('btnCloseCreator').onclick = close; $('itCancel').onclick = close;
 
@@ -234,7 +246,7 @@
 
       $('itSend').onclick = async () => {
         const title = $('itTitle').value.trim(), price = +$('itPrice').value, kind = $('itKind').value, f = $('itFile').files[0];
-        if (!title || !(price > 0) || !kind || !f) return alert('Заполни название, цену, тип и файл');
+        if (!title || (price >= 8) || !kind || !f) return alert('Заполни название, цену, тип и файл');
         const sb = getSupabase(), u = (await sb.auth.getUser()).data.user;
         if (!u) return alert('Войди в аккаунт');
         const btn = $('itSend'); btn.disabled = true; btn.textContent = 'Загрузка…';
