@@ -3,6 +3,26 @@
     return window.SB || window.supabaseClient || null;
   }
 
+  window.Coins = {
+    set: function (n) {
+      document.querySelectorAll('.cn').forEach(e => e.textContent = n);
+    },
+    refresh: async function () {
+      const sb = getSupabase(); if (!sb) return;
+      const u = (await sb.auth.getUser()).data.user;
+      if (!u) { this.set('0'); return; }
+      const r = await sb.from('profiles').select('coins').eq('id', u.id).maybeSingle();
+      this.set(r.data ? r.data.coins : 0);
+    }
+  };
+  document.addEventListener('sb', () => {
+    Coins.refresh();
+    const sb = getSupabase();
+    if (sb) sb.auth.onAuthStateChange(() => setTimeout(() => Coins.refresh(), 0));
+  });
+  document.addEventListener('coins', e => Coins.set(e.detail));
+  setInterval(() => Coins.refresh(), 60000);
+
   const MAXW = { status: 500, banner: 750 };
   function compress(file, kind, crop) {
     return new Promise((res, rej) => {
