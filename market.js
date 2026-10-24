@@ -343,6 +343,7 @@ openList: function (kind) {
 </div>
 <div style="display:flex;justify-content:flex-end;margin-bottom:14px"><div style="background:#fff;border-radius:14px;padding:8px 14px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.06)"><span id="mkCoins2">${this._coins}</span> ${COIN}</div></div>
 <div id="mkListGrid" class="mk-g4"></div>`;
+  this.drawList();
   },
 drawList: function () {
   const el = document.getElementById('mkListGrid'); if (!el) return;
@@ -410,7 +411,7 @@ openCart: async function () {
     const r = await sb.from('market_items').select('*').in('id', ids).eq('status', 'approved');
     items = (r.data || []).filter(i => !this._bought.has(i.id) && !(this._me && i.user_id === this._me.id));
     await authors(items);
-  },
+  }
   cart.set(items.map(i => i.id));
   const total = items.reduce((s, i) => s + (i.price || 0), 0), enough = total <= this._coins;
   el.innerHTML = `${BACK}<h3 style="font-size:28px;font-weight:400;margin:16px 0">Корзина <span style="font-size:16px;color:#8a94a3">${items.length}/${CART_MAX}</span></h3>` + (items.length ? `
