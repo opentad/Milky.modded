@@ -3,7 +3,7 @@
 const H0=location.hash;
 const sec=document.createElement('section');sec.id='v-prof';sec.hidden=true;
 document.querySelector('.main').appendChild(sec);
-sec.innerHTML='<div class="pf-nt" id="pf-nt" hidden></div><div id="pf-c"></div><input type="file" id="pf-file" accept="image/*" hidden><input type="file" id="pf-cover-file" accept="image/*" hidden><input type="file" id="pf-pfile" accept="image/*" hidden>';
+sec.innerHTML='<div class="pf-nt" id="pf-nt" hidden></div><div id="pf-c"></div><input type="file" id="pf-file" accept="image/*" hidden><input type="file" id="pf-pfile" accept="image/*" hidden>';
 const $=s=>sec.querySelector(s);
 const put=h=>{$('#pf-c').innerHTML=h};
 const db=()=>window.SB;
@@ -60,7 +60,6 @@ css.textContent=`
 .pf-big.pf-me{cursor:pointer}
 .pf-big.sq{border-radius:28px}
 .pf-pl{display:block;width:160px;aspect-ratio:500/166;margin:-30px 0 0 -10px;position:relative;z-index:3;border-radius:10px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.18)}
-button.pf-pl{background:#fff;border:2px dashed var(--pk);color:var(--pkt);font-weight:700;font-size:12px}
 .pf-w{flex:1 1 300px;min-width:0;padding-top:14px}
 .pf-w h2{font-size:25px;font-weight:800;line-height:1.2;color:var(--ptx)}
 .pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
@@ -84,7 +83,7 @@ button.pf-pl{background:#fff;border:2px dashed var(--pk);color:var(--pkt);font-w
 .pf-g.o{grid-template-columns:minmax(0,1fr) 300px}
 .pf-x{background:#fff;border-radius:22px;padding:18px;box-shadow:var(--sh);margin-bottom:18px}
 .pf-mn{padding:10px}
-.pf-mi{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:14px;font-weight:700;color:var(--ptx);text-align:left}
+.pf-mi{display:flex;gap:12px;align-items:center;width:100%;padding:12px 14px;border-radius:14px;font-weight:700;color:var(--ptx);text-align:left;cursor:pointer;background:transparent;border:0;font:inherit}
 .pf-mi svg{width:20px;height:20px;flex:none}
 .pf-mi.on{background:var(--pkbg);color:var(--pkt)}
 .pf-mi.off{color:var(--pmu);cursor:default}
@@ -176,10 +175,9 @@ const ppl=(t,a,n)=>`<div class="pf-x"><div class="pf-sh"><h3>${t}</h3><small>${n
 const mi=(k,t)=>`<div class="pf-mi off">${ic(k)}<span>${t}</span><small>скоро</small></div>`;
 function editHtml(){
   const p=S.p,ev=S.ev;
-  const F=[['nick','Никнейм','От 5 до 15 символов: латиница, цифры и _',p.nick||'',15],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0,1],['name','Имя в чате','От 2 до 30 символов',p.name||'',30],['plate','Плашка статуса','Ссылка на PNG 500×166 (начинается с https://)',p.plate_url||'',300]];
+  const F=[['nick','Никнейм','От 5 до 15 символов: латиница, цифры и _',p.nick||'',15],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0,1],['name','Имя в чате','От 2 до 30 символов',p.name||'',30]];
   return `<div class="pf-x pf-ed"><div class="pf-eh"><div><h3>Редактировать профиль</h3><small>Каждый параметр сохраняется отдельно</small></div><button class="pf-b g" data-x>Готово</button></div>`+
   `<div class="pf-f"><label><b>Фото профиля</b><small>Выбери фото и обрежь по кругу</small></label><span class="pf-mu">${p.avatar_url?'Фото загружено':'Пока нет фото'}</span><div class="pf-bs"><button class="pf-b" data-ava>Выбрать фото</button>${p.avatar_url?'<button class="pf-b g" data-avarm>Убрать</button>':''}</div></div>`+
-  `<div class="pf-f"><label><b>Баннер профиля</b><small>Размер 750×230 пикселей</small></label><span class="pf-mu">${p.cover_url?'Баннер загружен':'Пока нет баннера'}</span><div class="pf-bs"><button class="pf-b" data-cover-btn>Выбрать баннер</button>${p.cover_url?'<button class="pf-b g" data-cover-rm>Убрать</button>':''}</div></div>`+
   `<div class="pf-f"><label><b>Форма фото</b><small>Как показывать большое фото в профиле</small></label><span></span><div class="pf-bs"><button class="pf-b${p.ava_square?' g':''}" data-shape="0">Круг</button><button class="pf-b${p.ava_square?'':' g'}" data-shape="1">Квадрат</button></div></div>`+
   F.map(f=>{const v=ev[f[0]]!=null?ev[f[0]]:f[3],m=S.fm[f[0]];
     const ctl=f[5]?`<textarea data-k="${f[0]}">${esc(v)}</textarea>`:`<input data-k="${f[0]}" value="${esc(v)}" maxlength="${f[4]}"><span class="pf-cnt" data-c="${f[0]}">${v.length}/${f[4]}</span>`;
@@ -188,13 +186,13 @@ function editHtml(){
 }
 
 function cropHtml(){
-  const c=S.crop, isCover = c.type === 'cover';
-  return `<div class="pf-x pf-cr"><h3>${isCover?'Баннер профиля':'Фото профиля'}</h3><small>${isCover?'Двигай картинку, чтобы настроить область баннера (750×230)':'Двигай фото пальцем. Квадрат: большое фото в профиле. Пунктирный круг: маленькие аватарки.'}</small><canvas id="pf-cv" width="${VIEW}" height="${VIEW}"></canvas><input type="range" id="pf-z" min="0" max="100" value="${c.t}" aria-label="Масштаб"><div class="r"><button class="pf-b g" data-cx>Отмена</button><button class="pf-b" data-csv${c.busy?' disabled':''}>${c.busy?'Загружаем…':(isCover?'Сохранить баннер':'Сохранить фото')}</button></div></div>`;
+  const c=S.crop;
+  return `<div class="pf-x pf-cr"><h3>Фото профиля</h3><small>Двигай фото пальцем. Квадрат: большое фото в профиле. Пунктирный круг: маленькие аватарки.</small><canvas id="pf-cv" width="${VIEW}" height="${VIEW}"></canvas><input type="range" id="pf-z" min="0" max="100" value="${c.t}" aria-label="Масштаб"><div class="r"><button class="pf-b g" data-cx>Отмена</button><button class="pf-b" data-csv${c.busy?' disabled':''}>${c.busy?'Загружаем…':'Сохранить фото'}</button></div></div>`;
 }
 
 function paint(){
   const cv=$('#pf-cv');if(!cv||!S||!S.crop)return;
-  const c=S.crop,x=cv.getContext('2d'), isCover = c.type === 'cover';
+  const c=S.crop,x=cv.getContext('2d');
   x.clearRect(0,0,VIEW,VIEW);
   x.drawImage(c.img,c.x,c.y,c.img.width*c.s,c.img.height*c.s);
 
@@ -203,34 +201,19 @@ function paint(){
   x.beginPath();
   x.rect(0,0,VIEW,VIEW);
 
-  if(isCover){
-    const rx = (VIEW - C_W) / 2, ry = (VIEW - C_H) / 2;
-    x.rect(rx, ry, C_W, C_H);
-    x.fill('evenodd');
-    x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(rx, ry, C_W, C_H);
-  } else {
-    const m=VIEW/2-CR,s2=2*CR;
-    x.rect(m,m,s2,s2);
-    x.fill('evenodd');
-    x.fillStyle='rgba(0,0,0,.28)';x.beginPath();x.rect(m,m,s2,s2);x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2,true);x.fill('evenodd');
-    x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(m,m,s2,s2);
-    x.setLineDash([6,5]);x.globalAlpha=.85;x.beginPath();x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2);x.stroke();
-  }
+  const m=VIEW/2-CR,s2=2*CR;
+  x.rect(m,m,s2,s2);
+  x.fill('evenodd');
+  x.fillStyle='rgba(0,0,0,.28)';x.beginPath();x.rect(m,m,s2,s2);x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2,true);x.fill('evenodd');
+  x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(m,m,s2,s2);
+  x.setLineDash([6,5]);x.globalAlpha=.85;x.beginPath();x.arc(VIEW/2,VIEW/2,CR,0,Math.PI*2);x.stroke();
   x.restore();
 }
 
 function clampC(c){
-  const isCover = c.type === 'cover';
-  const iw=c.img.width*c.s, ih=c.img.height*c.s;
-  if(isCover){
-    const rx = (VIEW - C_W) / 2, ry = (VIEW - C_H) / 2;
-    c.x=Math.min(rx, Math.max(VIEW - rx - iw, c.x));
-    c.y=Math.min(ry, Math.max(VIEW - ry - ih, c.y));
-  } else {
-    const m=VIEW/2-CR;
-    c.x=Math.min(m,Math.max(VIEW-m-iw,c.x));
-    c.y=Math.min(m,Math.max(VIEW-m-ih,c.y));
-  }
+  const m=VIEW/2-CR,iw=c.img.width*c.s,ih=c.img.height*c.s;
+  c.x=Math.min(m,Math.max(VIEW-m-iw,c.x));
+  c.y=Math.min(m,Math.max(VIEW-m-ih,c.y));
 }
 
 function zoom(t){
@@ -240,7 +223,7 @@ function zoom(t){
   clampC(c);paint();
 }
 
-function openCrop(f, type='ava'){
+function openCrop(f){
   if(!f||!S||!S.mine)return;
   if(!/^image\//.test(f.type)){note('Выбери картинку: JPG или PNG');return}
   const u=URL.createObjectURL(f),img=new Image();
@@ -248,15 +231,8 @@ function openCrop(f, type='ava'){
     URL.revokeObjectURL(u);
     const k=Math.min(1,2400/Math.max(img.width,img.height));let src=img;
     if(k<1){const t=document.createElement('canvas');t.width=Math.round(img.width*k);t.height=Math.round(img.height*k);t.getContext('2d').drawImage(img,0,0,t.width,t.height);src=t}
-    
-    let min;
-    if(type==='cover'){
-      min=Math.max(C_W/src.width, C_H/src.height);
-    } else {
-      min=2*CR/Math.min(src.width,src.height);
-    }
-    
-    S.crop={img:src,type,min,s:min,t:0,x:VIEW/2-src.width*min/2,y:VIEW/2-src.height*min/2,busy:false};
+    const min=2*CR/Math.min(src.width,src.height);
+    S.crop={img:src,min,s:min,t:0,x:VIEW/2-src.width*min/2,y:VIEW/2-src.height*min/2,busy:false};
     clampC(S.crop);draw();
     const el=$('.pf-cr');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   };
@@ -267,39 +243,19 @@ function openCrop(f, type='ava'){
 async function saveCropResult(){
   const c=S&&S.crop,SB=db();if(!c||c.busy)return;
   c.busy=true;draw();
-  const isCover = c.type === 'cover';
   const o=document.createElement('canvas');
-  
-  if(isCover){
-    o.width = B_W; o.height = B_H;
-    const rx = (VIEW - C_W) / 2, ry = (VIEW - C_H) / 2;
-    o.getContext('2d').drawImage(c.img, (rx - c.x) / c.s, (ry - c.y) / c.s, C_W / c.s, C_H / c.s, 0, 0, B_W, B_H);
-  } else {
-    o.width = o.height = OUT;
-    const sw=2*CR/c.s;
-    o.getContext('2d').drawImage(c.img,(VIEW/2-CR-c.x)/c.s,(VIEW/2-CR-c.y)/c.s,sw,sw,0,0,OUT,OUT);
-  }
+  o.width=o.height=OUT;
+  const sw=2*CR/c.s;
+  o.getContext('2d').drawImage(c.img,(VIEW/2-CR-c.x)/c.s,(VIEW/2-CR-c.y)/c.s,sw,sw,0,0,OUT,OUT);
 
   const blob=await new Promise(r=>o.toBlob(r,'image/jpeg',.88));
-  const path = isCover ? (S.id+'_cover.jpg') : (S.id+'.jpg');
-  
+  const path=S.id+'.jpg';
   const u=await SB.storage.from(BKT).upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
   if(u.error){c.busy=false;draw();note('Не загрузилось: '+u.error.message);return}
   const url=SB.storage.from(BKT).getPublicUrl(path).data.publicUrl+'?v='+Date.now();
-  
-  const r = isCover ? await SB.rpc('set_cover',{p_url:url}) : await SB.rpc('set_avatar',{p_url:url});
+  const r=await SB.rpc('set_avatar',{p_url:url});
   if(r.error){c.busy=false;draw();note('Не сохранилось: '+r.error.message);return}
-  
-  if(isCover) S.p.cover_url=url; else S.p.avatar_url=url;
-  S.crop=null;draw();
-  note(isCover ? 'Баннер обновлен' : 'Фото обновлено');
-}
-
-async function rmCover(){
-  const SB=db(), r=await SB.rpc('set_cover',{p_url:''});
-  if(r.error){note('Не получилось: '+r.error.message);return}
-  SB.storage.from(BKT).remove([S.id+'_cover.jpg']);
-  S.p.cover_url=null;draw();note('Баннер убран');
+  S.p.avatar_url=url;S.crop=null;draw();note('Фото обновлено');
 }
 
 async function rmAva(){
@@ -317,9 +273,9 @@ function draw(){
     `<button class="pf-b${S.fw?' g':''}" data-follow>${S.fw?'Вы подписаны':'Подписаться'}</button><button class="pf-b g" data-dm>${ic('cmt')}Написать</button>`;
   const shown=p.name;
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
-  const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}${mi('bag','Мои покупки')}${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
+  const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}<button class="pf-mi" data-market-purchases>${ic('bag')}<span>Мои покупки</span></button>${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
-  <div class="pf-hd"><div class="pf-ava"><span class="pf-big${mine?' pf-me':''}${p.ava_square?' sq':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:(mine?'<button class="pf-pl" data-edit>+ Установить статус</button>':'')}</div>
+  <div class="pf-hd"><div class="pf-ava"><span class="pf-big${mine?' pf-me':''}${p.ava_square?' sq':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:''}</div>
    <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
     <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
@@ -350,8 +306,7 @@ function shrinkImg(f,max){
 }
 
 sec.addEventListener('change',async e=>{
-  if(e.target.id==='pf-file'){openCrop(e.target.files[0],'ava');return}
-  if(e.target.id==='pf-cover-file'){openCrop(e.target.files[0],'cover');return}
+  if(e.target.id==='pf-file'){openCrop(e.target.files[0]);return}
   if(e.target.id!=='pf-pfile')return;
   const f=e.target.files[0];if(!f||!S||!S.mine)return;
   if(!/^image\//.test(f.type)){note('Выбери картинку: JPG или PNG');return}
@@ -382,9 +337,17 @@ async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
   if(b('[data-go]'))MS.show('msg');
   else if(b('[data-ava]')){const f=$('#pf-file');f.value='';f.click()}
-  else if(b('[data-cover-btn]')){const f=$('#pf-cover-file');f.value='';f.click()}
   else if(b('[data-avarm]'))rmAva();
-  else if(b('[data-cover-rm]'))rmCover();
+  else if(b('[data-market-purchases]')){
+    if(window.MS && MS.show) {
+      MS.show('market');
+      if(window.Market && typeof window.Market.openPurchases === 'function') {
+        window.Market.openPurchases();
+      }
+    } else {
+      note('Откройте маркетплейс');
+    }
+  }
   else if((x=b('[data-shape]'))){
     const sq=x.dataset.shape==='1',r=await SB.rpc('set_ava_shape',{p_sq:sq});
     if(r.error){note('Не получилось: '+r.error.message);return}
@@ -404,12 +367,6 @@ async function act(e){
   else if((x=b('[data-s]'))){
     const k=x.dataset.s,inp=$(`[data-k="${k}"]`),v=inp.value.trim();let arg,r;
     const bad=m=>{S.ev[k]=inp.value;S.fm[k]={t:m,e:1};draw()};
-    if(k==='plate'){
-      if(v&&!/^https:\/\/\S+$/i.test(v))return bad('Нужна ссылка, начинающаяся с https://');
-      r=await SB.rpc('set_plate',{p_url:v});
-      if(r.error)return bad('Не получилось: '+r.error.message);
-      S.p.plate_url=v;delete S.ev[k];S.fm[k]={t:'Сохранено',e:0};draw();return;
-    }
     if(k==='nick'){
       if(!/^[A-Za-z0-9_]{5,15}$/.test(v))return bad('5–15 символов: латиница, цифры и _');
       r=await SB.rpc('set_nick',{p_nick:v});
