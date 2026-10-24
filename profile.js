@@ -93,6 +93,9 @@ css.textContent=`
 .pf-sh h3{font-size:16px;font-weight:800;color:var(--ptx)}.pf-sh small{color:var(--pmu)}
 .pf-pp{display:flex;gap:12px;align-items:center;width:100%;padding:7px 0;text-align:left;font-weight:600;color:var(--ptx)}
 .pf-mu{color:var(--pmu)}
+.pf-ava{flex:none;width:140px;position:relative;z-index:2}
+.pf-pl{display:block;width:160px;aspect-ratio:500/166;margin:-30px 0 0 -10px;position:relative;z-index:3;border-radius:10px;object-fit:cover;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+button.pf-pl{background:#fff;border:2px dashed var(--pk);color:var(--pkt);font-weight:700;font-size:12px}
 .pf-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin-top:2px}
 .pf-em{color:var(--pmu);text-align:center;padding:24px 0}
 .pf-ed{margin-top:18px}
@@ -114,7 +117,7 @@ css.textContent=`
 document.head.appendChild(css);
 
 let tok=0,S=null;
-const COLS='id,name,fio,nick,last_seen,status,tags,avatar_url,cover_url,comments_off';
+const COLS='id,name,fio,nick,last_seen,status,tags,avatar_url,cover_url,comments_off,plate_url';
 async function render(u){
   const tk=++tok;
   put('<div class="pf-x pf-em">Загружаем…</div>');
@@ -154,7 +157,7 @@ const ppl=(t,a,n)=>`<div class="pf-x"><div class="pf-sh"><h3>${t}</h3><small>${n
 const mi=(k,t)=>`<div class="pf-mi off">${ic(k)}<span>${t}</span><small>скоро</small></div>`;
 function editHtml(){
   const p=S.p,ev=S.ev;
-  const F=[['nick','Никнейм','От 5 до 15 символов: латиница, цифры и _',p.nick||'',15],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0,1],['name','Имя в чате','От 2 до 30 символов',p.name||'',30]];
+  const F=[['nick','Никнейм','От 5 до 15 символов: латиница, цифры и _',p.nick||'',15],['status','Строка статуса','Показывается рядом с именем',p.status||'',120],['tags','Интересы','Разделяйте запятыми',(p.tags||[]).join(', '),0,1],['name','Имя в чате','От 2 до 30 символов',p.name||'',30],['plate','Плашка статуса','Ссылка на PNG 500×166 (начинается с https://)',p.plate_url||'',300]];
   return `<div class="pf-x pf-ed"><div class="pf-eh"><div><h3>Редактировать профиль</h3><small>Каждый параметр сохраняется отдельно</small></div><button class="pf-b g" data-x>Готово</button></div>`+
   F.map(f=>{const v=ev[f[0]]!=null?ev[f[0]]:f[3],m=S.fm[f[0]];
     const ctl=f[5]?`<textarea data-k="${f[0]}">${esc(v)}</textarea>`:`<input data-k="${f[0]}" value="${esc(v)}" maxlength="${f[4]}"><span class="pf-cnt" data-c="${f[0]}">${v.length}/${f[4]}</span>`;
@@ -171,7 +174,7 @@ function draw(){
   const nick=p.nick?'@'+esc(p.nick):(mine?'ник не задан — задай в редактировании':'');
   const menu=mine?`<aside><div class="pf-x pf-mn">${mi('cls','Мой класс')}${mi('coin','MilkyCoin')}${mi('bag','Мои покупки')}${mi('paint','Оформление')}<button class="pf-mi on" data-edit>${ic('pen')}<span>Редактировать профиль</span></button>${mi('mark','Сохранённое')}${mi('gift','Подарки')}</div></aside>`:'';
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
-  <div class="pf-hd"><span class="pf-big" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>
+  <div class="pf-hd"><div class="pf-ava"><span class="pf-big"style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:(mine?'<button class="pf-pl" data-edit>+ Установить статус</button>':'')}</div>
    <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(p.fio)}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
     <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
     <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
@@ -203,6 +206,12 @@ async function act(e){
   else if((x=b('[data-s]'))){
     const k=x.dataset.s,inp=$(`[data-k="${k}"]`),v=inp.value.trim();let arg,r;
     const bad=m=>{S.ev[k]=inp.value;S.fm[k]={t:m,e:1};draw()};
+    if(k==='plate'){
+      if(v&&!/^https:\/\/\S+$/i.test(v))return bad('Нужна ссылка, начинающаяся с https://');
+      r=await SB.rpc('set_plate',{p_url:v});
+      if(r.error)return bad('Не получилось: '+r.error.message);
+      S.p.plate_url=v;delete S.ev[k];S.fm[k]={t:'Сохранено',e:0};draw();return;
+    }
     if(k==='nick'){
       if(!/^[A-Za-z0-9_]{5,15}$/.test(v))return bad('5–15 символов: латиница, цифры и _');
       r=await SB.rpc('set_nick',{p_nick:v});
