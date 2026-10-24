@@ -81,19 +81,19 @@
         </div>
 
         <h3 style="margin:28px 0 14px;font-size:20px">Товары</h3>
-        <div id="marketCatalog" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px"></div>
+        <div id="marketCatalog" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
 
         <div id="creatorPanel" style="display:none;margin-top:28px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
             <h3 style="margin:0;font-size:22px">Панель управления Креатора</h3>
             <button id="btnAddItem" style="padding:10px 18px;border:1px solid #00bcf2;background:#fff;color:#00a5d6;border-radius:12px;cursor:pointer">+ Добавить товар</button>
           </div>
-          <div id="myItems" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px"></div>
+          <div id="myItems" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
         </div>
 
         <div id="modPanel" style="display:none;margin-top:28px">
           <h3 style="font-size:20px">Очередь модерации</h3>
-          <div id="moderationQueue" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
+          <div id="moderationQueue" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px"></div>
         </div>
 
         <div id="creatorModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;justify-content:center;align-items:center">
@@ -231,17 +231,18 @@
 
     card: function (it, actions, badge) {
       const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
-      return `<div style="background:#fff;border-radius:22px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.05);display:flex;gap:14px;align-items:center">
-        <div style="position:relative;flex:none;width:130px;display:grid;place-items:center">
-          <img src="${esc(it.image_url)}" loading="lazy" style="max-width:130px;max-height:90px;border-radius:8px">
+      return `<div style="background:#fff;border-radius:22px;padding:14px;box-shadow:0 6px 24px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:10px;aspect-ratio:1/1;overflow:hidden">
+        <div style="flex:1;min-height:0;background:#f4f6f8;border-radius:14px;display:grid;place-items:center;overflow:hidden;padding:6px">
+          <img src="${esc(it.image_url)}" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px">
         </div>
-        <div style="flex:1;min-width:0">
+        <div style="flex:none;min-width:0">
           <span style="font-size:11px;border:1px solid #00bcf2;color:#00a5d6;border-radius:12px;padding:2px 9px">${KINDS[it.kind] || 'Статусы'}</span>
           ${badge || ''}
-          <div style="font-size:17px;margin:6px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title)}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:20px">${it.price || 10} 🪙</b>${actions}</div>
+          <div style="font-size:16px;margin:6px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title)}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:19px">${it.price || 10} 🪙</b>${actions}</div>
         </div></div>`;
     },
+    
     loadItems: async function () {
       const el = document.getElementById('marketCatalog'), sb = getSupabase(); if (!el || !sb) return;
       const me = (await sb.auth.getUser()).data.user;
