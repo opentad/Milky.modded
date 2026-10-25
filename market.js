@@ -143,6 +143,8 @@ badge: function () {
     ${BACK}
     <h3 style="margin:16px 0 14px;font-size:28px;font-weight:400">Очередь модерации</h3>
     <div id="moderationQueue" style="${GRID}"></div>
+    <h3 style="margin:28px 0 14px;font-size:28px;font-weight:400">Жалобы</h3>
+<div id="reportsQueue" style="display:grid;gap:12px"></div>
   </div>
         <div id="creatorModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;justify-content:center;align-items:center">
           <div style="background:#fff;border-radius:20px;width:92%;max-width:560px;max-height:92vh;overflow:auto;padding:26px;position:relative">
@@ -192,7 +194,7 @@ badge: function () {
   if (!u) return alert('Сначала войди в аккаунт');
   self.show('creator'); self.loadMyItems();
 };
-$('btnMod').onclick = () => { self.show('mod'); self.loadModerationQueue(); };
+$('btnMod').onclick = () => { self.show('mod'); self.loadModerationQueue(); self.loadReports(); };
 $('btnCart').onclick = () => self.openCart();
       $('btnAddItem').onclick = () => { $('creatorModal').style.display = 'flex'; };
 const close = () => { $('creatorModal').style.display = 'none'; reset(); };
@@ -481,6 +483,41 @@ checkout: async function () {
       el.innerHTML = (r.data || []).map(i => this.card(i,
         `<span style="display:flex;gap:6px"><button onclick="Market.approveItem(${i.id})" style="padding:8px 12px;border:0;border-radius:10px;background:#2ec4b6;color:#fff;font-weight:700">Одобрить</button><button onclick="Market.rejectItem(${i.id})" style="padding:8px 12px;border:0;border-radius:10px;background:#e63946;color:#fff;font-weight:700">Отклонить</button></span>`)
       ).join('') || '<p style="color:#888">Очередь пуста</p>';
+    },
+    loadReports: async function () {
+      const el = document.getElementById('reportsQueue'), sb = getSupabase(); if (!el || !sb || !this.isMod) return;
+      const r = await sb.from('reports').select('*').eq('resolved', false).order('id', { ascending: false }).limit(50);
+      if (r.error) { el.innerHTML = '<p style="color:red">' + esc(r.error.message) + '</p>'; return; }
+      const L = r.data || [], ids = k => L.filter(x => x.kind === k).map(x => x.target_id);
+      const [ps, cs] = await Promise.all([
+        ids('post').length ? sb.from('posts').select('id,body,image_url,user_id').in('id', ids('post')) : null,
+        ids('comment').length ? sb.from('post_comments').select('id,body,user_id').in('id', ids('comment')) : null]);
+      const T = { post: Object.fromEntries(((ps && ps.data) || []).map(x => [x.id, x])), comment: Object.fromEntries(((cs && cs.data) || []).map(x => [x.id, x])) };
+      const us = [...new Set(L.map(x => (T[x.kind][x.target_id] || {}).user_id).filter(Boolean))];
+      const nm = us.length ? Object.fromEntries(((await sb.from('profiles').select('id,name').in('id', us)).data || []).map(x => [x.id, x.name])) : {};
+      el.innerHTML = L.map(x => {
+        const t = T[x.kind][x.target_id];
+        return `<div style="background:#fff;border-radius:18px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.05)">
+          <div style="font-size:12px;color:#8a94a3">${x.kind === 'post' ? 'Публикация' : 'Комментарий'} · ${esc(x.reason)}</div>
+          ${t ? `<div style="font-weight:700;margin:6px 0 2px">${esc(nm[t.user_id] || 'Участник')}</div><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(t.body)}</div>${t.image_url ? `<img src="${esc(t.image_url)}" style="max-width:220px;border-radius:10px;margin-top:8px;display:block">` : ''}` : '<div style="color:#8a94a3;margin:6px 0">Уже удалено</div>'}
+          <div style="display:flex;gap:8px;margin-top:12px">
+            ${t ? `<button onclick="Market.reportDelete(${x.id},'${x.kind}',${x.target_id})" style="padding:9px 16px;border:0;border-radius:10px;background:#e63946;color:#fff;font-weight:700;cursor:pointer">Удалить</button>` : ''}
+            <button onclick="Market.reportClose(${x.id})" style="padding:9px 16px;border:0;border-radius:10px;background:#eef1f6;font-weight:700;cursor:pointer">${t ? 'Отклонить' : 'Закрыть'}</button>
+          </div></div>`;
+      }).join('') || '<p style="color:#888">Жалоб нет</p>';
+    },
+    reportClose: async function (id) {
+      const r = await getSupabase().from('reports').update({ resolved: true }).eq('id', id);
+      if (r.error) return alert(r.error.message);
+      this.loadReports();
+    },
+    reportDelete: async function (rid, kind, tid) {
+      if (!confirm('Удалить ' + (kind === 'post' ? 'публикацию' : 'комментарий') + '?')) return;
+      const sb = getSupabase();
+      const r = await sb.from(kind === 'post' ? 'posts' : 'post_comments').delete().eq('id', tid).select();
+      if (r.error || !(r.data || []).length) return alert('Не удалось удалить: ' + (r.error ? r.error.message : 'нет прав, проверь SQL из шага 0'));
+      await sb.from('reports').update({ resolved: true }).eq('target_id', tid).eq('kind', kind);
+      this.loadReports();
     },
     approveItem: async function (id) {
       const r = await getSupabase().from('market_items').update({ status: 'approved' }).eq('id', id);
