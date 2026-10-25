@@ -48,7 +48,8 @@ css.textContent=`
 #pm-pop{position:fixed;z-index:10000;min-width:170px;padding:6px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
 #pm-pop button{display:block;width:100%;padding:11px 14px;border:0;border-radius:10px;background:transparent;text-align:left;font:inherit;color:#1f2937;cursor:pointer}
 #pm-pop button:hover{background:#f2f4f8}
-#pm-pop button.dg{color:#e5314a}`;
+#pm-pop button.dg{color:#e5314a}
+.pf-hd>.pm-w{position:absolute;top:10px;right:14px;z-index:3}`;
 document.head.appendChild(css);
 
 const form=(pid,par)=>`<form class="cm-f" data-pid="${pid}" data-par="${par||''}"><input placeholder="${par?'Ответить…':'Написать комментарий…'}" maxlength="500" aria-label="Комментарий"><button aria-label="Отправить">${SEND}</button></form>`;
@@ -93,7 +94,7 @@ window.CMT={
   o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;justify-content:center;align-items:center;padding:16px';
   o.innerHTML=`<div style="background:#fff;border-radius:22px;width:100%;max-width:380px;padding:22px;color:#1f2937">
     <h3 style="margin:0 0 4px;font-size:20px;font-weight:800">Пожаловаться</h3>
-    <div style="color:#7a8594;font-size:13px;margin-bottom:12px">${kind==='post'?'На публикацию':'На комментарий'}. Модераторы посмотрят жалобу.</div>
+    <div style="color:#7a8594;font-size:13px;margin-bottom:12px">${kind==='post'?'На публикацию':kind==='profile'?'На аккаунт':'На комментарий'}. Модераторы посмотрят жалобу.</div>
     ${R.map(r=>`<button data-r="${r}" style="display:block;width:100%;text-align:left;padding:13px 14px;margin-bottom:8px;border:1px solid #e6e9ef;border-radius:14px;background:#fff;font:inherit;cursor:pointer">${r}</button>`).join('')}
     <button data-x style="width:100%;padding:12px;border:0;border-radius:14px;background:#f2f4f8;font:inherit;font-weight:700;cursor:pointer">Отмена</button></div>`;
   o.onclick=async e=>{
