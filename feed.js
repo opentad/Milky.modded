@@ -90,9 +90,9 @@ function posts(){
   if(st.s==='disc')a=[...a].sort((x,y)=>CMT.n(y.id)-CMT.n(x.id));
   $('#fd-l').innerHTML=a.map(p=>{
     const w=who(p.user_id);
-    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(SF(w.fio))}</span>`:''}<small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
+    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div style="flex:1;min-width:0"><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(SF(w.fio))}</span>`:''}${w.last_seen?`<small>${seen(w.last_seen)}</small>`:''}</div><small class="fd-tm">${dt(p.created_at)}</small>${CMT.dots((p.user_id!==st.me.id?'<button data-rep>Пожаловаться</button>':'')+(CMT.mod()?'<button data-pdel data-danger>Удалить</button>':''))}</div>
     <div class="fd-bd">${p.body.trim()?`<p>${esc(p.body)}</p>`:''}${p.image_url?`<img class="fd-pimg" src="${esc(p.image_url)}" alt="" loading="lazy">`:''}</div>
-    <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button>${p.user_id!==st.me.id?'<button data-rep style="margin-left:auto">Пожаловаться</button>':''}${CMT.mod()?`<button data-pdel style="color:#e5314a${p.user_id!==st.me.id?'':';margin-left:auto'}">Удалить</button>`:''}</div>
+    <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button></div>
     ${CMT.html(p.id,p.user_id,w.comments_off)}</article>`}).join('')
     ||'<div class="fd-e">Здесь пока пусто. '+(st.f==='mine'?'Подпишись на кого-нибудь справа.':'Опубликуй первый пост в своём профиле.')+'</div>';
 }
