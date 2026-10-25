@@ -37,15 +37,27 @@ css.textContent=`
 .cm-f svg{width:20px;height:20px}
 .cm-off{color:var(--mu);font-size:13px}
 .cm-fio{display:block;font-size:10px;font-weight:300;color:#9aa1a9;margin-top:1px}`;
+  .cm-b{position:relative}
+.cm-b>b{padding-right:34px}
+.cm-b .pm-w{position:absolute;top:4px;right:4px}
+.pm-w{display:inline-flex;align-items:center;flex:none}
+.pm-b{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:transparent;color:#8a94a3;display:grid;place-items:center;cursor:pointer}
+.pm-b:hover{background:rgba(0,0,0,.06)}
+.pm-h{display:none!important}
+.pf-tm,.fd-tm{white-space:nowrap}
+#pm-pop{position:fixed;z-index:10000;min-width:170px;padding:6px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+#pm-pop button{display:block;width:100%;padding:11px 14px;border:0;border-radius:10px;background:transparent;text-align:left;font:inherit;color:#1f2937;cursor:pointer}
+#pm-pop button:hover{background:#f2f4f8}
+#pm-pop button.dg{color:#e5314a}
 document.head.appendChild(css);
 
 const form=(pid,par)=>`<form class="cm-f" data-pid="${pid}" data-par="${par||''}"><input placeholder="${par?'Ответить…':'Написать комментарий…'}" maxlength="500" aria-label="Комментарий"><button aria-label="Отправить">${SEND}</button></form>`;
 function item(c,post,off){
   const n=st.nm[c.user_id]||{name:'Участник'},name=n.name||'Участник',L=st.lk[c.id]||[],on=L.includes(st.me.id),
     can=c.user_id===st.me.id||post.owner===st.me.id||st.mod,kids=(st.c[post.id]||[]).filter(k=>k.parent_id===c.id);
-  return `<div class="cm-i" data-cid="${c.id}"><button class="cm-a" data-cu="${c.user_id}" aria-label="Профиль" style="background-color:${PAL[hs(name)%7]};${n.avatar_url?`background-image:url('${esc(String(n.avatar_url).replace(/'/g,'%27'))}')`:''}">${n.avatar_url?'':esc(ini(name))}</button>
-  <div class="cm-bw"><div class="cm-b"><b data-cu="${c.user_id}">${esc(name)}</b>${n.fio?`<span class="cm-fio">${esc(n.fio)}</span>`:''}<p>${esc(c.body)}</p>
-  <div class="cm-m"><span>${dt(c.created_at)}</span>${off?'':'<button data-cr>Ответить</button>'}<button data-cl class="${on?'on':''}">${HEART}${L.length}</button>${can?'<button class="dg" data-cd>Удалить</button>':''}${c.user_id!==st.me.id?'<button data-crep>Пожаловаться</button>':''}</div></div>
+  return `<div class="cm-i" data-cid="${c.id}"><button class="cm-a" data-cu="${c.user_id}" aria-label="Профиль" style="background-color:${PAL[hs(name)%7]};${n.avatar_url?`background-image:url('${esc(n.avatar_url)}')`:''}">${n.avatar_url?'':esc(ini(name))}</button>
+  <div class="cm-bw"><div class="cm-b">${CMT.dots((c.user_id!==st.me.id?'<button data-crep>Пожаловаться</button>':'')+(can?'<button data-cd data-danger>Удалить</button>':''))}<b data-cu="${c.user_id}">${esc(name)}</b>${n.fio?`<span class="cm-fio">${esc(n.fio)}</span>`:''}<p>${esc(c.body)}</p>
+  <div class="cm-m"><span>${dt(c.created_at)}</span>${off?'':'<button data-cr>Ответить</button>'}<button data-cl class="${on?'on':''}">${HEART}${L.length}</button></div></div>
   ${st.rep===String(c.id)&&!off?form(post.id,c.id):''}${kids.length?`<div class="cm-k">${kids.map(k=>item(k,post,off)).join('')}</div>`:''}</div></div>`;
 }
 window.CMT={
@@ -93,6 +105,21 @@ window.CMT={
   };
   document.body.appendChild(o);
 };
+CMT.dots=h=>h?'<span class="pm-w"><button class="pm-b" data-pmenu aria-label="Ещё"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg></button><span class="pm-h" hidden>'+h+'</span></span>':'';
+document.addEventListener('click',e=>{
+  const pop=document.getElementById('pm-pop'),it=e.target.closest('[data-pmi]'),b=e.target.closest('[data-pmenu]');
+  if(pop&&it){const s=pop._s[+it.dataset.pmi];pop.remove();s.click();return}
+  if(pop){pop.remove();if(b&&pop._b===b)return}
+  if(!b)return;
+  const s=[...b.parentNode.querySelectorAll('.pm-h button')];if(!s.length)return;
+  const m=document.createElement('div');m.id='pm-pop';m._b=b;m._s=s;
+  m.innerHTML=s.map((x,i)=>'<button data-pmi="'+i+'"'+(x.hasAttribute('data-danger')?' class="dg"':'')+'>'+esc(x.textContent)+'</button>').join('');
+  document.body.appendChild(m);
+  const r=b.getBoundingClientRect();
+  m.style.top=Math.min(r.bottom+4,innerHeight-m.offsetHeight-8)+'px';
+  m.style.right=Math.max(8,innerWidth-r.right)+'px';
+});
+window.addEventListener('scroll',()=>{const p=document.getElementById('pm-pop');if(p)p.remove()},true);
 document.addEventListener('click',async e=>{
   const t=e.target,b=k=>t.closest(k),box=b('.cm');if(!box)return;
   const SB=window.SB;let x;
