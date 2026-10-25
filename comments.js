@@ -36,8 +36,8 @@ css.textContent=`
 .cm-f button{width:56px;height:46px;border-radius:16px;background:#f45b97;color:#fff;display:grid;place-items:center;flex:none}
 .cm-f svg{width:20px;height:20px}
 .cm-off{color:var(--mu);font-size:13px}
-.cm-fio{display:block;font-size:10px;font-weight:300;color:#9aa1a9;margin-top:1px}`;
-  .cm-b{position:relative}
+.cm-fio{display:block;font-size:10px;font-weight:300;color:#9aa1a9;margin-top:1px}
+.cm-b{position:relative}
 .cm-b>b{padding-right:34px}
 .cm-b .pm-w{position:absolute;top:4px;right:4px}
 .pm-w{display:inline-flex;align-items:center;flex:none}
@@ -48,7 +48,7 @@ css.textContent=`
 #pm-pop{position:fixed;z-index:10000;min-width:170px;padding:6px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
 #pm-pop button{display:block;width:100%;padding:11px 14px;border:0;border-radius:10px;background:transparent;text-align:left;font:inherit;color:#1f2937;cursor:pointer}
 #pm-pop button:hover{background:#f2f4f8}
-#pm-pop button.dg{color:#e5314a}
+#pm-pop button.dg{color:#e5314a}`;
 document.head.appendChild(css);
 
 const form=(pid,par)=>`<form class="cm-f" data-pid="${pid}" data-par="${par||''}"><input placeholder="${par?'Ответить…':'Написать комментарий…'}" maxlength="500" aria-label="Комментарий"><button aria-label="Отправить">${SEND}</button></form>`;
@@ -69,7 +69,7 @@ window.CMT={
     if(!ids.length)return;
     const r=await SB.from('post_comments').select('id,post_id,user_id,body,created_at,parent_id').in('post_id',ids).order('created_at',{ascending:false}).limit(500);
     if(r.error){toast('Комментарии не загрузились: '+r.error.message);return}
-    cs=(r.data||[]).reverse(),cid=cs.map(c=>c.id),uid=[...new Set(cs.map(c=>c.user_id))];
+    const cs=(r.data||[]).reverse(),cid=cs.map(c=>c.id),uid=[...new Set(cs.map(c=>c.user_id))];
     const [lk,nm]=await Promise.all([
       cid.length?SB.from('comment_likes').select('comment_id,user_id').in('comment_id',cid):null,
       uid.length?SB.from('profiles').select('id,name,fio,avatar_url').in('id',uid):null]);
