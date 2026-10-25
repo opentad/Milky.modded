@@ -48,9 +48,25 @@
     }
   };
 
+   /* ---------- ДЗ: Лаборатория явлений (физика, §1) ---------- */
+  X.D.phys1 = {
+    img: 'formulogia.jpg',
+    task: ['Физика / Тема: что изучает физика', 'Пройди 5 опытов в симуляции «Лаборатория явлений», потом пройди тест.'],
+    mat: [], sims: ['phys1'],
+    test: [{ q: 'Что изучает физика? Объясни своими словами.', k: 't' }]
+  };
+  X.SIM.phys1 = Object.assign({ t: 'Лаборатория явлений', btn: 'Перейти к симуляции',
+    d: 'Пройди 5 опытов: движение, нагревание, зеркало, электризация, магнит.',
+    m: ['Опыт 1: движение', 'Опыт 2: нагревание', 'Опыт 3: зеркало', 'Опыт 4: электризация', 'Опыт 5: магнит'] },
+    { mount(r, c) { const f = document.createElement('iframe'); f.src = 'learn/physics/physics1.html'; f.allow = 'fullscreen';
+      f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:18px'; r.appendChild(f);
+      const h = e => { const m = /^fiz:ok:(\d)$/.exec(String(e.data)); if (m) c.ok(+m[1]); };
+      addEventListener('message', h); return () => { removeEventListener('message', h); f.remove(); }; } });
+
   /* ---------- список домашних заданий: [id, предмет, метка, «сдать до»] ---------- */
   const LIST = [
     ['numroad', 'Алгебра', '', '30 Октября 20:00']
+     ['phys1', 'Физика', '', '30 Октября 20:00']
   ];
   MS.HW.splice(0, MS.HW.length);
   LIST.forEach(w => MS.HW.push(w));
