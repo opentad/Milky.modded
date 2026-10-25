@@ -7,6 +7,7 @@ sec.innerHTML='<div class="pf-nt" id="pf-nt" hidden></div><div id="pf-c"></div><
 const $=s=>sec.querySelector(s);
 const put=h=>{$('#pf-c').innerHTML=h};
 const db=()=>window.SB;
+  async function upd(p){const r=await db().from('profiles').update(p).eq('id',S.id).select('id');if(!r.error&&!(r.data||[]).length)r.error={message:'сервер не принял изменения (нет прав)'};return r}
 const SBU='https://sjwvrljmqpbopbxqkhkl.supabase.co',SBK='sb_publishable_mWqrZq0Vw65Ahk7ZIbtlNQ_owreCtcj';
 const BKT='avatars',VIEW=300,CR=130,OUT=800;
 
@@ -309,13 +310,13 @@ async function saveCropResult(){
   const u=await SB.storage.from(BKT).upload(path,blob,{upsert:true,contentType:'image/jpeg',cacheControl:'3600'});
   if(u.error){c.busy=false;draw();note('Не загрузилось: '+u.error.message);return}
   const url=SB.storage.from(BKT).getPublicUrl(path).data.publicUrl+'?v='+Date.now();
-  const r=await SB.from('profiles').update({avatar_url:url}).eq('id',S.id);
+  const r=await upd({avatar_url:url});
   if(r.error){c.busy=false;draw();note('Не сохранилось: '+r.error.message);return}
   S.p.avatar_url=url;S.crop=null;draw();note('Фото обновлено');
 }
 
 async function rmAva(){
-  const SB=db(),r=await SB.from('profiles').update({avatar_url:''}).eq('id',S.id);
+  const SB=db(),r=await upd({avatar_url:''});
   if(r.error){note('Не получилось: '+r.error.message);return}
   SB.storage.from(BKT).remove([S.id+'.jpg']);
   S.p.avatar_url=null;draw();note('Фото убрано');
@@ -341,7 +342,7 @@ function draw(){
   <div class="pf-g${mine?'':' o'}">${menu}<div>
    ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea>${S.pimg?`<div class="pf-pv"><img src="${esc(S.pimg.url)}" alt=""><button class="pf-b g" data-prm>Убрать фото</button></div>`:''}<div class="r"><button class="pf-b g" data-pph>${ic('img')}Фото</button><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
    ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<small>${dt(x.created_at)}</small></div></div>${x.body.trim()?`<p>${esc(x.body)}</p>`:''}${x.image_url?`<img class="pf-pimg" src="${esc(x.image_url)}" alt="" loading="lazy">`:''}
-     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button>${mine?'':`<button data-pm="${x.id}" aria-label="Ещё">⋯</button>`}${mine?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
+     <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button>${mine?'':`<button data-pm="${x.id}" aria-label="Ещё">⋯</button>`}${mine||CMT.mod()?`<button data-del="${x.id}" class="${S.cd===x.id?'dg':''}" aria-label="Удалить">${ic('trash')}${S.cd===x.id?'Точно удалить?':''}</button>`:''}</div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
   </div><aside>${ppl('Подписки',S.sub,S.ng)}${ppl('Подписчики',S.fol,S.nf)}</aside></div>`);
   if(S.crop)paint();
 }
@@ -408,7 +409,7 @@ async function act(e){
   if(t.id==='pfDsg'){S.dsg=false;draw();return}
   if(b('[data-go]'))MS.show('msg');
     else if(b('[data-pmore]')){if(window.MOD)MOD.menu('profile',S.id,S.id,()=>render(S.id))}
-  else if((x=b('[data-pm]'))){const pp=S.posts.find(z=>z.id==x.dataset.pm);if(window.MOD&&pp)MOD.menu('post',pp.id,S.id,()=>render(S.id))}
+  else if((x=b('[data-pm]')))CMT.report('post',+x.dataset.pm,S.id);
   else if(b('[data-ava]')){const f=$('#pf-file');f.value='';f.click()}
   else if(b('[data-avarm]'))rmAva();
  else if(b('[data-open-dsg]'))loadUserPurchases();
@@ -418,7 +419,7 @@ async function act(e){
   else if((x=b('[data-equip-item]'))){
     const kind = x.dataset.kind, url = x.dataset.url;
     const updateData = kind === 'banner' ? { cover_url: url } : { plate_url: url };
-    const r = await SB.from('profiles').update(updateData).eq('id', S.me.id);
+    const r = await upd(updateData);
     if(r.error) {
       note('Ошибка при установке: ' + r.error.message);
     } else {
@@ -430,7 +431,7 @@ async function act(e){
   else if((x=b('[data-remove-equipped]'))){
     const kind = x.dataset.removeEquipped;
     const updateData = kind === 'banner' ? { cover_url: '' } : { plate_url: '' };
-    const r = await SB.from('profiles').update(updateData).eq('id', S.me.id);
+    const r = await upd(updateData);
     if(r.error) {
       note('Ошибка: ' + r.error.message);
     } else {
@@ -440,7 +441,7 @@ async function act(e){
     }
   }
   else if((x=b('[data-shape]'))){
-    const sq=x.dataset.shape==='1',r=await SB.from('profiles').update({ava_square:sq}).eq('id',S.id);
+    const sq=x.dataset.shape==='1',r=await upd({ava_square:sq});
     if(r.error){note('Не получилось: '+r.error.message);return}
     S.p.ava_square=sq;draw();
   }
@@ -451,7 +452,7 @@ async function act(e){
   else if(b('[data-x]')){S.ed=false;S.ev={};S.fm={};draw()}
   else if(b('[data-dm]')){if(window.MG)MG.dm(S.id);else note('Личные сообщения скоро появятся')}
   else if(b('[data-sw]')){
-    const on=!S.p.comments_off,r=await SB.from('profiles').update({comments_off:on}).eq('id',S.id);
+    const on=!S.p.comments_off,r=await upd({comments_off:on});
     if(r.error){note('Не получилось: '+r.error.message);return}
     S.p.comments_off=on;draw();
   }
@@ -460,14 +461,14 @@ async function act(e){
     const bad=m=>{S.ev[k]=inp.value;S.fm[k]={t:m,e:1};draw()};
     if(k==='nick'){
       if(!/^[A-Za-z0-9_]{5,15}$/.test(v))return bad('5–15 символов: латиница, цифры и _');
-      r=await SB.from('profiles').update({nick:v}).eq('id',S.id);
+      r=await upd({nick:v});
       if(r.error)return bad(r.error.code==='23505'?'Этот ник уже занят':'Не получилось: '+r.error.message);
       S.p.nick=v;setHash(v);
     }else{
       if(k==='name'){if(v.length<2||v.length>30)return bad('От 2 до 30 символов');arg={name:v}}
       else if(k==='status')arg={status:v};
       else arg={tags:v.split(',').map(s=>s.trim()).filter(Boolean).slice(0,10)};
-      r=await SB.from('profiles').update(arg).eq('id',S.id);
+      r=await upd(arg);
       if(r.error)return bad('Не получилось: '+r.error.message);
       if(k==='name')S.p.name=v;else if(k==='status')S.p.status=v;else S.p.tags=arg.tags;
     }
@@ -505,7 +506,7 @@ async function act(e){
   else if((x=b('[data-del]'))){
     const id=+x.dataset.del;
     if(S.cd!==id){S.cd=id;draw();return}
-    const pp=S.posts.find(z=>z.id===id),r=await SB.from('posts').delete().eq('id',id);
+    const pp=S.posts.find(z=>z.id===id),r=await SB.from('posts').delete().eq('id',id).select();
     S.cd=null;
     if(r.error){draw();note('Не удалось удалить');return}
     const fp=pp&&pp.image_url?(pp.image_url.split('/posts/')[1]||''):'';
