@@ -183,6 +183,17 @@ async function render(u){
   const pr=await(/^[0-9a-f-]{36}$/i.test(key)?q.eq('id',key):q.eq('nick',key)).maybeSingle();
   if(tk!==tok)return;
   if(pr.error||!pr.data){put('<div class="pf-x pf-em">'+(pr.error?'Не удалось загрузить: '+esc(pr.error.message)+'. Проверь, что SQL выполнен.':'Профиль не найден.')+'</div>');return}
+  const pd=pr.data,urls=[pd.plate_url,pd.cover_url].filter(Boolean);
+if(urls.length){
+  const mi=await SB.from('market_items').select('image_url').in('image_url',urls);
+  if(tk!==tok)return;
+  if(!mi.error){
+    const ok=new Set((mi.data||[]).map(z=>z.image_url)),fix={};
+    if(pd.plate_url&&!ok.has(pd.plate_url)){fix.plate_url='';pd.plate_url=''}
+    if(pd.cover_url&&!ok.has(pd.cover_url)){fix.cover_url='';pd.cover_url=''}
+    if(me.id===pd.id&&Object.keys(fix).length)SB.from('profiles').update(fix).eq('id',me.id).then(()=>{});
+  }
+}
   const id=pr.data.id,mine=id===me.id;
   const [np,nf,ng,fw,ps,fo,su]=await Promise.all([
     SB.from('posts').select('id',{count:'exact',head:true}).eq('user_id',id),
@@ -324,7 +335,7 @@ async function rmAva(){
   const OLD=()=>!!(S&&S.p&&S.p.pfst==='old');
 const css2=document.createElement('style');
 css2.textContent=`
-.pfo{background:#fff;border-radius:28px;padding:22px}
+.pfo{padding:0}
 [data-theme=dark] .pfo{background:#14181f}
 .pfo-t{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .pfo-t h2{font-size:28px;font-weight:800;color:var(--ptx);overflow-wrap:anywhere}
