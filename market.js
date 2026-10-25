@@ -63,7 +63,8 @@ if (!document.getElementById('mk-css')) {
 }
 const GRID = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px';
 const BACK = '<button onclick="Market.show(\'shop\')" aria-label="Назад" style="width:44px;height:44px;border:0;background:transparent;color:#00bcf2;cursor:pointer;display:grid;place-items:center;padding:0"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>';
-const cart = {
+const BACK_S = BACK.replace('width:44px;height:44px','flex:none;width:30px;height:44px').replace('width="28" height="28"','width="26" height="26"');
+  const cart = {
   get() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) { return []; } },
   set(a) { localStorage.setItem(CART_KEY, JSON.stringify(a)); Market.badge(); }
 };
@@ -331,8 +332,9 @@ el.innerHTML = (this._creator ? '' : BECOME) + sec('status', 'Статусы', '
 openList: function (kind) {
   this._kind = kind; this._f = { q: '', min: '', max: '', hide: false, nw: false, sort: 'pop' };
   this.show('list');
-  document.getElementById('pgList').innerHTML = `${BACK}
+  document.getElementById('pgList').innerHTML = `
 <div style="display:flex;gap:10px;align-items:center;margin:4px 0 10px">
+  ${BACK_S}
   <input oninput="Market.setQ(this.value)" placeholder="Поиск по названию или автору" style="flex:1;min-width:0;padding:13px 16px;border:1px solid #e1e6ee;border-radius:14px;background:#fff;font:inherit;outline:0">
   <button onclick="Market.openFilters()" aria-label="Фильтры" style="flex:none;width:48px;height:48px;border:1px solid #00bcf2;border-radius:14px;background:#fff;color:#00bcf2;cursor:pointer;display:grid;place-items:center">${FILTER_SVG}</button>
   <div style="position:relative;flex:none">
