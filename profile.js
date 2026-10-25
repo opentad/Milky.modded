@@ -171,7 +171,7 @@ document.head.appendChild(css);
   document.documentElement.dataset.theme=localStorage.getItem('mk_theme')==='dark'?'dark':'light';
 
 let tok=0,S=null;
-const COLS='id,name,fio,nick,last_seen,status,tags,avatar_url,cover_url,comments_off,plate_url,ava_square';
+const COLS='id,name,fio,nick,last_seen,status,tags,avatar_url,cover_url,comments_off,plate_url,ava_square,pfst';
 async function render(u){
   const tk=++tok;
   put('<div class="pf-x pf-em">Загружаем…</div>');
@@ -321,7 +321,7 @@ async function rmAva(){
   S.p.avatar_url=null;draw();note('Фото убрано');
 }
 
-  const OLD=()=>localStorage.getItem('mk_pfst')==='old';
+  const OLD=()=>!!(S&&S.p&&S.p.pfst==='old');
 const css2=document.createElement('style');
 css2.textContent=`
 .pfo{background:#fff;border-radius:28px;padding:22px}
@@ -476,7 +476,11 @@ async function act(e){
   else if(b('[data-close-dsg]')){S.dsg=false;draw()}
   else if((x=b('[data-dk]'))){S.dk=x.dataset.dk;draw()}
   else if((x=b('[data-thm]'))){const th=x.dataset.thm;localStorage.setItem('mk_theme',th);document.documentElement.dataset.theme=th;draw()}
-    else if((x=b('[data-pst]'))){localStorage.setItem('mk_pfst',x.dataset.pst);draw()}
+    else if((x=b('[data-pst]'))){
+  const v=x.dataset.pst,r=await upd({pfst:v});
+  if(r.error){note('Не получилось: '+r.error.message);return}
+  S.p.pfst=v;draw();
+}
 else if(b('[data-gift]'))note('Подарки скоро появятся');
   else if((x=b('[data-equip-item]'))){
     const kind = x.dataset.kind, url = x.dataset.url;
