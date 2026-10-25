@@ -242,7 +242,7 @@ function designHtml(){
       <div class="pf-dp-nm">${esc(p.name)}</div>${p.plate_url?`<img class="pf-dp-pl" src="${esc(p.plate_url)}" alt="">`:''}</div></div>
     <div class="pf-dt">${tile('status','star','Статус')}${tile('banner','img','Баннеры')}</div>
     ${cards?`<div class="pf-p-grid">${cards}</div>`:`<div class="pf-em">Пока нет купленных ${k==='banner'?'баннеров':'статусов'}. Загляни в маркетплейс</div>`}
-    <div class="pf-th"><div><b>Тема</b><small class="pf-mu" style="display:block">Светлая или тёмная</small></div><div class="pf-bs"><button class="pf-b${dark?' g':''}" data-thm="light">Светлая</button><button class="pf-b${dark?'':' g'}" data-thm="dark">Тёмная</button></div></div>
+    <div class="pf-th"><div><b>Тема</b><small class="pf-mu" style="display:block">Светлая или тёмная</small></div><div class="pf-bs"><button class="pf-b${dark?' g':''}" data-thm="light">Светлая</button><button class="pf-b${dark?'':' g'}" data-thm="dark">Тёмная</button><div class="pf-th"><div><b>Тип оформления профиля</b><small class="pf-mu" style="display:block">Новый или старый вид страницы</small></div><div class="pf-bs"><button class="pf-b${OLD()?' g':''}" data-pst="new">Новый</button><button class="pf-b${OLD()?'':' g'}" data-pst="old">Старый</button></div></div></div></div>
   </div></div>`;
 }
   
@@ -321,7 +321,67 @@ async function rmAva(){
   S.p.avatar_url=null;draw();note('Фото убрано');
 }
 
+  const OLD=()=>localStorage.getItem('mk_pfst')==='old';
+const css2=document.createElement('style');
+css2.textContent=`
+.pfo{background:#fff;border-radius:28px;padding:22px}
+[data-theme=dark] .pfo{background:#14181f}
+.pfo-t{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pfo-t h2{font-size:28px;font-weight:800;color:var(--ptx);overflow-wrap:anywhere}
+.pfo-g{display:grid;grid-template-columns:250px minmax(0,1fr) 300px;grid-template-areas:"lf bn bn" "lf ps rt";gap:22px;margin-top:18px;align-items:start}
+.pfo-g.nb{grid-template-areas:"lf ps rt"}
+.pfo-lf{grid-area:lf;min-width:0}.pfo-bn{grid-area:bn}.pfo-ps{grid-area:ps;min-width:0}.pfo-rt{grid-area:rt}
+.pfo-bn{aspect-ratio:4/1;border-radius:24px;background:center/cover;box-shadow:var(--sh)}
+.pfo-aw{position:relative;margin-bottom:14px}
+.pfo-av{display:grid;place-items:center;width:100%;aspect-ratio:1;border-radius:50%;color:#fff;font-size:64px;font-weight:700;background-size:cover;background-position:center}
+.pfo-av.sq{border-radius:28px}.pfo-av.pf-me{cursor:pointer}
+.pfo-pl{position:absolute;left:-8px;top:-14px;width:68%;height:auto;aspect-ratio:500/166;object-fit:cover;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.pfo-nm{text-align:center}.pfo-nm b{display:block;font-size:17px;color:var(--ptx);overflow-wrap:anywhere}
+.pfo-pe{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pfo-pu{display:flex;flex-direction:column;align-items:center;gap:6px;background:transparent;border:0;cursor:pointer;min-width:0;color:var(--ptx)}
+.pfo-pu small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.pfo-lb{display:block;font-size:11.5px;color:var(--pmu);margin:14px 0 6px}.pfo-lb:first-child{margin-top:0}
+.pfo-tx{line-height:1.5;overflow-wrap:anywhere;color:var(--ptx)}
+.pfo-bt{display:flex;gap:10px;flex-wrap:wrap}.pfo-bt .pf-b{flex:1 1 120px}
+@media(max-width:1100px){.pfo-g,.pfo-g.nb{grid-template-columns:1fr;grid-template-areas:"lf" "bn" "rt" "ps"}.pfo-av{max-width:240px}}`;
+document.head.appendChild(css2);
+
+function feedHtml(shown){
+  const {p,mine}=S;
+  return `${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea>${S.pimg?`<div class="pf-pv"><img src="${esc(S.pimg.url)}" alt=""><button class="pf-b g" data-prm>Убрать фото</button></div>`:''}<div class="r"><button class="pf-b g" data-pph>${ic('img')}Фото</button><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
+  ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div style="flex:1;min-width:0"><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}</div><small class="pf-tm">${dt(x.created_at)}</small>${CMT.dots((mine?'':`<button data-pm="${x.id}">Пожаловаться</button>`)+(mine||CMT.mod()?`<button data-del="${x.id}" data-danger>Удалить</button>`:''))}</div>${x.body.trim()?`<p>${esc(x.body)}</p>`:''}${x.image_url?`<img class="pf-pimg" src="${esc(x.image_url)}" alt="" loading="lazy">`:''}
+   <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button></div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}`;
+}
+
+function drawOld(){
+  const ta=$('#pf-t');if(ta)S.draft=ta.value;
+  sec.querySelectorAll('[data-k]').forEach(i=>S.ev[i.dataset.k]=i.value);
+  const {p,mine}=S,tags=(p.tags||[]).filter(Boolean),sn=mine?'В сети':seen(p.last_seen),shown=p.name,sq=p.ava_square?' sq':'';
+  const grp=(t,a,n)=>`<div class="pf-x"><div class="pf-sh"><h3>${t} (${n})</h3></div><div class="pfo-pe">${a.slice(0,3).map(u=>`<button class="pfo-pu" data-open="${u.id}">${av(u,'pf-a')}<small>${esc(u.name)}</small></button>`).join('')||'<small class="pf-mu">Пока никого</small>'}</div></div>`;
+  put(`<div class="pfo">
+  <div class="pfo-t"><h2>${esc(shown)}</h2>${mine?'':CMT.dots('<button data-pacc>Пожаловаться на аккаунт</button>'+(CMT.mod()&&window.MOD?'<button data-pmore data-danger>Модерация</button>':''))}</div>
+  ${mine&&S.crop?cropHtml():''}${mine&&S.ed?editHtml():''}${mine&&S.dsg?designHtml():''}
+  <div class="pfo-g${p.cover_url?'':' nb'}">
+   <div class="pfo-lf">
+    <div class="pfo-aw"><span class="pfo-av${sq}${mine?' pf-me':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pfo-pl" src="${esc(p.plate_url)}" alt="">`:''}</div>
+    <div class="pf-x pfo-nm"><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}${sn?`<span class="pf-bd" style="margin-top:8px">${sn}</span>`:''}</div>
+    ${mine?'':`<button class="pf-b${S.fw?' g':''}" data-follow style="width:100%;margin-bottom:18px">${S.fw?'Вы подписаны':'Подписаться'}</button>`}
+    ${grp('Подписки',S.sub,S.ng)}${grp('Подписчики',S.fol,S.nf)}
+   </div>
+   ${p.cover_url?`<div class="pfo-bn" style="background-image:url('${esc(p.cover_url)}')"></div>`:''}
+   <div class="pfo-ps">${feedHtml(shown)}</div>
+   <aside class="pfo-rt">
+    <div class="pf-x"><small class="pfo-lb">Описание</small><div class="pfo-tx">${p.status?esc(p.status):'<span class="pf-mu">Не заполнено</span>'}</div>
+     ${tags.length?`<small class="pfo-lb">Интересы</small><div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
+     <small class="pfo-lb">Ник</small><div class="pfo-tx">${p.nick?'@'+esc(p.nick):'<span class="pf-mu">не задан</span>'}</div></div>
+    <div class="pfo-bt">${mine?`<button class="pf-b" data-edit>${ic('pen')}Редактировать</button><button class="pf-b g" data-open-dsg>${ic('paint')}Оформление</button>`:`<button class="pf-b g" data-dm>${ic('cmt')}Написать</button><button class="pf-b g" data-gift>${ic('gift')}Подарить</button>`}</div>
+   </aside>
+  </div></div>`);
+  if(S.crop)paint();
+}
+
 function draw(){
+  if(OLD()){drawOld();return}
   const ta=$('#pf-t');if(ta)S.draft=ta.value;
   sec.querySelectorAll('[data-k]').forEach(i=>S.ev[i.dataset.k]=i.value);
   const {p,mine}=S,tags=(p.tags||[]).filter(Boolean),sn=mine?'В сети':seen(p.last_seen);
@@ -416,6 +476,8 @@ async function act(e){
   else if(b('[data-close-dsg]')){S.dsg=false;draw()}
   else if((x=b('[data-dk]'))){S.dk=x.dataset.dk;draw()}
   else if((x=b('[data-thm]'))){const th=x.dataset.thm;localStorage.setItem('mk_theme',th);document.documentElement.dataset.theme=th;draw()}
+    else if((x=b('[data-pst]'))){localStorage.setItem('mk_pfst',x.dataset.pst);draw()}
+else if(b('[data-gift]'))note('Подарки скоро появятся');
   else if((x=b('[data-equip-item]'))){
     const kind = x.dataset.kind, url = x.dataset.url;
     const updateData = kind === 'banner' ? { cover_url: url } : { plate_url: url };
