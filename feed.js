@@ -92,7 +92,7 @@ function posts(){
     const w=who(p.user_id);
     return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(SF(w.fio))}</span>`:''}<small>${dt(p.created_at)}${w.last_seen?' · '+seen(w.last_seen):''}</small></div></div>
     <div class="fd-bd">${p.body.trim()?`<p>${esc(p.body)}</p>`:''}${p.image_url?`<img class="fd-pimg" src="${esc(p.image_url)}" alt="" loading="lazy">`:''}</div>
-    <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button></div>
+    <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button>${p.user_id!==st.me.id?'<button data-rep style="margin-left:auto">Пожаловаться</button>':''}${CMT.mod()?`<button data-pdel style="color:#e5314a${p.user_id!==st.me.id?'':';margin-left:auto'}">Удалить</button>`:''}</div>
     ${CMT.html(p.id,p.user_id,w.comments_off)}</article>`}).join('')
     ||'<div class="fd-e">Здесь пока пусто. '+(st.f==='mine'?'Подпишись на кого-нибудь справа.':'Опубликуй первый пост в своём профиле.')+'</div>';
 }
@@ -138,6 +138,13 @@ sec.addEventListener('click',async e=>{
     p.post_likes=[{count:cn(p.post_likes)+(on?-1:1)}];on?st.liked.delete(p.id):st.liked.add(p.id);posts();
     const r=on?await SB.from('post_likes').delete().match({post_id:p.id,user_id:st.me.id}):await SB.from('post_likes').insert({post_id:p.id});
     if(r.error)note('Не получилось: '+r.error.message);
+  }
+    else if(b('[data-rep]')){const p=st.posts.find(z=>z.id===pid(t));CMT.report('post',p.id,p.user_id)}
+  else if(b('[data-pdel]')){
+    const p=st.posts.find(z=>z.id===pid(t));if(!confirm('Удалить публикацию?'))return;
+    const r=await SB.from('posts').delete().eq('id',p.id).select();
+    if(r.error||!r.data.length)return note('Не удалось удалить');
+    st.posts=st.posts.filter(z=>z.id!==p.id);posts();
   }
   else if((x=b('[data-fw]'))){
     const id=x.dataset.fw;st.fol.add(id);people();
