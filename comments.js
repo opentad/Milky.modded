@@ -41,24 +41,27 @@ document.head.appendChild(css);
 
 const form=(pid,par)=>`<form class="cm-f" data-pid="${pid}" data-par="${par||''}"><input placeholder="${par?'Ответить…':'Написать комментарий…'}" maxlength="500" aria-label="Комментарий"><button aria-label="Отправить">${SEND}</button></form>`;
 function item(c,post,off){
-  const n=st.nm[c.user_id]||{name:'Участник'},name=n.name,L=st.lk[c.id]||[],on=L.includes(st.me.id),
-    can=c.user_id===st.me.id||post.owner===st.me.id,kids=(st.c[post.id]||[]).filter(k=>k.parent_id===c.id);
-  return `<div class="cm-i" data-cid="${c.id}"><button class="cm-a" data-cu="${c.user_id}" aria-label="Профиль" style="background-color:${PAL[hs(name)%7]};${n.avatar_url?`background-image:url('${esc(n.avatar_url)}')`:''}">${n.avatar_url?'':esc(ini(name))}</button>
+  const n=st.nm[c.user_id]||{name:'Участник'},name=n.name||'Участник',L=st.lk[c.id]||[],on=L.includes(st.me.id),
+    can=c.user_id===st.me.id||post.owner===st.me.id||st.mod,kids=(st.c[post.id]||[]).filter(k=>k.parent_id===c.id);
+  return `<div class="cm-i" data-cid="${c.id}"><button class="cm-a" data-cu="${c.user_id}" aria-label="Профиль" style="background-color:${PAL[hs(name)%7]};${n.avatar_url?`background-image:url('${esc(String(n.avatar_url).replace(/'/g,'%27'))}')`:''}">${n.avatar_url?'':esc(ini(name))}</button>
   <div class="cm-bw"><div class="cm-b"><b data-cu="${c.user_id}">${esc(name)}</b>${n.fio?`<span class="cm-fio">${esc(n.fio)}</span>`:''}<p>${esc(c.body)}</p>
-  <div class="cm-m"><span>${dt(c.created_at)}</span>${off?'':'<button data-cr>Ответить</button>'}<button data-cl class="${on?'on':''}">${HEART}${L.length}</button>${can?'<button class="dg" data-cd>Удалить</button>':''}</div></div>
+  <div class="cm-m"><span>${dt(c.created_at)}</span>${off?'':'<button data-cr>Ответить</button>'}<button data-cl class="${on?'on':''}">${HEART}${L.length}</button>${can?'<button class="dg" data-cd>Удалить</button>':''}${c.user_id!==st.me.id?'<button data-crep>Пожаловаться</button>':''}</div></div>
   ${st.rep===String(c.id)&&!off?form(post.id,c.id):''}${kids.length?`<div class="cm-k">${kids.map(k=>item(k,post,off)).join('')}</div>`:''}</div></div>`;
 }
 window.CMT={
+  mod:()=>st.mod,
   n:id=>(st.c[id]||[]).length,
   async load(SB,me,ids,cb){
     st.me=me;st.cb=cb;st.c={};st.lk={};
+    if(st.modOf!==me.id){const m=await SB.from('moderators').select('user_id').eq('user_id',me.id).maybeSingle();st.mod=!!m.data;st.modOf=me.id}
     if(!ids.length)return;
-    const r=await SB.from('post_comments').select('id,post_id,user_id,body,created_at,parent_id').in('post_id',ids).order('created_at').limit(500);
+    const r=await SB.from('post_comments').select('id,post_id,user_id,body,created_at,parent_id').in('post_id',ids).order('created_at',{ascending:false}).limit(500);
     if(r.error){toast('Комментарии не загрузились: '+r.error.message);return}
-    const cs=r.data||[],cid=cs.map(c=>c.id),uid=[...new Set(cs.map(c=>c.user_id))];
+    cs=(r.data||[]).reverse(),cid=cs.map(c=>c.id),uid=[...new Set(cs.map(c=>c.user_id))];
     const [lk,nm]=await Promise.all([
       cid.length?SB.from('comment_likes').select('comment_id,user_id').in('comment_id',cid):null,
       uid.length?SB.from('profiles').select('id,name,fio,avatar_url').in('id',uid):null]);
+    if(nm&&nm.error)toast('Профили: '+nm.error.message);
     cs.forEach(c=>(st.c[c.post_id]||(st.c[c.post_id]=[])).push(c));
     ((lk&&lk.data)||[]).forEach(l=>(st.lk[l.comment_id]||(st.lk[l.comment_id]=[])).push(l.user_id));
     ((nm&&nm.data)||[]).forEach(x=>st.nm[x.id]=x);
@@ -70,6 +73,25 @@ window.CMT={
       (top.length>3?'<button class="cm-more" data-cmore>'+(st.open[pid]?'Скрыть комментарии':'Показать комментарии ('+top.length+')')+'</button>':'')+
       (off?'<div class="cm-off">Автор отключил комментарии</div>':form(pid,''))+'</div>';
   }
+};
+  CMT.report=function(kind,id,uid){
+  if(document.getElementById('rp-bg'))return;
+  const R=['Оскорбления или травля','Спам или реклама','Неприемлемый контент','Другое'];
+  const o=document.createElement('div');o.id='rp-bg';
+  o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;justify-content:center;align-items:center;padding:16px';
+  o.innerHTML=`<div style="background:#fff;border-radius:22px;width:100%;max-width:380px;padding:22px;color:#1f2937">
+    <h3 style="margin:0 0 4px;font-size:20px;font-weight:800">Пожаловаться</h3>
+    <div style="color:#7a8594;font-size:13px;margin-bottom:12px">${kind==='post'?'На публикацию':'На комментарий'}. Модераторы посмотрят жалобу.</div>
+    ${R.map(r=>`<button data-r="${r}" style="display:block;width:100%;text-align:left;padding:13px 14px;margin-bottom:8px;border:1px solid #e6e9ef;border-radius:14px;background:#fff;font:inherit;cursor:pointer">${r}</button>`).join('')}
+    <button data-x style="width:100%;padding:12px;border:0;border-radius:14px;background:#f2f4f8;font:inherit;font-weight:700;cursor:pointer">Отмена</button></div>`;
+  o.onclick=async e=>{
+    if(e.target===o||e.target.closest('[data-x]')){o.remove();return}
+    const r=e.target.closest('[data-r]');if(!r)return;
+    o.remove();
+    const q=await window.SB.from('reports').insert({kind,target_id:id,target_user:uid||null,reason:r.dataset.r});
+    toast(q.error?(q.error.code==='23505'?'Вы уже жаловались на это':'Не отправилось: '+q.error.message):'Жалоба отправлена, спасибо');
+  };
+  document.body.appendChild(o);
 };
 document.addEventListener('click',async e=>{
   const t=e.target,b=k=>t.closest(k),box=b('.cm');if(!box)return;
@@ -83,10 +105,14 @@ document.addEventListener('click',async e=>{
     const r=on?await SB.from('comment_likes').delete().match({comment_id:id,user_id:st.me.id}):await SB.from('comment_likes').insert({comment_id:id});
     if(r.error){if(on)L.push(st.me.id);else L.splice(L.indexOf(st.me.id),1);redraw();toast('Не получилось: '+r.error.message)}
   }
+    else if(b('[data-crep]')){
+    const i=+b('.cm-i').dataset.cid,c=Object.values(st.c).flat().find(z=>z.id===i);
+    CMT.report('comment',i,c&&c.user_id);
+  }
   else if(b('[data-cd]')){
     const id=+b('.cm-i').dataset.cid;if(!confirm('Удалить комментарий?'))return;
     const r=await SB.from('post_comments').delete().eq('id',id).select();
-    if(r.error||!r.data.length)return toast('Не удалось удалить');
+    if(r.error||!r.data.length)return toast('Не удалось удалить: '+(r.error?r.error.message:'нет прав'));
     const gone=new Set([id]);let n;
     do{n=0;for(const p in st.c)st.c[p]=st.c[p].filter(c=>{const g=gone.has(c.id)||gone.has(c.parent_id);if(g&&!gone.has(c.id))gone.add(c.id);if(g)n=1;return !g})}while(n);
     redraw();
