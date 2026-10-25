@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Лаборатория явлений</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#070b18;--cy:#5ee0ff;--am:#ffb84d;--gr:#58ff9a;--rd:#ff6b7d;--glass:rgba(12,18,42,.78)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--ink);overflow:hidden;font-family:'Onest',system-ui,sans-serif;color:#eaf1ff}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.glass{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12)}
+h1,h2{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.01em}
+button{font-family:inherit;cursor:pointer;border:0}
+.btn{background:linear-gradient(135deg,var(--cy),#7aa8ff);color:#06122b;font-weight:700;font-size:16px;padding:14px 22px;border-radius:14px;width:100%}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.4}
+
+#hud{position:fixed;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top)) 14px 0;display:flex;justify-content:space-between;align-items:center;pointer-events:none;z-index:3}
+#name{font-family:'Unbounded',sans-serif;font-weight:500;font-size:14px;padding:8px 14px;border-radius:999px}
+#dots{display:flex;gap:5px;padding:10px 12px;border-radius:999px}
+#dots i{width:16px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);transition:.4s}
+#dots i.on{background:var(--am);width:26px}
+#dots i.done{background:var(--cy)}
+#meter{position:fixed;top:62px;left:14px;right:14px;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;z-index:3;transition:opacity .4s}
+#fill{height:100%;width:0;background:linear-gradient(90deg,var(--cy),var(--gr));border-radius:3px;transition:width .2s}
+#readout{position:fixed;top:78px;left:50%;transform:translateX(-50%);padding:7px 14px;border-radius:999px;font-weight:600;font-size:14px;z-index:3;transition:opacity .3s;white-space:nowrap}
+#hint{position:fixed;left:14px;right:14px;bottom:max(18px,env(safe-area-inset-bottom));text-align:center;padding:12px 16px;border-radius:16px;font-size:14.5px;line-height:1.4;z-index:3;transition:opacity .4s}
+.hide{opacity:0!important;pointer-events:none!important}
+
+#card{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:520px;margin:0 auto;border-radius:24px;padding:20px 20px 18px;z-index:5;transform:translateY(130%);transition:transform .7s cubic-bezier(.2,.9,.2,1);max-height:68vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#card.show{transform:none}
+#ctag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--cy);padding:5px 12px 5px 10px;border-radius:999px;background:rgba(94,224,255,.12)}
+#ctag:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy)}
+#ctitle{font-size:20px;line-height:1.2;margin:12px 0 8px}
+#ctext{font-size:15.5px;line-height:1.55;color:#d6e1ff;max-width:60ch}
+#cfact{margin:14px 0 16px;padding:10px 14px;border-left:3px solid var(--am);background:rgba(255,184,77,.09);border-radius:0 12px 12px 0;font-size:14px;line-height:1.5;color:#ffe3b3}
+
+.screen{position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:16px;z-index:6;transition:opacity .6s}
+.panel{width:100%;max-width:520px;border-radius:26px;padding:26px 22px 22px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#menu h1{font-size:30px;line-height:1.05;margin-bottom:6px;background:linear-gradient(120deg,#fff,var(--cy) 60%,var(--am));-webkit-background-clip:text;background-clip:text;color:transparent}
+#menu .sub{color:var(--am);font-weight:600;font-size:14px;margin-bottom:14px}
+#menu p{font-size:15.5px;line-height:1.55;color:#d6e1ff;margin-bottom:10px}
+#menu ul{list-style:none;margin:12px 0 18px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#menu li{font-size:13.5px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.07)}
+#quiz{align-items:center;background:rgba(5,8,20,.55)}
+#qtop{font-size:13.5px;color:var(--am);font-weight:600;margin-bottom:10px}
+#qtext{font-size:18px;line-height:1.4;font-weight:600;margin-bottom:16px}
+#qbtns{display:grid;gap:9px}
+.qb{background:rgba(255,255,255,.09);color:#eaf1ff;font-size:16px;font-weight:600;padding:14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.14);text-align:left}
+.qb.ok{background:rgba(88,255,154,.18);border-color:var(--gr)}
+.qb.bad{background:rgba(255,107,125,.18);border-color:var(--rd)}
+#qfb{font-size:14.5px;line-height:1.5;color:#d6e1ff;margin:14px 0;min-height:44px}
+#qfb b{color:#fff}
+.big{font-family:'Unbounded',sans-serif;font-size:46px;font-weight:700;color:var(--am);margin:6px 0 10px}
+@media (prefers-reduced-motion:reduce){#card{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="name" class="glass"></div>
+  <div id="dots" class="glass"></div>
+</div>
+<div id="meter" class="hide"><div id="fill"></div></div>
+<div id="readout" class="glass hide"></div>
+<div id="hint" class="glass hide"></div>
+
+<div id="card" class="glass">
+  <span id="ctag"></span>
+  <h2 id="ctitle"></h2>
+  <p id="ctext"></p>
+  <div id="cfact"></div>
+  <button class="btn" id="cnext">Дальше</button>
+</div>
+
+<div id="menu" class="screen">
+  <div class="panel glass">
+    <h1>Лаборатория явлений</h1>
+    <div class="sub">§ 1. Что изучает физика</div>
+    <p>Физика изучает изменения в природе — явления. Здесь их можно потрогать: крути, тащи, грей и смотри, что произойдёт.</p>
+    <ul>
+      <li>Движение шара</li><li>Нагревание воды</li><li>Отражение света</li><li>Электризация</li><li>Магнит</li><li>Проверка: физика, химия или биология?</li>
+    </ul>
+    <button class="btn" id="start">Начать опыты</button>
+  </div>
+</div>
+
+<div id="quiz" class="screen hide">
+  <div class="panel glass" id="qpanel"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const V3=THREE.Vector3,UP=new V3(0,1,0);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ease=t=>t*t*(3-2*t);
+const mat=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.1},o));
+function mesh(g,m,x=0,y=0,z=0){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
+function label(txt,{color='#fff',w=2.4,fs=56}={}){
+  const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');
+  x.font=`700 ${fs}px Onest,system-ui,sans-serif`;x.textAlign='center';x.textBaseline='middle';
+  x.shadowColor='rgba(0,0,0,.85)';x.shadowBlur=10;x.fillStyle=color;x.fillText(txt,256,64);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  s.scale.set(w,w/4,1);s.renderOrder=10;return s}
+const _d=new V3();
+function setB(m,A,B){_d.subVectors(B,A);const L=_d.length()||.001;m.position.copy(A).add(B).multiplyScalar(.5);m.scale.set(1,L,1);m.quaternion.setFromUnitVectors(UP,_d.divideScalar(L))}
+
+/* ---------- сцена ---------- */
+const canvas=$('#c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x070b18);scene.fog=new THREE.Fog(0x070b18,22,60);
+const cam=new THREE.PerspectiveCamera(50,1,.1,120);
+scene.add(new THREE.HemisphereLight(0x9bb7ff,0x1a1420,.75));
+const sun=new THREE.DirectionalLight(0xffffff,1.1);sun.position.set(4,10,6);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8});scene.add(sun);
+
+const tableTex=(()=>{const c=document.createElement('canvas');c.width=c.height=1024;const x=c.getContext('2d');
+  const g=x.createRadialGradient(512,512,0,512,512,512);g.addColorStop(0,'#2a386a');g.addColorStop(1,'#141b38');
+  x.fillStyle=g;x.fillRect(0,0,1024,1024);x.strokeStyle='rgba(120,160,255,.15)';x.lineWidth=2;
+  for(let i=0;i<=26;i++){const p=i*1024/26;x.beginPath();x.moveTo(p,0);x.lineTo(p,1024);x.moveTo(0,p);x.lineTo(1024,p);x.stroke()}
+  return new THREE.CanvasTexture(c)})();
+const sideM=mat(0x10162f,{roughness:.6});
+const table=new THREE.Mesh(new THREE.CylinderGeometry(6.5,6.7,.4,72),[sideM,new THREE.MeshStandardMaterial({map:tableTex,roughness:.45,metalness:.25}),sideM]);
+table.position.y=-.2;table.receiveShadow=true;scene.add(table);
+const rim=new THREE.Mesh(new THREE.TorusGeometry(6.52,.045,8,96),new THREE.MeshBasicMaterial({color:0x5ee0ff}));rim.rotation.x=Math.PI/2;scene.add(rim);
+{const sp=[];for(let i=0;i<600;i++){const r=rnd(28,50),a=rnd(0,6.283);sp.push(Math.cos(a)*r,rnd(-6,34),Math.sin(a)*r)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
+ scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x9bb7ff,size:.25,fog:false})))}
+
+/* ---------- ввод ---------- */
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(UP,0),_o=new V3();
+function pt(e,h=0){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,cam);plane.constant=-h;return ray.ray.intersectPlane(plane,_o)?_o.clone():null}
+
+/* ---------- состояние ---------- */
+let state='menu',cur=null,idx=0,zoomT=0,micro=0,tt=0;
+const tPos=new V3(0,9,12),lookC=new V3(0,0,0),tLook=new V3(0,.5,0);
+
+/* ======================= СТАНЦИЯ 1: ШАР КАТИТСЯ ======================= */
+function st1(){
+  const g=new THREE.Group(),R=.6,LIM=5.3;
+  const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');
+  for(let i=0;i<8;i++){x.fillStyle=i%2?'#ffffff':'#ff7a2f';x.fillRect(i*64,0,64,256)}
+  x.fillStyle='#1b2a6b';x.fillRect(0,100,512,56);
+  const ball=mesh(new THREE.SphereGeometry(R,40,28),new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(c),roughness:.3,metalness:.1}),-2.5,R,2.2);
+  g.add(ball);
+  const v=new V3(),pins=[];
+  for(let i=0;i<6;i++){const a=i/6*6.283+.4;
+    const p=mesh(new THREE.CylinderGeometry(.18,.26,.9,16),mat(0xffffff,{roughness:.3}),Math.cos(a)*3.2,.45,Math.sin(a)*3.2-.3);
+    const rg=new THREE.Mesh(new THREE.TorusGeometry(.21,.04,8,20),mat(0xff3b5c));rg.rotation.x=Math.PI/2;rg.position.y=.22;p.add(rg);
+    p.v=new V3();p.hit=false;p.fall=0;p.axis=new V3();g.add(p);pins.push(p)}
+  const N=300,tp=new Float32Array(N*3),tg=new THREE.BufferGeometry();
+  tg.setAttribute('position',new THREE.BufferAttribute(tp,3));tg.setDrawRange(0,0);
+  const tm=new THREE.PointsMaterial({color:0x5ee0ff,size:.18,transparent:true,opacity:.9,depthWrite:false,blending:THREE.AdditiveBlending});
+  const trail=new THREE.Points(tg,tm);trail.frustumCulled=false;g.add(trail);
+  let tn=0,last=ball.position.clone(),dist=0,hits=0,p0=null,p1=null;
+  const arrow=new THREE.ArrowHelper(new V3(1,0,0),new V3(),1,0xffd24d,.4,.3);arrow.visible=false;g.add(arrow);
+  const aim=new THREE.ArrowHelper(new V3(1,0,0),new V3(),1,0x5ee0ff,.4,.3);aim.visible=false;g.add(aim);
+  const S={grp:g,name:'Движение',prog:0,
+    hint:'Проведи пальцем по экрану — шар получит щелчок. Сбивай кегли!',
+    home:{pos:new V3(0,8,9),look:new V3(0,0,.4)},
+    card:{tag:'Механическое явление',title:'Движение — это смена места',
+      text:'Шар катится: с каждой секундой его положение относительно стола меняется. Если тело меняет место — значит, происходит механическое явление. Скорость постепенно падает из-за трения.',
+      fact:'Так же движутся велосипедист, автомобиль и облака в небе.'},
+    zoom:()=>({pos:ball.position.clone().add(new V3(0,2.4,3.6)),look:ball.position.clone()}),
+    down(e){p0=pt(e,.1);p1=p0&&p0.clone()},
+    move(e){if(!p0)return;p1=pt(e,.1)||p1;const d=p1.clone().sub(p0);d.y=0;const L=d.length();
+      if(L>.05){aim.visible=true;aim.position.set(ball.position.x,.3,ball.position.z);aim.setDirection(d.normalize());aim.setLength(Math.min(L,5)+.2,.35,.25)}},
+    up(){if(p0&&p1){v.copy(p1).sub(p0);v.y=0;v.multiplyScalar(2.2);if(v.length()>11)v.setLength(11)}p0=p1=null;aim.visible=false},
+    update(dt){
+      let sp=v.length();
+      if(sp>.02){
+        ball.position.addScaledVector(v,dt);
+        ball.rotateOnWorldAxis(new V3().crossVectors(UP,v).normalize(),sp*dt/R);
+        dist+=sp*dt;v.multiplyScalar(Math.max(0,1-.45*dt));v.setLength(Math.max(0,v.length()-.3*dt));
+        const r=Math.hypot(ball.position.x,ball.position.z);
+        if(r>LIM){const nx=ball.position.x/r,nz=ball.position.z/r,vn=v.x*nx+v.z*nz;
+          if(vn>0){v.x-=1.7*vn*nx;v.z-=1.7*vn*nz}ball.position.x=nx*LIM;ball.position.z=nz*LIM}
+        if(ball.position.distanceTo(last)>.3){const i=tn%N;tp[i*3]=ball.position.x;tp[i*3+1]=.08;tp[i*3+2]=ball.position.z;tn++;
+          tg.attributes.position.needsUpdate=true;tg.setDrawRange(0,Math.min(tn,N));last.copy(ball.position)}
+      } else v.set(0,0,0);
+      sp=v.length();
+      for(const p of pins){
+        if(!p.hit){const dx=p.position.x-ball.position.x,dz=p.position.z-ball.position.z,d=Math.hypot(dx,dz);
+          if(d<R+.22&&sp>.2){p.hit=true;hits++;const dir=new V3(dx,0,dz).normalize();
+            p.v.copy(v).multiplyScalar(.9).addScaledVector(dir,1.5);p.v.y=0;p.axis.crossVectors(UP,dir).normalize();v.multiplyScalar(.82)}}
+        else{p.fall=Math.min(1,p.fall+dt*3);p.quaternion.setFromAxisAngle(p.axis,p.fall*1.45);
+          p.position.y=.45-p.fall*.27;p.position.x+=p.v.x*dt;p.position.z+=p.v.z*dt;p.v.multiplyScalar(Math.max(0,1-2.5*dt))}}
+      if(sp>.15){arrow.visible=true;arrow.position.set(ball.position.x,1.6,ball.position.z);
+        arrow.setDirection(v.clone().normalize());arrow.setLength(.4+sp*.35,.35,.25)}else arrow.visible=false;
+      tm.size=.18+.2*micro;
+      S.prog=clamp(dist/14+hits*.05);
+      ro(`Пройдено: ${dist.toFixed(1)} м · кегли: ${hits}/6`.replace(' · ',', '))}};
+  return S}
+
+/* ======================= СТАНЦИЯ 2: НАГРЕВАНИЕ ======================= */
+function st2(){
+  const g=new THREE.Group(),cg=new THREE.Group();cg.position.y=1;g.add(cg);
+  const steel=mat(0x8a93b8,{metalness:.8,roughness:.3});
+  for(let i=0;i<3;i++){const a=i*2.094+.5;g.add(mesh(new THREE.CylinderGeometry(.05,.05,1,8),steel,Math.cos(a)*1.45,.5,Math.sin(a)*1.45))}
+  const ring=mesh(new THREE.TorusGeometry(1.45,.06,10,40),steel,0,.98,0);ring.rotation.x=Math.PI/2;g.add(ring);
+  g.add(mesh(new THREE.CylinderGeometry(.38,.5,.55,24),mat(0x6b7bd6,{roughness:.2}),0,.28,0));
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(.22,.45,16),new THREE.MeshBasicMaterial({color:0xff9a2e,transparent:true,opacity:.9}));
+  flame.position.y=.78;g.add(flame);
+  const fl=new THREE.PointLight(0xff8a3a,0,7);fl.position.set(0,.8,0);g.add(fl);
+  const glassM=new THREE.MeshPhysicalMaterial({color:0xd8ecff,transparent:true,opacity:.2,roughness:.05,side:THREE.DoubleSide,depthWrite:false});
+  const cup=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.3,2.4,48,1,true),glassM);cup.position.y=1.2;cg.add(cup);
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,.1,48),glassM);base.position.y=.05;cg.add(base);
+  const waterM=new THREE.MeshPhysicalMaterial({color:0x3aa0ff,transparent:true,opacity:.45,roughness:.1,depthWrite:false});
+  const water=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.3,1.6,48),waterM);water.position.y=.9;cg.add(water);
+  const blue=new THREE.Color(0x3aa0ff),iceC=new THREE.Color(0xe2f8ff);
+  /* молекулы H2O */
+  const mg=new THREE.Group();cg.add(mg);
+  const mO=new THREE.MeshStandardMaterial({color:0xff4d5e,roughness:.3}),mH=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.3});
+  const gO=new THREE.SphereGeometry(.1,16,12),gH=new THREE.SphereGeometry(.06,12,10),mols=[];
+  for(let ix=0;ix<4;ix++)for(let iy=0;iy<4;iy++)for(let iz=0;iz<4;iz++){
+    const m=new THREE.Group();m.add(new THREE.Mesh(gO,mO));
+    const h1=new THREE.Mesh(gH,mH);h1.position.set(.11,.08,0);const h2=new THREE.Mesh(gH,mH);h2.position.set(-.11,.08,0);m.add(h1,h2);
+    m.home=new V3(-.75+ix*.5,.35+iy*.4,-.75+iz*.5);m.position.copy(m.home);
+    m.v=new V3(rnd(-1,1),rnd(-1,1),rnd(-1,1)).normalize();m.th=Math.random();mg.add(m);mols.push(m)}
+  /* пар */
+  const SN=70,sp=new Float32Array(SN*3),sl=new Float32Array(SN),sg=new THREE.BufferGeometry();
+  for(let i=0;i<SN;i++)sp[i*3+1]=-99;sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
+  const steam=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:.55,transparent:true,opacity:.25,depthWrite:false}));steam.frustumCulled=false;g.add(steam);
+  const bubs=[];for(let i=0;i<14;i++){const b=new THREE.Mesh(new THREE.SphereGeometry(.07,8,8),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.6}));
+    b.position.set(rnd(-.9,.9),rnd(.2,1.6),rnd(-.9,.9));b.visible=false;cg.add(b);bubs.push(b)}
+  let T=-10,ph='ice',melt=0,boil=0,held=false;
+  const S={grp:g,name:'Нагревание',prog:0,
+    hint:'Зажми экран — загорится горелка. Отпусти — вода остывает.',
+    home:{pos:new V3(0,4.8,8.2),look:new V3(0,1.8,0)},
+    card:{tag:'Тепловое явление',title:'Лёд растаял, вода закипела',
+      text:'Вещество осталось тем же — H₂O, поменялось только движение молекул. В льду они дрожат на месте, в воде скользят друг мимо друга, в паре разлетаются в стороны.',
+      fact:'Замерзание воды — тоже тепловое явление, как сказано в параграфе.'},
+    zoom:()=>({pos:new V3(0,2.3,3.5),look:new V3(0,1.9,0)}),
+    down(){held=true},up(){held=false},
+    update(dt){
+      const hold=held||state==='zoom'||state==='card',h=hold?1:0;
+      if(ph==='ice'){T=Math.max(-10,T+(h?14:-3)*dt);if(T>=0){T=0;ph='melt'}}
+      else if(ph==='melt'){melt=clamp(melt+(h?.2:-.06)*dt);if(melt>=1)ph='water';else if(melt<=0&&!h){ph='ice';T=-.5}}
+      else if(ph==='water'){T=Math.max(4,T+(h?16:-5)*dt);if(T>=100){T=100;ph='boil'}}
+      else{boil=clamp(boil+(h?.3:-.25)*dt);if(boil<=0){ph='water';T=98}}
+      S.prog=ph==='ice'?.2*(T+10)/10:ph==='melt'?.2+.25*melt:ph==='water'?.45+.35*clamp(T/100):(boil>=1?1:.8+.19*boil);
+      const solid=ph==='ice'?1:ph==='melt'?1-melt:0;
+      waterM.color.copy(blue).lerp(iceC,solid);waterM.opacity=(.45+.4*solid)*(1-.55*micro);glassM.opacity=.2*(1-.7*micro);
+      flame.visible=!!h;flame.scale.set(1,1+.2*Math.sin(tt*32),1);fl.intensity=h?1.8:0;
+      /* молекулы */
+      const spd=.2+.9*clamp(T/100);
+      for(const m of mols){
+        const gas=ph==='boil'&&boil*1.3>m.th,s=gas?2.2:spd,ymax=gas?2.25:1.55;
+        m.v.x+=rnd(-1,1)*dt*8;m.v.y+=rnd(-1,1)*dt*8;m.v.z+=rnd(-1,1)*dt*8;m.v.setLength(s);
+        m.position.addScaledVector(m.v,dt);
+        if(solid>0){m.position.lerp(m.home,Math.min(1,solid*10*dt));
+          if(solid>.5){m.position.x+=rnd(-1,1)*.05*solid;m.position.y+=rnd(-1,1)*.05*solid;m.position.z+=rnd(-1,1)*.05*solid}}
+        else{m.rotation.x+=dt*s;m.rotation.y+=dt*s*.7}
+        const r=Math.hypot(m.position.x,m.position.z);
+        if(r>1.15){const k=1.15/r;m.position.x*=k;m.position.z*=k;m.v.x*=-1;m.v.z*=-1}
+        if(m.position.y<.2){m.position.y=.2;m.v.y=Math.abs(m.v.y)}
+        if(m.position.y>ymax){m.position.y=ymax;m.v.y=-Math.abs(m.v.y)}
+        m.scale.setScalar(1+micro*1.6)}
+      /* пар и пузыри */
+      const amt=ph==='boil'?(h?1:.3):ph==='water'?clamp((T-60)/40)*.4*(h?1:.5):0;
+      for(let i=0;i<SN;i++){
+        if(sl[i]<=0){if(Math.random()<amt*dt*9){sp[i*3]=rnd(-.9,.9);sp[i*3+1]=rnd(2.7,3.3);sp[i*3+2]=rnd(-.9,.9);sl[i]=1}}
+        else{sl[i]-=dt*.35;sp[i*3+1]+=dt*1.3;sp[i*3]+=Math.sin(tt*2+i)*dt*.2;if(sl[i]<=0)sp[i*3+1]=-99}}
+      sg.attributes.position.needsUpdate=true;
+      for(const b of bubs){b.visible=ph==='boil'&&h&&micro<.5;b.position.y+=dt*1.2;if(b.position.y>1.65)b.position.y=.2}
+      const name=ph==='ice'?'лёд':ph==='melt'?'плавление':ph==='water'?'вода':'кипение';
+      ro(`Температура ${Math.round(T)} °C, ${name}`)}};
+  return S}
+
+/* ======================= СТАНЦИЯ 3: ЗЕРКАЛО ======================= */
+function st3(){
+  const g=new THREE.Group(),Y=1.2,M=new V3(0,Y,1),SRC=new V3(-4.05,Y,1),WZ=-4;
+  let a=.95,hits=0,hold=0,lx=0,drag=false;const targets=[2.8,-2.6];let tx=targets[0];
+  g.add(mesh(new THREE.BoxGeometry(10,3.4,.2),mat(0x2a3360,{roughness:.9}),0,1.7,-4.1));
+  g.add(mesh(new THREE.BoxGeometry(.9,.7,.7),mat(0x444b6e),-4.5,Y,1));
+  {const lamp=new THREE.Mesh(new THREE.SphereGeometry(.16,16,12),new THREE.MeshBasicMaterial({color:0xfff0b0}));lamp.position.copy(SRC);g.add(lamp)}
+  g.add(mesh(new THREE.CylinderGeometry(.5,.55,.1,24),mat(0x3b4470),0,.05,1));
+  g.add(mesh(new THREE.CylinderGeometry(.06,.06,.5,10),mat(0x8a93b8,{metalness:.8}),0,.35,1));
+  const mir=new THREE.Group();mir.position.copy(M);g.add(mir);
+  mir.add(mesh(new THREE.BoxGeometry(1.8,1.4,.06),mat(0xdff3ff,{metalness:1,roughness:.03}),0,0,.01));
+  mir.add(mesh(new THREE.BoxGeometry(1.9,1.5,.05),mat(0x20284a),0,0,-.04));
+  const bm=new THREE.MeshBasicMaterial({color:0xffe9a8,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false});
+  const bg=new THREE.CylinderGeometry(.04,.04,1,8),b1=new THREE.Mesh(bg,bm),b2=new THREE.Mesh(bg,bm);g.add(b1,b2);
+  const spot=new THREE.Mesh(new THREE.CircleGeometry(.28,32),new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false}));
+  const halo=new THREE.Mesh(new THREE.CircleGeometry(.65,32),new THREE.MeshBasicMaterial({color:0xffe08a,transparent:true,opacity:.22,blending:THREE.AdditiveBlending,depthWrite:false}));
+  spot.add(halo);g.add(spot);
+  const ringM=new THREE.MeshBasicMaterial({color:0x58ff9a,transparent:true,opacity:.85,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.32,.42,40),ringM);ring.position.set(tx,Y,-3.98);g.add(ring);
+  /* микро-вид: нормаль и углы */
+  const mi=new THREE.Group();mi.visible=false;g.add(mi);
+  const nl=new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.6}));mi.add(nl);
+  const mkDots=c=>{const r=[];for(let i=0;i<16;i++){const s=new THREE.Mesh(new THREE.SphereGeometry(.04,8,8),new THREE.MeshBasicMaterial({color:c}));mi.add(s);r.push(s)}return r};
+  const dA=mkDots(0xffb84d),dB=mkDots(0x58ff9a);
+  const lbA=label('угол падения',{color:'#ffb84d',w:2.2,fs:46}),lbB=label('угол отражения',{color:'#58ff9a',w:2.4,fs:46});mi.add(lbA,lbB);
+  const nf=new V3(),inc=new V3(-1,0,0),out=new V3(),tmp=new V3(),arc=(ds,u,w)=>{for(let i=0;i<16;i++){const k=i/15;
+    tmp.copy(nf).multiplyScalar(1-k).addScaledVector(u,k).normalize().multiplyScalar(.95).add(M);ds[i].position.copy(tmp);ds[i].scale.setScalar(w)}};
+  const S={grp:g,name:'Зеркало',prog:0,
+    hint:'Води пальцем влево-вправо — зеркало поворачивается. Попади «зайчиком» в зелёное кольцо.',
+    home:{pos:new V3(0,5.5,8.5),look:new V3(0,1.2,-.5)},
+    card:{tag:'Световое явление',title:'Свет отражается от зеркала',
+      text:'Луч попал на зеркало и отскочил так, что угол отражения равен углу падения. Поэтому, поворачивая зеркало, ты управляешь «солнечным зайчиком» на стене.',
+      fact:'Повернул зеркало на угол α — отражённый луч повернулся на 2α.'},
+    zoom:()=>({pos:new V3(0,5.2,3.4),look:new V3(0,Y,.6)}),
+    down(e){drag=true;lx=e.clientX},up(){drag=false},
+    move(e){if(!drag)return;a=clamp(a+(e.clientX-lx)*.006,.25,1.4);lx=e.clientX},
+    update(dt){
+      mir.rotation.y=a;const s2=Math.sin(2*a),c2=Math.cos(2*a);
+      setB(b1,SRC,M);
+      const t=s2>.05?Math.min(12,(M.z-WZ)/s2):6;out.set(c2,0,-s2);
+      tmp.copy(M).addScaledVector(out,t);setB(b2,M,tmp);
+      const hx=M.x+c2*(M.z-WZ)/Math.max(s2,.001);
+      spot.visible=s2>.05&&Math.abs(hx)<4.9;spot.position.set(hx,Y,-3.96);
+      const near=spot.visible&&Math.abs(hx-tx)<.4;
+      if(hits<2){if(near)hold+=dt;else hold=Math.max(0,hold-dt*2);
+        if(hold>1){hits++;hold=0;if(hits<2){tx=targets[hits];ring.position.x=tx}}}
+      ring.visible=hits<2;ring.scale.setScalar(1+.08*Math.sin(tt*5));ringM.color.setHex(near?0xffffff:0x58ff9a);
+      S.prog=hits>=2?1:(hits+clamp(hold))/2;
+      if(micro>.02){mi.visible=true;nf.set(-Math.sin(a),0,-Math.cos(a));
+        setB(nl,M,tmp.copy(M).addScaledVector(nf,1.7));
+        arc(dA,inc,micro);arc(dB,out,micro);
+        lbA.position.copy(M).addScaledVector(tmp.copy(nf).add(inc).normalize(),1.6);
+        lbB.position.copy(M).addScaledVector(tmp.copy(nf).add(out).normalize(),1.6);
+        lbA.material.opacity=lbB.material.opacity=micro}
+      ro(`Попаданий: ${hits} из 2`)}};
+  return S}
+
+/* ======================= СТАНЦИЯ 4: ЭЛЕКТРИЗАЦИЯ ======================= */
+function st4(){
+  const g=new THREE.Group();let charge=0,ready=0,drag=false;const target=new V3(-1,1.1,1.5);
+  g.add(mesh(new THREE.BoxGeometry(2.6,.3,1.8),mat(0xc86b4a,{roughness:1}),-3.3,.15,2));
+  const wl=label('шерсть',{w:2,fs:48});wl.position.set(-3.3,.9,2);g.add(wl);
+  const combMat=mat(0x2e86ff,{roughness:.2,emissive:0x2e86ff,emissiveIntensity:0});
+  const comb=new THREE.Group();comb.position.copy(target);g.add(comb);
+  comb.add(mesh(new THREE.BoxGeometry(2.2,.12,.5),combMat));
+  for(let i=0;i<14;i++)comb.add(mesh(new THREE.BoxGeometry(.06,.35,.3),combMat,-1+i*.154,-.23,0));
+  const cl=new THREE.PointLight(0x5ee0ff,0,5);comb.add(cl);
+  const papers=[];
+  for(let i=0;i<12;i++){const p=mesh(new THREE.BoxGeometry(.38,.02,.38),mat(0xffffff,{roughness:.9}),rnd(1,4.2),.011,rnd(-2,2.2));
+    p.rotation.y=rnd(0,6.28);p.v=new V3();p.st=false;p.off=new V3();g.add(p);papers.push(p)}
+  /* микро-вид */
+  const mi=new THREE.Group();mi.position.set(0,7,0);mi.visible=false;g.add(mi);
+  const slabR=mat(0x2e86ff,{emissive:0x2e86ff,emissiveIntensity:0});
+  mi.add(mesh(new THREE.BoxGeometry(1.6,2.6,.5),mat(0xc86b4a),-2.6,0,0),mesh(new THREE.BoxGeometry(1.6,2.6,.5),slabR,2.6,0,0));
+  const l1=label('шерсть',{w:2.2});l1.position.set(-2.6,1.8,0);const l2=label('расчёска',{w:2.4});l2.position.set(2.6,1.8,0);mi.add(l1,l2);
+  const mc=document.createElement('canvas');mc.width=mc.height=64;{const x=mc.getContext('2d');x.fillStyle='#06122b';x.font='700 60px Onest,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('−',32,34)}
+  const minusMat=new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mc),depthTest:false}),els=[];
+  for(let i=0;i<26;i++){const e=new THREE.Group();e.add(new THREE.Mesh(new THREE.SphereGeometry(.14,14,10),new THREE.MeshBasicMaterial({color:0x7fd8ff})));
+    const s=new THREE.Sprite(minusMat);s.scale.set(.3,.3,1);s.position.z=.15;e.add(s);e.ph=Math.random();e.sp=rnd(.22,.4);e.y0=rnd(-1,1);e.z0=rnd(.3,.6);mi.add(e);els.push(e)}
+  const tmp=new V3();
+  const S={grp:g,name:'Электризация',prog:0,
+    hint:'Води расчёску по шерсти — она набирает заряд. Потом поднеси к бумажкам и подними 5 штук.',
+    home:{pos:new V3(0,7,8),look:new V3(0,.4,.3)},
+    card:{tag:'Электрическое явление',title:'Трение заряжает расчёску',
+      text:'При трении часть электронов переходит с шерсти на пластик, и расчёска получает отрицательный заряд. Заряженное тело притягивает лёгкие бумажки — вот почему они прыгнули к ней.',
+      fact:'Молния в грозу — тот же электрический разряд, только огромный.'},
+    zoom:()=>({pos:new V3(0,7.4,6.2),look:new V3(0,7,0)}),
+    down(e){drag=true;S.move(e)},up(){drag=false},
+    move(e){if(!drag)return;const P=pt(e,1.1);if(P){target.x=clamp(P.x,-4.8,4.8);target.z=clamp(P.z,-2.8,3.2)}},
+    update(dt){
+      const prev=comb.position.clone(),k=1-Math.exp(-dt*14);
+      const over=comb.position.x<-2&&comb.position.z>1;
+      comb.position.x+=(target.x-comb.position.x)*k;comb.position.z+=(target.z-comb.position.z)*k;
+      comb.position.y+=((over?.6:1.1)-comb.position.y)*k;
+      const mv=comb.position.distanceTo(prev);
+      if(over)charge=clamp(charge+mv*.14);else if(state==='play')charge=Math.max(0,charge-dt*.03);
+      combMat.emissiveIntensity=charge*.7;cl.intensity=charge*2.5;
+      let st=0;const tg=comb.position;
+      for(const p of papers){
+        if(p.st){p.position.copy(tg).add(p.off);st++;if(charge<.12){p.st=false;p.v.set(0,0,0)}continue}
+        tmp.subVectors(tg,p.position);const d=tmp.length();
+        if(charge>.15&&d<1.2+charge*2.4)p.v.addScaledVector(tmp.normalize(),charge*70/(1+d*.5)*dt);
+        p.v.y-=14*dt;p.v.multiplyScalar(Math.max(0,1-1.5*dt));p.position.addScaledVector(p.v,dt);
+        if(p.position.y<.011){p.position.y=.011;p.v.y=0;p.v.x*=.7;p.v.z*=.7}
+        p.rotation.z+=p.v.x*dt*.4;
+        if(charge>.2&&d<.45){p.st=true;p.off.set(rnd(-.9,.9),-.38,rnd(-.1,.1));p.rotation.set(0,p.rotation.y,0)}}
+      ready=st>=5?ready+dt:0;S.prog=ready>.5?1:Math.min(.98,st/5);
+      /* микро */
+      if(micro>.02){mi.visible=true;slabR.emissiveIntensity=micro*.6;
+        for(const e of els){const u=(tt*e.sp+e.ph)%1;e.position.set(-1.75+3.5*u,e.y0+Math.sin(u*Math.PI)*.7,e.z0);e.scale.setScalar(micro)}}
+      ro(`Заряд ${'▮'.repeat(Math.round(charge*8)).padEnd(8,'▯')}   бумажек: ${st}/5`)}};
+  return S}
+
+/* ======================= СТАНЦИЯ 5: МАГНИТ ======================= */
+function st5(){
+  const g=new THREE.Group();let drag=false;const target=new V3(-3,.7,3),M=new V3(-3,.7,3);
+  const mag=new THREE.Group();mag.position.copy(M);g.add(mag);
+  mag.add(mesh(new THREE.BoxGeometry(1.3,.55,.7),mat(0xe03a4e,{roughness:.3}),-.65,0,0),mesh(new THREE.BoxGeometry(1.3,.55,.7),mat(0x2f6bff,{roughness:.3}),.65,0,0));
+  const lN=label('N',{w:.9,fs:90,color:'#fff'});lN.position.set(-.65,.55,0);const lS=label('S',{w:.9,fs:90,color:'#fff'});lS.position.set(.65,.55,0);mag.add(lN,lS);
+  const steel=mat(0xb9c2d6,{metalness:.9,roughness:.25}),nails=[];
+  for(let i=0;i<8;i++){const n=new THREE.Group();
+    const sh=mesh(new THREE.CylinderGeometry(.05,.05,1,10),steel);sh.rotation.z=Math.PI/2;
+    const hd=mesh(new THREE.CylinderGeometry(.12,.12,.04,10),steel,.5,0,0);hd.rotation.z=Math.PI/2;n.add(sh,hd);
+    n.position.set(rnd(-2.5,3.8),.06,rnd(-3,1.2));n.rotation.y=rnd(0,6.28);n.v=new V3();n.st=false;n.off=new V3();g.add(n);nails.push(n)}
+  const cols=[0x4cd37a,0xffc24d,0xc89a5a,0x7a5cff,0xff7aa8];
+  cols.forEach((c,i)=>{const o=mesh(i%2?new THREE.BoxGeometry(.5,.5,.5):new THREE.SphereGeometry(.28,16,12),mat(c,{roughness:.6}),rnd(-1,4),.28,rnd(-3,1.5));
+    o.rotation.y=rnd(0,3);g.add(o)});
+  const lp=label('пластик и дерево',{w:2.6,fs:44,color:'#9bb7ff'});lp.position.set(3.2,1.4,-2.4);lp.material.opacity=.0;g.add(lp);
+  /* микро: домены железа */
+  const mi=new THREE.Group();mi.position.set(0,7,0);mi.visible=false;g.add(mi);
+  const panel=new THREE.Mesh(new THREE.PlaneGeometry(7.2,3.6),new THREE.MeshBasicMaterial({color:0x1a2447,transparent:true,opacity:.85}));panel.position.z=-.15;mi.add(panel);
+  const ar=[],cg=new THREE.ConeGeometry(.14,.55,12),am=mat(0xffb84d,{roughness:.3});
+  for(let i=0;i<9;i++)for(let j=0;j<4;j++){const c=new THREE.Mesh(cg,am);c.position.set(-3+i*.75,-1.1+j*.75,0);c.r=rnd(0,6.283);mi.add(c);ar.push(c)}
+  const lt=label('внутри железа',{w:2.6});lt.position.set(0,2.1,0);mi.add(lt);
+  const mb=mesh(new THREE.BoxGeometry(1.2,1.6,.6),mat(0xe03a4e),4.6,0,0);mi.add(mb);
+  const lm=label('магнит',{w:1.8,fs:50});lm.position.set(4.6,1.2,0);mi.add(lm);
+  const mp=new V3(),tmp=new V3();
+  const S={grp:g,name:'Магнит',prog:0,
+    hint:'Води магнит пальцем. Притяни 5 гвоздей — цветные предметы он не тронет.',
+    home:{pos:new V3(0,7,8),look:new V3(0,.4,0)},
+    card:{tag:'Магнитное явление',title:'Магнит выстраивает железо',
+      text:'Магнит притянул гвозди, а пластик и дерево не тронул. Внутри железа есть крошечные «магнитики»: рядом с магнитом они выстраиваются в одну сторону, и железо само становится магнитом.',
+      fact:'Поэтому гвоздь, висящий на магните, может удержать следующий гвоздь.'},
+    zoom:()=>({pos:new V3(0,7,6.8),look:new V3(0,7,0)}),
+    down(e){drag=true;S.move(e)},up(){drag=false},
+    move(e){if(!drag)return;const P=pt(e,.7);if(P){target.x=clamp(P.x,-4.6,4.6);target.z=clamp(P.z,-3.6,3.6)}},
+    update(dt){
+      const k=1-Math.exp(-dt*14);mag.position.x+=(target.x-mag.position.x)*k;mag.position.z+=(target.z-mag.position.z)*k;
+      let st=0;
+      for(const n of nails){
+        mp.set(mag.position.x+clamp(n.position.x-mag.position.x,-1.3,1.3),.7,mag.position.z);
+        if(n.st){n.position.copy(mp).add(n.off);st++;continue}
+        tmp.subVectors(mp,n.position);const d=tmp.length();
+        if(d<2.8)n.v.addScaledVector(tmp.normalize(),70/(1+d*d*.35)*dt);
+        n.v.y-=14*dt;n.v.multiplyScalar(Math.max(0,1-1.5*dt));n.position.addScaledVector(n.v,dt);
+        if(n.position.y<.06){n.position.y=.06;n.v.y=0;n.v.x*=.7;n.v.z*=.7}
+        if(d<.5){n.st=true;n.off.set(rnd(-.2,.2),-.5-rnd(0,.1),rnd(-.3,.3));n.rotation.set(0,0,Math.PI/2+rnd(-.15,.15))}}
+      S.prog=clamp(st/5);
+      if(micro>.02){mi.visible=true;const al=ease(clamp((zoomT-.5)/2));
+        ar.forEach((c,i)=>{const ang=c.r*(1-al)+.06*Math.sin(tt*3+i);c.rotation.z=ang-Math.PI/2;c.scale.setScalar(micro)});
+        lt.material.opacity=lm.material.opacity=micro}
+      ro(`Гвоздей на магните: ${st}/5`)}};
+  return S}
+
+const ST=[st1,st2,st3,st4,st5];
+
+/* ---------- интерфейс ---------- */
+function ro(t){const r=$('#readout');if(r.textContent!==t)r.textContent=t}
+function setProg(p){$('#fill').style.width=(p*100)+'%'}
+const dotsEl=$('#dots');for(let i=0;i<ST.length+1;i++)dotsEl.appendChild(document.createElement('i'));
+function paintDots(){[...dotsEl.children].forEach((d,i)=>{d.className=i<idx?'done':i===idx?'on':''})}
+function load(i){
+  if(cur)scene.remove(cur.grp);
+  idx=i;cur=ST[i]();scene.add(cur.grp);zoomT=0;micro=0;
+  $('#name').textContent=cur.name;$('#hint').textContent=cur.hint;setProg(0);paintDots();
+  if(state!=='menu'){state='play';showHud(true)}}
+function showHud(on){['#hint','#meter','#readout'].forEach(s=>$(s).classList.toggle('hide',!on))}
+function startZoom(){state='zoom';zoomT=0;cur.up&&cur.up();showHud(false)}
+function showCard(){const c=cur.card;state='card';try{parent.postMessage('fiz:ok:'+(idx+1),'*')}catch(e){}
+  $('#ctag').textContent=c.tag;$('#ctitle').textContent=c.title;$('#ctext').textContent=c.text;$('#cfact').textContent=c.fact;
+  $('#cnext').textContent=idx<ST.length-1?'Дальше':'К заданию';$('#card').classList.add('show')}
+$('#cnext').onclick=()=>{$('#card').classList.remove('show');if(idx<ST.length-1)load(idx+1);else startQuiz()};
+$('#start').onclick=()=>{$('#menu').classList.add('hide');state='play';showHud(true)};
+
+/* ---------- проверочное задание ---------- */
+const Q=[
+ {t:'а) Расчёска, которой расчесали волосы, притянула мелкие кусочки бумаги',a:0,e:'Электрическое явление. Заряд появился, но вещество бумаги и пластика не изменилось.'},
+ {t:'б) Весной появилась листва на деревьях',a:2,e:'Изменения происходят с живыми организмами — это биологическое явление.'},
+ {t:'в) Солнечный луч отразился от зеркала, и на стене появился солнечный зайчик',a:0,e:'Световое явление — отражение света. Ты его только что сам запускал.'},
+ {t:'г) Белая бумага на солнце пожелтела',a:1,e:'Под действием света в бумаге образуются новые вещества — это химическое явление.'},
+ {t:'д) Кусок мела упал и раскрошился',a:0,e:'Изменились только форма и размер, а вещество осталось тем же. Это механическое явление.'},
+ {t:'е) В кружке, которую забыли помыть, выросла плесень',a:2,e:'Плесень — живой организм, значит, явление биологическое.'}];
+const OPT=['Физическое','Химическое','Биологическое'];
+let qi=0,score=0;
+function startQuiz(){cur&&scene.remove(cur.grp);cur=null;state='quiz';idx=ST.length;paintDots();
+  $('#name').textContent='Проверка';showHud(false);qi=0;score=0;$('#quiz').classList.remove('hide');renderQ()}
+function renderQ(){
+  const q=Q[qi],p=$('#qpanel');
+  p.innerHTML=`<div id="qtop">Задание 1 из учебника, пункт ${qi+1} из ${Q.length}</div><div id="qtext">${q.t}</div><div id="qbtns">${OPT.map((o,i)=>`<button class="qb" data-i="${i}">${o}</button>`).join('')}</div><div id="qfb"></div><button class="btn" id="qn" disabled>Дальше</button>`;
+  p.querySelectorAll('.qb').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;p.querySelectorAll('.qb').forEach(x=>x.disabled=true);
+    p.querySelector(`[data-i="${q.a}"]`).classList.add('ok');
+    if(i===q.a){score++;$('#qfb').innerHTML='<b>Верно!</b> '+q.e}else{b.classList.add('bad');$('#qfb').innerHTML='<b>Почти.</b> '+q.e}
+    const n=$('#qn');n.disabled=false;n.textContent=qi<Q.length-1?'Дальше':'Результат';n.onclick=()=>{qi++;qi<Q.length?renderQ():renderEnd()}})}
+function renderEnd(){
+  const msg=score>=5?'Ты отлично разобрался в явлениях природы.':score>=3?'Неплохо! Перечитай в параграфе, чем различаются явления.':'Загляни в параграф ещё раз и попробуй снова — опыты помогут.';
+  $('#qpanel').innerHTML=`<h2 style="font-size:22px">Задание выполнено</h2><div class="big">${score} из ${Q.length}</div><p style="font-size:15.5px;line-height:1.55;color:#d6e1ff;margin-bottom:12px">${msg}</p><p style="font-size:14px;line-height:1.5;color:#ffe3b3;margin-bottom:18px">Физика изучает физические явления: механические, тепловые, световые, электрические, магнитные. Химические и биологические явления изучают другие науки.</p><button class="btn" id="again">Пройти заново</button>`;
+  $('#again').onclick=()=>{$('#quiz').classList.add('hide');$('#menu').classList.remove('hide');state='menu';load(0)}}
+
+/* ---------- ввод и цикл ---------- */
+canvas.addEventListener('pointerdown',e=>{if(state==='play'&&cur&&cur.down){canvas.setPointerCapture(e.pointerId);cur.down(e)}});
+canvas.addEventListener('pointermove',e=>{if(state==='play'&&cur&&cur.move)cur.move(e)});
+['pointerup','pointercancel'].forEach(n=>canvas.addEventListener(n,e=>{cur&&cur.up&&cur.up(e)}));
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+const fit=()=>clamp(.95/(innerWidth/innerHeight),1,2.3);
+load(0);
+
+let prevT=performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt=Math.min(.05,(now-prevT)/1000);prevT=now;tt+=dt;
+  if(cur){
+    cur.update(dt);
+    if(state==='play'){setProg(cur.prog);if(cur.prog>=1)startZoom()}
+    if(state==='zoom'){zoomT+=dt;micro=ease(clamp(zoomT/2.2));if(zoomT>3.2)showCard()}
+    if(state==='card')micro=1;
+    if(state==='play')micro=0}
+  const f=fit();
+  if(state==='zoom'||state==='card'){const z=cur.zoom(),zf=1+(f-1)*.55;tPos.copy(z.pos).sub(z.look).multiplyScalar(zf).add(z.look);tLook.copy(z.look)}
+  else if(state==='play'&&cur){tPos.copy(cur.home.pos).sub(cur.home.look).multiplyScalar(f).add(cur.home.look);tLook.copy(cur.home.look)}
+  else{const a=tt*.12;tPos.set(Math.cos(a)*10*f*.8,6+f,Math.sin(a)*10*f*.8);tLook.set(0,.6,0)}
+  const k=1-Math.exp(-dt*2.6);cam.position.lerp(tPos,k);lookC.lerp(tLook,k);cam.lookAt(lookC);
+  renderer.render(scene,cam)}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
