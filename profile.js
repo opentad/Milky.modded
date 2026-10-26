@@ -179,10 +179,12 @@ async function render(u){
   if(!SB){put('<div class="pf-x pf-em">Нет связи с сервером. Проверь интернет и обнови страницу.</div>');return}
   const me=(await SB.auth.getUser()).data.user;if(tk!==tok)return;
   if(!me){put('<div class="pf-x pf-em">Чтобы открыть профиль, войди в аккаунт.<br><button class="pf-b" data-go="1" style="margin:14px auto 0">Войти</button></div>');return}
-  const key=u||me.id,q=SB.from('profiles').select(COLS);
+  const lim=await SB.rpc('am_limited');if(tk!==tok)return;
+const key=u||me.id,q=SB.from('profiles').select(COLS);
   const pr=await(/^[0-9a-f-]{36}$/i.test(key)?q.eq('id',key):q.eq('nick',key)).maybeSingle();
   if(tk!==tok)return;
   if(pr.error||!pr.data){put('<div class="pf-x pf-em">'+(pr.error?'Не удалось загрузить: '+esc(pr.error.message)+'. Проверь, что SQL выполнен.':'Профиль не найден.')+'</div>');return}
+  if(lim.data===true&&pr.data.id!==me.id){put('<div class="pf-x pf-em">Доступ к чужим профилям для тебя закрыт.</div>');return}
   const pd=pr.data,urls=[pd.plate_url,pd.cover_url].filter(Boolean);
 if(urls.length){
   const mi=await SB.from('market_items').select('image_url').in('image_url',urls);
