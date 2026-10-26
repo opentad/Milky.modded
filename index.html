@@ -961,8 +961,8 @@ function weekHTML(teacher){
 /* ---------- отрисовка ---------- */
 function rHome(){
   const t=mode==='teacher';
-  $('#hello').textContent='Мир тебе, '+(t?'Имя учителя':'Милколенок')+'!';
-  $('#dname').textContent=t?'Имя учителя':'Милколенок';
+  $('#hello').textContent='Мир тебе, '+(t?'Имя учителя':(window.ME_NAME||'Милколенок'))+'!';
+  $('#dname').textContent=t?'Имя учителя':(window.ME_NAME||'Милколенок');
   $('#sw').textContent=t?'Переключить на режим Ученика':'Переключить на режим Учителя';
   $('#stu').hidden=t;$('#tea').hidden=!t;
   $('#tf').innerHTML=[['all','Все'],['mat','Математика'],['alg','Алгебра'],['geom','Геометрия']].map(b=>`<button class="${b[0]===tf?'on':''}" data-tf="${b[0]}">${b[1]}</button>`).join('');
@@ -1144,6 +1144,7 @@ rCl();rHw();rGr();show('home');
   <script src="messenger.js?v=13"></script>
 <script src="comments.js?v=10"></script>
 <script src="profile.js?v=13"></script>
+  <script src="me.js?v=1"></script>
 <script src="feed.js?v=10"></script>
 <script src="market.js?v=11"></script>
   <script src="library.js?v=1"></script>
