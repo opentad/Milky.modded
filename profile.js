@@ -471,6 +471,11 @@ async function loadUserPurchases(){
     if(r.error){note('Не удалось загрузить покупки: '+r.error.message);return}
     list=r.data||[];
   }
+  const own=await SB.from('market_items').select('*').eq('user_id',S.me.id).eq('status','approved');
+  if(own.error){note('Не удалось загрузить ваши товары: '+own.error.message);return}
+  const have=new Set(list.map(z=>z.id));
+  (own.data||[]).forEach(z=>{if(!have.has(z.id))list.push(z)});
+  list.sort((a,b)=>b.id-a.id);
   S.purchasesList=list;S.dk='status';S.dsg=true;draw();
 }
 
