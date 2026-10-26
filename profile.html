@@ -219,6 +219,11 @@ function draw(){
   sec.querySelectorAll('[data-k]').forEach(i=>S.ev[i.dataset.k]=i.value);
   sec.querySelectorAll('[data-ci]').forEach(i=>S.cdr[i.dataset.ci]=i.value);
   const {p,mine}=S,tags=(p.tags||[]).filter(Boolean),sn=mine?'В сети':seen(p.last_seen);
+  // Код для вставки в блок карточки или информации:
+`<div class="pf-x">
+   <small class="pfo-lb">Время на сайте</small>
+   <div class="pfo-tx">${window.formatOnlineTime ? window.formatOnlineTime(p.online_seconds) : '0 мин'}</div>
+ </div>`
   const btns=mine?`<button class="pf-b" data-edit>${ic('pen')}Редактировать профиль</button>`:
     `<button class="pf-b${S.fw?' g':''}" data-follow>${S.fw?'Вы подписаны':'Подписаться'}</button><button class="pf-b g" data-dm>${ic('cmt')}Написать</button>`;
   const shown=p.fio||p.name;
