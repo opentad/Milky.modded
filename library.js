@@ -10,7 +10,7 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(books));localStorage
 const esc=t=>String(t).replace(/[<>&"]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]));
 const hue=t=>{let x=7;for(const ch of t)x=(x*31+ch.charCodeAt(0))>>>0;return x%360};
 const cover=(b,cls)=>{const h=hue(b.title);return `<div class="lb-cv ${cls||''}" style="background:linear-gradient(160deg,hsl(${h},70%,62%),hsl(${(h+35)%360},65%,44%))"><span>${esc(b.title)}</span></div>`};
-const who=()=>(($('#dname')||{}).textContent||'').trim()||'Автор';
+const who=()=>(window.ME_NAME||'').trim()||'Автор';
 const per=()=>window.matchMedia('(max-width:700px)').matches?1:2;
 const avg=b=>b.rc?(b.rs/b.rc).toFixed(1).replace('.',',')+' ★ · оценок: '+b.rc:'Пока нет оценок';
 const PLUS='<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
