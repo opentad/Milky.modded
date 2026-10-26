@@ -21,6 +21,10 @@ const BACK='<svg viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></s
 const st=document.createElement('style');st.textContent=`
 #v-lib{padding-bottom:70px}
 .sw.lb-up{display:inline-flex;align-items:center;gap:8px}.sw svg{width:15px;height:15px}
+.lb-hb{display:flex;gap:10px;flex-wrap:wrap}
+.lb-up.g{background:#fff;color:var(--cy);border:1.5px solid var(--cy)}
+.lb-it{cursor:pointer}
+.lb-ed{width:36px;height:36px;border-radius:50%;background:var(--pl);color:var(--cy);display:grid;place-items:center;flex:none}.lb-ed svg{width:16px;height:16px}
 .lb-ok{margin-top:16px;padding:12px 18px;border-radius:14px;background:#e7f6e5;color:var(--ok);font-weight:600;font-size:13px}
 .lb-g{display:grid;grid-template-columns:300px 1fr;gap:22px;margin-top:22px;align-items:start}
 .lb-books{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -75,7 +79,7 @@ const st=document.createElement('style');st.textContent=`
 document.head.appendChild(st);
 
 const sec=document.createElement('section');sec.id='v-lib';sec.hidden=true;$('.main').appendChild(sec);
-let mode='list',cur=null,pages=[''],sp=0,title='Без названия',desc='',ro=false,tas=[],meas=null,flash='',lastP=per();
+let ret='list',mode='list',cur=null,pages=[''],sp=0,title='Без названия',desc='',ro=false,tas=[],meas=null,flash='',lastP=per();
 
 function listV(){
   const top=[...books].sort((a,b)=>b.reads-a.reads).slice(0,5),all=[...books].sort((a,b)=>b.date-a.date);
@@ -83,6 +87,12 @@ function listV(){
   sec.innerHTML=`<div class="top"><div><div class="cap">Милки</div><h1>Библиотека</h1></div><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div>${ok}
   <div class="lb-g"><section class="card"><div class="hd"><h2>Топ книг недели</h2></div><div class="hd2">Самые читаемые</div>${top.length?top.map((b,i)=>`<button class="lb-it" data-o="${b.id}"><i class="lb-n">${i+1}</i>${cover(b)}<div><b>${esc(b.title)}</b><small>${esc(b.author)}</small></div><em>Открыть ›</em></button>`).join(''):'<div class="fr">Пока пусто</div>'}</section>
   <section><h2 class="sec" style="margin-top:0">Книги участников</h2>${all.length?`<div class="lb-books">${all.map(b=>`<button class="lb-b" data-o="${b.id}">${cover(b)}<b>${esc(b.title)}</b><small>${esc(b.author)}</small></button>`).join('')}</div>`:'<div class="card">Книг пока нет. Нажми «Загрузить» и опубликуй первую!</div>'}</section></div>`;
+}
+function mineV(){
+  const mb=books.filter(b=>b.own||b.author===who()).sort((a,b)=>b.date-a.date);
+  const ok=flash?`<div class="lb-ok">${esc(flash)}</div>`:'';flash='';
+  sec.innerHTML=`<div class="top"><div><div class="cap">Библиотека</div><h1>Мои работы</h1></div><div class="lb-hb"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}
+  <section class="card" style="margin-top:22px;max-width:560px"><div class="hd2">Нажми на карандашик, чтобы изменить работу</div>${mb.length?mb.map((b,i)=>`<div class="lb-it" data-o="${b.id}"><i class="lb-n">${i+1}</i>${cover(b)}<div><b>${esc(b.title)}</b><small>${esc(b.author)}</small></div><button class="lb-ed" data-e="${b.id}" aria-label="Изменить">${PEN}</button></div>`).join(''):'<div class="fr">У тебя пока нет работ. Нажми «Загрузить» и опубликуй первую!</div>'}</section>`;
 }
 function infoV(){
   const b=cur,mine=my[b.id]||0,dt=new Date(b.date).toLocaleDateString('ru');
@@ -96,17 +106,17 @@ function infoV(){
 function editV(){
   const ph=ro?'':' placeholder="Пиши здесь…"',r=ro?' readonly':'';
   lastP=per();
-  sec.innerHTML=`<div class="lb-bar"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><div class="r">${ro?'':`<button class="lb-btn" id="lb-word">${UPL}Загрузить из Word</button><button class="lb-btn gn" id="lb-pub">Опубликовать</button>`}</div></div>
+  sec.innerHTML=`<div class="lb-bar"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><div class="r">${ro?'':`<button class="lb-btn" id="lb-word">${UPL}Загрузить из Word</button><button class="lb-btn gn" id="lb-pub">${cur?'Сохранить':'Опубликовать'}</button>`}</div></div>
   <div class="lb-tt" id="lb-tt"></div>${ro?'':'<textarea class="lb-desc" id="lb-desc" maxlength="500" placeholder="Описание книги: о чём она (по желанию)"></textarea>'}<div class="fb" id="lb-msg" style="text-align:center"></div>
   <div class="lb-sp"><div class="pgw"><textarea class="pg meas" tabindex="-1" aria-hidden="true"></textarea><textarea class="pg" data-i="0"${r}${ph}></textarea><div class="pn"></div></div><div class="pgw"><textarea class="pg" data-i="1"${r}></textarea><div class="pn"></div></div></div>
   <div class="lb-nav"><button class="go" id="lb-pv">‹</button><span id="lb-n"></span><button class="go" id="lb-nx">›</button></div><input type="file" id="lb-file" accept=".docx" hidden>`;
   tas=[...sec.querySelectorAll('textarea.pg:not(.meas)')];meas=sec.querySelector('.meas');
   if(!ro)sec.querySelector('#lb-desc').value=desc;
-  if(mode==='read')pages=paginate(cur.text);
+  if(mode==='read'||cur)pages=paginate(cur.text);
   if(per()===2&&pages.length%2)pages.push('');
   tt();fill();
 }
-const render=()=>{mode==='list'?listV():mode==='info'?infoV():editV();window.scrollTo(0,0)};
+const render=()=>{if(mode==='list'||mode==='mine')ret=mode;mode==='list'?listV():mode==='mine'?mineV():mode==='info'?infoV():editV();window.scrollTo(0,0)};
 const msg=(t,ok)=>{const m=$('#lb-msg');if(m){m.className='fb '+(ok?'ok2':'bad');m.textContent=t}};
 function tt(){$('#lb-tt').innerHTML='<h2>'+esc(title)+'</h2>'+(ro?'':'<button class="lb-pen" id="lb-pen" aria-label="Изменить название">'+PEN+'</button>')}
 function editTitle(){
@@ -136,24 +146,28 @@ function fill(){
 }
 function openBook(id){cur=books.find(b=>b.id===id);if(!cur)return;mode='info';render()}
 function readBook(){cur.reads++;save();title=cur.title;ro=true;sp=0;mode='read';render()}
+function editBook(id){cur=books.find(b=>b.id===id);if(!cur)return;title=cur.title;desc=cur.desc||'';sp=0;ro=false;mode='edit';render()}
 function newBook(){cur=null;title='Без названия';desc='';pages=[''];sp=0;ro=false;mode='edit';render()}
 function rate(r){const id=cur.id,old=my[id];if(old)cur.rs-=old;else cur.rc++;cur.rs+=r;my[id]=r;save();infoV()}
 function publish(){
   const text=pages.join('').trim();
   if(title==='Без названия'){msg('Дай книге название: карандашик над разворотом.',0);return}
   if(text.length<20){msg('Напиши хотя бы пару предложений.',0);return}
-  books.unshift({id:Date.now(),title,author:who(),text,desc:desc.trim(),reads:0,rs:0,rc:0,date:Date.now()});
+  if(cur){cur.title=title;cur.text=text;cur.desc=desc.trim();save();flash='Изменения сохранены ✓';mode='mine';render();return}
+  books.unshift({id:Date.now(),own:1,title,author:who(),text,desc:desc.trim(),reads:0,rs:0,rc:0,date:Date.now()});
   save();flash='Книга «'+title+'» опубликована ✓';mode='list';render();
 }
 const loadM=()=>new Promise((ok,no)=>{if(window.mammoth)return ok();const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
 
 sec.addEventListener('click',e=>{
   const c=k=>e.target.closest(k);
-  if(c('[data-o]'))openBook(+c('[data-o]').dataset.o);
+  if(c('[data-e]'))editBook(+c('[data-e]').dataset.e);
+  else if(c('[data-a="mine"]')){mode='mine';render()}
+  else if(c('[data-o]'))openBook(+c('[data-o]').dataset.o);
   else if(c('[data-a="new"]'))newBook();
   else if(c('[data-r]'))rate(+c('[data-r]').dataset.r);
   else if(c('#lb-read'))readBook();
-  else if(c('#lb-back')){mode=mode==='read'?'info':'list';render()}
+  else if(c('#lb-back')){mode=mode==='read'?'info':((mode==='info'||mode==='edit')&&ret==='mine')?'mine':'list';render()}
   else if(c('#lb-pen'))editTitle();
   else if(c('#lb-pv')){sp=Math.max(0,sp-1);fill()}
   else if(c('#lb-nx')){if(per()*(sp+1)<pages.length){sp++;fill()}}
