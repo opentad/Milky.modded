@@ -2,333 +2,500 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Числовая дорога</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Лаборатория чисел</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#1d2b33;--teal:#1aa6b0;--gold:#f0b429;--red:#d6453a;--paper:#f3f0e0}
+:root{--ink:#070b18;--cy:#5ee0ff;--am:#ffb84d;--gr:#58ff9a;--rd:#ff6b7d;--glass:rgba(12,18,42,.78)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:#08141d}
-button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-#app{display:flex;flex-direction:column;height:100%}
-#stage{flex:1 1 0;min-height:180px;position:relative;overflow:hidden;background:#08141d}
-canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:block;touch-action:none;border-radius:12px;cursor:crosshair}
-#side{flex:0 0 auto;max-height:52vh;overflow:auto;background:var(--paper);padding:12px 14px 18px;border-top:4px solid var(--teal)}
-@media(min-aspect-ratio:5/4){#app{flex-direction:row}#side{flex:0 0 400px;max-height:none;border-top:0;border-left:4px solid var(--teal)}}
-.tabs{display:flex;gap:6px;margin-bottom:10px}
-.tab{flex:1;height:38px;border-radius:10px;background:#dcd8bf;font-weight:800;font-size:14px}
-.tab.on{background:var(--teal);color:#fff}
-.tab.ok{box-shadow:inset 0 -4px 0 #2fa56b}
-.th{padding:12px 14px;border-radius:14px;background:#fff;border-left:8px solid var(--teal);font-size:14px;line-height:1.55;margin-bottom:12px}
-.th h3{font-size:17px;color:#0d7a83;margin-bottom:4px}
-.th p{margin:5px 0}
-.th ul{margin:5px 0 5px 18px}
-.th .ex{margin-top:7px;padding:8px 10px;border-radius:10px;background:#e3f4f2}
-.task{font-size:16px;font-weight:600;line-height:1.5;margin-bottom:10px}
-.fb{min-height:22px;font-size:13.5px;font-weight:600;margin-top:8px;line-height:1.45}
-.fb.g{color:#1f7a44}.fb.b{color:#b0471a}
-.btn{height:46px;padding:0 20px;border-radius:12px;background:var(--teal);color:#fff;font-weight:700;font-size:14px;box-shadow:0 3px 0 #0e747c;margin:4px 6px 0 0}
-.btn.alt{background:var(--red);box-shadow:0 3px 0 #8f2b24}
-.mini{height:40px;min-width:62px;padding:0 10px;border-radius:10px;background:#fff;border:2px solid var(--teal);font-weight:700;font-size:13px}
-.mini.fk{height:auto;min-height:52px;padding:3px 14px;font-size:14px}
-.mini .fr{font-size:1.1em}
-.bs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
-.rd{font-size:15px;margin-bottom:6px}
-.rd b{font-size:22px;color:#0d7a83}
-input[type=range]{width:100%;height:34px;accent-color:var(--teal)}
-input[type=text]{width:100%;height:46px;border:2px solid #b8b08a;border-radius:12px;padding:0 14px;font:inherit;font-size:16px;background:#fffef6;margin-top:8px}
-.st{font-size:13.5px;padding:6px 10px;margin-bottom:4px;border-left:4px solid var(--gold);background:#fff;border-radius:0 8px 8px 0;line-height:1.5}
-.st.rp{border-color:var(--red);background:#fde3df;font-weight:600}
-.win{padding:12px 14px;border-radius:14px;background:#d8f0e1;border:2px solid #2fa56b;font-weight:600;font-size:14px;line-height:1.55}
-.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 3px;font-size:.85em}
-.fr i{font-style:normal;border-bottom:2px solid currentColor;padding:0 4px}
-.fr b{font-weight:inherit;padding:0 4px;font-size:1em}
-.mx{display:inline-flex;align-items:center}
-.th .key{margin:8px 0;padding:10px 12px;border-radius:12px;background:#fff3c4;border-left:6px solid var(--gold);font-size:15px;line-height:1.5}
+html,body{height:100%;background:var(--ink);overflow:hidden;font-family:'Onest',system-ui,sans-serif;color:#eaf1ff}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.glass{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12)}
+h1,h2{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.01em}
+button{font-family:inherit;cursor:pointer;border:0}
+.btn{background:linear-gradient(135deg,var(--cy),#7aa8ff);color:#06122b;font-weight:700;font-size:16px;padding:14px 22px;border-radius:14px;width:100%}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.4}
+
+#hud{position:fixed;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top)) 14px 0;display:flex;justify-content:space-between;align-items:center;pointer-events:none;z-index:3}
+#name{font-family:'Unbounded',sans-serif;font-weight:500;font-size:14px;padding:8px 14px;border-radius:999px}
+#dots{display:flex;gap:5px;padding:10px 12px;border-radius:999px}
+#dots i{width:16px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);transition:.4s}
+#dots i.on{background:var(--am);width:26px}
+#dots i.done{background:var(--cy)}
+#meter{position:fixed;top:62px;left:14px;right:14px;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;z-index:3;transition:opacity .4s}
+#fill{height:100%;width:0;background:linear-gradient(90deg,var(--cy),var(--gr));border-radius:3px;transition:width .2s}
+#readout{position:fixed;top:78px;left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:16px;font-weight:600;font-size:14px;line-height:1.3;text-align:center;max-width:calc(100vw - 28px);z-index:3;transition:opacity .3s}
+#hint{position:fixed;left:14px;right:14px;bottom:max(18px,env(safe-area-inset-bottom));text-align:center;padding:12px 16px;border-radius:16px;font-size:14.5px;line-height:1.4;z-index:3;transition:opacity .4s}
+.hide{opacity:0!important;pointer-events:none!important}
+
+#card{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));max-width:520px;margin:0 auto;border-radius:24px;padding:20px 20px 18px;z-index:5;transform:translateY(130%);transition:transform .7s cubic-bezier(.2,.9,.2,1);max-height:68vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#card.show{transform:none}
+#ctag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--cy);padding:5px 12px 5px 10px;border-radius:999px;background:rgba(94,224,255,.12)}
+#ctag:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cy);box-shadow:0 0 10px var(--cy)}
+#ctitle{font-size:20px;line-height:1.2;margin:12px 0 8px}
+#ctext{font-size:15.5px;line-height:1.55;color:#d6e1ff;max-width:60ch}
+#cfact{margin:14px 0 16px;padding:10px 14px;border-left:3px solid var(--am);background:rgba(255,184,77,.09);border-radius:0 12px 12px 0;font-size:14px;line-height:1.5;color:#ffe3b3}
+
+.screen{position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:16px;z-index:6;transition:opacity .6s}
+.panel{width:100%;max-width:520px;border-radius:26px;padding:26px 22px 22px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#menu h1{font-size:30px;line-height:1.05;margin-bottom:6px;background:linear-gradient(120deg,#fff,var(--cy) 60%,var(--am));-webkit-background-clip:text;background-clip:text;color:transparent}
+#menu .sub{color:var(--am);font-weight:600;font-size:14px;margin-bottom:14px}
+#menu p{font-size:15.5px;line-height:1.55;color:#d6e1ff;margin-bottom:10px}
+#menu ul{list-style:none;margin:12px 0 18px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#menu li{font-size:13.5px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.07)}
+#quiz{align-items:center;background:rgba(5,8,20,.55)}
+#qtop{font-size:13.5px;color:var(--am);font-weight:600;margin-bottom:10px}
+#qtext{font-size:18px;line-height:1.4;font-weight:600;margin-bottom:16px}
+#qbtns{display:grid;gap:9px}
+.qb{background:rgba(255,255,255,.09);color:#eaf1ff;font-size:16px;font-weight:600;padding:14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.14);text-align:left}
+.qb.ok{background:rgba(88,255,154,.18);border-color:var(--gr)}
+.qb.bad{background:rgba(255,107,125,.18);border-color:var(--rd)}
+#qfb{font-size:14.5px;line-height:1.5;color:#d6e1ff;margin:14px 0;min-height:44px}
+#qfb b{color:#fff}
+.big{font-family:'Unbounded',sans-serif;font-size:46px;font-weight:700;color:var(--am);margin:6px 0 10px}
+@media (prefers-reduced-motion:reduce){#card{transition:none}}
 </style>
 </head>
 <body>
-<div id="app"><div id="stage"><canvas id="cv" width="1280" height="720"></canvas></div><aside id="side"></aside></div>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="name" class="glass"></div>
+  <div id="dots" class="glass"></div>
+</div>
+<div id="meter" class="hide"><div id="fill"></div></div>
+<div id="readout" class="glass hide"></div>
+<div id="hint" class="glass hide"></div>
+
+<div id="card" class="glass">
+  <span id="ctag"></span>
+  <h2 id="ctitle"></h2>
+  <p id="ctext"></p>
+  <div id="cfact"></div>
+  <button class="btn" id="cnext">Дальше</button>
+</div>
+
+<div id="menu" class="screen">
+  <div class="panel glass">
+    <h1>Лаборатория чисел</h1>
+    <div class="sub">§ 1. Числа и выражения, п. 1</div>
+    <p>Рациональные числа можно потрогать: расселяй их по множествам, дели плитку, считай остатки и катай колесо.</p>
+    <ul>
+      <li>Множества N, Z, Q</li><li>Равные дроби</li><li>Деление и период</li><li>Число между числами</li><li>Колесо π</li><li>Проверка</li>
+    </ul>
+    <button class="btn" id="start">Начать опыты</button>
+  </div>
+</div>
+
+<div id="quiz" class="screen hide">
+  <div class="panel glass" id="qpanel"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const $=s=>document.querySelector(s);
-const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
-const red=(n,d)=>{if(d<0){n=-n;d=-d}const g=gcd(n,d)||1;return{n:n/g,d:d/g}};
-const cmp=(a,b)=>a.n*b.d-b.n*a.d;
-const fmt=n=>String(Math.round(n*100)/100).replace('.',',').replace('-','−');
-const fr=(n,d)=>`<span class="fr"><i>${n}</i><b>${d}</b></span>`;
-const mx=(w,n,d)=>`<span class="mx">${w}${fr(n,d)}</span>`;
-/* разбор числа: 5, −0,7, 3/4, 1 2/5, 1,(37), 0,8(3) */
-function parse(s){
-  s=String(s).trim().replace(/[−–—]/g,'-').replace(/\s+/g,' ').replace(/,/g,'.');let m;
-  if(m=s.match(/^(-?)(\d+) (\d+)\/(\d+)$/)){const d=+m[4];if(!d)return null;return red((m[1]?-1:1)*(+m[2]*d+ +m[3]),d)}
-  if(m=s.match(/^(-?\d+)\/(-?\d+)$/)){if(!+m[2])return null;return red(+m[1],+m[2])}
-  if(m=s.match(/^(-?)(\d+)(?:\.(\d*))?(?:\((\d+)\))?$/)){
-    const f=m[3]||'',p=m[4]||'';let d=Math.pow(10,f.length),n=+m[2]*d+(+f||0);
-    if(p){const k=Math.pow(10,p.length)-1;n=n*k+ +p;d=d*k}
-    return red((m[1]?-1:1)*n,d)}
-  return null;
-}
+const V3=THREE.Vector3,UP=new V3(0,1,0);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ease=t=>t*t*(3-2*t);
+const mat=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.1},o));
+function mesh(g,m,x=0,y=0,z=0){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
+/* надпись в 3D; .set(текст, цвет) меняет текст на лету */
+function dlabel(txt,{color='#fff',w=2.4,fs=56,cw=512,ch=128,dt=false}={}){
+  const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d'),tex=new THREE.CanvasTexture(c);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:dt}));
+  s.scale.set(w,w*ch/cw,1);s.renderOrder=10;
+  s.set=(t,col=color)=>{if(s._t===t&&s._c===col)return;s._t=t;s._c=col;x.clearRect(0,0,cw,ch);
+    x.font=`700 ${fs}px Onest,system-ui,sans-serif`;x.textAlign='center';x.textBaseline='middle';
+    x.shadowColor='rgba(0,0,0,.85)';x.shadowBlur=10;x.fillStyle=col;x.fillText(t,cw/2,ch/2+2);tex.needsUpdate=true};
+  s.set(txt);return s}
+const fmt=v=>String(parseFloat(v.toFixed(9))).replace('.',',');
+const _d=new V3();
+function setB(m,A,B){_d.subVectors(B,A);const L=_d.length()||.001;m.position.copy(A).add(B).multiplyScalar(.5);m.scale.set(1,L,1);m.quaternion.setFromUnitVectors(UP,_d.divideScalar(L))}
 
-/* ================= мини-3D движок ================= */
-const W=1280,H=720,cv=$('#cv'),x=cv.getContext('2d');
-const cam={x:0,y:1.7,z:0,yaw:0,pitch:0},FC=900,FOG=[60,134,146];
-const LV=(()=>{const v=[.45,.8,.3],m=Math.hypot(...v);return v.map(a=>a/m)})();
-let LST=[];
-const P3=p=>{const dx=p[0]-cam.x,dy=p[1]-cam.y,dz=p[2]-cam.z,c=Math.cos(cam.yaw),s=Math.sin(cam.yaw),xr=dx*c-dz*s,zr=dx*s+dz*c,cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch);return[xr,dy*cp+zr*sp,zr*cp-dy*sp]};
-const dist=p=>Math.hypot(p[0]-cam.x,p[1]-cam.y,p[2]-cam.z);
-const shade=(c,l,d)=>{const f=Math.min(1,Math.pow(Math.max(d,0)/110,1.3))*.95,m=k=>Math.round(c[k]*Math.min(l,1.2)*(1-f)+FOG[k]*f);return`rgb(${m(0)},${m(1)},${m(2)})`};
-function addPoly(pts,style,layer,depth,ol){
-  const q=pts.map(P3),o=[],N=.3;
-  for(let i=0;i<q.length;i++){const a=q[i],b=q[(i+1)%q.length];if(a[2]>=N)o.push(a);if((a[2]>=N)!==(b[2]>=N)){const t=(N-a[2])/(b[2]-a[2]);o.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,N])}}
-  if(o.length<3)return;
-  LST.push({k:0,path:o.map(p=>[W/2+FC*p[0]/p[2],H/2-FC*p[1]/p[2]]),st:style,l:layer,d:depth,ol});
-}
-const quad=(x0,x1,z0,z1,col,y=0,l=0)=>{const d=dist([(x0+x1)/2,y,(z0+z1)/2]);addPoly([[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z1]],shade(col,.8,d),l,d)};
-const boxF=(x0,x1,y0,y1,z0,z1,col,o={})=>{const c=[(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],v=[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]];return[[0,1,2,3],[5,4,7,6],[4,0,3,7],[1,5,6,2],[3,2,6,7],[4,5,1,0]].map(i=>({p:i.map(k=>v[k]),col,c,em:o.em,ol:o.ol}))};
-function nrm(fc){const p=fc.p,a=p[0],b=p[1],c=p[2],u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];const m=Math.hypot(...n)||1;n=n.map(k=>k/m);
-  const g=p.reduce((s,q)=>[s[0]+q[0],s[1]+q[1],s[2]+q[2]],[0,0,0]).map(k=>k/p.length);if(n[0]*(g[0]-fc.c[0])+n[1]*(g[1]-fc.c[1])+n[2]*(g[2]-fc.c[2])<0)n=n.map(k=>-k);return[n,g]}
-function faces(Fs){for(const fc of Fs){const[n,g]=nrm(fc);if(n[0]*(cam.x-g[0])+n[1]*(cam.y-g[1])+n[2]*(cam.z-g[2])<=0)continue;const d=dist(g);
-  addPoly(fc.p,fc.em?`rgb(${fc.col.join(',')})`:shade(fc.col,.42+.58*Math.max(0,n[0]*LV[0]+n[1]*LV[1]+n[2]*LV[2]),d),1,d,fc.ol)}}
-function lab(txt,wx,wy,wz,size,col='#fff'){const q=P3([wx,wy,wz]);if(q[2]<.6)return;LST.push({k:1,x:W/2+FC*q[0]/q[2],y:H/2-FC*q[1]/q[2],s:size*FC/q[2],txt,col,l:1,d:dist([wx,wy,wz])-.6})}
-function drawLabel(t,X,Y,s,col){
-  if(s<7)return;x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';x.fillStyle=col;x.strokeStyle='rgba(8,20,30,.85)';x.lineWidth=Math.max(2,s*.12);
-  const T=(str,px,py,fs)=>{x.font=`800 ${fs}px Montserrat,sans-serif`;x.strokeText(str,px,py);x.fillText(str,px,py)};
-  const fracAt=(n,d,px)=>{T(n,px,Y-s*.4,s*.8);T(d,px,Y+s*.45,s*.8);x.strokeStyle='rgba(8,20,30,.85)';x.lineWidth=s*.2;x.beginPath();x.moveTo(px-s*.4,Y);x.lineTo(px+s*.4,Y);x.stroke();x.strokeStyle=col;x.lineWidth=s*.09;x.beginPath();x.moveTo(px-s*.4,Y);x.lineTo(px+s*.4,Y);x.stroke()};
-  if(t.startsWith('f:')){const[,n,d]=t.split(':');fracAt(n,d,X)}
-  else if(t.startsWith('m:')){const[,w,n,d]=t.split(':');T(w,X-s*.55,Y,s);fracAt(n,d,X+s*.4)}
-  else T(t,X,Y,s)}
-function flush(){
-  LST.sort((a,b)=>a.l-b.l||b.d-a.d);
-  for(const i of LST){
-    if(i.k===0){x.fillStyle=i.st;x.beginPath();i.path.forEach((p,j)=>j?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.fill();
-      if(i.ol){x.strokeStyle=i.ol;x.lineWidth=2.4;x.lineJoin='round';x.stroke()}else{x.strokeStyle=i.st;x.lineWidth=.8;x.stroke()}}
-    else drawLabel(i.txt,i.x,i.y,i.s,i.col)}
-  LST=[];
-}
-function sky(){
-  const hy=H/2-FC*Math.tan(cam.pitch),g=x.createLinearGradient(0,0,0,Math.max(hy,2));g.addColorStop(0,'#0b1d2e');g.addColorStop(1,'#46949f');x.fillStyle=g;x.fillRect(0,0,W,H);
-  x.fillStyle='rgb(60,134,146)';x.fillRect(0,Math.max(hy,0),W,H);
-  x.fillStyle='rgba(30,70,90,.7)';x.beginPath();x.moveTo(0,hy);for(let X=0;X<=W;X+=20)x.lineTo(X,hy-18-14*Math.sin(X*.009+cam.yaw*4)-9*Math.sin(X*.025));x.lineTo(W,hy);x.fill();
-}
-function env(){
-  const cz=cam.z,z0=Math.floor((cz-12)/8)*8;
-  for(let z=z0;z<cz+130;z+=8){
-    quad(-70,-5,z,z+8,[34,64,60]);quad(5,70,z,z+8,[34,64,60]);
-    quad(-5,5,z,z+8,((z/8)&1)?[52,66,84]:[46,58,76]);
-    quad(-5,-4.75,z,z+8,[90,220,230],0,.4);quad(4.75,5,z,z+8,[90,220,230],0,.4)}
-  const b0=Math.floor((cz-12)/24)*24;
-  for(let z=b0;z<cz+130;z+=24){const k=Math.round(z/24);[-1,1].forEach(s=>{const h=6+((k*7+(s>0?3:0))%5)*2.5,X=s*(15+((k*3)%3)*3);
-    faces(boxF(X-4,X+4,0,h,z-5,z+5,[[70,92,110],[84,76,104],[64,104,104]][(k+(s>0?1:0)+9)%3],{ol:'rgba(8,20,30,.75)'}));
-    faces(boxF(X-4.05,X+4.05,h-.4,h,z-5.05,z+5.05,[255,200,90],{em:1}))})}
-  const l0=Math.floor((cz-12)/16)*16;
-  for(let z=l0;z<cz+110;z+=16)[-1,1].forEach(s=>{faces(boxF(s*5.7-.1,s*5.7+.1,0,4.6,z-.1,z+.1,[40,52,64]));faces(boxF(s*5.7-.4,s*5.7+.4,4.6,4.9,z-.4,z+.4,[255,236,150],{em:1}))});
-}
-/* ================= общее ================= */
-let pt=[],snd0=null,tNow=0,flashT=0,tracer=null,pointer={x:W*.5,y:H*.5};
-const ST={cur:0,done:[0,0,0,0,0]};
-function done(i){if(ST.done[i])return;ST.done[i]=1;try{parent.postMessage('doroga:ok:'+i,'*')}catch(e){}}
-function snd(kind){try{const A=window.AudioContext||window.webkitAudioContext;if(!snd0)snd0=new A();const a=snd0,t=a.currentTime;
-  if(kind==='shot'||kind==='bad'){const dur=kind==='shot'?.14:.2,len=Math.floor(a.sampleRate*dur),b=a.createBuffer(1,len,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<len;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/len,3);
-    const n=a.createBufferSource();n.buffer=b;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=kind==='shot'?3000:600;const g=a.createGain();g.gain.value=.3;n.connect(f);f.connect(g);g.connect(a.destination);n.start(t)}
-  else{[660,880,1175].forEach((fq,i)=>{const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=fq;g.gain.setValueAtTime(0,t+i*.09);g.gain.linearRampToValueAtTime(.18,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.09+.5);o.connect(g);g.connect(a.destination);o.start(t+i*.09);o.stop(t+i*.09+.6)})}
-}catch(e){}}
-function burst(sx,sy,good){for(let k=0;k<26;k++){const a=Math.random()*6.28,s=120+Math.random()*320;pt.push({x:sx,y:sy,vx:Math.cos(a)*s,vy:Math.sin(a)*s-80,l:0,m:.5+Math.random()*.4,c:good?['#ffe27a','#7be3a0','#fff'][k%3]:['#ff6a5a','#ffb09a','#fff'][k%3]})}}
-function fx(dt){
-  pt=pt.filter(p=>(p.l+=dt)<p.m);pt.forEach(p=>{p.vy+=500*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;x.globalAlpha=1-p.l/p.m;x.fillStyle=p.c;x.fillRect(p.x,p.y,6,6)});x.globalAlpha=1;
-  if(tracer){tracer.l+=dt;if(tracer.l>.09)tracer=null;else{x.strokeStyle='rgba(255,236,160,.9)';x.lineWidth=4;x.beginPath();x.moveTo(930,610);x.lineTo(tracer.x,tracer.y);x.stroke()}}
-}
-function gun(){
-  x.save();x.translate(1040,760);x.rotate(-.32);
-  x.fillStyle='#232a31';x.strokeStyle='#0b0f13';x.lineWidth=3;
-  x.beginPath();x.roundRect(-210,-34,330,50,10);x.fill();x.stroke();
-  x.fillStyle='#161b20';x.beginPath();x.roundRect(110,-26,170,18,6);x.fill();x.stroke();
-  x.fillStyle='#5b3b22';x.beginPath();x.roundRect(-330,-28,150,56,14);x.fill();x.stroke();
-  x.fillStyle='#161b20';x.beginPath();x.roundRect(-40,10,44,100,10);x.fill();x.stroke();
-  x.fillStyle='#4b5560';x.beginPath();x.roundRect(-60,-62,120,28,8);x.fill();x.stroke();
-  if(flashT>0){const g=x.createRadialGradient(290,-18,2,290,-18,90);g.addColorStop(0,'#fff');g.addColorStop(.3,'#ffe27a');g.addColorStop(1,'rgba(255,120,20,0)');x.globalAlpha=Math.min(1,flashT*10);x.fillStyle=g;x.beginPath();x.arc(290,-18,90,0,7);x.fill();x.globalAlpha=1}
-  x.restore();
-}
-function crosshair(){x.save();x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=2.5;x.beginPath();x.arc(pointer.x,pointer.y,14,0,7);x.moveTo(pointer.x-26,pointer.y);x.lineTo(pointer.x-12,pointer.y);x.moveTo(pointer.x+12,pointer.y);x.lineTo(pointer.x+26,pointer.y);x.moveTo(pointer.x,pointer.y-26);x.lineTo(pointer.x,pointer.y-12);x.moveTo(pointer.x,pointer.y+12);x.lineTo(pointer.x,pointer.y+26);x.stroke();x.restore()}
-function shoot(px,py){flashT=.12;tracer={x:px,y:py,l:0};snd('shot')}
-const lbl=s=>{const m=String(s).match(/^(\d+)\/(\d+)$/);return m?`f:${m[1]}:${m[2]}`:s};
-/* ---- числовая прямая ---- */
-const WK={tp:0,sp:0},U=6;
-const clamp=v=>Math.max(-8,Math.min(8,Math.round(v*100)/100));
-const walkCtrl=()=>`<div class="rd">Ты на отметке: <b id="rdv">${fmt(WK.tp)}</b></div><input type="range" id="sl" min="-8" max="8" step="0.01" value="${WK.tp}" aria-label="Положение на прямой"><div class="bs">${[['−1',-1],['−0,1',-.1],['−0,01',-.01],['+0,01',.01],['+0,1',.1],['+1',1]].map(b=>`<button class="mini" data-d="${b[1]}">${b[0]}</button>`).join('')}</div>`;
-function walkNudge(d){WK.tp=clamp(WK.tp+d);const s=$('#sl');if(s)s.value=WK.tp;const r=$('#rdv');if(r)r.textContent=fmt(WK.tp)}
-function walkScene(dt){
-  WK.sp+=(WK.tp-WK.sp)*Math.min(1,dt*9);
-  cam.x=0;cam.y=1.7;cam.z=WK.sp*U;cam.yaw=0;cam.pitch=.04;sky();env();
-  for(let k=Math.max(-8,Math.floor(WK.sp)-1);k<=Math.min(8,Math.ceil(WK.sp)+19);k++){
-    const z=k*U,zero=k===0,c=zero?[255,200,60]:[40,170,185];
-    faces(boxF(-4.7,-4.3,0,3.5,z-.2,z+.2,[60,76,92],{ol:'rgba(8,20,30,.8)'}));faces(boxF(4.3,4.7,0,3.5,z-.2,z+.2,[60,76,92],{ol:'rgba(8,20,30,.8)'}));
-    faces(boxF(-4.7,4.7,3.4,3.9,z-.2,z+.2,c,{em:1}));lab(String(k<0?'−'+(-k):k),0,4.6,z,zero?1.5:1.2,zero?'#ffe27a':'#fff')}
-  for(let t=Math.max(-8,Math.floor(WK.sp*10)/10-.5);t<=Math.min(8,WK.sp+14);t+=.1){const r=Math.round(t*10)/10;if(Math.abs(r-Math.round(r))<.01)continue;const half=Math.abs(r*10%5)<.01,z=r*U;quad(half?-3.4:-1.6,half?3.4:1.6,z-.05,z+.05,[170,240,245],0,.5)}
-  flush();hudLine(WK.sp);
-}
-function hudLine(pos){
-  const X0=150,X1=W-150,Y=66,mp=v=>X0+(v+8)/16*(X1-X0);
-  x.fillStyle='rgba(8,24,36,.78)';x.beginPath();x.roundRect(90,14,W-180,112,18);x.fill();
-  x.strokeStyle='#8fe3ec';x.lineWidth=4;x.beginPath();x.moveTo(X0-24,Y);x.lineTo(X1+24,Y);x.stroke();
-  x.textAlign='center';x.textBaseline='middle';x.fillStyle='#d9f6f8';
-  for(let k=-8;k<=8;k++){x.lineWidth=k===0?5:3;x.beginPath();x.moveTo(mp(k),Y-(k===0?16:10));x.lineTo(mp(k),Y+(k===0?16:10));x.stroke();x.font=(k===0?'800 24px':'700 19px')+' Montserrat,sans-serif';x.fillText(k<0?'−'+(-k):String(k),mp(k),Y+34)}
-  x.fillStyle='#ff5a4a';x.beginPath();x.moveTo(mp(pos),Y-4);x.lineTo(mp(pos)-12,Y-26);x.lineTo(mp(pos)+12,Y-26);x.fill();
-  x.font='800 22px Montserrat,sans-serif';x.fillStyle='#fff';x.fillText(fmt(pos),mp(pos),Y-40);
-  x.font='600 15px Montserrat,sans-serif';x.fillStyle='#9fd7dc';x.textAlign='left';x.fillText('◀ меньше',112,112);x.textAlign='right';x.fillText('больше ▶',W-112,112);
-}
-/* ---- сцена для мишеней ---- */
-function baseScene(){cam.x=0;cam.y=1.9;cam.z=0;cam.yaw=Math.sin(tNow*.4)*.02;cam.pitch=.06;sky();env()}
-function crateF(c,sz,col){return boxF(c.x-sz,c.x+sz,c.y-sz,c.y+sz,c.z-sz,c.z+sz,col,{ol:'#1b1208'})}
-function hit(list,sz,px,py){let best=null,bd=1e9;list.forEach((c,i)=>{if(!c.alive)return;const q=P3([c.x,c.y,c.z]);if(q[2]<1)return;const sx=W/2+FC*q[0]/q[2],sy=H/2-FC*q[1]/q[2],h=sz*FC/q[2]*1.05;if(Math.abs(px-sx)<h&&Math.abs(py-sy)<h&&q[2]<bd){bd=q[2];best=i}});return best}
-/* ================= задания ================= */
-const win=(t,i)=>`<div class="win">${t}</div>${i<4?'<button class="btn" data-act="next">Дальше</button>':''}`;
-const TH=[
-`<h3>Что такое числовая прямая</h3><p>Все числа живут на одной дороге. <b>Нуль</b> стоит посередине. Идёшь вперёд, числа становятся больше: 1, 2, 3… Идёшь назад, числа меньше: −1, −2, −3…</p><p>Между целыми числами тоже есть числа. Это дроби: 0,5 лежит ровно посередине между 0 и 1.</p><div class="ex"><b>Как играть:</b> двигай ползунок или жми кнопки. Красный флажок на шкале сверху показывает, где ты. Нужное число найдено? Жми «Встать здесь».</div>`,
-`<h3>Какие бывают числа</h3><ul><li><b>Натуральные</b> — те, которыми считают: 1, 2, 3… Нуля и минусов среди них нет.</li><li><b>Целые</b> — натуральные, нуль и числа с минусом: −2, −1, 0, 1, 2… Дробей нет.</li><li><b>Дробные</b> — числа «между» целыми: 5,6; ${fr(3,4)}; −0,7.</li></ul><p>Целые и дробные вместе называют <b>рациональными</b> числами.</p><div class="ex"><b>Как узнать:</b> есть дробная часть? Тогда число дробное. Есть минус или нуль? Тогда оно целое, но не натуральное.</div><div class="ex"><b>Как играть:</b> целься мышкой или пальцем в ящик с нужным числом и стреляй касанием.</div>`,
-`<h3>Одно число, разные дроби</h3><p>Половина — это ${fr(1,2)}, но и ${fr(2,4)}, и ${fr(4,8)}. Число то же самое, только кусочки мельче.</p><ul><li>Знаменатель умножили на 2, значит и числитель умножь на 2.</li><li>Знаменатель разделили на 3, значит и числитель раздели на 3. Это называется <b>сократить</b> дробь.</li></ul><div class="ex"><b>Как играть:</b> закрась нижнюю полоску так, чтобы закрашенная часть была той же длины, что и у верхней. Белая линия подскажет, где должен кончаться цвет.</div>`,
-`<h3>Как дробь превратить в десятичную</h3><div class="key"><b>Самое главное:</b> чтобы дробь стала десятичной, её надо просто <b>РАЗДЕЛИТЬ</b>: числитель на знаменатель. Чёрточка дроби — это знак деления.<br>${fr(3,4)} = 3 : 4 = 0,75</div><p>Но 3 на 4 «целыми» не делится: меньше одной штуки на человека. Поможет мелочь. Делим <b>3 рубля поровну на 4 человек</b>:</p><ul><li><b>Меняем на мелкие.</b> Каждый рубль — это 10 монет по 10 копеек. Было 3 монеты, стало 30.</li><li><b>Раздаём по одной монете каждому,</b> пока хватает на всех. 30 монет: каждому по 7 (раздали 28), осталось 2. Семь монет по 10 копеек — это 0,7. Первая цифра ответа: 7.</li><li><b>Остаток меняем на ещё более мелкие.</b> Каждая из 2 монет по 10 копеек — это 10 монет по 1 копейке. Стало 20 монет, каждому по 5, остатка нет. Вторая цифра: 5.</li></ul><p>Получилось 0,75. Так и делится любая дробь.</p><p><b>Когда остановиться:</b></p><ul><li>Осталось <b>0</b>: всё поделено. ${fr(3,4)} = 0,75.</li><li>Осталось <b>столько же, сколько уже оставалось раньше</b>: дальше цифры пойдут по кругу. Круг (период) пишут один раз в скобках: ${fr(1,3)} = 0,(3).</li></ul><div class="ex"><b>Пример ${fr(1,3)}:</b> 1 рубль на 3 человек. Меняем: 10 монет. Каждому по 3, осталась 1. Осталась 1, как и в самом начале, значит снова 10 и снова по 3: цифра 3 повторяется. Ответ 0,(3).</div><div class="ex"><b>Как играть:</b> жми «Разменять на мелкие», потом «Раздать по монете каждому», пока на всех не хватает. Остаток снова меняй на мелкие. Когда всё поделено или остаток повторился, запиши ответ в строку.</div>`,
-`<h3>Как сравнивать числа</h3><ul><li>На прямой чем правее, тем больше.</li><li>Сначала запиши числа одинаково, лучше десятичными: ${fr(3,8)} = 0,375.</li><li>Положительные сравнивай по цифрам слева направо: 0,1004 больше 0,013.</li><li>С минусом наоборот: больше то, что ближе к нулю. −3,24 больше, чем −3,42.</li><li>Периодические выпиши подлиннее: 1,(37) = 1,3737…, это больше, чем 1,37.</li></ul><div class="ex"><b>Число между двумя:</b> между 0,1 и 0,2 лежит, например, 0,15.</div>`];
-const MS=[];
-/* 1. Числовая прямая */
-const T0=[
- {t:'Встань на число <b>−4</b>',v:-4,h:'Минус значит «позади нуля». Иди назад до отметки −4.'},
- {t:'Встань на <b>нуль</b>',v:0,h:'Нуль — золотые ворота посередине дороги.'},
- {t:'Встань на число <b>5,6</b>',v:5.6,h:'5,6 лежит между 5 и 6, чуть дальше середины. Помогут кнопки «0,1».'},
- {t:`Встань на число <b>${fr(3,4)}</b>`,v:.75,h:'Дробь — это деление: 3 : 4 = 0,75. Это между 0 и 1, ближе к 1.'},
- {t:`Встань на число <b>−${fr(1,2)}</b>`,v:-.5,h:'1/2 = 0,5, значит −1/2 = −0,5. Это посередине между −1 и 0.'}];
-MS[0]={th:TH[0],i:0,msg:'',good:0,
- init(){WK.tp=WK.sp=0;this.i=0;this.msg='';this.good=0},
- body(){if(ST.done[0])return win('Отлично! Ты нашёл все числа на прямой.',0);return`<div class="task">${this.i+1} из ${T0.length}. ${T0[this.i].t}</div>${walkCtrl()}<button class="btn" data-act="stand">Встать здесь</button><div class="fb ${this.good?'g':'b'}">${this.msg}</div>`},
- act(a){if(a!=='stand')return;const t=T0[this.i];
-  if(Math.abs(WK.tp-t.v)<=.03){snd('ok');this.i++;this.msg='Верно!';this.good=1;if(this.i>=T0.length){done(0);renderAll();return}}else{snd('bad');this.msg='Пока не здесь. '+t.h;this.good=0}setBody()},
- draw(dt){walkScene(dt)}};
-/* 2. Мишени */
-const CR=[['28',28],['−4',-4],['0',0],['5,6',5.6],['f:3:4',.75],['7',7],['−27',-27],['m:1:2:5',1.4],['−0,7',-.7]];
-const RD=[
- {t:'Подстрели все <b>натуральные</b> числа (1, 2, 3…)',ok:v=>Number.isInteger(v)&&v>=1,why:v=>v<0?'Это число с минусом, а натуральные бывают только положительными.':v===0?'Нуль не считают натуральным числом.':'Это дробь, а натуральные числа целые: 1, 2, 3…'},
- {t:'Подстрели все <b>целые</b> числа',ok:v=>Number.isInteger(v),why:()=>'Это дробное число: у него есть дробная часть. Целые числа без неё.'},
- {t:'Подстрели все <b>дробные</b> числа',ok:v=>!Number.isInteger(v),why:()=>'Это целое число, у него нет дробной части. Ищи дробные.'}];
-MS[1]={th:TH[1],r:0,cr:[],msg:'',good:0,pause:0,
- init(){this.r=0;this.build();this.msg='';this.good=0;this.pause=0},
- build(){this.cr=CR.map((c,i)=>{const A=i<5;return{lab:c[0],v:c[1],x:A?(i-2)*3:(i-5)*3-4.5+3,y:A?1.5:4.4,z:A?14:22,alive:true,fl:0}})},
- body(){if(ST.done[1])return win('Все мишени сбиты. Ты отличаешь натуральные, целые и дробные числа.',1);const left=this.cr.filter(c=>c.alive&&RD[this.r].ok(c.v)).length;return`<div class="task">Раунд ${this.r+1} из 3. ${RD[this.r].t}</div><div class="rd">Осталось сбить: <b>${left}</b></div><div class="fb ${this.good?'g':'b'}">${this.msg}</div>`},
- click(px,py){if(ST.done[1]||this.pause>0)return;shoot(px,py);const i=hit(this.cr,1,px,py);if(i===null)return;const c=this.cr[i],q=P3([c.x,c.y,c.z]),sx=W/2+FC*q[0]/q[2],sy=H/2-FC*q[1]/q[2];
-  if(RD[this.r].ok(c.v)){c.alive=false;burst(sx,sy,1);this.msg='Попал!';this.good=1;
-    if(!this.cr.some(z=>z.alive&&RD[this.r].ok(z.v))){this.msg='Раунд пройден!';snd('ok');this.pause=1.1}}
-  else{c.fl=.6;burst(sx,sy,0);snd('bad');this.msg='Мимо цели. '+RD[this.r].why(c.v);this.good=0}setBody()},
- draw(dt){baseScene();
-  if(this.pause>0){this.pause-=dt;if(this.pause<=0){if(this.r>=2){done(1);renderAll()}else{this.r++;this.build();this.msg='';setBody()}}}
-  this.cr.forEach((c,i)=>{if(!c.alive)return;c.fl=Math.max(0,c.fl-dt);const by=Math.sin(tNow*1.6+i)*.18,cc={...c,y:c.y+by};faces(crateF(cc,1,c.fl>0?[210,60,50]:[200,134,62]));faces(boxF(c.x-1.02,c.x+1.02,cc.y-.15,cc.y+.15,c.z-1.02,c.z+1.02,[120,76,36]));lab(c.lab,c.x,cc.y,c.z-1.06,1.15,'#fff')});
-  flush();flashT=Math.max(0,flashT-dt);gun();fx(dt);crosshair()}};
-/* 3. Полоски */
-const T2=[[3,4,8],[2,5,10],[1,3,9],[6,9,3]];
-MS[2]={th:TH[2],i:0,j:0,msg:'',good:0,
- init(){this.i=0;this.j=0;this.msg='';this.good=0},
- body(){if(ST.done[2])return win('Верно! Ты умеешь записывать одно число разными дробями.',2);const[k,n,m]=T2[this.i];return`<div class="task">${this.i+1} из ${T2.length}. Закрась нижнюю полоску так, чтобы ${fr(k,n)} = ${fr('?',m)}</div><div class="rd">Закрашено частей: <b>${this.j}</b> из ${m}, то есть ${fr(this.j,m)}</div><div class="bs"><button class="mini" data-act="dec">− одна часть</button><button class="mini" data-act="inc">+ одна часть</button></div><button class="btn" data-act="chk">Проверить</button><div class="fb ${this.good?'g':'b'}">${this.msg}</div>`},
- act(a){const[k,n,m]=T2[this.i];
-  if(a==='inc')this.j=Math.min(m,this.j+1);else if(a==='dec')this.j=Math.max(0,this.j-1);
-  else if(a==='chk'){if(this.j*n===k*m){snd('ok');const rule=m>n?`Знаменатель умножили на ${m/n} (${n} → ${m}), значит и числитель умножаем на ${m/n}: ${k} → ${this.j}.`:`Знаменатель разделили на ${n/m} (${n} → ${m}), значит и числитель делим на ${n/m}: ${k} → ${this.j}. Дробь сократили до несократимой.`;
-    this.msg='Верно! '+rule;this.good=1;this.i++;this.j=0;if(this.i>=T2.length){done(2);renderAll();return}}
-   else{snd('bad');this.msg='Пока нет. Закрашенная часть нижней полоски должна кончаться там же, где белая линия.';this.good=0}}
-  setBody()},
- draw(){cam.x=0;cam.y=2.5;cam.z=0;cam.yaw=0;cam.pitch=.1;sky();env();
-  const[k,n,m]=T2[Math.min(this.i,T2.length-1)],L=12,zz=12,seg=(row,cnt,fill,yb,cf)=>{for(let s=0;s<cnt;s++){const x0=-L/2+L*s/cnt+.03,x1=-L/2+L*(s+1)/cnt-.03;faces(boxF(x0,x1,yb,yb+1.1,zz,zz+.7,s<fill?cf:[236,232,214],{ol:'#10222c'}))}};
-  seg(0,n,k,3.7,[240,150,40]);seg(1,m,this.j,1.4,[40,170,120]);
-  faces(boxF(-L/2+L*k/n-.04,-L/2+L*k/n+.04,2.5,3.7,zz-.05,zz+.05,[255,255,255],{em:1}));
-  lab(`f:${k}:${n}`,-7.2,4.25,zz,1.2,'#ffc46b');lab(`f:${this.j}:${m}`,-7.2,1.95,zz,1.2,'#7be3a0');flush()}};
-/* 4. Деление */
-const DV=[[1,3],[5,6],[3,16]];
-function divExpected(a,b){const rems=[a],dg=[];let r=a;for(let n=0;n<60;n++){const xx=r*10;dg.push(Math.floor(xx/b));r=xx%b;if(r===0)return'0,'+dg.join('');const s=rems.indexOf(r);if(s>=0)return'0,'+dg.slice(0,s).join('')+'('+dg.slice(s).join('')+')';rems.push(r)}}
-const CN=['рубль','10 копеек','1 копейка','0,1 копейки','0,01 копейки','0,001 копейки','0,0001 копейки'];
-const CC=[[240,190,60],[205,210,220],[215,130,70],[120,190,230],[190,150,220],[120,200,140],[230,120,150]];
-const cn=k=>CN[Math.min(k,6)];
-MS[3]={th:TH[3],k:0,steps:[],cur:null,ok:[0,0,0],msg:'',val:'',
- init(){this.k=0;this.reset0()},
- reset0(){this.steps=[];this.cur=null;this.msg='';this.val=''},
- state(){const[a,b]=DV[this.k],rems=[a,...this.steps.map(t=>t.r2)],last=this.steps[this.steps.length-1],fin=!this.cur&&!!last&&(last.r2===0||rems.slice(0,-1).includes(last.r2)),rep=fin&&last.r2!==0;return{a,b,rems,last,fin,rep,s:rep?rems.indexOf(last.r2):-1}},
- body(){if(ST.done[3])return win('Верно! Ты умеешь превращать дробь в десятичную и находить период.',3);
-  const q=this.state(),digs=this.steps.map(t=>t.dg).join(''),n=this.steps.length,c=this.cur;
-  let h=`<div class="task">Переведи ${fr(q.a,q.b)} в десятичную дробь. Это просто деление: ${q.a} : ${q.b}. Делим ${q.a} рублей поровну на ${q.b} человек.</div><div class="bs">${DV.map((d,k)=>`<button class="mini fk" data-act="k${k}" style="${k===this.k?'background:#cfeff1':''}">${fr(d[0],d[1])}${this.ok[k]?' ✓':''}</button>`).join('')}</div>`;
-  if(this.ok[this.k])return h+`<div class="fb g">Верно! ${q.a}/${q.b} = ${divExpected(q.a,q.b)}. Выбери другую дробь сверху.</div>`;
-  h+=this.steps.map((t,i)=>{const last=i===n-1,isRp=q.rep&&last;return`<div class="st${isRp?' rp':''}">Шаг ${i+1}. Меняем ${q.rems[i]} монет «${cn(i)}» на ${t.x} монет «${cn(i+1)}» (каждая = 10 мелких). Раздали: каждому по ${t.dg}, осталось ${t.r2}. Цифра ${t.dg} идёт в ответ.${isRp?` Осталось ${t.r2}, как перед шагом ${q.s+1}. Значит, с цифры ${q.s+1} всё идёт по кругу!`:''}${t.r2===0?' Ничего не осталось, всё поделено.':''}</div>`}).join('');
-  if(n)h+=`<div class="rd">Ответ пока: <b>0,${digs}</b></div>`;
-  if(!q.fin&&!c)h+=`<div class="st">${n?`На всех больше не хватает. Осталось ${q.last.r2} монет «${cn(n)}». Размени каждую на 10 мелких.`:`У нас ${q.a} монет «${cn(0)}». На ${q.b} человек поровну так не разделить. Размени каждую на 10 мелких монет.`}</div><button class="btn" data-act="chg">Разменять на мелкие</button>`;
-  if(c){h+=`<div class="st">В кучке ${c.p} монет «${cn(n+1)}». Каждому уже по ${c.d}. ${c.p>=q.b?`Хватает ещё на круг из ${q.b} монет.`:'На всех больше не хватает.'}</div><button class="btn" data-act="give">${c.p>=q.b?'Раздать по монете каждому':'Не хватает на всех'}</button>`;
-   if(c.p>=q.b*2)h+='<button class="btn" data-act="giveall">Раздать всё сразу</button>'}
-  h+='<button class="btn alt" data-act="reset">Заново</button>';
-  if(q.fin){const pre=digs.slice(0,Math.max(q.s,0)),per=q.rep?digs.slice(q.s):'';
-   h+=`<div class="task" style="margin-top:8px">${q.rep?`Остаток повторился (круг!). Цифры до круга: «${pre||'нет'}». Цифры в круге: «${per}». Запиши ответ, круг в скобках.`:'Всё поделено, остатка нет. Запиши ответ: все цифры подряд после «0,».'}</div><input type="text" id="dans" autocomplete="off" placeholder="например 0,2(7)" value="${this.val.replace(/"/g,'')}"><button class="btn" data-act="dchk">Проверить</button>`}
-  return h+`<div class="fb b">${this.msg}</div>`},
- act(a){const q=this.state();this.msg='';
-  if(/^k\d$/.test(a)){this.k=+a[1];this.reset0()}
-  else if(a==='reset')this.reset0();
-  else if(a==='chg'){if(!this.cur&&!q.fin){const base=q.last?q.last.r2:q.a;this.cur={x:base*10,d:0,p:base*10};snd('shot')}}
-  else if(a==='give'||a==='giveall'){const c=this.cur;
-   if(c){if(a==='giveall'){while(c.p>=q.b){c.p-=q.b;c.d++}}else if(c.p>=q.b){c.p-=q.b;c.d++}
-    snd('shot');if(c.p<q.b){this.steps.push({x:c.x,dg:c.d,r2:c.p});this.cur=null}}}
-  else if(a==='dchk'){const v=($('#dans').value||'').replace(/\s/g,'').replace(/\./g,',');this.val=v;
-   if(v===divExpected(q.a,q.b)){snd('ok');this.ok[this.k]=1;this.val='';if(this.ok.every(Boolean)){done(3);renderAll();return}}
-   else{snd('bad');const hasP=v.includes('(');
-    if(q.rep&&!hasP)this.msg='Остаток повторился, значит цифры идут по кругу. Круг надо записать в скобках.';
-    else if(!q.rep&&hasP)this.msg='Всё поделено, круга нет. Скобки не нужны.';
-    else this.msg='Пока нет. Проверь цифры. Они идут подряд, как на шагах выше: '+this.steps.map(t=>t.dg).join('')+'.'}}
-  setBody()},
- draw(){cam.x=0;cam.y=3.5;cam.z=0;cam.yaw=0;cam.pitch=.3;sky();
-  const q=this.state(),n=this.steps.length,c=this.cur,L=this.steps[n-1],b=q.b,sp=Math.min(2.6,14/b),w=sp*.4,digs=this.steps.map(t=>t.dg).join(''),
-   cols=[[214,90,80],[80,150,210],[120,190,110],[230,170,70],[160,110,200]],
-   lvl=c?n+1:n,pile=c?c.p:(n?L.r2:q.a),dp=c?c.d:(n?L.dg:0),col=CC[Math.min(lvl,6)];
-  faces(boxF(-11,11,-.6,0,3,18,[128,86,48],{ol:'#2a1a08'}));
-  for(let i=0;i<b;i++){const px=(i-(b-1)/2)*sp,ch=Math.min(.16,w*.9);
-   faces(boxF(px-w*.85,px+w*.85,0,2.2,14,15,cols[i%5],{ol:'#10222c'}));
-   faces(boxF(px-w,px+w,0,.08,11.2,12.8,[235,235,225],{ol:'#10222c'}));
-   for(let k=0;k<dp;k++)faces(boxF(px-ch,px+ch,.08+k*.12,.18+k*.12,12-ch,12+ch,col,{ol:'#3d2a05'}));
-   if(dp>0)lab(String(dp),px,2.8,14.5,.5,'#fff')}
-  for(let i=0;i<pile;i++){
-   if(lvl===0){const cx=((i%8)-3.5)*.8,cz=6+Math.floor(i/8)*.8;faces(boxF(cx-.33,cx+.33,0,.16,cz-.33,cz+.33,col,{ol:'#3d2a05'}))}
-   else{const cx=((i%10)-4.5)*.36,cz=5.6+Math.floor(i/10)*.36;faces(boxF(cx-.15,cx+.15,0,.1,cz-.15,cz+.15,col,{ol:'#3d2a05'}))}}
-  lab(pile+' монет · '+cn(lvl),0,.2,4.7,.3,'#fff');
-  if(n)lab('0,'+digs,0,4,14,1,q.rep?'#ffb3aa':'#fff');
-  flush()}};
-/* 5. Сравнение */
-const PR=[['0,013','0,1004','Запиши с одинаковым числом знаков: 0,0130 и 0,1004.'],['−3,24','−3,42','У чисел с минусом больше то, что ближе к нулю.'],['3/8','0,375','Переведи 3/8 в десятичную дробь: 3 : 8 = 0,375.'],['1,37','1,(37)','Выпиши цифры: 1,3700… и 1,3737…']];
-const BT=[{lo:1/8,hi:1/7,t:`Встань на число между ${fr(1,8)} и ${fr(1,7)}`,h:'1/8 = 0,125, а 1/7 ≈ 0,143. Нужно число правее первого и левее второго.'},{lo:1/6,hi:1/5,t:`Встань на число между ${fr(1,6)} и ${fr(1,5)}`,h:'1/6 ≈ 0,167, а 1/5 = 0,2. Нужно число между ними.'}];
-MS[4]={th:TH[4],i:0,msg:'',good:0,
- init(){this.i=0;this.msg='';this.good=0;WK.tp=WK.sp=0;this.mk()},
- mk(){const p=PR[this.i];if(!p)return;this.cr=[{lab:lbl(p[0]),x:-3.3,y:1.9,z:9,alive:true,s:0},{lab:lbl(p[1]),x:3.3,y:1.9,z:9,alive:true,s:1}]},
- body(){if(ST.done[4])return win('Готово! Ты умеешь сравнивать любые рациональные числа. Кстати, число π не рациональное: его нельзя записать дробью. В 7 классе мы такие числа не используем.',4);
-  if(this.i<PR.length)return`<div class="task">${this.i+1} из ${PR.length+BT.length}. Подстрели <b>большее</b> число. Если числа равны, жми «Равны».</div><button class="btn alt" data-act="eqb">Равны</button><div class="fb ${this.good?'g':'b'}">${this.msg}</div>`;
-  const b=BT[this.i-PR.length];return`<div class="task">${this.i+1} из ${PR.length+BT.length}. ${b.t}</div>${walkCtrl()}<button class="btn" data-act="stand">Встать здесь</button><div class="fb ${this.good?'g':'b'}">${this.msg}</div>`},
- next(msg){this.i++;this.good=1;this.msg=msg;if(this.i>=PR.length+BT.length){done(4);renderAll();return}if(this.i===PR.length){WK.tp=WK.sp=0}else if(this.i<PR.length)this.mk();setBody()},
- act(a){if(this.i>=PR.length+BT.length)return;const p=PR[this.i];
-  if(a==='eqb'&&p){const c=cmp(parse(p[0]),parse(p[1]));if(c===0){snd('ok');this.next('Верно, числа равны: '+p[0]+' = '+p[1]+'.')}else{snd('bad');this.good=0;this.msg='Числа не равны. '+p[2];setBody()}}
-  else if(a==='stand'&&!p){const b=BT[this.i-PR.length],r=Math.round(WK.tp*100)/100;if(r>b.lo&&r<b.hi){snd('ok');this.next('Верно! '+fmt(r)+' лежит между ними.')}else{snd('bad');this.good=0;this.msg='Пока нет. '+b.h;setBody()}}},
- click(px,py){if(this.i>=PR.length||ST.done[4])return;shoot(px,py);const p=PR[this.i],i=hit(this.cr,1.6,px,py);if(i===null)return;const c=this.cr[i],q=P3([c.x,c.y,c.z]),sx=W/2+FC*q[0]/q[2],sy=H/2-FC*q[1]/q[2],cc=cmp(parse(p[0]),parse(p[1]));
-  if(cc!==0&&((c.s===0&&cc>0)||(c.s===1&&cc<0))){burst(sx,sy,1);snd('ok');this.next('Верно! '+(cc>0?p[0]:p[1])+' больше.')}
-  else{burst(sx,sy,0);snd('bad');this.good=0;this.msg=cc===0?'Эти числа равны! Нажми «Равны».':'Нет, это меньшее число. '+p[2];setBody()}},
- draw(dt){if(this.i>=PR.length){walkScene(dt);return}baseScene();this.cr.forEach(c=>{faces(crateF(c,1.6,[200,134,62]));lab(c.lab,c.x,c.y,c.z-1.65,1.3,'#fff')});flush();flashT=Math.max(0,flashT-dt);gun();fx(dt);crosshair()}};
-/* ================= каркас ================= */
-const side=$('#side');
-const tabsHTML=()=>`<div class="tabs">${[1,2,3,4,5].map((n,i)=>`<button class="tab${i===ST.cur?' on':''}${ST.done[i]?' ok':''}" data-tab="${i}">${n}</button>`).join('')}</div>`;
-function setBody(){const b=$('#body');if(b)b.innerHTML=MS[ST.cur].body()}
-function renderAll(){side.innerHTML=tabsHTML()+`<div class="th">${MS[ST.cur].th}</div><div id="body"></div>`;setBody()}
-function go(i){ST.cur=i;MS[i].init&&MS[i].init();renderAll()}
-side.addEventListener('click',e=>{const b=e.target.closest('[data-act],[data-d],[data-tab]');if(!b)return;
-  if(b.dataset.tab!==undefined)return go(+b.dataset.tab);
-  if(b.dataset.d!==undefined)return walkNudge(+b.dataset.d);
-  if(b.dataset.act==='next')return go(Math.min(4,ST.cur+1));
-  MS[ST.cur].act&&MS[ST.cur].act(b.dataset.act)});
-side.addEventListener('input',e=>{if(e.target.id==='sl'){WK.tp=+e.target.value;const r=$('#rdv');if(r)r.textContent=fmt(WK.tp)}});
-side.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='dans')MS[3].act('dchk')});
-function toCanvas(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
-cv.addEventListener('pointermove',e=>{pointer=toCanvas(e)});
-cv.addEventListener('pointerdown',e=>{pointer=toCanvas(e);const m=MS[ST.cur];m.click&&m.click(pointer.x,pointer.y)});
-function fit(){const r=$('#stage'),k=Math.min(r.clientWidth/W,r.clientHeight/H)||1;cv.style.width=W*k+'px';cv.style.height=H*k+'px'}
-if(window.ResizeObserver)new ResizeObserver(fit).observe($('#stage'));addEventListener('resize',fit);fit();
-let last=performance.now();
-function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;tNow+=dt;MS[ST.cur].draw(dt);requestAnimationFrame(loop)}
-MS.forEach(m=>m.init&&0);go(0);requestAnimationFrame(loop);
+/* ---------- сцена ---------- */
+const canvas=$('#c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x070b18);scene.fog=new THREE.Fog(0x070b18,22,60);
+const cam=new THREE.PerspectiveCamera(50,1,.1,120);
+scene.add(new THREE.HemisphereLight(0x9bb7ff,0x1a1420,.75));
+const sun=new THREE.DirectionalLight(0xffffff,1.1);sun.position.set(4,10,6);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8});scene.add(sun);
+
+const tableTex=(()=>{const c=document.createElement('canvas');c.width=c.height=1024;const x=c.getContext('2d');
+  const g=x.createRadialGradient(512,512,0,512,512,512);g.addColorStop(0,'#2a386a');g.addColorStop(1,'#141b38');
+  x.fillStyle=g;x.fillRect(0,0,1024,1024);x.strokeStyle='rgba(120,160,255,.15)';x.lineWidth=2;
+  for(let i=0;i<=26;i++){const p=i*1024/26;x.beginPath();x.moveTo(p,0);x.lineTo(p,1024);x.moveTo(0,p);x.lineTo(1024,p);x.stroke()}
+  return new THREE.CanvasTexture(c)})();
+const sideM=mat(0x10162f,{roughness:.6});
+const table=new THREE.Mesh(new THREE.CylinderGeometry(6.5,6.7,.4,72),[sideM,new THREE.MeshStandardMaterial({map:tableTex,roughness:.45,metalness:.25}),sideM]);
+table.position.y=-.2;table.receiveShadow=true;scene.add(table);
+const rim=new THREE.Mesh(new THREE.TorusGeometry(6.52,.045,8,96),new THREE.MeshBasicMaterial({color:0x5ee0ff}));rim.rotation.x=Math.PI/2;scene.add(rim);
+{const sp=[];for(let i=0;i<600;i++){const r=rnd(28,50),a=rnd(0,6.283);sp.push(Math.cos(a)*r,rnd(-6,34),Math.sin(a)*r)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
+ scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x9bb7ff,size:.25,fog:false})))}
+
+/* ---------- ввод ---------- */
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(UP,0),_o=new V3();
+function pt(e,h=0){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(ndc,cam);plane.constant=-h;return ray.ray.intersectPlane(plane,_o)?_o.clone():null}
+
+/* ---------- состояние ---------- */
+let state='menu',cur=null,idx=0,zoomT=0,micro=0,tt=0;
+const tPos=new V3(0,9,12),lookC=new V3(0,0,0),tLook=new V3(0,.5,0);
+
+/* ======================= СТАНЦИЯ 1: МНОЖЕСТВА N ⊂ Z ⊂ Q ======================= */
+function st1(){
+  const g=new THREE.Group(),RAD=[1.5,2.9,4.3],NM=['N','Z','Q'],CP=['натуральные','целые','рациональные'],CO=[0x3fb6dc,0x2d56b3,0x1c2a5c];
+  const discs=[],rings=[],zl=[],zc=[];
+  for(let i=2;i>=0;i--){
+    const geo=new THREE.CylinderGeometry(RAD[i],RAD[i],1,64);geo.translate(0,.5,0);
+    const d=new THREE.Mesh(geo,mat(CO[i],{roughness:.55,metalness:.15}));d.castShadow=d.receiveShadow=true;g.add(d);discs[i]=d;
+    const r=new THREE.Mesh(new THREE.TorusGeometry(RAD[i],.045,8,96),new THREE.MeshBasicMaterial({color:0x5ee0ff}));r.rotation.x=Math.PI/2;g.add(r);rings[i]=r;
+    const a=dlabel(NM[i],{w:1.0,fs:110,dt:true,color:'#eaf1ff'}),b=dlabel(CP[i],{w:2.3,fs:46,dt:true,color:'#cfe3ff'});
+    a.position.z=-(RAD[i]-.6);b.position.z=a.position.z+.5;g.add(a,b);zl[i]=a;zc[i]=b}
+  const chain=dlabel('N ⊂ Z ⊂ Q',{w:3.6,fs:92,color:'#ffb84d'});chain.position.set(0,2.4,0);g.add(chain);
+  const DATA=[['5',0],['−4',1],['1/2',2],['0',1],['−0,7',2],['28',0],['5,6',2],['−27',1]];
+  const toks=DATA.map(([s,z],i)=>{
+    const a=Math.PI*(.1+.8*i/7),hx=Math.cos(a)*5.45,hz=Math.sin(a)*5.45;
+    const t=new THREE.Group(),m=mat(0xffb84d,{roughness:.35});
+    t.add(mesh(new THREE.CylinderGeometry(.5,.5,.22,32),m));
+    const l=dlabel(s,{w:1.7,fs:84});l.position.y=.5;t.add(l);
+    t.position.set(hx,.11,hz);t.home=new V3(hx,.11,hz);t.tgt=t.home.clone();t.right=z;t.zone=-1;t.m=m;t.txt=s;
+    g.add(t);return t});
+  let drag=null,ok=0,fb='',fbT=0;
+  const S={grp:g,name:'Множества',prog:0,
+    hint:'Перетащи каждое число в самое маленькое множество, куда оно помещается.',
+    home:{pos:new V3(0,9,9),look:new V3(0,0,.5)},
+    card:{tag:'Множества чисел',title:'Каждое число живёт в своём кругу',
+      text:'Натуральные числа — это 1, 2, 3 …; целые добавляют нуль и противоположные числа; рациональные — ещё и дроби. Поэтому каждый круг лежит внутри следующего: N ⊂ Z ⊂ Q.',
+      fact:'Буквы взяты из слов: naturalis — природный, Zahl — число, quotient — отношение.'},
+    zoom:()=>({pos:new V3(0,6,11),look:new V3(0,.6,0)}),
+    down(e){const P=pt(e,.3);if(!P)return;let b=null,bd=1.1;
+      for(const t of toks){if(t.zone>=0)continue;const d=Math.hypot(t.position.x-P.x,t.position.z-P.z);if(d<bd){bd=d;b=t}}
+      if(b){drag=b;b.tgt.set(P.x,.9,P.z)}},
+    move(e){if(!drag)return;const P=pt(e,.3);if(P)drag.tgt.set(P.x,.9,P.z)},
+    up(){if(!drag)return;const t=drag;drag=null;
+      const r=Math.hypot(t.tgt.x,t.tgt.z),z=r<RAD[0]?0:r<RAD[1]?1:r<RAD[2]?2:-1;
+      if(z===t.right){t.zone=z;t.m.color.setHex(0x58ff9a);fb='';ok++}
+      else{
+        if(z>t.right)fb=`${t.txt} входит и в ${NM[z]}, но ищи самое маленькое множество`;
+        else if(z>=0)fb=`${t.txt} не входит в ${NM[z]}: `+(t.right===1?'натуральные — это 1, 2, 3 …':'это дробь, а в Z только целые');
+        else fb='';
+        fbT=3.5;t.tgt.copy(t.home)}},
+    update(dt){
+      const hs=[.14+micro*1,.1+micro*.5,.06],k=1-Math.exp(-dt*14);
+      for(let i=0;i<3;i++){discs[i].scale.y=hs[i];rings[i].position.y=hs[i]+.01;zl[i].position.y=hs[i]+.55;zc[i].position.y=hs[i]+.15}
+      chain.material.opacity=micro;
+      for(const t of toks){
+        if(t.zone>=0)t.tgt.y=hs[t.zone]+.11;
+        t.position.lerp(t.tgt,k)}
+      fbT-=dt;S.prog=ok/8;
+      ro(fbT>0&&fb?fb:`Разложено: ${ok} из 8`)}};
+  return S}
+
+/* ======================= СТАНЦИЯ 2: РАВНЫЕ ДРОБИ ======================= */
+function st2(){
+  const g=new THREE.Group(),BL=7,Z0=.3;
+  g.add(mesh(new THREE.BoxGeometry(BL+.3,.22,1.5),mat(0x141c3d,{roughness:.6}),0,.11,Z0));
+  g.add(mesh(new THREE.BoxGeometry(BL,.1,1.1),mat(0x2b3a78,{roughness:.4}),0,.27,Z0));
+  g.add(mesh(new THREE.BoxGeometry(BL/2,.08,1.1),mat(0xffb84d,{roughness:.3,emissive:0xffb84d,emissiveIntensity:.15}),-BL/4,.36,Z0));
+  const divM=new THREE.MeshBasicMaterial({color:0x070b18}),divG=new THREE.MeshBasicMaterial({color:0x58ff9a}),divs=[];
+  for(let i=0;i<11;i++){const d=new THREE.Mesh(new THREE.BoxGeometry(.07,.22,1.14),divM);d.position.set(0,.36,Z0);d.visible=false;g.add(d);divs.push(d)}
+  const post=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1,8),new THREE.MeshBasicMaterial({color:0x58ff9a}));post.position.set(0,1,Z0);g.add(post);
+  const l0=dlabel('0',{w:.7,cw:128,ch:128,fs:90}),l1=dlabel('1',{w:.7,cw:128,ch:128,fs:90});
+  l0.position.set(-BL/2,.3,Z0+1.1);l1.position.set(BL/2,.3,Z0+1.1);g.add(l0,l1);
+  const cur_=dlabel('',{w:2.6,fs:96});cur_.position.set(0,1.9,Z0);g.add(cur_);
+  const chainL=dlabel('',{w:6.8,cw:1024,fs:60,color:'#ffb84d'});chainL.position.set(0,.5,Z0+2.2);g.add(chainL);
+  /* микро: все дроби друг под другом */
+  const mi=new THREE.Group();mi.position.set(0,7,0);mi.visible=false;g.add(mi);
+  const mlabs=[],OX=.35,BW=2.8;
+  const bm=mat(0x2b3a78),am=mat(0xffb84d,{emissive:0xffb84d,emissiveIntensity:.15}),dm=new THREE.MeshBasicMaterial({color:0x070b18}),gm=new THREE.MeshBasicMaterial({color:0x58ff9a});
+  for(let r=0;r<6;r++){
+    const n=2*(r+1),y=1.75-r*.7;
+    mi.add(mesh(new THREE.BoxGeometry(BW,.1,.34),bm,OX,y,0));
+    mi.add(mesh(new THREE.BoxGeometry(BW/2,.12,.34),am,OX-BW/4,y,0));
+    for(let k=1;k<n;k++){const d=new THREE.Mesh(new THREE.BoxGeometry(.035,.2,.38),k===n/2?gm:dm);d.position.set(OX-BW/2+k*BW/n,y,0);mi.add(d)}
+    const lb=dlabel(r===0?'1/2':`${n/2}/${n}`,{w:1.0,cw:256,ch:128,fs:70});lb.position.set(OX-BW/2-.65,y,0);mi.add(lb);mlabs.push(lb)}
+  const mline=new THREE.Mesh(new THREE.BoxGeometry(.04,4.3,.04),new THREE.MeshBasicMaterial({color:0x58ff9a}));mline.position.set(OX,0,.25);mi.add(mline);
+  const t1=dlabel('это одно и то же число',{w:4.4,cw:1024,fs:54,color:'#ffb84d'});t1.position.set(0,2.9,0);
+  const t2=dlabel('1/2 — несократимая дробь:',{w:4.4,cw:1024,fs:50,color:'#58ff9a'});t2.position.set(0,-2.4,0);
+  const t3=dlabel('у неё наименьший знаменатель',{w:4.4,cw:1024,fs:50,color:'#58ff9a'});t3.position.set(0,-2.8,0);
+  mi.add(t1,t2,t3);mlabs.push(t1,t2,t3);
+  let acc=1,lx=0,drag=false,stay=0,lastN=0,cnt=0;const found={};
+  const S={grp:g,name:'Дроби',prog:0,
+    hint:'Води пальцем влево-вправо: плитка делится на части. Найди 4 дроби, равные 1/2.',
+    home:{pos:new V3(0,8,8.5),look:new V3(0,.5,.6)},
+    card:{tag:'Рациональные числа',title:'Одно число — много дробей',
+      text:'Половина остаётся половиной, сколько бы ни было частей: 1/2 = 2/4 = 3/6 = 4/8 … Любое рациональное число можно записать дробью m/n, где m — целое, а n — натуральное, и притом многими способами.',
+      fact:'Из всех таких дробей можно выбрать одну с наименьшим знаменателем — она несократима. Для 1/2 это сама 1/2.'},
+    zoom:()=>({pos:new V3(0,7.3,6.2),look:new V3(0,7,0)}),
+    down(e){drag=true;lx=e.clientX},up(){drag=false},
+    move(e){if(!drag)return;acc=clamp(acc+(e.clientX-lx)/36,1,12);lx=e.clientX},
+    update(dt){
+      const n=Math.round(acc),even=n%2===0;
+      if(n!==lastN){lastN=n;stay=0;
+        divs.forEach((d,k)=>{d.visible=k<n-1;if(d.visible){d.position.x=-BL/2+(k+1)*BL/n;d.material=(even&&k===n/2-1)?divG:divM}})}
+      if(even){stay+=dt;if(stay>.45&&!found[n]){found[n]=1;cnt++;
+        chainL.set(Object.keys(found).map(Number).sort((a,b)=>a-b).map(q=>q===2?'1/2':`${q/2}/${q}`).join(' = '))}}
+      cur_.set(even?(n===2?'1/2':`${n/2}/${n}`):`?/${n}`,even?'#58ff9a':'#ff6b7d');
+      post.scale.y=even?1.3:.01;
+      S.prog=clamp(cnt/4);
+      if(micro>.02){mi.visible=true;mi.scale.setScalar(.6+.4*micro);mlabs.forEach(l=>l.material.opacity=micro)}
+      ro(even?`${n===2?'1/2':`${n/2}/${n}`} — граница на середине. Найдено: ${cnt} из 4`:`На ${n} част${n===1?'ь':n<5?'и':'ей'} середина не попадает на границу. Найдено: ${cnt} из 4`)}};
+  return S}
+
+/* ======================= СТАНЦИЯ 3: ДЕЛЕНИЕ И ПЕРИОД ======================= */
+function st3(){
+  const g=new THREE.Group(),TASKS=[[1,8],[8,37],[7,12]],rowG=new THREE.Group();
+  const title=dlabel('',{w:3.2,fs:90,color:'#ffb84d'});title.position.set(0,.9,-1.9);
+  const nowL=dlabel('',{w:6,cw:1024,fs:54});nowL.position.set(0,.5,2.0);
+  const chainL=dlabel('',{w:6,cw:1024,fs:46,color:'#9bb7ff'});chainL.position.set(0,.5,2.8);
+  const resL=dlabel('',{w:5,cw:1024,fs:86,color:'#ffb84d'});resL.position.set(0,.7,-3.1);
+  const noteL=dlabel('',{w:5.4,cw:1024,fs:46,color:'#58ff9a'});noteL.position.set(0,.5,3.6);
+  const brk=new THREE.Group();g.add(rowG,title,nowL,chainL,resL,noteL,brk);
+  const amB=new THREE.MeshBasicMaterial({color:0xffb84d});
+  let ti=0,done=0,steps=0,rem=[],digs=[],fin=false,finT=0,tiles=[],n=1,d=8,nowTxt='',res='';
+  const XT=i=>(i-1.5)*1.05;
+  function addTile(i,txt,sub,col){
+    const t=new THREE.Group();t.position.set(XT(i),0,0);
+    const m=mat(col||0x2b4c9a,{roughness:.35,emissive:0x000000});
+    t.add(mesh(new THREE.BoxGeometry(.9,.3,1.0),m,0,.15,0));
+    const l=dlabel(txt,{w:.9,cw:128,ch:128,fs:96});l.position.y=.75;t.add(l);
+    const s=dlabel(sub,{w:1.05,cw:256,ch:64,fs:34,color:'#9bb7ff'});s.position.set(0,.2,.85);t.add(s);
+    t.m=m;t.age=0;t.scale.setScalar(.01);rowG.add(t);tiles[i]=t}
+  function setTask(){
+    while(rowG.children.length)rowG.remove(rowG.children[0]);
+    while(brk.children.length)brk.remove(brk.children[0]);
+    [n,d]=TASKS[ti];tiles=[];rem=[n];digs=[];steps=0;fin=false;finT=0;nowTxt='';res='';
+    resL.set(' ');chainL.set(' ');noteL.set(' ');nowL.set(' ');title.set(`${n} ÷ ${d}`);
+    addTile(0,'0,',`ост. ${n}`,0x4a5a9a)}
+  function finish(kind,j){
+    fin=true;finT=0;done++;
+    if(kind==='end'){res=`${n}/${d} = 0,${digs.join('')}`;tiles[steps].m.color.setHex(0x2fbf71);noteL.set('остаток 0 — деление закончилось')}
+    else{
+      const pre=digs.slice(0,j).join(''),per=digs.slice(j).join('');res=`${n}/${d} = 0,${pre}(${per})`;
+      for(let i=j+1;i<=steps;i++){tiles[i].m.color.setHex(0xffb84d);tiles[i].m.emissive.setHex(0x5a3a00)}
+      const x1=XT(j+1)-.5,x2=XT(steps)+.5,cx=(x1+x2)/2;
+      const bar=new THREE.Mesh(new THREE.BoxGeometry(x2-x1,.07,.09),amB);bar.position.set(cx,1.3,0);
+      const p1=new THREE.Mesh(new THREE.BoxGeometry(.07,.3,.09),amB),p2=p1.clone();p1.position.set(x1,1.15,0);p2.position.set(x2,1.15,0);
+      const pl=dlabel('период',{w:1.5,fs:56,color:'#ffb84d'});pl.position.set(cx,1.75,0);
+      brk.add(bar,p1,p2,pl);noteL.set('остаток повторился — цифры пойдут по кругу')}
+    resL.set(res);chainL.set('остатки: '+rem.join(' → '))}
+  function step(){
+    const r=rem[rem.length-1]*10,dg=Math.floor(r/d),nr=r%d;
+    digs.push(dg);rem.push(nr);steps++;addTile(steps,String(dg),`ост. ${nr}`);
+    nowTxt=`${r} ÷ ${d} = ${dg}, остаток ${nr}`;nowL.set(nowTxt);
+    if(nr===0)return finish('end');
+    let j=-1;for(let q=0;q<rem.length-1;q++)if(rem[q]===nr){j=q;break}
+    if(j>=0)finish('per',j);else if(steps>=6)finish('per',0)}
+  setTask();
+  const S={grp:g,name:'Деление',prog:0,
+    hint:'Нажимай на экран — делим уголком. Смотри на остатки: когда остаток повторится, цифры пойдут по кругу.',
+    home:{pos:new V3(0,7,7.5),look:new V3(0,.3,.2)},
+    card:{tag:'Дроби и деление',title:'Остатки пошли по кругу — цифры тоже',
+      text:'Чтобы записать дробь десятичной, делим числитель на знаменатель. Остаток 0 — дробь конечная, как 1/8 = 0,125. Остатки начали повторяться — повторяются и цифры: это период, его пишут в скобках, например 8/37 = 0,(216).',
+      fact:'Любую дробь m/n можно записать либо конечной десятичной дробью, либо бесконечной периодической.'},
+    zoom:()=>({pos:new V3(0,4,5.5),look:new V3(0,.4,0)}),
+    down(){if(!fin)step()},
+    update(dt){
+      for(const t of tiles){if(!t)continue;t.age+=dt*4;t.scale.setScalar(.01+.99*ease(clamp(t.age)))}
+      if(fin){finT+=dt;if(finT>2.8&&ti<TASKS.length-1){ti++;setTask()}}
+      S.prog=done>=3?1:(done+(fin?0:Math.min(.7,steps*.22)))/3;
+      const z=1+.25*micro;resL.scale.set(5*z,5*z*128/1024,1);noteL.material.opacity=micro;
+      ro(fin?res:steps?nowTxt:`Нажми на экран — начнём делить ${n} на ${d}`)}};
+  return S}
+
+/* ======================= СТАНЦИЯ 4: ЧИСЛО МЕЖДУ ЧИСЛАМИ ======================= */
+function st4(){
+  const g=new THREE.Group(),BL=7,Z0=.2,XM=3.1;
+  let L=1.3,R=1.4,cnt=0,drag=false,tx=0,flash=0,built=false,fb='',fbT=0;const hist=[];
+  const barM=mat(0x2b3a78,{emissive:0xffb84d,emissiveIntensity:0});
+  g.add(mesh(new THREE.BoxGeometry(BL+.5,.2,1.2),mat(0x141c3d,{roughness:.6}),0,.1,Z0));
+  g.add(mesh(new THREE.BoxGeometry(BL,.12,.5),barM,0,.26,Z0));
+  const pm=mat(0x8a93b8,{metalness:.8,roughness:.3});
+  for(const sx of[-1,1]){g.add(mesh(new THREE.CylinderGeometry(.07,.07,1.4,10),pm,sx*BL/2,.9,Z0));g.add(mesh(new THREE.SphereGeometry(.14,14,10),pm,sx*BL/2,1.62,Z0))}
+  const tm=new THREE.MeshBasicMaterial({color:0x7fb0ff});
+  for(let i=1;i<10;i++){const t=new THREE.Mesh(new THREE.BoxGeometry(.04,.12,.3),tm);t.position.set(-BL/2+i*BL/10,.38,Z0);g.add(t)}
+  const dL=dlabel('',{w:2.2,fs:72,color:'#ffb84d'}),dR=dlabel('',{w:2.2,fs:72,color:'#ffb84d'});
+  dL.position.set(-BL/2,2.2,Z0);dR.position.set(BL/2,2.2,Z0);g.add(dL,dR);
+  const ineq=dlabel('',{w:6.6,cw:1024,fs:72,color:'#58ff9a'});ineq.position.set(0,3.3,Z0);g.add(ineq);
+  const ball=new THREE.Group();ball.position.set(0,.8,Z0);g.add(ball);
+  ball.add(mesh(new THREE.SphereGeometry(.3,24,18),mat(0x5ee0ff,{emissive:0x5ee0ff,emissiveIntensity:.35,roughness:.25}),0,0,0));
+  const cone=mesh(new THREE.ConeGeometry(.16,.4,14),mat(0x5ee0ff,{emissive:0x5ee0ff,emissiveIntensity:.35}),0,-.35,0);cone.rotation.x=Math.PI;ball.add(cone);
+  /* микро: лестница увеличений */
+  const mi=new THREE.Group();mi.position.set(0,7,0);mi.visible=false;g.add(mi);const mlabs=[];
+  function build(){
+    built=true;
+    const px=(v,a,b)=>-1.2+2.4*(v-a)/(b-a);
+    const bm=mat(0x2b3a78),am=new THREE.MeshBasicMaterial({color:0xffb84d}),lm=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.5}),bl=new THREE.MeshBasicMaterial({color:0x7fd8ff});
+    const cyl=new THREE.CylinderGeometry(.015,.015,1,6),ys=hist.map((h,i)=>1.9-i*.95);
+    hist.forEach((h,i)=>{
+      const y=ys[i],nL=i<hist.length-1?hist[i+1].L:L,nR=i<hist.length-1?hist[i+1].R:R,a=px(nL,h.L,h.R),b=px(nR,h.L,h.R);
+      mi.add(mesh(new THREE.BoxGeometry(2.4,.1,.3),bm,0,y,0));
+      const hl=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.03,b-a),.14,.32),am);hl.position.set((a+b)/2,y,0);mi.add(hl);
+      const bs=new THREE.Mesh(new THREE.SphereGeometry(.09,12,10),bl);bs.position.set(px(h.v,h.L,h.R),y+.14,0);mi.add(bs);
+      const l1=dlabel(fmt(h.L),{w:1.1,cw:256,ch:64,fs:44}),l2=dlabel(fmt(h.R),{w:1.1,cw:256,ch:64,fs:44});
+      l1.position.set(-1.75,y,0);l2.position.set(1.75,y,0);mi.add(l1,l2);mlabs.push(l1,l2);
+      if(i<hist.length-1){
+        const c1=new THREE.Mesh(cyl,lm),c2=new THREE.Mesh(cyl,lm);
+        setB(c1,new V3(a,y,0),new V3(-1.2,ys[i+1],0));setB(c2,new V3(b,y,0),new V3(1.2,ys[i+1],0));mi.add(c1,c2)}});
+    const t1=dlabel('Между любыми двумя числами',{w:4.4,cw:1024,fs:50,color:'#ffb84d'}),t2=dlabel('всегда найдётся ещё одно',{w:4.4,cw:1024,fs:50,color:'#ffb84d'}),t3=dlabel('и так — сколько угодно раз',{w:4.4,cw:1024,fs:50,color:'#58ff9a'});
+    t1.position.set(0,3.2,0);t2.position.set(0,2.8,0);t3.position.set(0,-2.9,0);mi.add(t1,t2,t3);mlabs.push(t1,t2,t3)}
+  function val(){const t=clamp((tx+BL/2)/BL,.06,.94),w=R-L,dig=Math.ceil(-Math.log10(w))+2,p=Math.pow(10,dig);return{t,v:Math.round((L+t*w)*p)/p}}
+  function set(e){const P=pt(e,.2);if(P)tx=clamp(P.x,-XM,XM)}
+  const S={grp:g,name:'Между числами',prog:0,
+    hint:'Нажми на линейку и отпусти — точка встанет между числами. Поставь 5 точек подряд.',
+    home:{pos:new V3(0,7,9),look:new V3(0,.8,.2)},
+    card:{tag:'Рациональные числа',title:'Между двумя числами всегда есть третье',
+      text:'Возьми любые два числа — например, 1,3 и 1,4. Между ними поместится ещё одно, потом ещё и ещё: промежуток можно делить сколько угодно раз. Поэтому рациональных чисел бесконечно много, а «следующего» числа после данного не существует.',
+      fact:'Это нужно в заданиях 7–9: найти число между 1/8 и 1/7 — значит, взять любое число из промежутка.'},
+    zoom:()=>({pos:new V3(0,7.2,7),look:new V3(0,7,0)}),
+    down(e){drag=true;set(e)},move(e){if(drag)set(e)},
+    up(){if(!drag)return;drag=false;
+      const {t,v}=val();if(!(v>L&&v<R))return;
+      hist.push({L,R,v});cnt++;fb=`${fmt(L)} < ${fmt(v)} < ${fmt(R)}`;fbT=3;
+      if(t>.5)L=v;else R=v;
+      tx=0;flash=1},
+    update(dt){
+      const k=1-Math.exp(-dt*14);ball.position.x+=(tx-ball.position.x)*k;
+      ball.position.y=.8+.06*Math.sin(tt*3)+flash*.4;
+      const {v}=val();
+      dL.set(fmt(L));dR.set(fmt(R));
+      ineq.set(`${fmt(L)} < ${fmt(v)} < ${fmt(R)}`);
+      barM.emissiveIntensity=flash*.5;flash=Math.max(0,flash-dt*2);
+      S.prog=cnt/5;
+      if(micro>.02){if(!built)build();mi.visible=true;mi.scale.setScalar(.6+.4*micro);mlabs.forEach(l=>l.material.opacity=micro)}
+      fbT-=dt;
+      ro(fbT>0?`Поставлено: ${fb}`:`Точек поставлено: ${cnt} из 5`)}};
+  return S}
+
+/* ======================= СТАНЦИЯ 5: КОЛЕСО π ======================= */
+function st5(){
+  const g=new THREE.Group(),R=.8,U=2*R,X0=-4.2,C=2*Math.PI*R,PI='3,14159265358979';
+  let wx=X0,tx=X0,drag=false,lastX=0,tm=0;
+  g.add(mesh(new THREE.BoxGeometry(6.8,.1,1.1),mat(0x2b3a78,{roughness:.45}),X0+3.2,.05,.1));
+  const tkM=new THREE.MeshBasicMaterial({color:0x9bb7ff});
+  for(let i=0;i<=40;i++){const h=i%10===0?.22:i%5===0?.14:.08,t=new THREE.Mesh(new THREE.BoxGeometry(.025,h,.07),tkM);t.position.set(X0+i*U/10,.1+h/2,.58);g.add(t)}
+  for(let i=0;i<=4;i++){const l=dlabel(String(i),{w:.7,cw:128,ch:128,fs:88});l.position.set(X0+i*U,.15,1.2);g.add(l)}
+  const cc=document.createElement('canvas');cc.width=cc.height=256;const cx=cc.getContext('2d');
+  cx.fillStyle='#1c2a5c';cx.fillRect(0,0,256,256);cx.strokeStyle='#5ee0ff';cx.lineWidth=16;cx.beginPath();cx.arc(128,128,116,0,6.283);cx.stroke();
+  cx.lineWidth=9;for(let i=0;i<3;i++){const a=i*Math.PI/3;cx.beginPath();cx.moveTo(128-Math.cos(a)*110,128-Math.sin(a)*110);cx.lineTo(128+Math.cos(a)*110,128+Math.sin(a)*110);cx.stroke()}
+  cx.fillStyle='#5ee0ff';cx.beginPath();cx.arc(128,128,16,0,6.283);cx.fill();
+  const capM=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(cc),roughness:.4,metalness:.2});
+  const wg=new THREE.Group();g.add(wg);
+  const wheel=new THREE.Mesh(new THREE.CylinderGeometry(R,R,.5,64),[mat(0x3a4a8f,{roughness:.4}),capM,capM]);wheel.rotation.x=Math.PI/2;wheel.castShadow=true;wg.add(wheel);
+  const dot=new THREE.Mesh(new THREE.SphereGeometry(.11,14,10),new THREE.MeshStandardMaterial({color:0xff4d5e,emissive:0xff4d5e,emissiveIntensity:.5}));dot.position.set(0,-R*.97,.3);wg.add(dot);
+  const rib=new THREE.Mesh(new THREE.BoxGeometry(1,.06,.2),new THREE.MeshBasicMaterial({color:0xffb84d}));rib.position.set(X0,.13,.38);g.add(rib);
+  const flag=new THREE.Group();flag.position.set(X0+C,0,.38);flag.visible=false;g.add(flag);
+  const fp=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.1,8),new THREE.MeshBasicMaterial({color:0x58ff9a}));fp.position.y=.65;flag.add(fp);
+  const fl=dlabel('π',{w:1.0,cw:256,ch:128,fs:120,color:'#58ff9a'});fl.position.y=1.5;flag.add(fl);
+  /* микро: цифры π */
+  const mi=new THREE.Group();mi.position.set(0,7,0);mi.visible=false;g.add(mi);
+  const piL=dlabel('π = ',{w:4.4,cw:1024,fs:64,color:'#ffb84d'});piL.position.y=.9;
+  const n1=dlabel('цифры никогда не повторяются',{w:4.4,cw:1024,fs:46,color:'#58ff9a'});n1.position.y=.1;
+  const n2=dlabel('нет периода — число иррациональное',{w:4.4,cw:1024,fs:44,color:'#58ff9a'});n2.position.y=-.35;
+  const n3=dlabel('22/7 = 3,(142857) — лишь приближение',{w:4.4,cw:1024,fs:42,color:'#9bb7ff'});n3.position.y=-1.1;
+  mi.add(piL,n1,n2,n3);
+  const S={grp:g,name:'Колесо π',prog:0,
+    hint:'Води пальцем вправо — колесо катится по линейке. Его диаметр равен 1. Докати до одного оборота.',
+    home:{pos:new V3(-1.3,3.6,10.1),look:new V3(-1.3,.6,0)},
+    card:{tag:'Действительные числа',title:'Число, которое не уместится в дробь',
+      text:'Колесо диаметром 1 за один оборот проходит путь π = 3,1415926 … Цифры после запятой никогда не повторяются, периода нет. Такие числа нельзя записать как m/n — их называют иррациональными.',
+      fact:'Рациональные и иррациональные числа вместе образуют множество действительных чисел. В 7 классе мы работаем только с рациональными.'},
+    zoom:()=>({pos:new V3(0,7.2,7),look:new V3(0,7,0)}),
+    down(e){const P=pt(e,.9);if(!P)return;drag=true;lastX=P.x},up(){drag=false},
+    move(e){if(!drag)return;const P=pt(e,.9);if(!P)return;tx=clamp(tx+(P.x-lastX),X0,X0+C);lastX=P.x},
+    update(dt){
+      const k=1-Math.exp(-dt*8);wx+=(tx-wx)*k;
+      if((wx-X0)/C>.995){wx=tx=X0+C}
+      const th=(wx-X0)/R;wg.position.set(wx,R+.1,0);wg.rotation.z=-th;
+      const len=Math.max(.001,wx-X0);rib.scale.x=len;rib.position.x=X0+len/2;
+      S.prog=clamp((wx-X0)/C);flag.visible=S.prog>=1;
+      if(micro>.02){mi.visible=true;tm+=dt;const q=Math.min(PI.length,Math.floor(tm*5));
+        piL.set('π = '+PI.slice(0,q)+(q>=PI.length?'…':''));
+        [n1,n2,n3].forEach(l=>l.material.opacity=micro)}
+      const dist=(wx-X0)/U;
+      ro(S.prog>=1?'Один оборот: 3,14159… диаметра':`Путь колеса: ${dist.toFixed(3).replace('.',',')} диаметра`)}};
+  return S}
+
+const ST=[st1,st2,st3,st4,st5];
+
+/* ---------- интерфейс ---------- */
+function ro(t){const r=$('#readout');if(r.textContent!==t)r.textContent=t}
+function setProg(p){$('#fill').style.width=(p*100)+'%'}
+const dotsEl=$('#dots');for(let i=0;i<ST.length+1;i++)dotsEl.appendChild(document.createElement('i'));
+function paintDots(){[...dotsEl.children].forEach((d,i)=>{d.className=i<idx?'done':i===idx?'on':''})}
+function load(i){
+  if(cur)scene.remove(cur.grp);
+  idx=i;cur=ST[i]();scene.add(cur.grp);zoomT=0;micro=0;
+  $('#name').textContent=cur.name;$('#hint').textContent=cur.hint;setProg(0);paintDots();
+  if(state!=='menu'){state='play';showHud(true)}}
+function showHud(on){['#hint','#meter','#readout'].forEach(s=>$(s).classList.toggle('hide',!on))}
+function startZoom(){state='zoom';zoomT=0;cur.up&&cur.up();showHud(false)}
+function showCard(){const c=cur.card;state='card';try{parent.postMessage('alg:ok:'+(idx+1),'*')}catch(e){}
+  $('#ctag').textContent=c.tag;$('#ctitle').textContent=c.title;$('#ctext').textContent=c.text;$('#cfact').textContent=c.fact;
+  $('#cnext').textContent=idx<ST.length-1?'Дальше':'К заданию';$('#card').classList.add('show')}
+$('#cnext').onclick=()=>{$('#card').classList.remove('show');if(idx<ST.length-1)load(idx+1);else startQuiz()};
+$('#start').onclick=()=>{$('#menu').classList.add('hide');state='play';showHud(true)};
+
+/* ---------- проверочное задание ---------- */
+const Q=[
+ {t:'Верно ли, что −4 ∈ N, −4 ∈ Z, −4 ∈ Q?',o:['Верны все три','Верны только два последних','Верно только −4 ∈ Z'],a:1,e:'−4 — целое число, значит −4 ∈ Z, а раз Z ⊂ Q, то и −4 ∈ Q. Но натуральные числа — это 1, 2, 3 …, поэтому −4 ∉ N.'},
+ {t:'A — множество чётных чисел, B — множество чисел, кратных 4. Какое множество является подмножеством другого?',o:['B ⊂ A','A ⊂ B','Никакое'],a:0,e:'Каждое число, кратное 4, чётное (8, 12, 16 …). А вот 6 чётное, но на 4 не делится. Значит, B ⊂ A.'},
+ {t:'Как записать число 1/3 в виде бесконечной десятичной дроби?',o:['0,3','0,(03)','0,(3)'],a:2,e:'Делим 1 на 3: остаток каждый раз равен 1, цифра 3 повторяется без конца. Период — 3, запись 0,(3).'},
+ {t:'Сравните числа 1,37 и 1,(37).',o:['1,37 < 1,(37)','1,37 = 1,(37)','1,37 > 1,(37)'],a:0,e:'1,(37) = 1,373737 … — после 1,37 идут ещё цифры, поэтому это число чуть больше.'},
+ {t:'Какое число больше 1/8, но меньше 1/7?',o:['0,2','0,13','0,1'],a:1,e:'1/8 = 0,125, а 1/7 = 0,142857 … Число 0,13 лежит между ними.'},
+ {t:'Чему равно 0,(9) = 0,999 …?',o:['Числу, чуть меньшему 1','Иррациональному числу','Числу 1'],a:2,e:'Дроби с периодом 9 считают другой записью дробей с периодом 0: 0,(9) = 1.'},
+ {t:'Какое из чисел иррациональное?',o:['2,5 = 2,5000 …','π = 3,1415926 …','−5/11 = −0,(45)'],a:1,e:'У π нет периода — это бесконечная непериодическая дробь. Остальные числа записываются как m/n, значит, они рациональные.'}];
+let qi=0,score=0;
+function startQuiz(){cur&&scene.remove(cur.grp);cur=null;state='quiz';idx=ST.length;paintDots();
+  $('#name').textContent='Проверка';showHud(false);qi=0;score=0;$('#quiz').classList.remove('hide');renderQ()}
+function renderQ(){
+  const q=Q[qi],p=$('#qpanel');
+  p.innerHTML=`<div id="qtop">Вопрос ${qi+1} из ${Q.length}</div><div id="qtext">${q.t}</div><div id="qbtns">${q.o.map((o,i)=>`<button class="qb" data-i="${i}">${o}</button>`).join('')}</div><div id="qfb"></div><button class="btn" id="qn" disabled>Дальше</button>`;
+  p.querySelectorAll('.qb').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;p.querySelectorAll('.qb').forEach(x=>x.disabled=true);
+    p.querySelector(`[data-i="${q.a}"]`).classList.add('ok');
+    if(i===q.a){score++;$('#qfb').innerHTML='<b>Верно!</b> '+q.e}else{b.classList.add('bad');$('#qfb').innerHTML='<b>Почти.</b> '+q.e}
+    const n=$('#qn');n.disabled=false;n.textContent=qi<Q.length-1?'Дальше':'Результат';n.onclick=()=>{qi++;qi<Q.length?renderQ():renderEnd()}})}
+function renderEnd(){
+  const msg=score>=6?'Ты отлично разобрался в рациональных числах.':score>=4?'Неплохо! Перечитай в параграфе, как устроены периодические дроби.':'Загляни в параграф ещё раз и попробуй снова — опыты помогут.';
+  $('#qpanel').innerHTML=`<h2 style="font-size:22px">Задание выполнено</h2><div class="big">${score} из ${Q.length}</div><p style="font-size:15.5px;line-height:1.55;color:#d6e1ff;margin-bottom:12px">${msg}</p><p style="font-size:14px;line-height:1.5;color:#ffe3b3;margin-bottom:18px">Целые и дробные числа вместе — рациональные: N ⊂ Z ⊂ Q. Каждое из них записывается как m/n и как бесконечная периодическая дробь. Непериодические дроби — иррациональные числа; вместе с рациональными они дают действительные.</p><button class="btn" id="again">Пройти заново</button>`;
+  $('#again').onclick=()=>{$('#quiz').classList.add('hide');$('#menu').classList.remove('hide');state='menu';load(0)}}
+
+/* ---------- ввод и цикл ---------- */
+canvas.addEventListener('pointerdown',e=>{if(state==='play'&&cur&&cur.down){canvas.setPointerCapture(e.pointerId);cur.down(e)}});
+canvas.addEventListener('pointermove',e=>{if(state==='play'&&cur&&cur.move)cur.move(e)});
+['pointerup','pointercancel'].forEach(n=>canvas.addEventListener(n,e=>{cur&&cur.up&&cur.up(e)}));
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+const fit=()=>clamp(.95/(innerWidth/innerHeight),1,2.3);
+load(0);
+
+let prevT=performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt=Math.min(.05,(now-prevT)/1000);prevT=now;tt+=dt;
+  if(cur){
+    cur.update(dt);
+    if(state==='play'){setProg(cur.prog);if(cur.prog>=1)startZoom()}
+    if(state==='zoom'){zoomT+=dt;micro=ease(clamp(zoomT/2.2));if(zoomT>3.2)showCard()}
+    if(state==='card')micro=1;
+    if(state==='play')micro=0}
+  const f=fit();
+  if(state==='zoom'||state==='card'){const z=cur.zoom(),zf=1+(f-1)*.55;tPos.copy(z.pos).sub(z.look).multiplyScalar(zf).add(z.look);tLook.copy(z.look)}
+  else if(state==='play'&&cur){tPos.copy(cur.home.pos).sub(cur.home.look).multiplyScalar(f).add(cur.home.look);tLook.copy(cur.home.look)}
+  else{const a=tt*.12;tPos.set(Math.cos(a)*10*f*.8,6+f,Math.sin(a)*10*f*.8);tLook.set(0,.6,0)}
+  const k=1-Math.exp(-dt*2.6);cam.position.lerp(tPos,k);lookC.lerp(tLook,k);cam.lookAt(lookC);
+  renderer.render(scene,cam)}
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
