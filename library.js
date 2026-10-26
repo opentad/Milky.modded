@@ -127,9 +127,9 @@ const refresh=()=>load().then(()=>{if(!sec.hidden&&(mode==='list'||mode==='mine'
 function listV(){
   const pub=books.filter(b=>b.status==='published'),top=[...pub].sort((a,b)=>b.reads-a.reads).slice(0,5),all=pub,ok=banner();
   const em=loading?'Загружаем…':'Пока пусто';
-  sec.innerHTML=`<div class="top"><div><div class="cap">Милки</div><h1>Библиотека</h1></div><div class="lb-hb"><button class="sw lb-up g" data-a="mine">Мои работы</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}${errT?`<div class="lb-ok bad">${esc(errT)}</div>`:''}
+  sec.innerHTML=`<div class="top"><div></div><div class="lb-hb"><button class="sw lb-up g" data-a="mine">Мои работы</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}${errT?`<div class="lb-ok bad">${esc(errT)}</div>`:''}
   <div class="lb-g"><section class="card"><div class="hd"><h2>Топ книг недели</h2></div><div class="hd2">Самые читаемые</div>${top.length?top.map((b,i)=>`<button class="lb-it" data-o="${b.id}"><i class="lb-n">${i+1}</i>${cover(b)}<div><b>${esc(b.title)}</b><small>${esc(b.author)}</small></div><em>Открыть ›</em></button>`).join(''):'<div class="fr">'+em+'</div>'}</section>
-  <section><h2 class="sec" style="margin-top:0">Книги участников</h2>${all.length?`<div class="lb-books">${all.map(b=>`<button class="lb-b" data-o="${b.id}">${cover(b)}<b>${esc(b.title)}</b><small>${esc(b.author)}</small></button>`).join('')}</div>`:'<div class="card">'+(loading?'Загружаем…':'Книг пока нет. Нажми «Загрузить» и опубликуй первую!')+'</div>'}</section></div>`;
+  <section>${all.length?`<div class="lb-books">${all.map(b=>`<button class="lb-b" data-o="${b.id}">${cover(b)}<b>${esc(b.title)}</b><small>${esc(b.author)}</small></button>`).join('')}</div>`:'<div class="card">'+(loading?'Загружаем…':'Книг пока нет. Нажми «Загрузить» и опубликуй первую!')+'</div>'}</section></div>`;
 }
 let menuId=0;
 const AP=[['edit',PEN,'Редактировать'],['arch',ARC,'В архив'],['del',TRS,'Удалить']];
