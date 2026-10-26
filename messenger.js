@@ -18,7 +18,8 @@ const PA={
 };
 const ic=k=>'<svg viewBox="0 0 24 24"><path d="'+PA[k]+'"/></svg>';
  Object.assign(PA,{dots:'M12 5.5h.01M12 12h.01M12 18.5h.01',poll:'M5 20V11M12 20V4M19 20v-6',trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7M10 11v5M14 11v5',pin:'M9 4h6l-.8 5.5L17 13H7l2.8-3.5zM12 13v7',copy:'M9 9h10v11H9zM15 9V4H5v11h4'});
-const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+PA.reply='M9 7L4 12l5 5M4 12h10a6 6 0 0 1 6 6';
+ const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const hl=(t,q)=>{
   if(!q)return esc(t);
   const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
@@ -72,7 +73,7 @@ const tx=m=>m.x||(m.f?'📎 '+m.f.n:'');
 const hits=c=>{const ql=cq.toLowerCase(),r=[];if(sOpen&&ql)c.msgs.forEach((m,i)=>{if((m.x||'').toLowerCase().includes(ql))r.push(i)});return r};
  const RD=JSON.parse(localStorage.getItem('mgr')||'{}');
 let LIVE=0;
- let mOpen=0,menuOpen=0,pinI=-1,ma='',VT={},LS={},FI={};
+ let mOpen=0,menuOpen=0,pinI=-1,ma='',VT={},LS={},FI={},rep=null,iOpen=0,bl=new Set();
 const unread=c=>LIVE?c.msgs.filter(m=>m.w!=='sys'&&m.w!==ME&&m.t>(RD[c.id]||0)).length:0;
 function markRead(c){RD[c.id]=Math.max(Date.now(),last(c).t);localStorage.setItem('mgr',JSON.stringify(RD))}
 
@@ -274,7 +275,7 @@ function rList(){
     const hit=ql&&[...c.msgs].reverse().find(m=>(m.x||'').toLowerCase().includes(ql));
     if(hit)line=hl(hit.x,q);
     else line=esc((lm.w===ME?'Вы: ':(c.m.length>2&&lm.w!=='sys'?lm.w.split(' ')[0]+': ':''))+tx(lm));
-    return '<button class="mg-c'+(c.id===sel?' on':'')+'" data-c="'+c.id+'"><span class="mg-a" style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+
+    return '<button class="mg-c'+(c.id===sel?' on':'')+'" data-c="'+c.id+'">'+avW(c)+
       '<span class="mg-ci"><b>'+hl(nm(c),q)+'</b><small>'+line+'</small></span>'+
       '<span class="mg-ct">'+lt(lm.t)+(c.un?'<i>'+c.un+'</i>':'')+'</span></button>';
   }).join('')||'<div class="mg-em" style="padding:30px 10px">Ничего не найдено</div>';
@@ -284,9 +285,9 @@ function rHead(){
   const fsb='<button class="mg-ib" id="mgfs" title="'+(fs?'Свернуть':'Во весь экран')+'">'+ic(fs?'exit':'full')+'</button>';
   if(!c){h.innerHTML='<div class="mg-hi"><b>Выбери чат</b><small>или создай новый</small></div>'+fsb;return}
   const n=c.m.length;
-  const sub=c.sys?'Сообщения от системы':(n>2?n+' '+pl(n)+': '+c.m.join(', '):(n<2?'Пока только ты. Пригласи по ссылке':'Личный чат'));
+  const sub=c.sys?'Сообщения от системы':subline(c);
   h.innerHTML='<button class="mg-ib mg-bk" id="mgbk">'+ic('back')+'</button>'+
-    '<span class="mg-a" style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+
+    'avW(c)+ style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+
     '<div class="mg-hi"><b>'+esc(nm(c))+'</b><small>'+esc(sub)+'</small></div>'+
     (c.sys?'':'<button class="mg-ib'+(sOpen?' on':'')+'" id="mgsb" title="Поиск в чате">'+ic('search')+'</button>'+
       '<button class="mg-ib'+(aOpen?' on':'')+'" id="mgad" title="Добавить участника">'+ic('adduser')+'</button>')+
@@ -321,15 +322,16 @@ function rMsgs(keep){
       (me?'':'<span class="mg-a s" style="background:'+col(m.w)+'">'+ini(m.w)+'</span>')+
       '<div class="mg-b'+(hit[mi]===i?' cur':'')+'"'+(m.id?' data-mid="'+m.id+'"':'')+'>'+
       (!me?'<em style="color:'+col(m.w)+'">'+esc(m.w)+'</em>'+(FI[m.uid]?'<span class="fio">'+esc(FI[m.uid])+'</span>':''):'')+
-      (m.poll?pollHTML(m):(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
+      (m.rt?quote(m.rt):'')+(m.poll?pollHTML(m):(m.x?'<p>'+hl(m.x,hq)+'</p>':''))+
       (m.f?'<div class="mg-f"'+(m.f.p?' data-fp="'+esc(m.f.p)+'" style="cursor:pointer"':'')+'>'+ic('clip')+'<span>'+esc(m.f.n)+'</span><small>'+m.f.s+'</small></div>':'')+
-      '<small>'+(m.pin?'📌 ':'')+dm(m.t)+' в '+hm(m.t)+'</small>'+(m.id&&ma===String(m.id)?actHTML(m,me):'')+'</div>'+
+      '<small>'+(m.pin?'📌 ':'')+dm(m.t)+' в '+hm(m.t)+'</small></div>'+
       (me?'<span class="mg-a s"><img src="ava.jpg" alt=""></span>':'')+'</div>';
   });
   b.innerHTML=h;
   const cn=$('#mgcn');if(cn)cn.textContent=hit.length?(mi+1)+'/'+hit.length:'0';
   const cu=$('.mg-b.cur',b);
   if(cu)b.scrollTop=cu.offsetTop-b.clientHeight/2+cu.offsetHeight/2;else if(keep)b.scrollTop=s0;else b.scrollTop=b.scrollHeight;
+ (rep?'<div class="mg-pf mg-rp">'+ic('reply')+'<span><b>'+esc(rep.w)+'</b> '+esc(rep.x)+'</span><button id="mgrx">'+ic('close')+'</button></div>':'')+
 }
 function rFoot(){
   const c=cur(),f=$('#mgf');
@@ -351,17 +353,18 @@ function rFoot(){
 function renderAll(){
   const c=cur();if(c&&!sec.hidden)markRead(c);
   $('#mgb').classList.toggle('has',!!c);
-  rTabs();rList();rHead();rMem();rPins();rBar();rAdd();rMsgs();rFoot();
+  rTabs();rList();rHead();rMem();rPins();rBar();rAdd();rMsgs();rFoot();rInfo();
 }
 
 /* ---------- действия ---------- */
 function open(id){
+ rep=null;iOpen=0;
   sel=id;aOpen=0;eOpen=0;pf=null;err='';dr='';mi=-1;mOpen=0;menuOpen=0;ma='';pinI=-1;
   sOpen=q?1:0;cq=q;
   renderAll();
   if(sOpen){const i=$('#mgcq');if(i)i.blur()}
 }
-function closeChat(){sel=null;sOpen=0;cq='';aOpen=0;mOpen=0;menuOpen=0;ma='';renderAll()}
+function closeChat(){iOpen=0;sel=null;sOpen=0;cq='';aOpen=0;mOpen=0;menuOpen=0;ma='';renderAll()}
 function setFs(v){
   fs=v?1:0;sec.classList.toggle('fs',!!fs);
   try{
@@ -411,10 +414,11 @@ sec.addEventListener('click',e=>{
   const t=e.target,b=k=>t.closest(k);let x;
  enablePush();
  if(menuOpen&&!b('#mgdots')&&!b('#mgpoll')){menuOpen=0;rHead()}
+ if(ma&&!b('.mg-pop')&&!b('.mg-b[data-mid]')){ma='';rMsgs(1)}
   if(b('#mg-home'))MS.show('home');
   else if(b('#mgfs'))setFs(!fs);
   else if(b('#mgx')||b('#mgbk'))closeChat();
-  else if((x=b('[data-c]')))open(x.dataset.c);
+  else if((x=b('[data-c]'))){open(x.dataset.c);updPresence()};
   else if((x=b('[data-tab]'))){tab=x.dataset.tab;rTabs();rList()}
   else if((x=b('[data-p]'))){const n=x.dataset.p;ns.has(n)?ns.delete(n):ns.add(n);rList()}
   else if(b('#mgcr'))create();
@@ -431,7 +435,11 @@ sec.addEventListener('click',e=>{
   else if(b('#mgout'))sb.auth.signOut();
    else if(b('#mgdots')){menuOpen=menuOpen?0:1;rHead()}
   else if(b('#mgpoll')){menuOpen=0;rHead();pollModal()}
-  else if(b('.mg-hd>.mg-a')||b('.mg-hi')){const c=cur();if(c&&!c.sys){mOpen=mOpen?0:1;rMem();refreshSeen().then(rMem)}}
+  else if(b('.mg-hd>.mg-w')||b('.mg-hi')){const c=cur();if(c&&!c.sys){iOpen=iOpen?0:1;rInfo();if(!iOpen)rMsgs();else{loadBl().then(rInfo);refreshSeen().then(rInfo)}}}
+else if(b('[data-iback]')){iOpen=0;rInfo();rMsgs()}
+else if(b('[data-blk]'))toggleBlock(peer(cur()));
+else if(b('[data-delchat]'))delChatModal();
+else if(b('[data-leave]'))leaveChat();
    else if((x=b('[data-u]'))){if(window.PF){MS.show('prof');PF.open(x.dataset.u)}else toast('Профиль скоро появится')}
   else if((x=b('[data-vote]')))vote(x.dataset.vote,+x.dataset.o);
   else if((x=b('[data-copy]')))copyMsg(x.dataset.copy);
@@ -439,6 +447,9 @@ sec.addEventListener('click',e=>{
   else if((x=b('[data-del]')))delMsg(x.dataset.del);
   else if((x=b('[data-unpin]')))pinMsg(x.dataset.unpin);
   else if((x=b('[data-jump]')))pinJump(x.dataset.jump);
+   else if((x=b('[data-reply]')))startReply(x.dataset.reply);
+else if(b('#mgrx')){rep=null;rFoot()}
+else if((x=b('[data-qj]')))jump(x.dataset.qj);
   else if((x=b('.mg-b[data-mid]'))&&!b('.mg-f')&&!b('.mg-po')&&!b('.mg-act')){ma=ma===x.dataset.mid?'':x.dataset.mid;rMsgs(1)}
    else if(b('[data-code]')){const c=cur();if(c){navigator.clipboard&&navigator.clipboard.writeText(c.code);toast('Код скопирован: '+c.code)}}
     else if(b('#mgdel'))delAccModal();
@@ -448,7 +459,7 @@ sec.addEventListener('click',e=>{
 sec.addEventListener('input',e=>{
   const id=e.target.id;
   if(id==='mgq'){q=e.target.value;if(tab!=='c'){tab='c';rTabs()}rList()}
-  else if(id==='mgi'){dr=e.target.value;grow(e.target)}
+  else if(id==='mgi'){dr=e.target.value;grow(e.target)};sendTy()
   else if(id==='mgcq'){cq=e.target.value;mi=-1;rMsgs()}
   else if(id==='mgnt')nt=e.target.value;
 });
@@ -475,7 +486,7 @@ if(window.matchMedia('(min-width:821px)').matches){
 renderAll();
 /* ===== SUPABASE ===== */
 const SB_URL='https://sjwvrljmqpbopbxqkhkl.supabase.co',SB_KEY='sb_publishable_mWqrZq0Vw65Ahk7ZIbtlNQ_owreCtcj';
-let sb=null,me=null,ch=null,am='in';const nmap={};
+let sb=null,me=null,ch=null,tch=null,am='in';const nmap={};
 const J=new URLSearchParams(location.search).get('join');if(J)sessionStorage.setItem('mj',J);
 const st2=document.createElement('style');st2.textContent=`
 .mg-ac{max-width:420px;margin:30px auto;background:#fff;border-radius:25px;padding:30px;box-shadow:0 6px 30px rgba(0,0,0,.04)}
@@ -609,6 +620,18 @@ document.head.appendChild(st6);
  #v-msg.mg.fs{top:0}
 }`;
 document.head.appendChild(st7);
+ const st8=document.createElement('style');st8.textContent=`
+.mg-pop{position:absolute;z-index:6;width:max-content;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.2);padding:4px;animation:mgd .15s}
+.mg-pop button{display:flex;gap:10px;align-items:center;width:100%;height:38px;padding:0 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:#222;text-align:left}
+.mg-pop button:hover{background:#f1f3f5}
+.mg-pop button.rd{color:#e5314a}
+.mg-pop svg{width:18px;height:18px;flex:none}
+.mg-q{border-left:3px solid #8774e1;background:rgba(135,116,225,.12);border-radius:6px;padding:4px 8px;margin-bottom:5px;cursor:pointer;font-size:12.5px}
+.mg-q b{display:block;font-size:12px;color:#8774e1}
+.mg-q span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.mg-rp{border-left:3px solid #8774e1}
+.mg-rp span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}`;
+document.head.appendChild(st8);
 function fit(){
   const r=document.getElementById('rail'),h=document.querySelector('header,.top,.topbar');
   sec.style.setProperty('--rw',(r&&innerWidth>820?Math.round(r.getBoundingClientRect().right):0)+'px');
@@ -619,13 +642,13 @@ const au=document.createElement('div');au.id='mgau';au.hidden=true;sec.appendChi
 const tr=m=>/Invalid login/i.test(m)?'Неверная почта или пароль':/already/i.test(m)?'Такая почта уже зарегистрирована':/rate limit/i.test(m)?'Слишком много попыток, подожди минуту':m;
 function toast(t){let d=$('#mgtoast');if(!d){d=document.createElement('div');d.id='mgtoast';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:60;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
 const setName=(id,n)=>{n=n||'Участник';let k=n,i=2;while(Object.entries(nmap).some(([u,v])=>v===k&&u!==id))k=n+' '+i++;nmap[id]=k};
-const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,uid:r.user_id,cid:r.chat_id,pin:!!r.pinned,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
+const toM=r=>{const s=(r.body||'').startsWith('§sys§');return{id:r.id,uid:r.user_id,rt:r.reply_to,cid:r.chat_id,pin:!!r.pinned,poll:r.poll||null,w:s?'sys':(nmap[r.user_id]||'Участник'),x:s?r.body.slice(5):(r.body||''),f:r.file_path?{n:r.file_name||'файл',s:'',p:r.file_path}:null,t:Date.parse(r.created_at)}};
 async function loadAll(){
   const since=new Date(Date.now()-30*864e5).toISOString();
   const [a,b,d]=await Promise.all([
     sb.from('chats').select('id,title,invite_code,created_at'),
-    sb.from('chat_members').select('chat_id,user_id'),
-    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,poll').gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
+    sb.from('chat_members').select('chat_id,user_id',cleared_at),
+    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,poll',reply_to).gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
   if(a.error||b.error||d.error){toast('Ошибка загрузки: '+(a.error||b.error||d.error).message);return}
   const ms=d.data.reverse(),ids=new Set([me.id]);
   b.data.forEach(x=>ids.add(x.user_id));ms.forEach(x=>ids.add(x.user_id));
@@ -633,10 +656,11 @@ async function loadAll(){
 await loadVotes();
   ME=nmap[me.id]||'Я';
   const un=Object.fromEntries(C.map(c=>[c.id,c.un||0]));
+  const CL={};b.data.forEach(x=>{if(x.user_id===me.id&&x.cleared_at)CL[x.chat_id]=Date.parse(x.cleared_at)});
   C.splice(0,C.length,...a.data.map(c=>{
-    const u=b.data.filter(x=>x.chat_id===c.id).map(x=>x.user_id),m=ms.filter(x=>x.chat_id===c.id).map(toM);
-    if(!m.length)m.push({w:'sys',x:'Чат создан',t:Date.parse(c.created_at)});
-    return{id:c.id,code:c.invite_code,uids:u,title:c.title||'',un:un[c.id]||0,m:u.map(x=>nmap[x]||'Участник'),msgs:m}}));
+    const u=b.data.filter(x=>x.chat_id===c.id).map(x=>x.user_id),m=ms.filter(x=>x.chat_id===c.id).map(toM).filter(x=>!CL[c.id]||x.t>CL[c.id]);
+    if(!m.length){if(CL[c.id])return null;m.push({w:'sys',x:'Чат создан',t:Date.parse(c.created_at)})}
+    return{id:c.id,code:c.invite_code,uids:u,title:c.title||'',un:un[c.id]||0,m:u.map(x=>nmap[x]||'Участник'),msgs:m}}).filter(Boolean));
 }
 const link=c=>location.origin+location.pathname+'?join='+c.code;
 function copy(t){const ok=()=>toast('Ссылка скопирована. Отправь её тому, кого хочешь пригласить');if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok,()=>prompt('Скопируй ссылку',t));else prompt('Скопируй ссылку',t)}
@@ -705,7 +729,106 @@ async function loadVotes(){const r=await sb.from('poll_votes').select('message_i
 function findMsg(id){for(const c of C){const m=c.msgs.find(x=>String(x.id)===String(id));if(m)return m}}
 function dropMsg(id){for(const c of C){const n=c.msgs.length;c.msgs=c.msgs.filter(m=>String(m.id)!==String(id));if(c.msgs.length!==n){if(!c.msgs.length)c.msgs.push({w:'sys',x:'Сообщений нет',t:Date.now()});if(sel===c.id){rMsgs(1);rPins()}rList()}}}
 function dots(){return'<button class="mg-ib'+(menuOpen?' on':'')+'" id="mgdots" title="Ещё">'+ic('dots')+'</button>'+(menuOpen?'<div class="mg-dd"><button id="mgpoll">'+ic('poll')+'Создать опрос</button></div>':'')}
-function rMem(){
+var TY={};let tyAt=0;
+function isDM(c){return !c.sys&&(c.uids||[]).length===2}
+function peer(c){return(c.uids||[]).find(u=>u!==me.id)}
+function typers(c){const t=Date.now();return(c.uids||[]).filter(u=>u!==me.id&&t-(TY[c.id+':'+u]||0)<3000).map(u=>nmap[u]||'Участник')}
+function avW(c){const on=isDM(c)&&seen(peer(c))==='В сети';return'<span class="mg-w"><span class="mg-a" style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+(on?'<u></u>':'')+'</span>'}
+function subline(c){
+  const t=typers(c);
+  if(isDM(c))return t.length?'печатает...':seen(peer(c));
+  if(t.length)return t.length===1?t[0]+' печатает...':t.join(', ')+' печатают...';
+  const n=c.m.length;
+  return n>2?n+' '+pl(n)+': '+c.m.join(', '):(n<2?'Пока только ты. Пригласи по ссылке':'Личный чат');
+}
+function rTy(){const c=cur(),s=$('.mg-hi small');if(c&&s)s.textContent=subline(c);if(iOpen)rInfo()}
+function sendTy(){const c=cur();if(!c||!tch||c.sys||Date.now()-tyAt<2500)return;tyAt=Date.now();tch.send({type:'broadcast',event:'t',payload:{c:c.id,u:me.id}})}
+async function updPresence(){
+  if(!sb||!me||!LIVE)return;
+  const ids=[...new Set(C.filter(isDM).map(peer))];if(!ids.length)return;
+  ((await sb.from('profiles').select('id,last_seen').in('id',ids)).data||[]).forEach(r=>LS[r.id]=Date.parse(r.last_seen));
+  const c=cur();rList();rTy();const w=$('.mg-hd .mg-w');if(c&&w)w.outerHTML=avW(c);
+}
+setInterval(updPresence,30000);
+function quote(id){const o=findMsg(id);return'<div class="mg-q"'+(o?' data-qj="'+o.id+'"':'')+'><b>'+(o?esc(o.w):'')+'</b><span>'+(o?esc(o.poll?'📊 '+o.poll.q:(o.x||(o.f?'📎 '+o.f.n:''))):'Сообщение недоступно')+'</span></div>'}
+function startReply(id){const m=findMsg(id);if(!m)return;rep={id:m.id,w:m.w,x:m.poll?'📊 '+m.poll.q:(m.x||(m.f?'📎 '+m.f.n:''))};ma='';rMsgs(1);rFoot();const i=$('#mgi');if(i)i.focus()}
+function showPop(b){
+  if(!ma)return;
+  const e=b.querySelector('.mg-b[data-mid="'+ma+'"]'),m=findMsg(ma);
+  if(!e||!m){ma='';return}
+  const mine=m.uid===me.id,p=document.createElement('div');p.className='mg-pop';
+  p.innerHTML='<button data-reply="'+m.id+'">'+ic('reply')+'Ответить</button><button data-copy="'+m.id+'">'+ic('copy')+'Скопировать</button><button data-pin="'+m.id+'">'+ic('pin')+(m.pin?'Открепить':'Закрепить')+'</button>'+(mine?'<button class="rd" data-del="'+m.id+'">'+ic('trash')+'Удалить</button>':'');
+  b.appendChild(p);
+  let l=e.offsetLeft+(mine?e.offsetWidth-p.offsetWidth:0);
+  l=Math.max(8,Math.min(l,b.clientWidth-p.offsetWidth-8));
+  p.style.left=l+'px';p.style.top=(e.offsetTop+e.offsetHeight+6)+'px';
+  const need=p.offsetTop+p.offsetHeight-b.scrollTop-b.clientHeight+10;
+  if(need>0)b.scrollTop+=need;
+}
+ Object.assign(PA,{door:'M15 4.5h3.2a1.3 1.3 0 0 1 1.3 1.3v12.4a1.3 1.3 0 0 1-1.3 1.3H15M3.5 12h11M7.3 8.2L3.5 12l3.8 3.8',ban:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM6 6l12 12'});
+const st9=document.createElement('style');st9.textContent=`
+.mg-int{flex:1;overflow-y:auto;padding:8px 0 20px}
+.mg-ir{display:flex;gap:12px;align-items:center;width:100%;height:50px;padding:0 20px;font-weight:600;font-size:14.5px;color:#34404e;text-align:left}
+.mg-ir:hover{background:#f4f5f7}
+.mg-ir.rd{color:#e5314a}
+.mg-ir svg{width:20px;height:20px;flex:none}
+.mg-ih{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 20px 18px}
+.mg-ih b{font-size:19px}
+.mg-a.big{width:88px;height:88px;font-size:30px}
+.mg-ia{margin-top:14px;border-top:1px solid var(--ln);padding-top:6px}`;
+document.head.appendChild(st9);
+$('#mgm').insertAdjacentHTML('beforebegin','<div class="mg-int" id="mgint" hidden></div>');
+
+function rInfo(){
+  const p=$('#mgint');if(!p)return;
+  const c=cur(),on=!!(c&&iOpen&&!c.sys);
+  p.hidden=!on;
+  ['#mgm','#mgf','#mgpin','#mgsr','#mgap','#mgmem'].forEach(s=>{const e=$(s);if(e)e.style.display=on?'none':''});
+  if(!on){p.innerHTML='';return}
+  const one=isDM(c),o=one?peer(c):null,nn=nm(c);
+  const rows=(c.uids||[]).map(u=>{
+    const n=nmap[u]||'Участник',s=seen(u),ty=u!==me.id&&Date.now()-(TY[c.id+':'+u]||0)<3000,ol=s==='В сети';
+    return'<div class="mg-mr" data-u="'+u+'" style="cursor:pointer"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(ol?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(ty||ol?'on':'')+'">'+(ty?(one?'печатает...':esc(n)+' печатает...'):s)+'</small></div></div>'}).join('');
+  p.innerHTML='<button class="mg-ir" data-iback>'+ic('back')+'К чату</button>'+
+    '<div class="mg-ih"><span class="mg-a big" style="background:'+col(nn)+'">'+ini(nn)+'</span><b>'+esc(nn)+'</b></div>'+
+    '<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+rows+'</div>'+
+    '<div class="mg-ia">'+(one?'<button class="mg-ir" data-blk>'+ic('ban')+(bl.has(o)?'Разблокировать':'Заблокировать')+'</button><button class="mg-ir rd" data-delchat>'+ic('trash')+'Удалить чат</button>':'<button class="mg-ir rd" data-leave>'+ic('door')+'Выйти из чата</button>')+'</div>';
+}
+async function loadBl(){const r=await sb.from('blocks').select('blocked').eq('blocker',me.id);bl=new Set((r.data||[]).map(x=>x.blocked))}
+async function toggleBlock(u){
+  if(!u)return;const on=bl.has(u);
+  if(!on&&!confirm('Заблокировать? Этот человек больше не сможет писать вам в личном чате.'))return;
+  const r=on?await sb.from('blocks').delete().match({blocker:me.id,blocked:u}):await sb.from('blocks').insert({blocked:u});
+  if(r.error){toast('Не получилось: '+r.error.message);return}
+  on?bl.delete(u):bl.add(u);rInfo();toast(on?'Разблокировано':'Заблокировано');
+}
+function delChatModal(){
+  const c=cur();if(!c)return;
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;inset:0;z-index:70;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:20px';
+  d.innerHTML='<div class="mg-pm"><h3 style="color:#e5314a">Удалить чат?</h3><p style="font-size:14px;line-height:1.5;margin-bottom:14px">Переписка будет удалена. Это действие невозвратно.</p><label class="pc"><input type="checkbox" id="dboth"> Удалить чат у меня и у собеседника</label><div class="pe" id="de"></div><div class="pb"><button id="dcn">Отмена</button><button class="ok" id="dok" style="background:#e5314a">Удалить</button></div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',async e=>{
+    const id=e.target.id;
+    if(e.target===d||id==='dcn')d.remove();
+    else if(id==='dok'){
+      e.target.disabled=true;
+      const both=d.querySelector('#dboth').checked,files=c.msgs.filter(m=>m.f&&m.f.p).map(m=>m.f.p);
+      const r=await sb.rpc(both?'delete_chat':'clear_chat',{p_chat:c.id});
+      if(r.error){d.querySelector('#de').textContent='Не получилось: '+r.error.message;e.target.disabled=false;return}
+      if(both&&files.length)sb.storage.from('chat-files').remove(files);
+      d.remove();iOpen=0;await loadAll();sel=null;renderAll();toast('Чат удалён');
+    }
+  });
+}
+async function leaveChat(){
+  const c=cur();if(!c||!confirm('Выйти из чата? Вы перестанете получать сообщения.'))return;
+  await sb.from('messages').insert({chat_id:c.id,body:'§sys§'+ME+' вышел(ла) из чата'});
+  const r=await sb.rpc('leave_chat',{p_chat:c.id});
+  if(r.error){toast('Не получилось: '+r.error.message);return}
+  iOpen=0;await loadAll();sel=null;renderAll();
+}
+ function rMem(){
   const c=cur(),b=$('#mgmem');
   if(!c||c.sys){b.className='mg-mp';b.innerHTML='';return}
   b.innerHTML='<div class="mg-mi"><b>'+c.m.length+' '+pl(c.m.length)+'</b>'+(c.uids||[]).map(u=>{const n=nmap[u]||'Участник',s=seen(u),on=s==='В сети';return'<div class="mg-mr" data-u="'+u+'" style="cursor:pointer"><span class="mg-w"><span class="mg-a" style="background:'+col(n)+'">'+ini(n)+'</span>'+(on?'<u></u>':'')+'</span><div><b>'+esc(n)+(u===me.id?' (ты)':'')+'</b>'+(FI[u]?'<span class="fio">'+esc(FI[u])+'</span>':'')+'<small class="'+(on?'on':'')+'">'+s+'</small></div></div>'}).join('')+'</div>';
@@ -839,16 +962,18 @@ function live(){
    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'messages'},p=>{const m=findMsg(p.new.id);if(m){m.pin=!!p.new.pinned;if(sel===m.cid){rMsgs(1);rPins()}}})
    .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages'},p=>dropMsg(p.old.id))
    .on('postgres_changes',{event:'*',schema:'public',table:'poll_votes'},async()=>{await loadVotes();rMsgs(1)})
-   .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_members'},async()=>{await loadAll();rList();rHead();rMem();rMsgs()}).subscribe();
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_members'},async()=>{await loadAll();rList();rHead();rMem();rMsgs()}).on('postgres_changes',{event:'DELETE',schema:'public',table:'chat_members'},async()=>{await loadAll();if(!C.some(z=>z.id===sel)){sel=null;iOpen=0}renderAll()}).subscribe();
+if(tch)sb.removeChannel(tch);
+tch=sb.channel('typing',{config:{broadcast:{self:false}}}).on('broadcast',{event:'t'},({payload})=>{TY[payload.c+':'+payload.u]=Date.now();rTy();setTimeout(rTy,3100)}).subscribe();
 }
 async function send(){
   const c=cur();if(!c)return;const x=dr.trim();if(!x&&!pf)return;
-  const f=pf;dr='';pf=null;err='';eOpen=0;rFoot();
+  const f=pf,rp=rep;dr='';pf=null;rep=null;err='';eOpen=0;rFoot();
   let p=null;
   if(f){const ex=(f.n.split('.').pop()||'').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
     const u=await sb.storage.from('chat-files').upload(c.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.'+ex,f.b,{contentType:f.b.type||'application/octet-stream'});
     if(u.error){err='Файл не загрузился: '+u.error.message;rFoot();return}p=u.data.path}
-  const r=await sb.from('messages').insert({chat_id:c.id,body:x||null,file_path:p,file_name:f?f.n:null}).select().single();
+  const r=await sb.from('messages').insert({chat_id:c.id,body:x||null,file_path:p,file_name:f?f.n:null,reply_to:rp?rp.id:null}).select().single();
   if(r.error){err='Не отправилось: '+r.error.message;rFoot();return}
   push(r.data);const i=$('#mgi');if(i)i.focus();
 }
