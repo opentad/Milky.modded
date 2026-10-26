@@ -287,7 +287,7 @@ function rHead(){
   const n=c.m.length;
   const sub=c.sys?'Сообщения от системы':subline(c);
   h.innerHTML='<button class="mg-ib mg-bk" id="mgbk">'+ic('back')+'</button>'+
-    'avW(c)+ style="background:'+col(nm(c))+'">'+(c.sys?ic('bell'):ini(nm(c)))+'</span>'+
+    avW(c)+
     '<div class="mg-hi"><b>'+esc(nm(c))+'</b><small>'+esc(sub)+'</small></div>'+
     (c.sys?'':'<button class="mg-ib'+(sOpen?' on':'')+'" id="mgsb" title="Поиск в чате">'+ic('search')+'</button>'+
       '<button class="mg-ib'+(aOpen?' on':'')+'" id="mgad" title="Добавить участника">'+ic('adduser')+'</button>')+
@@ -331,7 +331,7 @@ function rMsgs(keep){
   const cn=$('#mgcn');if(cn)cn.textContent=hit.length?(mi+1)+'/'+hit.length:'0';
   const cu=$('.mg-b.cur',b);
   if(cu)b.scrollTop=cu.offsetTop-b.clientHeight/2+cu.offsetHeight/2;else if(keep)b.scrollTop=s0;else b.scrollTop=b.scrollHeight;
- (rep?'<div class="mg-pf mg-rp">'+ic('reply')+'<span><b>'+esc(rep.w)+'</b> '+esc(rep.x)+'</span><button id="mgrx">'+ic('close')+'</button></div>':'')+
+ showPop(b);
 }
 function rFoot(){
   const c=cur(),f=$('#mgf');
@@ -339,6 +339,7 @@ function rFoot(){
   f.hidden=false;
   const dis=c.sys?' disabled':'';
   f.innerHTML=(eOpen?'<div class="mg-em2">'+EM.map(e=>'<button data-e="'+e+'">'+e+'</button>').join('')+'</div>':'')+
+   (rep?'<div class="mg-pf mg-rp">'+ic('reply')+'<span><b>'+esc(rep.w)+'</b> '+esc(rep.x)+'</span><button id="mgrx">'+ic('close')+'</button></div>':'')+
     (pf?'<div class="mg-pf">'+ic('clip')+esc(pf.n)+' · '+pf.s+'<button id="mgpx">'+ic('close')+'</button></div>':'')+
     (err?'<div class="mg-er">'+err+'</div>':'')+
     '<div class="mg-fr"><button class="mg-sm" id="mgem"'+dis+'>'+ic('smile')+'</button>'+
@@ -418,7 +419,7 @@ sec.addEventListener('click',e=>{
   if(b('#mg-home'))MS.show('home');
   else if(b('#mgfs'))setFs(!fs);
   else if(b('#mgx')||b('#mgbk'))closeChat();
-  else if((x=b('[data-c]'))){open(x.dataset.c);updPresence()};
+  else if((x=b('[data-c]'))){open(x.dataset.c);updPresence()}
   else if((x=b('[data-tab]'))){tab=x.dataset.tab;rTabs();rList()}
   else if((x=b('[data-p]'))){const n=x.dataset.p;ns.has(n)?ns.delete(n):ns.add(n);rList()}
   else if(b('#mgcr'))create();
@@ -459,7 +460,7 @@ else if((x=b('[data-qj]')))jump(x.dataset.qj);
 sec.addEventListener('input',e=>{
   const id=e.target.id;
   if(id==='mgq'){q=e.target.value;if(tab!=='c'){tab='c';rTabs()}rList()}
-  else if(id==='mgi'){dr=e.target.value;grow(e.target)};sendTy()
+  else if(id==='mgi'){dr=e.target.value;grow(e.target);sendTy()}
   else if(id==='mgcq'){cq=e.target.value;mi=-1;rMsgs()}
   else if(id==='mgnt')nt=e.target.value;
 });
@@ -647,8 +648,8 @@ async function loadAll(){
   const since=new Date(Date.now()-30*864e5).toISOString();
   const [a,b,d]=await Promise.all([
     sb.from('chats').select('id,title,invite_code,created_at'),
-    sb.from('chat_members').select('chat_id,user_id',cleared_at),
-    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,poll',reply_to).gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
+    sb.from('chat_members').select('chat_id,user_id,cleared_at'),
+    sb.from('messages').select('id,chat_id,user_id,body,file_path,file_name,created_at,pinned,poll,reply_to').gte('created_at',since).order('created_at',{ascending:false}).limit(1000)]);
   if(a.error||b.error||d.error){toast('Ошибка загрузки: '+(a.error||b.error||d.error).message);return}
   const ms=d.data.reverse(),ids=new Set([me.id]);
   b.data.forEach(x=>ids.add(x.user_id));ms.forEach(x=>ids.add(x.user_id));
@@ -676,7 +677,8 @@ function authView(msg){
   '<div class="mg-warn">НЕ ВВОДИТЬ ПАРОЛЬ ОТ НАСТОЯЩЕГО АККАУНТА MILKY SCHOOL</div><p class="mg-ai">Почта и пароль нужны только для идентификации и сохранения истории переписки.</p>'+
   (am==='up'?'<input id="mgan" placeholder="Имя в чате" autocomplete="off"><input id="mgfio" placeholder="ФИО полностью" autocomplete="off"><p class="mg-ai">ФИО нужно, чтобы понять, что ты из школы. Оно показывается мелким бледным текстом под именем.</p>':'')+
   '<input id="mgae" type="email" placeholder="Почта" autocomplete="off"><input id="mgpw" type="password" placeholder="Пароль (от 6 символов)" autocomplete="off">'+
-  '<div class="mg-er" id="mgaer">'+(msg||'')+'</div><button class="mg-go" id="mgag">'+(am==='in'?'Войти':'Зарегистрироваться')+'</button><button class="mg-go" id="mgsw" style="background:none;color:var(--bt);margin-top:4px">'+(am==='in'?'Нет аккаунта? Регистрация':'Уже есть аккаунт? Войти')+'</button></div>';
+  (am==='up'?'<label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.4;margin:4px 0 8px"><input type="checkbox" id="mgcns" style="width:auto;height:auto;margin:2px 0 0;padding:0"><span>Я даю <a href="consent.html" target="_blank">согласие на обработку персональных данных</a> и ознакомлен(а) с <a href="privacy.html" target="_blank">политикой конфиденциальности</a>. Если мне нет 18 лет, мой родитель согласен.</span></label>':'')+
+   '<div class="mg-er" id="mgaer">'+(msg||'')+'</div><button class="mg-go" id="mgag">'+(am==='in'?'Войти':'Зарегистрироваться')+'</button><button class="mg-go" id="mgsw" style="background:none;color:var(--bt);margin-top:4px">'+(am==='in'?'Нет аккаунта? Регистрация':'Уже есть аккаунт? Войти')+'</button><p class="mg-ai" style="font-size:10.5px;opacity:.6;text-align:center;margin:12px 0 0">Не имеет отношения к ООО «Милки Компани»</p></div>';
 }
  function checkFio(s){
   const PAT=/(ович|евич|ьич|ич|овна|евна|ьевна|ична|инична|ыч|оглы|кызы|кизи|улы|угли)$/i;
@@ -698,8 +700,9 @@ au.addEventListener('click',async e=>{
   if(am==='up'){
     if(nn.length<2)return bad('Введи имя в чате');
     const f=checkFio($('#mgfio').value);if(f.err)return bad(f.err);fio=f.v;
+   if(!$('#mgcns').checked)return bad('Нужно согласие на обработку персональных данных');
   }
-  const r=am==='in'?await sb.auth.signInWithPassword({email:em,password:pw}):await sb.auth.signUp({email:em,password:pw,options:{data:{name:nn,fio}}});
+  const r=am==='in'?await sb.auth.signInWithPassword({email:em,password:pw}):await sb.auth.signUp({email:em,password:pw,options:{data:{name:nn,fio,consent:new Date().toISOString()}}});
   if(r.error)return bad(tr(r.error.message));
   if(!r.data.session)bad('Подтверди почту по письму или выключи «Confirm email» в Supabase');
 });
