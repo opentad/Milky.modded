@@ -73,6 +73,24 @@ css.textContent=`
 .bk-oi svg{width:16px;height:16px}
 .bk-o strong{display:block;font-size:13.5px;font-weight:600}
 .bk-o small{color:var(--mu);font-size:11px}
+.bk-hero,.bk .card{position:relative;overflow:hidden;color:#fff;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300' preserveAspectRatio='none'%3E%3Cpath d='M0 190C150 130 300 250 450 190S700 120 800 180V300H0Z' fill='white' fill-opacity='.12'/%3E%3Cpath d='M0 235C160 185 320 285 480 235S720 195 800 245V300H0Z' fill='white' fill-opacity='.1'/%3E%3C/svg%3E") center/100% 100% no-repeat,linear-gradient(135deg,#0b63d1 0%,#1798e0 55%,#4fd3f3 100%);box-shadow:0 10px 34px rgba(18,140,220,.22)}
+.bk .card .hd h2{color:#fff}
+.bk .card .bk-mu{color:rgba(255,255,255,.65)}
+.bk .card .bk-p small,.bk .card .bk-o small{color:rgba(255,255,255,.7)}
+.bk .card .bk-p:active{background:rgba(255,255,255,.14)}
+.bk .card .bk-t button{background:rgba(255,255,255,.16);color:#fff}
+.bk .card .bk-t button.on{background:#fff;color:#1798e0}
+.bk .card .bk-q,.bk .card .bk-in{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.4);color:#fff}
+.bk .card input::placeholder{color:rgba(255,255,255,.7)}
+.bk .card .bk-ch{color:#fff}
+.bk .card .bk-go{background:#fff;color:#1176cf}
+.bk .card .bk-x{background:rgba(255,255,255,.18);color:#fff}
+.bk .bk-st{background:none;border:1px solid rgba(255,255,255,.4)}
+.bk .bk-s.p{color:#5be37d}
+.bk .bk-s.m{color:#ff7a88}
+.bk .bk-o{border-bottom-color:rgba(255,255,255,.2)}
+.bk .bk-oi{background:rgba(255,255,255,.18);color:#fff}
+@media(max-width:520px){.bk-hero
 @media(max-width:520px){.bk-hero{padding:22px 18px}.bk-n{font-size:38px}.bk-st b{font-size:17px}}`;
 document.head.appendChild(css);
 
@@ -90,7 +108,7 @@ function render(){
   }else if(open&&pick){
     panel=`<section class="card" id="bk-tr"><div class="hd"><h2>Перевод</h2></div><div class="bk-sel"><div class="bk-p">${ava(pick)}<span><b>${esc(pick.n)}</b><small>@${esc(pick.nick||'')}</small></span></div><button class="bk-ch" data-a="back">Сменить</button></div><input class="bk-in" id="bk-a" inputmode="numeric" placeholder="Сумма (у тебя ${b===null?'…':fmt(b)})" autocomplete="off"><input class="bk-in" id="bk-c" maxlength="100" placeholder="Комментарий (необязательно)" autocomplete="off"><div class="bk-fb" id="bk-fb"></div><div class="bk-act"><button class="bk-go" data-a="send">Перевести</button><button class="bk-x" data-a="cancel">Отмена</button></div></section>`;
   }
-  sec.innerHTML=`<div class="bk"><div class="cap">Школа</div>
+  sec.innerHTML=`<div class="bk">
   <div class="bk-hero"><svg class="bk-w" viewBox="0 0 800 300" preserveAspectRatio="none"><path d="M0 190 C150 130 300 250 450 190 S700 120 800 180 V300 H0Z" fill="rgba(255,255,255,.12)"/><path d="M0 235 C160 185 320 285 480 235 S720 195 800 245 V300 H0Z" fill="rgba(255,255,255,.1)"/><circle cx="710" cy="55" r="95" fill="rgba(255,255,255,.08)"/></svg>
    <div class="bk-l">На личном счету:</div><div class="bk-n">${b===null?'…':fmt(b)}<span class="coin"></span></div>
    <div class="bk-r"><button class="bk-b" data-a="tr">${ic('arrow')}Перевести</button><button class="bk-b" disabled>Открыть накопительный счет <em>скоро</em></button></div>
@@ -114,10 +132,10 @@ function lst(){
 
 async function send(){
   const a=parseInt($('#bk-a').value,10),c=$('#bk-c').value.trim(),f=$('#bk-fb'),btn=$('[data-a="send"]');
-  const bad=m=>{f.textContent=m;f.style.color='#d97706'};
+  const bad=m=>{f.textContent=m;f.style.color='#ffd27a'};
   if(!(a>0))return bad('Введи сумму больше нуля');
   if(BAL!==null&&a>BAL)return bad('Не хватает монет: на счету '+fmt(BAL));
-  btn.disabled=true;f.style.color='#566170';f.textContent='Отправляю…';
+  btn.disabled=true;f.style.color='#fff';f.textContent='Отправляю…';
   let r;try{r=await window.SB.rpc('send_coins',{to_user:pick.id,amt:a,cmt:c})}catch(e){r={error:{message:''}}}
   if(r.error){btn.disabled=false;const m=r.error.message||'';return bad(m.includes('no_money')?'Не хватает монет':m.includes('self')?'Нельзя переводить самому себе':m.includes('bad_amount')?'Некорректная сумма':'Не получилось перевести. Попробуй ещё раз')}
   note='Переведено '+fmt(a)+' → '+pick.n;open=false;pick=null;q='';
