@@ -21,14 +21,23 @@ const cnNum=()=>{const e=document.querySelector('.cn');const n=e?parseInt(String
 const bal=()=>st.bal==null?cnNum():st.bal;
 const setBal=v=>{st.bal=v;save();document.querySelectorAll('.cn').forEach(e=>e.textContent=v)};
 const me=()=>window.ME_NAME||'Милколенок';
-const users=()=>(window.BANK_USERS||USERS).filter(u=>u.n!==me());
+let REAL=null;
+async function loadUsers(){
+  const SB=window.SB;if(!SB)return;
+  try{
+    const u=(await SB.auth.getUser()).data.user;if(!u)return;
+    const r=await SB.from('profiles').select('*');
+    if(r.data){REAL=r.data.filter(p=>p.id!==u.id&&p.name).map(p=>({id:p.id,n:p.name,nick:p.nick||p.nickname||p.username||'',av:p.avatar_url||''}));if(!sec.hidden)render()}
+  }catch(e){}
+}
+const users=()=>REAL||(window.BANK_USERS||USERS).filter(u=>u.n!==me());
 
 /* ===== помощники ===== */
 const esc=t=>String(t).replace(/[<>&"]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]));
 const fmt=n=>Number(n).toLocaleString('ru-RU');
 const ic=k=>window.MS?MS.ic(k):'';
 const COL=['#17b3e6','#e8793a','#3b8f2f','#9b59d0','#e5517a','#2d6a9f'];
-const ava=u=>{let h=0;for(const c of u.n)h=(h*31+c.charCodeAt(0))>>>0;return `<i style="background:${COL[h%COL.length]}">${esc(u.n.trim()[0]||'?')}</i>`};
+const ava=u=>{let h=0;for(const c of u.n)h=(h*31+c.charCodeAt(0))>>>0;return u.av?`<i style="background:url('${esc(u.av)}') center/cover"></i>`:`<i style="background:${COL[h%COL.length]}">${esc(u.n.trim()[0]||'?')}</i>`};
 const sg=o=>(o.t==='in'||o.t==='sale')?1:-1;
 const ttl=o=>({in:'Перевод от '+o.who,out:'Перевод для '+o.who,sale:'Продажа'+(o.title?': '+o.title:''),buy:'Покупка'+(o.title?': '+o.title:'')})[o.t]||'Операция';
 const oic=o=>o.t==='in'?'<span style="display:block;transform:rotate(180deg)">'+ic('arrow')+'</span>':o.t==='out'?ic('arrow'):ic('shop');
@@ -153,5 +162,5 @@ sec.addEventListener('input',e=>{if(e.target.id==='bk-q'){q=e.target.value;lst()
 /* ===== для других разделов (маркет и т.д.): Bank.addOp({t:'sale'|'buy'|'in',amt:50,title:'Название',who:'Имя'}) ===== */
 window.Bank={addOp(o){const x={t:o.t,amt:+o.amt||0,who:o.who||'',title:o.title||'',cm:o.cm||'',ts:Date.now()};st.ops.push(x);setBal(bal()+sg(x)*x.amt);if(!sec.hidden)render()}};
 
-(window.RV=window.RV||{}).bank=render;
+(window.RV=window.RV||{}).bank=()=>{render();loadUsers()};
 })();
