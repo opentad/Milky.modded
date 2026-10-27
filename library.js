@@ -1,6 +1,7 @@
 (function(){
 const $=s=>document.querySelector(s);
 let books=[],my={},meId=null,loading=true,errT='';
+let lk=new Set(),prog={},pgT=0,bought=new Set();
 const esc=t=>String(t==null?'':t).replace(/[<>&"]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]));
 const hue=t=>{let x=7;for(const ch of t)x=(x*31+ch.charCodeAt(0))>>>0;return x%360};
 const cover=(b,cls)=>{if(b.cover)return `<div class="lb-cv ${cls||''}" style="background:url(${b.cover}) center/cover"></div>`;const h=hue(b.title);return `<div class="lb-cv ${cls||''}" style="background:linear-gradient(160deg,hsl(${h},70%,62%),hsl(${(h+35)%360},65%,44%))"><span>${esc(b.title)}</span></div>`};
@@ -12,10 +13,12 @@ const PLUS='<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
 const PEN='<svg viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19l-4 1zM14.5 6.5l3 3"/></svg>';
 const UPL='<svg viewBox="0 0 24 24"><path d="M7.5 3.5h6.8l4.7 4.7v9.8a3 3 0 0 1-3 3H7.5a3 3 0 0 1-3-3V6.5a3 3 0 0 1 3-3zM12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg>';
 const BACK='<svg viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></svg>';
-  const DOTS='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>';
+const DOTS='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>';
 const TRS='<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
 const ARC='<svg viewBox="0 0 24 24"><path d="M3 5h18v4H3zM5 9v10h14V9M10 13h4"/></svg>';
-  const EYE='<svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE='<svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const HRT='<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3 5 6.5 5c2.1 0 3.9 1.2 5.5 3 1.6-1.8 3.4-3 5.5-3C21 5 22.8 8.6 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>';
+const hr=id=>`<span class="lb-hr${lk.has(id)?' on':''}" data-h="${id}" role="button" aria-label="Нравится">${HRT}</span>`;
 
 const st=document.createElement('style');st.textContent=`
 #v-lib{padding-bottom:70px}
@@ -114,16 +117,20 @@ async function load(){
   if(!SB){loading=false;errT='Нет связи с сервером. Проверь интернет и обнови страницу.';return}
   const u=(await SB.auth.getUser()).data.user;meId=u?u.id:null;
   if(meId)await SB.from('library_books').delete().eq('user_id',meId).eq('status','archived').lt('archived_at',new Date(Date.now()-90*864e5).toISOString());
-  const [b,r,l,pg]=await Promise.all([
-    SB.from('library_books').select('id,user_id,title,author,descr,reads,created_at,status,cover,'created_at',{ascending:false}).limit(300),
+  const [b,r,l,pg,bu]=await Promise.all([
+    SB.from('library_books').select('id,user_id,title,author,descr,reads,created_at,status,cover,archived_at,genres,price,free_pages').order('created_at',{ascending:false}).limit(300),
     SB.from('library_rates').select('book_id,rating,user_id'),
     SB.from('library_likes').select('book_id'),
-    SB.from('library_progress').select('book_id,page')]);
+    SB.from('library_progress').select('book_id,page'),
+    SB.from('library_buys').select('book_id')]);
   loading=false;
   if(b.error){books=[];errT='Не удалось загрузить книги: '+b.error.message+'. Проверь, что SQL выполнен.';return}
-  const R={};my={};lk=new Set((l.data||[]).map(x=>x.book_id));prog={};(pg.data||[]).forEach(x=>{prog[x.book_id]=x.page});
+  const R={};my={};
+  lk=new Set((l.data||[]).map(x=>x.book_id));
+  bought=new Set((bu.data||[]).map(x=>x.book_id));
+  prog={};(pg.data||[]).forEach(x=>{prog[x.book_id]=x.page});
   (r.data||[]).forEach(x=>{const s=R[x.book_id]||(R[x.book_id]={s:0,c:0});s.s+=x.rating;s.c++;if(x.user_id===meId)my[x.book_id]=x.rating});
-  books=b.data.map(x=>({status:x.status||'published',cover:x.cover,genres:x.genres||[],id:x.id,uid:x.user_id,title:x.title,author:x.author||'Автор',desc:x.descr,reads:x.reads,date:Date.parse(x.created_at),rs:(R[x.id]||{s:0}).s,rc:(R[x.id]||{c:0}).c}));
+  books=b.data.map(x=>({status:x.status||'published',cover:x.cover,genres:x.genres||[],price:x.price||0,fp:x.free_pages||0,id:x.id,uid:x.user_id,title:x.title,author:x.author||'Автор',desc:x.descr,reads:x.reads||0,date:Date.parse(x.created_at),rs:(R[x.id]||{s:0}).s,rc:(R[x.id]||{c:0}).c}));
 }
 const refresh=()=>load().then(()=>{if(!sec.hidden&&(mode==='list'||mode==='mine'||mode==='liked'))render(1)});
 
@@ -147,12 +154,10 @@ function mineV(){
   sec.innerHTML=`<div class="top"><div><div class="cap">Библиотека</div><h1>Мои работы</h1></div><div class="lb-hb"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}<section class="card" style="margin-top:22px;max-width:560px">${body}</section>`;
 }
 
-let tab='book',ccov='',cimg=null,cz=1,cx=.5,cy=.5,gen=[],gOpen=false,gTmp=[];
-
+let tab='book',ccov='',cimg=null,cz=1,cx=.5,cy=.5,gen=[],gOpen=false,gTmp=[],paid=false,price=20,freeOn=false,freeN=10;
 
 const render=keep=>{if(mode==='list'||mode==='mine'||mode==='liked')ret=mode;mode==='liked'?likedV():mode==='list'?listV():mode==='mine'?mineV():mode==='info'?infoV():editV();if(!keep)window.scrollTo(0,0)};
 const msg=(t,ok)=>{const m=$('#lb-msg');if(m){m.className='fb '+(ok?'ok2':'bad');m.textContent=t}};
-function tt(){$('#lb-tt').innerHTML='<h2>'+esc(title)+'</h2>'+(ro?'':'<button class="lb-pen" id="lb-pen" aria-label="Изменить название">'+PEN+'</button>')}
 function editTitle(){
   const box=$('#lb-tt');box.innerHTML='<input maxlength="60" value="'+esc(title)+'">';
   const i=box.firstChild;let d=0;i.focus();i.select();
@@ -172,7 +177,7 @@ function paginate(text){
   return out.length?out:[''];
 }
 
-  const ask=(t,ok,red)=>new Promise(res=>{
+const ask=(t,ok,red)=>new Promise(res=>{
   const d=document.createElement('div');d.className='lb-md';
   d.innerHTML=`<div class="lb-mb"><p>${esc(t)}</p><div><button class="lb-btn gr" data-v="0">Отмена</button><button class="lb-btn${red?' rd':' gn'}" data-v="1">${esc(ok)}</button></div></div>`;
   d.onclick=e=>{const v=e.target.closest('[data-v]');if(v||e.target===d){d.remove();res(!!v&&v.dataset.v==='1')}};
@@ -182,12 +187,13 @@ async function save(status){
   if(busy)return;
   const text=pages.join('').trim();
   if(title==='Без названия'){msg('Дай книге название: карандашик над разворотом.',0);return}
+  if(paid&&!(price>=20)){msg('Цена не может быть меньше 20.',0);return}
   if(status==='published'&&text.length<20){msg('Напиши хотя бы пару предложений.',0);return}
   if(status==='published'&&!(cur&&cur.status==='published')&&!(await ask('Опубликовать книгу «'+title+'»? Её увидят все участники.','Опубликовать')))return;
   const SB=await getSB(),u=SB?(await SB.auth.getUser()).data.user:null;
   if(!u){msg('Чтобы сохранить, войди в аккаунт.',0);return}
   busy=true;['#lb-pub','#lb-draft'].forEach(s=>{const x=$(s);if(x)x.disabled=true});msg('Сохраняем…',1);
-  const d={title,body:text,descr:desc.trim(),genres:gen,cover:ccov||null,status,archived_at:null,deco:fixDeco()};
+  const d={title,body:text,descr:desc.trim(),genres:gen,price:paid?price:0,free_pages:paid&&freeOn?freeN:0,cover:ccov||null,status,archived_at:null,deco:fixDeco()};
   const r=cur?await SB.from('library_books').update(d).eq('id',cur.id).select('id')
     :await SB.from('library_books').insert({...d,author:who()}).select('id');
   busy=false;
@@ -212,11 +218,11 @@ const loadM=()=>new Promise((ok,no)=>{if(window.mammoth)return ok();const s=docu
 sec.addEventListener('click',e=>{
   const c=k=>e.target.closest(k);
   if(c('[data-act]')){act(c('[data-act]').dataset.act,+c('[data-act]').dataset.id);return}
-if(c('[data-m]')){const i=+c('[data-m]').dataset.m;menuId=menuId===i?0:i;render(1);return}
-if(menuId&&!c('.lb-mn')){menuId=0;render(1);return}
-if(c('[data-t]')){tab=c('[data-t]').dataset.t;$('#lb-cvp').hidden=tab!=='cover';$('#lb-bk').hidden=tab!=='book';sec.querySelectorAll('.lb-tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));if(tab==='book')fill();return}
-if(c('#lb-imgb')){$('#lb-img').click();return}
-if(c('#lb-draft')){save('draft');return}
+  if(c('[data-m]')){const i=+c('[data-m]').dataset.m;menuId=menuId===i?0:i;render(1);return}
+  if(menuId&&!c('.lb-mn')){menuId=0;render(1);return}
+  if(c('[data-t]')){tab=c('[data-t]').dataset.t;$('#lb-cvp').hidden=tab!=='cover';$('#lb-bk').hidden=tab!=='book';sec.querySelectorAll('.lb-tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));if(tab==='book')fill();return}
+  if(c('#lb-imgb')){$('#lb-img').click();return}
+  if(c('#lb-draft')){save('draft');return}
   if(c('[data-e]'))editBook(+c('[data-e]').dataset.e);
   else if(c('[data-a="mine"]')){mode='mine';render()}
   else if(c('[data-o]'))openBook(+c('[data-o]').dataset.o);
@@ -247,7 +253,7 @@ sec.addEventListener('input',e=>{
 });
 sec.addEventListener('change',async e=>{
   if(e.target.id==='lb-img'){const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{cimg=im;cz=1;cx=.5;cy=.5;$('#lb-z').value=1;$('#lb-x').value=.5;$('#lb-y').value=.5;covPrev()};im.src=URL.createObjectURL(f);e.target.value='';return}
-if(e.target.id!=='lb-file')return;const f=e.target.files[0];if(!f)return;
+  if(e.target.id!=='lb-file')return;const f=e.target.files[0];if(!f)return;
   msg('Читаю файл…',1);
   try{
     await loadM();
@@ -259,17 +265,17 @@ if(e.target.id!=='lb-file')return;const f=e.target.files[0];if(!f)return;
   e.target.value='';
 });
 addEventListener('resize',()=>{
-  if(sec.hidden||(mode!=='edit'&&mode!=='read')||tab==='cover')return;
+  if(sec.hidden||(mode!=='edit'&&mode!=='read')||tab==='cover'||tab==='pay')return;
   const P=per();if(P===lastP)return;lastP=P;
   pages=paginate(pages.join(''));if(P===2&&pages.length%2)pages.push('');sp=0;fill();
 });
 document.addEventListener('sb',()=>{if(!sec.hidden)refresh()});
 window.RV=window.RV||{};window.RV.lib=()=>{mode='list';render();refresh()};
 
-  /* ===== ОФОРМЛЕНИЕ КНИГИ ===== */
-const lk=document.createElement('link');lk.rel='stylesheet';
-lk.href='https://fonts.googleapis.com/css2?family=Literata:wght@400;500&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=EB+Garamond:wght@400;500&family=Cormorant+Garamond:wght@500;600&family=Playfair+Display:wght@400;500&display=swap';
-document.head.appendChild(lk);
+/* ===== ОФОРМЛЕНИЕ КНИГИ ===== */
+const lkf=document.createElement('link');lkf.rel='stylesheet';
+lkf.href='https://fonts.googleapis.com/css2?family=Literata:wght@400;500&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=EB+Garamond:wght@400;500&family=Cormorant+Garamond:wght@500;600&family=Playfair+Display:wght@400;500&display=swap';
+document.head.appendChild(lkf);
 const st2=document.createElement('style');st2.textContent=`
 .lb-sp .pg{font-size:var(--fs,14px)}
 .lb-sd{display:none;background:#fff;border-radius:18px;padding:14px;box-shadow:0 6px 30px rgba(0,0,0,.05);margin:14px auto 0;max-width:560px}
@@ -337,7 +343,7 @@ const fixDeco=()=>({font:deco.font,st:deco.st.map(o=>({...o,p:Math.min(o.p,Math.
 function styleFont(){const s=sec.querySelector('.lb-sp');if(!s)return;const f=FN.find(x=>x[0]===deco.font)||FN[0];s.style.fontFamily=f[2];s.style.fontStyle=f[3];s.style.fontWeight=f[4];s.style.setProperty('--fs',f[5]+'px')}
 const loadFont=()=>{const f=FN.find(x=>x[0]===deco.font)||FN[0];return Promise.race([document.fonts.load(f[3]+' '+f[4]+' 16px '+f[2].split(',')[0],'Аб'),new Promise(r=>setTimeout(r,2000))]).catch(()=>{})};
 function repag(){pages=paginate(pages.join(''));if(per()===2&&pages.length%2)pages.push('');if(per()*sp>=pages.length)sp=Math.max(0,Math.ceil(pages.length/per())-1)}
-async function setFont(id){deco.font=id;renderSide();styleFont();await loadFont();if(!sec.querySelector('.lb-sp')||tab==='cover')return;repag();fill()}
+async function setFont(id){deco.font=id;renderSide();styleFont();await loadFont();if(!sec.querySelector('.lb-sp')||tab==='cover'||tab==='pay')return;repag();fill()}
 
 function renderSide(){
   const fp=$('#lb-fp'),sk=$('#lb-sk');if(!fp||!sk)return;
@@ -356,14 +362,13 @@ function addSt(t,x){
   fill();
 }
 
-/* перекрывают старые версии */
 function fill(){
   const P=per(),pn=sec.querySelectorAll('.pn'),ly=sec.querySelectorAll('.stl');
   sec.querySelector('.lb-sp').classList.toggle('one',P===1);
   [0,1].forEach(k=>{const v=pages[P*sp+k]||'';if(tas[k].value!==v)tas[k].value=v;pn[k].textContent=P*sp+k+1;ly[k].innerHTML=stHTML(P*sp+k)});
   $('#lb-n').textContent=(P===1?(sp+1):(2*sp+1)+'–'+Math.min(2*sp+2,pages.length))+' из '+pages.length;
   $('#lb-pv').disabled=sp===0;$('#lb-nx').disabled=P*(sp+1)>=pages.length;
-if(ro&&cur)saveProg(P*sp);
+  if(ro&&cur)saveProg(P*sp);
 }
 async function fetchText(){
   const SB=await getSB();if(!SB)return false;
@@ -372,20 +377,26 @@ async function fetchText(){
   if(r.error)return false;
   cur.text=r.data.body;cur.deco=r.data.deco||null;return true;
 }
+const owns=b=>b.price<=0||bought.has(b.id)||b.uid===meId;
 async function readBook(){
   const SB0=await getSB(),u0=SB0?(await SB0.auth.getUser()).data.user:null;
   if(!u0){msg('Чтобы читать книги, войди в аккаунт.',0);return}
   meId=u0.id;
+  if(!owns(cur)&&!(cur.fp>0)){msg('Эта книга платная. Нажми «Купить».',0);return}
   if(!await fetchText()){msg('Не получилось открыть книгу. Попробуй ещё раз.',0);return}
   if(window.SB)window.SB.rpc('lib_read',{bid:cur.id}).then(()=>{});
-  title=cur.title;ro=true;sp=Math.floor((prog[cur.id]||0)/per());tab='book';deco=normDeco(cur.deco);mode='read';render();if(per()*sp>=pages.length){sp=0;fill()}
+  title=cur.title;ro=true;sp=Math.floor((prog[cur.id]||0)/per());tab='book';deco=normDeco(cur.deco);mode='read';render();
+  if(per()*sp>=pages.length){sp=0;fill()}
+  if(!owns(cur))msg('Это ознакомительный фрагмент: первые '+cur.fp+' страниц. Чтобы читать дальше, купи книгу.',1);
 }
 async function editBook(id){
   cur=books.find(b=>b.id===id);if(!cur)return;
   if(!await fetchText()){note('Не получилось открыть книгу для изменения.',1);render();return}
-  title=cur.title;desc=cur.desc||'';gen=[...(cur.genres||[])];gOpen=false;ccov=cur.cover||'';cimg=null;tab='book';sp=0;ro=false;deco=normDeco(cur.deco);mode='edit';render();
+  title=cur.title;desc=cur.desc||'';gen=[...(cur.genres||[])];gOpen=false;
+  paid=cur.price>0;price=cur.price>0?cur.price:20;freeOn=cur.fp>0;freeN=cur.fp>0?cur.fp:10;
+  ccov=cur.cover||'';cimg=null;tab='book';sp=0;ro=false;deco=normDeco(cur.deco);mode='edit';render();
 }
-function newBook(){cur=null;title='Без названия';ccov='';cimg=null;tab='book';desc='';gen=[];gOpen=false;pages=[''];sp=0;ro=false;deco=normDeco(null);mode='edit';render()}
+function newBook(){cur=null;title='Без названия';ccov='';cimg=null;tab='book';desc='';gen=[];gOpen=false;paid=false;price=20;freeOn=false;freeN=10;pages=[''];sp=0;ro=false;deco=normDeco(null);mode='edit';render()}
 function drawCov(){
   const c=$('#lb-cvs');if(!c||!cimg)return;const g=c.getContext('2d');g.imageSmoothingQuality='high';
   g.fillStyle='#fff';g.fillRect(0,0,480,640);
@@ -402,10 +413,11 @@ function covPrev(){
 function editV(){
   const ph=ro?'':' placeholder="Пиши здесь…"',r=ro?' readonly':'';
   lastP=per();
-  sec.innerHTML=`<div class="lb-bar"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><div class="r">${ro?'':`<button class="lb-btn" id="lb-word">${UPL}Загрузить из Word</button>`}</div></div>
-  ${ro?'':'<div class="lb-tabs"><button data-t="cover">Обложка</button><button data-t="book" class="on">Книга</button><button data-t="deco">Оформление</button></div>'}
+  sec.innerHTML=`<div class="lb-bar"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><div class="r">${ro?'':`<button class="lb-btn" id="lb-word">${UPL}Загрузить из Word</button><label class="lb-sw"><input type="checkbox" id="lb-paid"${paid?' checked':''}><i></i>Сделать платной</label>`}</div></div>
+  ${ro?'':`<div class="lb-tabs"><button data-t="cover">Обложка</button><button data-t="book" class="on">Книга</button><button data-t="deco">Оформление</button><button data-t="pay"${paid?'':' hidden'}>Оплата</button></div>`}
   <div class="lb-tt" id="lb-tt"></div>
   <div id="lb-cvp" hidden><div class="lb-cvw" id="lb-prev"></div><button class="lb-btn" id="lb-imgb">Загрузить картинку</button><div class="lb-rg" id="lb-rg" hidden><label>Размер<input type="range" id="lb-z" min="0.5" max="3" step="0.05" value="1"></label><label>Влево — вправо<input type="range" id="lb-x" min="0" max="1" step="0.01" value="0.5"></label><label>Вверх — вниз<input type="range" id="lb-y" min="0" max="1" step="0.01" value="0.5"></label></div></div>
+  <div id="lb-pay" hidden></div>
   <div id="lb-bk"><div class="lb-mid">
   <div class="lb-sp"><div class="pgw"><textarea class="pg meas" tabindex="-1" aria-hidden="true"></textarea><textarea class="pg" data-i="0"${r}${ph}></textarea><div class="stl"></div><div class="pn"></div></div><div class="pgw"><textarea class="pg" data-i="1"${r}></textarea><div class="stl"></div><div class="pn"></div></div></div>
   <div class="lb-nav"><button class="go" id="lb-pv">‹</button><span id="lb-n"></span><button class="go" id="lb-nx">›</button></div>${ro?'':'<textarea class="lb-desc" id="lb-desc" maxlength="500" placeholder="Описание книги: о чём она (по желанию)"></textarea><div id="lb-gn"></div>'}</div>${ro?'':'<div class="lb-sd lb-fp" id="lb-fp"></div><div class="lb-sd lb-sk" id="lb-sk"></div>'}</div>
@@ -417,9 +429,10 @@ function editV(){
   if(!ro)sec.querySelector('#lb-desc').value=desc;
   styleFont();
   if(mode==='read'||cur)pages=paginate(cur.text);
+  if(mode==='read'&&!owns(cur))pages=pages.slice(0,Math.max(1,cur.fp));
   if(per()===2&&pages.length%2)pages.push('');
   tt();renderSide();fill();genV();
-  if(deco.font!=='def')loadFont().then(()=>{if(sec.querySelector('.lb-sp')&&tab!=='cover'){repag();fill()}});
+  if(deco.font!=='def')loadFont().then(()=>{if(sec.querySelector('.lb-sp')&&tab!=='cover'&&tab!=='pay'){repag();fill()}});
 }
 
 /* обработчики */
@@ -468,9 +481,8 @@ sec.addEventListener('pointermove',e=>{
   const s=dg.s;s.style.left=o.x+'%';s.style.top=o.y+'%';s.style.width=o.w+'%';s.style.height=o.h+'cqw';
 });
 const dgUp=()=>{dg=null};sec.addEventListener('pointerup',dgUp);sec.addEventListener('pointercancel',dgUp);
-addEventListener('resize',()=>{const bk=$('#lb-bk');if(sec.hidden||!bk||ro)return;bk.classList.toggle('side',tab==='deco'&&wide());fit()});
 
-  /* ===== ПРАВКА: блоки рядом + красивые стикеры ===== */
+/* ===== ПРАВКА: блоки рядом + красивые стикеры ===== */
 const st3=document.createElement('style');st3.textContent=`
 #lb-bk.side{grid-template-columns:160px auto 170px}
 #lb-bk.duo{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:'mid mid' 'fp sk';gap:12px;align-items:start}
@@ -519,14 +531,14 @@ function layoutDeco(){
   bk.classList.toggle('duo',d&&!wide2()&&sec.clientWidth>=520);
 }
 function tabFix(){
-  const bk=$('#lb-bk');if(!bk||ro)return;const im=$('#lb-im');
-  bk.hidden=tab==='cover';if(im)im.hidden=tab==='cover';
-  layoutDeco();
+  const bk=$('#lb-bk');if(!bk||ro)return;const im=$('#lb-im'),fn=sec.querySelector('.lb-fin'),hide=tab==='cover'||tab==='pay';
+  bk.hidden=hide;if(im)im.hidden=hide;if(fn)fn.hidden=tab==='pay';
+  layoutDeco();payV();
   if(!bk.hidden){fit();fill()}
 }
 addEventListener('resize',()=>{layoutDeco();fit()});
 
-  /* ===== ОТЗЫВЫ ===== */
+/* ===== ОТЗЫВЫ ===== */
 const st4=document.createElement('style');st4.textContent=`
 .rvi{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--ln)}
 .rvi:last-child{border:0}
@@ -542,6 +554,12 @@ document.head.appendChild(st4);
 let pend=0,rtxt='',revs=[];
 
 function openBook(id){cur=books.find(b=>b.id===id);if(!cur)return;pend=0;rtxt='';revs=[];mode='info';render()}
+function buyV(b){
+  const rd=`<button class="lb-btn big" id="lb-read">${prog[b.id]>0?'Продолжить · стр. '+(prog[b.id]+1):'Читать'}</button>`;
+  if(owns(b))return rd;
+  const buy=`<button class="lb-btn big gn" id="lb-buy">Купить за ${b.price} <span class="coin"></span></button>`;
+  return b.fp>0?`<div class="lb-buyrow"><div class="lb-rdw">${rd}<small>Первые ${b.fp} страниц</small></div>${buy}</div>`:buy;
+}
 function infoV(){
   const b=cur,mine=my[b.id]||0,dt=new Date(b.date).toLocaleDateString('ru'),sh=pend||mine;
   sec.innerHTML=`<button class="back" id="lb-back" style="margin:0 0 12px">${BACK}Назад</button>
@@ -550,16 +568,9 @@ function infoV(){
   <div class="lb-avg">${avg(b)}${mine?' · твоя оценка: '+mine:' · нажми на звезду, чтобы оценить'}</div>
   <div class="lb-avg lb-eye">${EYE}${b.reads||0} · уникальных просмотров<button class="lb-hrt${lk.has(b.id)?' on':''}" data-h="${b.id}">${HRT} Нравится</button></div><div id="lb-rf"></div><div class="fb" id="lb-msg"></div>
   ${b.genres&&b.genres.length?'<div class="lb-gc">'+b.genres.map(g=>'<span>'+esc(g)+'</span>').join('')+'</div>':''}<h3>Описание</h3><p>${b.desc?esc(b.desc).replace(/\n/g,'<br>'):'Описания нет.'}</p>
-  <button class="lb-btn big" id="lb-read">${prog[b.id]>0?'Продолжить · стр. '+(prog[b.id]+1):'Читать'}</button></div></div>
+  ${buyV(b)}</div></div>
   <section class="card" style="margin-top:22px"><div class="hd"><h2>Отзывы</h2><span id="lb-rc"></span></div><div id="lb-rv"><div class="fr">Загружаем…</div></div></section>`;
   revForm();loadRev();
-}
-function revForm(){
-  const f=$('#lb-rf');if(!f)return;
-  if(!pend){f.innerHTML='';return}
-  f.innerHTML=`<textarea id="lb-rt" class="lb-desc" style="max-width:none;margin:10px 0 0;height:90px" maxlength="500" placeholder="Напиши отзыв о книге (по желанию)">${esc(rtxt)}</textarea>
-  <div class="lb-hint" style="margin:6px 0 8px">Можно без текста: тогда опубликуется только оценка ${pend} ★</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="lb-btn gn" id="lb-rs">${my[cur.id]?'Сохранить отзыв':'Опубликовать'}</button><button class="lb-btn gr" id="lb-rx">Отмена</button></div>`;
 }
 function rate(r){
   if(!meId){msg('Чтобы оценить книгу, войди в аккаунт.',0);return}
@@ -598,12 +609,14 @@ sec.addEventListener('click',async e=>{
   }
 });
 sec.addEventListener('input',e=>{if(e.target.id==='lb-rt')rtxt=e.target.value});
-  /* ===== ЖАЛОБЫ НА КНИГИ ===== */
+
+/* ===== ЖАЛОБЫ НА КНИГИ ===== */
 const st5=document.createElement('style');st5.textContent=`
 .lb-th{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .lb-bm{position:relative;display:inline-block;flex:none}
 .lb-bm .lb-mn{top:42px;right:0}
-.lb-tt .lb-bm{margin-left:4px}`.lb-eye{display:flex;align-items:center;gap:6px;margin-top:6px}.lb-eye svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round};
+.lb-tt .lb-bm{margin-left:4px}
+.lb-eye{display:flex;align-items:center;gap:6px;margin-top:6px}.lb-eye svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}`;
 document.head.appendChild(st5);
 let bmOpen=false,modOK=false,modState=0;
 const FLAG='<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
@@ -671,6 +684,7 @@ sec.addEventListener('click',e=>{
   if(c('[data-bk]')){const k=c('[data-bk]').dataset.bk;bmOpen=false;bmDraw();if(k==='rep')doReport();else modDel();return}
   if(bmOpen&&!c('.lb-bm')){bmOpen=false;bmDraw()}
 });
+
 /* ===== ЖАНРЫ ===== */
 const GN=['Фэнтези','Фантастика','Детектив','Приключения','Ужасы','Юмор','Поэзия','Научпоп','Учебное','Детское','Другое'];
 const st6=document.createElement('style');st6.textContent=`
@@ -695,10 +709,8 @@ sec.addEventListener('change',e=>{
   const g=e.target.dataset&&e.target.dataset.g;if(!g)return;
   gTmp=e.target.checked?[...new Set([...gTmp,g])]:gTmp.filter(x=>x!==g);
 });
+
 /* ===== ПОНРАВИВШИЕСЯ ===== */
-let lk=new Set(),prog={},pgT=0;
-const HRT='<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3 5 6.5 5c2.1 0 3.9 1.2 5.5 3 1.6-1.8 3.4-3 5.5-3C21 5 22.8 8.6 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>';
-const hr=id=>`<span class="lb-hr${lk.has(id)?' on':''}" data-h="${id}" role="button" aria-label="Нравится">${HRT}</span>`;
 const st7=document.createElement('style');st7.textContent=`
 .lb-b{position:relative}
 .lb-hr{position:absolute;right:20px;top:20px;z-index:3;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);color:#9aa4ae;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
@@ -732,6 +744,57 @@ function saveProg(p){
   if(!cur||!meId)return;const id=cur.id;prog[id]=p;clearTimeout(pgT);
   pgT=setTimeout(async()=>{const SB=await getSB();if(SB)SB.from('library_progress').upsert({book_id:id,user_id:meId,page:p,updated_at:new Date().toISOString()},{onConflict:'book_id,user_id'})},600);
 }
+
+/* ===== ПЛАТНЫЕ КНИГИ ===== */
+const st8=document.createElement('style');st8.textContent=`
+.lb-bar .r{flex-direction:column;align-items:flex-end;gap:6px}
+.lb-sw{display:flex;align-items:center;gap:8px;font-size:12px;color:#566170;cursor:pointer;margin-top:2px}
+.lb-sw input{display:none}
+.lb-sw i{width:36px;height:20px;border-radius:10px;background:#d5dbe0;position:relative;transition:.2s;flex:none}
+.lb-sw i::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.lb-sw input:checked+i{background:var(--cy)}.lb-sw input:checked+i::after{left:18px}
+.pay-w{display:flex;gap:30px;justify-content:center;align-items:flex-start;margin:20px auto;max-width:760px}
+.pay-w .lb-cv{width:220px;aspect-ratio:3/4;flex:none}
+.pay-f{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;background:#fff;border-radius:20px;padding:22px;box-shadow:0 6px 30px rgba(0,0,0,.05)}
+.pay-f h3{font-size:16px;font-weight:700}
+.pay-f label.n{display:flex;align-items:center;gap:10px;font-size:13px;color:#566170}
+.pay-f input[type=number]{width:100px;height:40px;border:1px solid #dfe5ea;border-radius:12px;padding:0 12px;font:inherit;outline:0}
+.pay-f .lb-hint{margin:0}
+.lb-buyrow{display:flex;gap:14px;align-items:flex-start;margin-top:14px;flex-wrap:wrap}
+.lb-buyrow .big{margin-top:0}
+.lb-rdw{display:flex;flex-direction:column;align-items:center;gap:6px}
+.lb-rdw small{font-size:11px;color:#9aa4ae}
+.lb-btn .coin{width:20px;height:20px;margin:0 0 0 2px;vertical-align:-5px}`;
+document.head.appendChild(st8);
+function payV(){
+  const p=$('#lb-pay');if(!p)return;p.hidden=tab!=='pay';if(tab!=='pay')return;
+  p.innerHTML=`<div class="pay-w">${sec.clientWidth>=700?cover({title,cover:ccov}):''}<div class="pay-f"><h3>Оплата</h3>
+  <label class="n">Цена: <input type="number" id="lb-pr" min="20" value="${price}"> монет</label><div class="lb-hint">Минимум 20 монет.</div>
+  <label class="lb-sw"><input type="checkbox" id="lb-fo"${freeOn?' checked':''}><i></i>Сделать первые страницы бесплатными</label>
+  ${freeOn?`<label class="n">Сколько страниц: <input type="number" id="lb-fn" min="1" value="${freeN}"></label>`:''}
+  <button class="lb-btn gn" id="lb-ps" style="align-self:flex-start">Сохранить</button></div></div>`;
+}
+sec.addEventListener('change',e=>{
+  const i=e.target.id;
+  if(i==='lb-paid'){paid=e.target.checked;const pb=sec.querySelector('[data-t="pay"]'),bb=sec.querySelector('[data-t="book"]');pb.hidden=!paid;(paid?pb:bb).click();return}
+  if(i==='lb-pr'){price=Math.max(20,parseInt(e.target.value)||20);e.target.value=price;return}
+  if(i==='lb-fn'){freeN=Math.max(1,parseInt(e.target.value)||10);e.target.value=freeN;return}
+  if(i==='lb-fo'){freeOn=e.target.checked;payV()}
+});
+sec.addEventListener('click',async e=>{
+  if(e.target.closest('#lb-ps')){save(cur&&cur.status==='published'?'published':'draft');return}
+  const bt=e.target.closest('#lb-buy');if(!bt)return;
+  if(!meId){msg('Чтобы купить книгу, войди в аккаунт.',0);return}
+  if(!(await ask('Купить «'+cur.title+'» за '+cur.price+' монет?','Купить')))return;
+  const SB=await getSB();if(!SB)return;bt.disabled=true;
+  const r=await SB.rpc('lib_buy',{bid:cur.id});
+  if(r.error){bt.disabled=false;msg('Не получилось: '+r.error.message,0);return}
+  if(r.data==='nomoney'){bt.disabled=false;msg('Не хватает монет.',0);return}
+  bought.add(cur.id);
+  document.querySelectorAll('.cn').forEach(n=>{const v=parseInt(String(n.textContent).replace(/\D/g,''));if(!isNaN(v))n.textContent=v-cur.price});
+  infoV();msg('Книга куплена! Приятного чтения.',1);
+});
+
 window.LBopen=async id=>{
   MS.show('lib');await load();
   if(!books.find(x=>x.id===id)){alert('Книга не найдена: возможно, она уже удалена.');return}
