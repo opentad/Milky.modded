@@ -3,34 +3,10 @@
 const $=s=>document.querySelector(s);
 const KEY='milkbank_v1';
 
-/* ===== ДАННЫЕ (пока демо: всё хранится в браузере; позже заменим на Supabase) ===== */
-const USERS=[
- {id:'u1',n:'Алиса Громова',nick:'alisa'},
- {id:'u2',n:'Борис Ильин',nick:'boris_i'},
- {id:'u3',n:'Вера Соколова',nick:'vera'},
- {id:'u4',n:'Глеб Орлов',nick:'gleb'},
- {id:'u5',n:'Дарья Лисина',nick:'dasha_l'},
- {id:'u6',n:'Егор Тихонов',nick:'egor'},
- {id:'u7',n:'Злата Миронова',nick:'zlata'},
- {id:'u8',n:'Игорь Сомов',nick:'igor_s'}
-];
-let st={};try{st=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
-if(st.bal===undefined)st.bal=null;st.ops=st.ops||[];st.freq=st.freq||{};
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
-const cnNum=()=>{const e=document.querySelector('.cn');const n=e?parseInt(String(e.textContent).replace(/\s/g,''),10):NaN;return isNaN(n)?0:n};
-const bal=()=>st.bal==null?cnNum():st.bal;
-const setBal=v=>{st.bal=v;save();document.querySelectorAll('.cn').forEach(e=>e.textContent=v)};
-const me=()=>window.ME_NAME||'Милколенок';
-let REAL=null;
-async function loadUsers(){
-  const SB=window.SB;if(!SB)return;
-  try{
-    const u=(await SB.auth.getUser()).data.user;if(!u)return;
-    const r=await SB.from('profiles').select('*');
-    if(r.data){REAL=r.data.filter(p=>p.id!==u.id&&p.name).map(p=>({id:p.id,n:p.name,nick:p.nick||p.nickname||p.username||'',av:p.avatar_url||''}));if(!sec.hidden)render()}
-  }catch(e){}
-}
-const users=()=>REAL||(window.BANK_USERS||USERS).filter(u=>u.n!==me());
+/* ===== ДАННЫЕ (Supabase: profiles.coins, transfers, purchases, функция send_coins) ===== */
+let ME=null,BAL=null,USERS=[],OPS=[],FREQ={};
+const syncCn=()=>document.querySelectorAll('.cn').forEach(e=>{if(BAL!==null)e.textContent=BAL});
+const users=()=>USERS;
 
 /* ===== помощники ===== */
 const esc=t=>String(t).replace(/[<>&"]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]));
@@ -42,8 +18,8 @@ const sg=o=>(o.t==='in'||o.t==='sale')?1:-1;
 const ttl=o=>({in:'Перевод от '+o.who,out:'Перевод для '+o.who,sale:'Продажа'+(o.title?': '+o.title:''),buy:'Покупка'+(o.title?': '+o.title:'')})[o.t]||'Операция';
 const oic=o=>o.t==='in'?'<span style="display:block;transform:rotate(180deg)">'+ic('arrow')+'</span>':o.t==='out'?ic('arrow'):ic('shop');
 const when=ts=>{const d=new Date(ts);return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+', '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
-const monthOps=()=>{const d=new Date(),y=d.getFullYear(),m=d.getMonth();return st.ops.filter(o=>{const x=new Date(o.ts);return x.getFullYear()===y&&x.getMonth()===m}).sort((a,b)=>b.ts-a.ts)};
-const top3=()=>users().filter(u=>st.freq[u.id]>0).sort((a,b)=>st.freq[b.id]-st.freq[a.id]).slice(0,3);
+const monthOps=()=>OPS.slice().sort((a,b)=>b.ts-a.ts);
+const top3=()=>users().filter(u=>FREQ[u.id]>0).sort((a,b)=>FREQ[b.id]-FREQ[a.id]).slice(0,3);
 
 /* ===== стили ===== */
 const css=document.createElement('style');
@@ -105,22 +81,22 @@ const sec=document.createElement('section');sec.id='v-bank';sec.hidden=true;$('.
 let open=false,pick=null,tab='all',q='',note='';
 
 function render(){
-  const b=bal(),ops=monthOps(),inc=ops.filter(o=>sg(o)>0).reduce((s,o)=>s+o.amt,0),exp=ops.filter(o=>sg(o)<0).reduce((s,o)=>s+o.amt,0);
+  const b=BAL,ops=monthOps(),inc=ops.filter(o=>sg(o)>0).reduce((s,o)=>s+o.amt,0),exp=ops.filter(o=>sg(o)<0).reduce((s,o)=>s+o.amt,0);
   const mon=new Date().toLocaleDateString('ru-RU',{month:'long'});
   const fq=top3();
   let panel='';
   if(open&&!pick){
     panel=`<section class="card" id="bk-tr"><div class="hd"><h2>Кому перевести</h2></div><div class="bk-t" id="bk-tabs"></div><input class="bk-q" id="bk-q" placeholder="Поиск по имени или нику" value="${esc(q)}" autocomplete="off"><div class="bk-list" id="bk-list"></div></section>`;
   }else if(open&&pick){
-    panel=`<section class="card" id="bk-tr"><div class="hd"><h2>Перевод</h2></div><div class="bk-sel"><div class="bk-p">${ava(pick)}<span><b>${esc(pick.n)}</b><small>@${esc(pick.nick||'')}</small></span></div><button class="bk-ch" data-a="back">Сменить</button></div><input class="bk-in" id="bk-a" inputmode="numeric" placeholder="Сумма (у тебя ${fmt(b)})" autocomplete="off"><input class="bk-in" id="bk-c" maxlength="100" placeholder="Комментарий (необязательно)" autocomplete="off"><div class="bk-fb" id="bk-fb"></div><div class="bk-act"><button class="bk-go" data-a="send">Перевести</button><button class="bk-x" data-a="cancel">Отмена</button></div></section>`;
+    panel=`<section class="card" id="bk-tr"><div class="hd"><h2>Перевод</h2></div><div class="bk-sel"><div class="bk-p">${ava(pick)}<span><b>${esc(pick.n)}</b><small>@${esc(pick.nick||'')}</small></span></div><button class="bk-ch" data-a="back">Сменить</button></div><input class="bk-in" id="bk-a" inputmode="numeric" placeholder="Сумма (у тебя ${b===null?'…':fmt(b)})" autocomplete="off"><input class="bk-in" id="bk-c" maxlength="100" placeholder="Комментарий (необязательно)" autocomplete="off"><div class="bk-fb" id="bk-fb"></div><div class="bk-act"><button class="bk-go" data-a="send">Перевести</button><button class="bk-x" data-a="cancel">Отмена</button></div></section>`;
   }
   sec.innerHTML=`<div class="bk"><div class="cap">Школа</div>
   <div class="bk-hero"><svg class="bk-w" viewBox="0 0 800 300" preserveAspectRatio="none"><path d="M0 190 C150 130 300 250 450 190 S700 120 800 180 V300 H0Z" fill="rgba(255,255,255,.12)"/><path d="M0 235 C160 185 320 285 480 235 S720 195 800 245 V300 H0Z" fill="rgba(255,255,255,.1)"/><circle cx="710" cy="55" r="95" fill="rgba(255,255,255,.08)"/></svg>
-   <div class="bk-l">На личном счету:</div><div class="bk-n">${fmt(b)}<span class="coin"></span></div>
+   <div class="bk-l">На личном счету:</div><div class="bk-n">${b===null?'…':fmt(b)}<span class="coin"></span></div>
    <div class="bk-r"><button class="bk-b" data-a="tr">${ic('arrow')}Перевести</button><button class="bk-b" disabled>Открыть накопительный счет <em>скоро</em></button></div>
    ${note?`<div class="bk-ok">${esc(note)}</div>`:''}</div>
   ${panel}
-  <section class="card"><div class="hd"><h2>Частые операции</h2></div>${fq.length?fq.map(u=>`<button class="bk-p" data-pick="${u.id}">${ava(u)}<span><b>${esc(u.n)}</b><small>переводов: ${st.freq[u.id]}</small></span></button>`).join(''):'<div class="bk-mu">Пока не было операций</div>'}</section>
+  <section class="card"><div class="hd"><h2>Частые операции</h2></div>${fq.length?fq.map(u=>`<button class="bk-p" data-pick="${u.id}">${ava(u)}<span><b>${esc(u.n)}</b><small>переводов: ${FREQ[u.id]}</small></span></button>`).join(''):'<div class="bk-mu">Пока не было операций</div>'}</section>
   <section class="card"><div class="hd"><h2>Операции за ${mon}</h2></div>
    <div class="bk-st"><div><small>Доходы</small><b class="g">+${fmt(inc)}</b></div><div><small>Расходы</small><b class="r">−${fmt(exp)}</b></div><div><small>Всего операций</small><b>${ops.length}</b></div></div>
    ${ops.length?ops.map(o=>{const p=sg(o)>0;return `<div class="bk-o"><b class="bk-s ${p?'p':'m'}">${p?'+':'−'}${fmt(o.amt)}</b><span class="bk-oi">${oic(o)}</span><div><strong>${esc(ttl(o))}</strong><small>${when(o.ts)}${o.cm?' · '+esc(o.cm):''}</small></div></div>`}).join(''):'<div class="bk-mu">В этом месяце операций нет</div>'}
@@ -136,15 +112,38 @@ function lst(){
   $('#bk-list').innerHTML=L.length?L.map(u=>`<button class="bk-p" data-pick="${u.id}">${ava(u)}<span><b>${esc(u.n)}</b><small>@${esc(u.nick||'')}</small></span></button>`).join(''):`<div class="bk-mu">${t==='freq'?'Пока не было операций':'Никого не найдено'}</div>`;
 }
 
-function send(){
-  const a=parseInt($('#bk-a').value,10),c=$('#bk-c').value.trim(),f=$('#bk-fb');
+async function send(){
+  const a=parseInt($('#bk-a').value,10),c=$('#bk-c').value.trim(),f=$('#bk-fb'),btn=$('[data-a="send"]');
   const bad=m=>{f.textContent=m;f.style.color='#d97706'};
   if(!(a>0))return bad('Введи сумму больше нуля');
-  if(a>bal())return bad('Не хватает монет: на счету '+fmt(bal()));
-  st.ops.push({t:'out',amt:a,who:pick.n,cm:c,ts:Date.now()});
-  st.freq[pick.id]=(st.freq[pick.id]||0)+1;
-  setBal(bal()-a);
-  note='Переведено '+fmt(a)+' → '+pick.n;open=false;pick=null;q='';render();
+  if(BAL!==null&&a>BAL)return bad('Не хватает монет: на счету '+fmt(BAL));
+  btn.disabled=true;f.style.color='#566170';f.textContent='Отправляю…';
+  let r;try{r=await window.SB.rpc('send_coins',{to_user:pick.id,amt:a,cmt:c})}catch(e){r={error:{message:''}}}
+  if(r.error){btn.disabled=false;const m=r.error.message||'';return bad(m.includes('no_money')?'Не хватает монет':m.includes('self')?'Нельзя переводить самому себе':m.includes('bad_amount')?'Некорректная сумма':'Не получилось перевести. Попробуй ещё раз')}
+  note='Переведено '+fmt(a)+' → '+pick.n;open=false;pick=null;q='';
+  await load();
+}
+async function load(){
+  const sb=window.SB;if(!sb)return;
+  try{
+    const u=(await sb.auth.getUser()).data.user;if(!u)return;ME=u.id;
+    const d=new Date(),ms=new Date(d.getFullYear(),d.getMonth(),1),msN=ms.getTime(),msI=ms.toISOString();
+    const [pr,co,tr,pu]=await Promise.all([
+      sb.from('profiles').select('id,name,nick,avatar_url'),
+      sb.from('profiles').select('coins').eq('id',ME).maybeSingle(),
+      sb.from('transfers').select('*').order('created_at',{ascending:false}).limit(300),
+      sb.from('purchases').select('*').or('buyer.eq.'+ME+',seller.eq.'+ME).gte('created_at',msI).order('created_at',{ascending:false}).limit(200)]);
+    const nm={};USERS=[];
+    (pr.data||[]).forEach(p=>{nm[p.id]=p.name||p.nick||'Пользователь';if(p.id!==ME&&p.name)USERS.push({id:p.id,n:p.name,nick:p.nick||'',av:p.avatar_url||''})});
+    BAL=co.data&&co.data.coins!=null?co.data.coins:0;syncCn();
+    FREQ={};OPS=[];
+    (tr.data||[]).forEach(t=>{const out=t.from_id===ME,ts=Date.parse(t.created_at);if(out)FREQ[t.to_id]=(FREQ[t.to_id]||0)+1;
+      if(ts>=msN)OPS.push({t:out?'out':'in',amt:t.amount,who:nm[out?t.to_id:t.from_id]||'Пользователь',cm:t.comment||'',ts})});
+    (pu.data||[]).forEach(p=>{const ts=Date.parse(p.created_at);
+      if(p.buyer===ME)OPS.push({t:'buy',amt:p.price,title:p.title||'',ts});
+      else if(p.seller===ME)OPS.push({t:'sale',amt:p.seller_gain!=null?p.seller_gain:p.price,title:p.title||'',ts})});
+  }catch(e){}
+  render();
 }
 
 sec.addEventListener('click',e=>{
@@ -159,8 +158,5 @@ sec.addEventListener('click',e=>{
 });
 sec.addEventListener('input',e=>{if(e.target.id==='bk-q'){q=e.target.value;lst()}});
 
-/* ===== для других разделов (маркет и т.д.): Bank.addOp({t:'sale'|'buy'|'in',amt:50,title:'Название',who:'Имя'}) ===== */
-window.Bank={addOp(o){const x={t:o.t,amt:+o.amt||0,who:o.who||'',title:o.title||'',cm:o.cm||'',ts:Date.now()};st.ops.push(x);setBal(bal()+sg(x)*x.amt);if(!sec.hidden)render()}};
-
-(window.RV=window.RV||{}).bank=()=>{render();loadUsers()};
+(window.RV=window.RV||{}).bank=()=>{render();load()};
 })();
