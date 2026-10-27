@@ -25,8 +25,10 @@ const top3=()=>users().filter(u=>FREQ[u.id]>0).sort((a,b)=>FREQ[b.id]-FREQ[a.id]
 const css=document.createElement('style');
 css.textContent=`
 #v-bank{padding-bottom:60px}
+#v-bank::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(900px 520px at 88% -5%,rgba(139,108,240,.55),transparent 62%),radial-gradient(760px 560px at 8% 105%,rgba(40,205,235,.38),transparent 62%),linear-gradient(165deg,#081f55 0%,#0f3f8f 48%,#1a73c4 100%)}
+#v-bank::after{content:'';position:fixed;left:0;right:0;bottom:0;height:62vh;z-index:-1;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Cpath d='M0 150C200 70 380 230 600 150S1000 60 1200 140V400H0Z' fill='%238b6cf0' fill-opacity='.14'/%3E%3Cpath d='M0 230C220 160 420 300 640 230S1020 170 1200 230V400H0Z' fill='white' fill-opacity='.07'/%3E%3Cpath d='M0 310C240 260 440 360 680 305S1040 270 1200 315V400H0Z' fill='%2340d0ee' fill-opacity='.12'/%3E%3C/svg%3E") center bottom/100% 100% no-repeat}
 .bk{max-width:860px}
-.bk-hero{position:relative;overflow:hidden;border-radius:25px;padding:26px 28px 24px;color:#fff;margin-top:6px;background:linear-gradient(135deg,#0b63d1 0%,#1798e0 55%,#4fd3f3 100%);box-shadow:0 10px 34px rgba(18,140,220,.28)}
+.bk-hero{position:relative;color:#fff;padding:14px 4px 6px}
 .bk-w{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;stroke:none}
 .bk-hero>*:not(.bk-w){position:relative}
 .bk-l{font-size:14px;font-weight:500;opacity:.92}
@@ -59,7 +61,7 @@ css.textContent=`
 .bk-sel{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .bk-sel .bk-p{width:auto;flex:1;cursor:default}
 .bk-ch{font-size:12px;font-weight:600;color:var(--bt);padding:6px 10px}
-.bk-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 8px;padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#124f94,#1796cf);color:#fff}
+.bk-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 8px;padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,#0d2f78,#3b3fb0 62%,#1c7fcf);color:#fff}
 .bk-st small{display:block;font-size:11px;opacity:.78;margin-bottom:3px}
 .bk-st b{font-size:20px;font-weight:800}
 .bk-st .g{color:#5be37d}
@@ -73,25 +75,7 @@ css.textContent=`
 .bk-oi svg{width:16px;height:16px}
 .bk-o strong{display:block;font-size:13.5px;font-weight:600}
 .bk-o small{color:var(--mu);font-size:11px}
-.bk-hero,.bk .card{position:relative;overflow:hidden;color:#fff;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300' preserveAspectRatio='none'%3E%3Cpath d='M0 190C150 130 300 250 450 190S700 120 800 180V300H0Z' fill='white' fill-opacity='.12'/%3E%3Cpath d='M0 235C160 185 320 285 480 235S720 195 800 245V300H0Z' fill='white' fill-opacity='.1'/%3E%3C/svg%3E") center/100% 100% no-repeat,linear-gradient(135deg,#0b63d1 0%,#1798e0 55%,#4fd3f3 100%);box-shadow:0 10px 34px rgba(18,140,220,.22)}
-.bk .card .hd h2{color:#fff}
-.bk .card .bk-mu{color:rgba(255,255,255,.65)}
-.bk .card .bk-p small,.bk .card .bk-o small{color:rgba(255,255,255,.7)}
-.bk .card .bk-p:active{background:rgba(255,255,255,.14)}
-.bk .card .bk-t button{background:rgba(255,255,255,.16);color:#fff}
-.bk .card .bk-t button.on{background:#fff;color:#1798e0}
-.bk .card .bk-q,.bk .card .bk-in{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.4);color:#fff}
-.bk .card input::placeholder{color:rgba(255,255,255,.7)}
-.bk .card .bk-ch{color:#fff}
-.bk .card .bk-go{background:#fff;color:#1176cf}
-.bk .card .bk-x{background:rgba(255,255,255,.18);color:#fff}
-.bk .bk-st{background:none;border:1px solid rgba(255,255,255,.4)}
-.bk .bk-s.p{color:#5be37d}
-.bk .bk-s.m{color:#ff7a88}
-.bk .bk-o{border-bottom-color:rgba(255,255,255,.2)}
-.bk .bk-oi{background:rgba(255,255,255,.18);color:#fff}
-@media(max-width:520px){.bk-hero
-@media(max-width:520px){.bk-hero{padding:22px 18px}.bk-n{font-size:38px}.bk-st b{font-size:17px}}`;
+@media(max-width:520px){.bk-hero{padding:14px 0 6px}.bk-n{font-size:38px}.bk-st b{font-size:17px}}`;
 document.head.appendChild(css);
 
 /* ===== страница ===== */
@@ -109,8 +93,7 @@ function render(){
     panel=`<section class="card" id="bk-tr"><div class="hd"><h2>Перевод</h2></div><div class="bk-sel"><div class="bk-p">${ava(pick)}<span><b>${esc(pick.n)}</b><small>@${esc(pick.nick||'')}</small></span></div><button class="bk-ch" data-a="back">Сменить</button></div><input class="bk-in" id="bk-a" inputmode="numeric" placeholder="Сумма (у тебя ${b===null?'…':fmt(b)})" autocomplete="off"><input class="bk-in" id="bk-c" maxlength="100" placeholder="Комментарий (необязательно)" autocomplete="off"><div class="bk-fb" id="bk-fb"></div><div class="bk-act"><button class="bk-go" data-a="send">Перевести</button><button class="bk-x" data-a="cancel">Отмена</button></div></section>`;
   }
   sec.innerHTML=`<div class="bk">
-  <div class="bk-hero"><svg class="bk-w" viewBox="0 0 800 300" preserveAspectRatio="none"><path d="M0 190 C150 130 300 250 450 190 S700 120 800 180 V300 H0Z" fill="rgba(255,255,255,.12)"/><path d="M0 235 C160 185 320 285 480 235 S720 195 800 245 V300 H0Z" fill="rgba(255,255,255,.1)"/><circle cx="710" cy="55" r="95" fill="rgba(255,255,255,.08)"/></svg>
-   <div class="bk-l">На личном счету:</div><div class="bk-n">${b===null?'…':fmt(b)}<span class="coin"></span></div>
+  <div class="bk-hero"><div class="bk-l">На личном счету:</div><div class="bk-n">${b===null?'…':fmt(b)}<span class="coin"></span></div>
    <div class="bk-r"><button class="bk-b" data-a="tr">${ic('arrow')}Перевести</button><button class="bk-b" disabled>Открыть накопительный счет <em>скоро</em></button></div>
    ${note?`<div class="bk-ok">${esc(note)}</div>`:''}</div>
   ${panel}
@@ -132,10 +115,10 @@ function lst(){
 
 async function send(){
   const a=parseInt($('#bk-a').value,10),c=$('#bk-c').value.trim(),f=$('#bk-fb'),btn=$('[data-a="send"]');
-  const bad=m=>{f.textContent=m;f.style.color='#ffd27a'};
+  const bad=m=>{f.textContent=m;f.style.color='#d97706'};
   if(!(a>0))return bad('Введи сумму больше нуля');
   if(BAL!==null&&a>BAL)return bad('Не хватает монет: на счету '+fmt(BAL));
-  btn.disabled=true;f.style.color='#fff';f.textContent='Отправляю…';
+  btn.disabled=true;f.style.color='#566170';f.textContent='Отправляю…';
   let r;try{r=await window.SB.rpc('send_coins',{to_user:pick.id,amt:a,cmt:c})}catch(e){r={error:{message:''}}}
   if(r.error){btn.disabled=false;const m=r.error.message||'';return bad(m.includes('no_money')?'Не хватает монет':m.includes('self')?'Нельзя переводить самому себе':m.includes('bad_amount')?'Некорректная сумма':'Не получилось перевести. Попробуй ещё раз')}
   note='Переведено '+fmt(a)+' → '+pick.n;open=false;pick=null;q='';
