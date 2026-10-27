@@ -169,15 +169,6 @@ function paginate(text){
   return out.length?out:[''];
 }
 
-function openBook(id){cur=books.find(b=>b.id===id);if(!cur)return;mode='info';render()}
-async function readBook(){
-  const SB0=await getSB(),u0=SB0?(await SB0.auth.getUser()).data.user:null;
-  if(!u0){msg('Чтобы читать книги, войди в аккаунт.',0);return}
-  meId=u0.id;
-  if(!await fetchText()){msg('Не получилось открыть книгу. Попробуй ещё раз.',0);return}
-  cur.reads++;if(window.SB)window.SB.rpc('lib_read',{bid:cur.id}).then(()=>{});
-  title=cur.title;ro=true;sp=0;mode='read';render();
-}
 async function editBook(id){
   cur=books.find(b=>b.id===id);if(!cur)return;
   if(!await fetchText()){note('Не получилось открыть книгу для изменения.',1);render();return}
