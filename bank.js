@@ -120,7 +120,7 @@ async function send(){
   if(BAL!==null&&a>BAL)return bad('Не хватает монет: на счету '+fmt(BAL));
   btn.disabled=true;f.style.color='#566170';f.textContent='Отправляю…';
   let r;try{r=await window.SB.rpc('send_coins',{to_user:pick.id,amt:a,cmt:c})}catch(e){r={error:{message:''}}}
-  if(r.error){btn.disabled=false;const m=r.error.message||'';return bad(m.includes('no_money')?'Не хватает монет':m.includes('self')?'Нельзя переводить самому себе':m.includes('bad_amount')?'Некорректная сумма':'Не получилось перевести. Попробуй ещё раз')}
+  if(r.error){btn.disabled=false;const m=r.error.message||'';return bad(m.includes('no_money')?'Не хватает монет':m.includes('self')?'Нельзя переводить самому себе':m.includes('bad_amount')?'Некорректная сумма':'Не получилось перевести: '+(m||'нет связи'))}
   note='Переведено '+fmt(a)+' → '+pick.n;open=false;pick=null;q='';
   await load();
 }
