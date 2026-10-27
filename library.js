@@ -15,6 +15,7 @@ const BACK='<svg viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></s
   const DOTS='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>';
 const TRS='<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
 const ARC='<svg viewBox="0 0 24 24"><path d="M3 5h18v4H3zM5 9v10h14V9M10 13h4"/></svg>';
+  const EYE='<svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 
 const st=document.createElement('style');st.textContent=`
 #v-lib{padding-bottom:70px}
@@ -113,23 +114,25 @@ async function load(){
   if(!SB){loading=false;errT='Нет связи с сервером. Проверь интернет и обнови страницу.';return}
   const u=(await SB.auth.getUser()).data.user;meId=u?u.id:null;
   if(meId)await SB.from('library_books').delete().eq('user_id',meId).eq('status','archived').lt('archived_at',new Date(Date.now()-90*864e5).toISOString());
-  const [b,r]=await Promise.all([
-    SB.from('library_books').select('id,user_id,title,author,descr,reads,created_at,status,cover,archived_at').order('created_at',{ascending:false}).limit(300),
-    SB.from('library_rates').select('book_id,rating,user_id')]);
+  const [b,r,l,pg]=await Promise.all([
+    SB.from('library_books').select('id,user_id,title,author,descr,reads,created_at,status,cover,'created_at',{ascending:false}).limit(300),
+    SB.from('library_rates').select('book_id,rating,user_id'),
+    SB.from('library_likes').select('book_id'),
+    SB.from('library_progress').select('book_id,page')]);
   loading=false;
   if(b.error){books=[];errT='Не удалось загрузить книги: '+b.error.message+'. Проверь, что SQL выполнен.';return}
-  const R={};my={};
+  const R={};my={};lk=new Set((l.data||[]).map(x=>x.book_id));prog={};(pg.data||[]).forEach(x=>{prog[x.book_id]=x.page});
   (r.data||[]).forEach(x=>{const s=R[x.book_id]||(R[x.book_id]={s:0,c:0});s.s+=x.rating;s.c++;if(x.user_id===meId)my[x.book_id]=x.rating});
-  books=b.data.map(x=>({status:x.status||'published',cover:x.cover,id:x.id,uid:x.user_id,title:x.title,author:x.author||'Автор',desc:x.descr,reads:x.reads,date:Date.parse(x.created_at),rs:(R[x.id]||{s:0}).s,rc:(R[x.id]||{c:0}).c}));
+  books=b.data.map(x=>({status:x.status||'published',cover:x.cover,genres:x.genres||[],id:x.id,uid:x.user_id,title:x.title,author:x.author||'Автор',desc:x.descr,reads:x.reads,date:Date.parse(x.created_at),rs:(R[x.id]||{s:0}).s,rc:(R[x.id]||{c:0}).c}));
 }
-const refresh=()=>load().then(()=>{if(!sec.hidden&&(mode==='list'||mode==='mine'))render(1)});
+const refresh=()=>load().then(()=>{if(!sec.hidden&&(mode==='list'||mode==='mine'||mode==='liked'))render(1)});
 
 function listV(){
   const pub=books.filter(b=>b.status==='published'),top=[...pub].sort((a,b)=>b.reads-a.reads).slice(0,5),all=pub,ok=banner();
   const em=loading?'Загружаем…':'Пока пусто';
-  sec.innerHTML=`<div class="top"><div></div><div class="lb-hb"><button class="sw lb-up g" data-a="mine">Мои работы</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}${errT?`<div class="lb-ok bad">${esc(errT)}</div>`:''}
+  sec.innerHTML=`<div class="top"><div></div><div class="lb-hb"><button class="sw lb-up g" data-a="mine">Мои работы</button><button class="sw lb-up g lb-hbtn" data-a="liked" aria-label="Понравившиеся">${HRT}</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}${errT?`<div class="lb-ok bad">${esc(errT)}</div>`:''}
   <div class="lb-g"><section class="card"><div class="hd"><h2>Топ книг недели</h2></div><div class="hd2">Самые читаемые</div>${top.length?top.map((b,i)=>`<button class="lb-it" data-o="${b.id}"><i class="lb-n">${i+1}</i>${cover(b)}<div><b>${esc(b.title)}</b><small>${esc(b.author)}</small></div><em>Открыть ›</em></button>`).join(''):'<div class="fr">'+em+'</div>'}</section>
-  <section>${all.length?`<div class="lb-books">${all.map(b=>`<button class="lb-b" data-o="${b.id}">${cover(b)}<b>${esc(b.title)}</b><small>${esc(b.author)}</small></button>`).join('')}</div>`:'<div class="card">'+(loading?'Загружаем…':'Книг пока нет. Нажми «Загрузить» и опубликуй первую!')+'</div>'}</section></div>`;
+  <section>${all.length?`<div class="lb-books">${all.map(b=>`<button class="lb-b" data-o="${b.id}">${hr(b.id)}${cover(b)}<b>${esc(b.title)}</b><small>${esc(b.author)}</small></button>`).join('')}</div>`:'<div class="card">'+(loading?'Загружаем…':'Книг пока нет. Нажми «Загрузить» и опубликуй первую!')+'</div>'}</section></div>`;
 }
 let menuId=0;
 const AP=[['edit',PEN,'Редактировать'],['arch',ARC,'В архив'],['del',TRS,'Удалить']];
@@ -144,10 +147,10 @@ function mineV(){
   sec.innerHTML=`<div class="top"><div><div class="cap">Библиотека</div><h1>Мои работы</h1></div><div class="lb-hb"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}<section class="card" style="margin-top:22px;max-width:560px">${body}</section>`;
 }
 
-let tab='book',ccov='',cimg=null,cz=1,cx=.5,cy=.5;
+let tab='book',ccov='',cimg=null,cz=1,cx=.5,cy=.5,gen=[],gOpen=false,gTmp=[];
 
 
-const render=keep=>{if(mode==='list'||mode==='mine')ret=mode;mode==='list'?listV():mode==='mine'?mineV():mode==='info'?infoV():editV();if(!keep)window.scrollTo(0,0)};
+const render=keep=>{if(mode==='list'||mode==='mine'||mode==='liked')ret=mode;mode==='liked'?likedV():mode==='list'?listV():mode==='mine'?mineV():mode==='info'?infoV():editV();if(!keep)window.scrollTo(0,0)};
 const msg=(t,ok)=>{const m=$('#lb-msg');if(m){m.className='fb '+(ok?'ok2':'bad');m.textContent=t}};
 function tt(){$('#lb-tt').innerHTML='<h2>'+esc(title)+'</h2>'+(ro?'':'<button class="lb-pen" id="lb-pen" aria-label="Изменить название">'+PEN+'</button>')}
 function editTitle(){
@@ -184,7 +187,7 @@ async function save(status){
   const SB=await getSB(),u=SB?(await SB.auth.getUser()).data.user:null;
   if(!u){msg('Чтобы сохранить, войди в аккаунт.',0);return}
   busy=true;['#lb-pub','#lb-draft'].forEach(s=>{const x=$(s);if(x)x.disabled=true});msg('Сохраняем…',1);
-  const d={title,body:text,descr:desc.trim(),cover:ccov||null,status,archived_at:null,deco:fixDeco()};
+  const d={title,body:text,descr:desc.trim(),genres:gen,cover:ccov||null,status,archived_at:null,deco:fixDeco()};
   const r=cur?await SB.from('library_books').update(d).eq('id',cur.id).select('id')
     :await SB.from('library_books').insert({...d,author:who()}).select('id');
   busy=false;
@@ -220,7 +223,7 @@ if(c('#lb-draft')){save('draft');return}
   else if(c('[data-a="new"]'))newBook();
   else if(c('[data-r]'))rate(+c('[data-r]').dataset.r);
   else if(c('#lb-read'))readBook();
-  else if(c('#lb-back')){mode=mode==='read'?'info':((mode==='info'||mode==='edit')&&ret==='mine')?'mine':'list';render()}
+  else if(c('#lb-back')){mode=mode==='read'?'info':((mode==='info'||mode==='edit')&&(ret==='mine'||ret==='liked'))?ret:'list';render()}
   else if(c('#lb-pen'))editTitle();
   else if(c('#lb-pv')){sp=Math.max(0,sp-1);fill()}
   else if(c('#lb-nx')){if(per()*(sp+1)<pages.length){sp++;fill()}}
@@ -271,7 +274,6 @@ const st2=document.createElement('style');st2.textContent=`
 .lb-sp .pg{font-size:var(--fs,14px)}
 .lb-sd{display:none;background:#fff;border-radius:18px;padding:14px;box-shadow:0 6px 30px rgba(0,0,0,.05);margin:14px auto 0;max-width:560px}
 #lb-bk.deco .lb-sd{display:block}
-#lb-bk.deco .lb-desc{display:none}
 #lb-bk.side{display:grid;grid-template-columns:190px auto 190px;grid-template-areas:'fp mid sk';gap:18px;justify-content:center;align-items:start}
 #lb-bk.side .lb-sd{margin:10px 0 0;max-width:none}
 .lb-fp{grid-area:fp}.lb-mid{grid-area:mid}.lb-sk{grid-area:sk}
@@ -361,6 +363,7 @@ function fill(){
   [0,1].forEach(k=>{const v=pages[P*sp+k]||'';if(tas[k].value!==v)tas[k].value=v;pn[k].textContent=P*sp+k+1;ly[k].innerHTML=stHTML(P*sp+k)});
   $('#lb-n').textContent=(P===1?(sp+1):(2*sp+1)+'–'+Math.min(2*sp+2,pages.length))+' из '+pages.length;
   $('#lb-pv').disabled=sp===0;$('#lb-nx').disabled=P*(sp+1)>=pages.length;
+if(ro&&cur)saveProg(P*sp);
 }
 async function fetchText(){
   const SB=await getSB();if(!SB)return false;
@@ -374,15 +377,15 @@ async function readBook(){
   if(!u0){msg('Чтобы читать книги, войди в аккаунт.',0);return}
   meId=u0.id;
   if(!await fetchText()){msg('Не получилось открыть книгу. Попробуй ещё раз.',0);return}
-  cur.reads++;if(window.SB)window.SB.rpc('lib_read',{bid:cur.id}).then(()=>{});
-  title=cur.title;ro=true;sp=0;tab='book';deco=normDeco(cur.deco);mode='read';render();
+  if(window.SB)window.SB.rpc('lib_read',{bid:cur.id}).then(()=>{});
+  title=cur.title;ro=true;sp=Math.floor((prog[cur.id]||0)/per());tab='book';deco=normDeco(cur.deco);mode='read';render();if(per()*sp>=pages.length){sp=0;fill()}
 }
 async function editBook(id){
   cur=books.find(b=>b.id===id);if(!cur)return;
   if(!await fetchText()){note('Не получилось открыть книгу для изменения.',1);render();return}
-  title=cur.title;desc=cur.desc||'';ccov=cur.cover||'';cimg=null;tab='book';sp=0;ro=false;deco=normDeco(cur.deco);mode='edit';render();
+  title=cur.title;desc=cur.desc||'';gen=[...(cur.genres||[])];gOpen=false;ccov=cur.cover||'';cimg=null;tab='book';sp=0;ro=false;deco=normDeco(cur.deco);mode='edit';render();
 }
-function newBook(){cur=null;title='Без названия';ccov='';cimg=null;tab='book';desc='';pages=[''];sp=0;ro=false;deco=normDeco(null);mode='edit';render()}
+function newBook(){cur=null;title='Без названия';ccov='';cimg=null;tab='book';desc='';gen=[];gOpen=false;pages=[''];sp=0;ro=false;deco=normDeco(null);mode='edit';render()}
 function drawCov(){
   const c=$('#lb-cvs');if(!c||!cimg)return;const g=c.getContext('2d');g.imageSmoothingQuality='high';
   g.fillStyle='#fff';g.fillRect(0,0,480,640);
@@ -403,9 +406,9 @@ function editV(){
   ${ro?'':'<div class="lb-tabs"><button data-t="cover">Обложка</button><button data-t="book" class="on">Книга</button><button data-t="deco">Оформление</button></div>'}
   <div class="lb-tt" id="lb-tt"></div>
   <div id="lb-cvp" hidden><div class="lb-cvw" id="lb-prev"></div><button class="lb-btn" id="lb-imgb">Загрузить картинку</button><div class="lb-rg" id="lb-rg" hidden><label>Размер<input type="range" id="lb-z" min="0.5" max="3" step="0.05" value="1"></label><label>Влево — вправо<input type="range" id="lb-x" min="0" max="1" step="0.01" value="0.5"></label><label>Вверх — вниз<input type="range" id="lb-y" min="0" max="1" step="0.01" value="0.5"></label></div></div>
-  <div id="lb-bk"><div class="lb-mid">${ro?'':'<textarea class="lb-desc" id="lb-desc" maxlength="500" placeholder="Описание книги: о чём она (по желанию)"></textarea>'}
+  <div id="lb-bk"><div class="lb-mid">
   <div class="lb-sp"><div class="pgw"><textarea class="pg meas" tabindex="-1" aria-hidden="true"></textarea><textarea class="pg" data-i="0"${r}${ph}></textarea><div class="stl"></div><div class="pn"></div></div><div class="pgw"><textarea class="pg" data-i="1"${r}></textarea><div class="stl"></div><div class="pn"></div></div></div>
-  <div class="lb-nav"><button class="go" id="lb-pv">‹</button><span id="lb-n"></span><button class="go" id="lb-nx">›</button></div></div>${ro?'':'<div class="lb-sd lb-fp" id="lb-fp"></div><div class="lb-sd lb-sk" id="lb-sk"></div>'}</div>
+  <div class="lb-nav"><button class="go" id="lb-pv">‹</button><span id="lb-n"></span><button class="go" id="lb-nx">›</button></div>${ro?'':'<textarea class="lb-desc" id="lb-desc" maxlength="500" placeholder="Описание книги: о чём она (по желанию)"></textarea><div id="lb-gn"></div>'}</div>${ro?'':'<div class="lb-sd lb-fp" id="lb-fp"></div><div class="lb-sd lb-sk" id="lb-sk"></div>'}</div>
   ${ro?'':`<div class="lb-im" id="lb-im"><button class="lb-btn gr" id="lb-pic">${IMGI}Загрузить изображение</button><small>1 изображение на 10 страниц</small></div>
   <div class="lb-fin">${cur&&cur.status==='published'?'':'<button class="lb-btn gr" id="lb-draft">Сохранить черновик</button>'}<button class="lb-btn gn" id="lb-pub">${cur&&cur.status==='published'?'Сохранить':'Опубликовать'}</button></div>`}
   <div class="fb" id="lb-msg" style="text-align:center"></div>
@@ -415,7 +418,7 @@ function editV(){
   styleFont();
   if(mode==='read'||cur)pages=paginate(cur.text);
   if(per()===2&&pages.length%2)pages.push('');
-  tt();renderSide();fill();
+  tt();renderSide();fill();genV();
   if(deco.font!=='def')loadFont().then(()=>{if(sec.querySelector('.lb-sp')&&tab!=='cover'){repag();fill()}});
 }
 
@@ -545,9 +548,9 @@ function infoV(){
   <div class="lb-info"><div class="lb-l">${cover(b)}</div><div class="lb-r"><div class="lb-au">${esc(b.author)} · опубликовано ${dt}</div><h1>${esc(b.title)}</h1>
   <div class="lb-stars">${[1,2,3,4,5].map(i=>`<button class="lb-st${i<=sh?' on':''}" data-r="${i}" aria-label="Оценка ${i}">★</button>`).join('')}</div>
   <div class="lb-avg">${avg(b)}${mine?' · твоя оценка: '+mine:' · нажми на звезду, чтобы оценить'}</div>
-  <div id="lb-rf"></div><div class="fb" id="lb-msg"></div>
-  <h3>Описание</h3><p>${b.desc?esc(b.desc).replace(/\n/g,'<br>'):'Описания нет.'}</p>
-  <button class="lb-btn big" id="lb-read">Читать</button></div></div>
+  <div class="lb-avg lb-eye">${EYE}${b.reads||0} · уникальных просмотров<button class="lb-hrt${lk.has(b.id)?' on':''}" data-h="${b.id}">${HRT} Нравится</button></div><div id="lb-rf"></div><div class="fb" id="lb-msg"></div>
+  ${b.genres&&b.genres.length?'<div class="lb-gc">'+b.genres.map(g=>'<span>'+esc(g)+'</span>').join('')+'</div>':''}<h3>Описание</h3><p>${b.desc?esc(b.desc).replace(/\n/g,'<br>'):'Описания нет.'}</p>
+  <button class="lb-btn big" id="lb-read">${prog[b.id]>0?'Продолжить · стр. '+(prog[b.id]+1):'Читать'}</button></div></div>
   <section class="card" style="margin-top:22px"><div class="hd"><h2>Отзывы</h2><span id="lb-rc"></span></div><div id="lb-rv"><div class="fr">Загружаем…</div></div></section>`;
   revForm();loadRev();
 }
@@ -600,7 +603,7 @@ const st5=document.createElement('style');st5.textContent=`
 .lb-th{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .lb-bm{position:relative;display:inline-block;flex:none}
 .lb-bm .lb-mn{top:42px;right:0}
-.lb-tt .lb-bm{margin-left:4px}`;
+.lb-tt .lb-bm{margin-left:4px}`.lb-eye{display:flex;align-items:center;gap:6px;margin-top:6px}.lb-eye svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round};
 document.head.appendChild(st5);
 let bmOpen=false,modOK=false,modState=0;
 const FLAG='<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
@@ -668,6 +671,67 @@ sec.addEventListener('click',e=>{
   if(c('[data-bk]')){const k=c('[data-bk]').dataset.bk;bmOpen=false;bmDraw();if(k==='rep')doReport();else modDel();return}
   if(bmOpen&&!c('.lb-bm')){bmOpen=false;bmDraw()}
 });
+/* ===== ЖАНРЫ ===== */
+const GN=['Фэнтези','Фантастика','Детектив','Приключения','Ужасы','Юмор','Поэзия','Научпоп','Учебное','Детское','Другое'];
+const st6=document.createElement('style');st6.textContent=`
+.gn-w{max-width:980px;margin:10px auto 0;position:relative}
+.gn-h{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 16px;border:1px solid #dfe5ea;border-radius:14px;background:#fff;font-size:13px;text-align:left;color:#34404e}
+.gn-l{margin-top:6px;background:#fff;border:1px solid #dfe5ea;border-radius:14px;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px 10px}
+.gn-l label{display:flex;gap:8px;align-items:center;font-size:13px;padding:4px 0}
+.gn-l .lb-btn{grid-column:1/-1;justify-self:start;margin-top:6px}
+.lb-gc{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.lb-gc span{background:var(--pl);color:var(--bt);border-radius:12px;padding:3px 10px;font-size:12px;font-weight:600}`;
+document.head.appendChild(st6);
+function genV(){
+  const b=$('#lb-gn');if(!b)return;
+  b.innerHTML=`<div class="gn-w"><button class="gn-h" id="gn-t"><span>Жанр: ${gen.length?esc(gen.join(', ')):'не выбран'}</span><span>${gOpen?'▴':'▾'}</span></button>${gOpen?`<div class="gn-l">${GN.map(g=>`<label><input type="checkbox" data-g="${g}"${gTmp.includes(g)?' checked':''}>${g}</label>`).join('')}<button class="lb-btn gn" id="gn-s">Сохранить</button></div>`:''}</div>`;
+}
+sec.addEventListener('click',e=>{
+  const c=k=>e.target.closest(k);
+  if(c('#gn-t')){gTmp=[...gen];gOpen=!gOpen;genV();return}
+  if(c('#gn-s')){gen=[...gTmp];gOpen=false;genV()}
+});
+sec.addEventListener('change',e=>{
+  const g=e.target.dataset&&e.target.dataset.g;if(!g)return;
+  gTmp=e.target.checked?[...new Set([...gTmp,g])]:gTmp.filter(x=>x!==g);
+});
+/* ===== ПОНРАВИВШИЕСЯ ===== */
+let lk=new Set(),prog={},pgT=0;
+const HRT='<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3 5 6.5 5c2.1 0 3.9 1.2 5.5 3 1.6-1.8 3.4-3 5.5-3C21 5 22.8 8.6 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>';
+const hr=id=>`<span class="lb-hr${lk.has(id)?' on':''}" data-h="${id}" role="button" aria-label="Нравится">${HRT}</span>`;
+const st7=document.createElement('style');st7.textContent=`
+.lb-b{position:relative}
+.lb-hr{position:absolute;right:20px;top:20px;z-index:3;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);color:#9aa4ae;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+.lb-hr svg,.lb-hrt svg,.lb-hbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.lb-hr.on,.lb-hrt.on{color:#e5484d}
+.lb-hr.on svg,.lb-hrt.on svg{fill:#e5484d}
+.lb-hrt{margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:600;color:#9aa4ae}
+.lb-hbtn{padding:0 14px}`;
+document.head.appendChild(st7);
+function likedV(){
+  const L=books.filter(b=>b.status==='published'&&lk.has(b.id)),ok=banner();
+  sec.innerHTML=`<div class="top"><div><div class="cap">Библиотека</div><h1>Понравившиеся</h1></div><div class="lb-hb"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button></div></div>${ok}<section style="margin-top:22px">${L.length?`<div class="lb-books">${L.map(b=>`<button class="lb-b" data-o="${b.id}">${hr(b.id)}${cover(b)}<b>${esc(b.title)}</b><small>${esc(b.author)}</small></button>`).join('')}</div>`:'<div class="card">'+(meId?'Пока пусто. Нажми на сердечко на книге, и она появится здесь.':'Войди в аккаунт, чтобы видеть понравившиеся.')+'</div>'}</section>`;
+}
+async function toggleLike(id){
+  const bad=t=>document.getElementById('lb-msg')?msg(t,0):alert(t);
+  if(!meId){bad('Чтобы отметить книгу, войди в аккаунт.');return}
+  const SB=await getSB();if(!SB)return;
+  const on=lk.has(id),paint=()=>document.querySelectorAll('[data-h="'+id+'"]').forEach(x=>x.classList.toggle('on',lk.has(id)));
+  on?lk.delete(id):lk.add(id);paint();
+  const r=on?await SB.from('library_likes').delete().eq('book_id',id).eq('user_id',meId):await SB.from('library_likes').insert({book_id:id});
+  if(r.error){on?lk.add(id):lk.delete(id);paint();bad('Не получилось: '+r.error.message)}
+}
+sec.addEventListener('click',e=>{
+  const h=e.target.closest('[data-h]');
+  if(h){e.stopPropagation();toggleLike(+h.dataset.h);return}
+  if(e.target.closest('[data-a="liked"]')){e.stopPropagation();mode='liked';render()}
+},true);
+
+/* ===== ЗАПОМИНАЕМ СТРАНИЦУ ===== */
+function saveProg(p){
+  if(!cur||!meId)return;const id=cur.id;prog[id]=p;clearTimeout(pgT);
+  pgT=setTimeout(async()=>{const SB=await getSB();if(SB)SB.from('library_progress').upsert({book_id:id,user_id:meId,page:p,updated_at:new Date().toISOString()},{onConflict:'book_id,user_id'})},600);
+}
 window.LBopen=async id=>{
   MS.show('lib');await load();
   if(!books.find(x=>x.id===id)){alert('Книга не найдена: возможно, она уже удалена.');return}
