@@ -169,19 +169,6 @@ function paginate(text){
   return out.length?out:[''];
 }
 
-async function editBook(id){
-  cur=books.find(b=>b.id===id);if(!cur)return;
-  if(!await fetchText()){note('Не получилось открыть книгу для изменения.',1);render();return}
-  title=cur.title;desc=cur.desc||'';ccov=cur.cover||'';cimg=null;tab='book';sp=0;ro=false;mode='edit';render();
-}
-function newBook(){ccov='';cimg=null;tab='book';desc='';pages=[''];sp=0;ro=false;mode='edit';render()}
-async function rate(r){
-  const SB=await getSB();
-  if(!SB||!meId){msg('Чтобы оценить книгу, войди в аккаунт.',0);return}
-  const res=await SB.from('library_rates').upsert({book_id:cur.id,user_id:meId,rating:r},{onConflict:'book_id,user_id'});
-  if(res.error){msg('Не получилось: '+res.error.message,0);return}
-  const old=my[cur.id];if(old)cur.rs-=old;else cur.rc++;cur.rs+=r;my[cur.id]=r;infoV();
-}
   const ask=(t,ok,red)=>new Promise(res=>{
   const d=document.createElement('div');d.className='lb-md';
   d.innerHTML=`<div class="lb-mb"><p>${esc(t)}</p><div><button class="lb-btn gr" data-v="0">Отмена</button><button class="lb-btn${red?' rd':' gn'}" data-v="1">${esc(ok)}</button></div></div>`;
@@ -344,26 +331,12 @@ let deco={font:'def',st:[]};
 const num=(v,a,b,d)=>Math.min(b,Math.max(a,+v||d));
 const normDeco=d=>({font:FN.some(f=>f[0]===(d&&d.font))?d.font:'def',st:((d&&Array.isArray(d.st))?d.st:[]).slice(0,80).map(o=>({id:String(o.id||'').replace(/\W/g,'').slice(0,20)||('s'+Math.random().toString(36).slice(2,8)),p:num(o.p,0,9999,0),t:(o.t==='img'||SK.some(k=>k[0]===o.t))?o.t:'n1',x:num(o.x,0,95,10),y:num(o.y,0,95,10),w:num(o.w,8,100,30),h:num(o.h,4,100,10),txt:String(o.txt||'').slice(0,120),src:/^data:image\//.test(o.src||'')?o.src:'',ar:num(o.ar,.1,10,1)}))});
 const fixDeco=()=>({font:deco.font,st:deco.st.map(o=>({...o,p:Math.min(o.p,Math.max(0,pages.length-1))}))});
-const wide=()=>sec.clientWidth>=1000;
 
 function styleFont(){const s=sec.querySelector('.lb-sp');if(!s)return;const f=FN.find(x=>x[0]===deco.font)||FN[0];s.style.fontFamily=f[2];s.style.fontStyle=f[3];s.style.fontWeight=f[4];s.style.setProperty('--fs',f[5]+'px')}
 const loadFont=()=>{const f=FN.find(x=>x[0]===deco.font)||FN[0];return Promise.race([document.fonts.load(f[3]+' '+f[4]+' 16px '+f[2].split(',')[0],'Аб'),new Promise(r=>setTimeout(r,2000))]).catch(()=>{})};
 function repag(){pages=paginate(pages.join(''));if(per()===2&&pages.length%2)pages.push('');if(per()*sp>=pages.length)sp=Math.max(0,Math.ceil(pages.length/per())-1)}
 async function setFont(id){deco.font=id;renderSide();styleFont();await loadFont();if(!sec.querySelector('.lb-sp')||tab==='cover')return;repag();fill()}
-function fit(){
-  const s=sec.querySelector('.lb-sp'),m=sec.querySelector('.lb-mid');if(!s||!m)return;
-  s.style.width=s.style.transform=s.style.marginBottom='';m.style.width='';
-  if(ro||tab!=='deco'||!wide())return;
-  const w=Math.min(980,sec.clientWidth),k=Math.max(.55,Math.min(.76,(sec.clientWidth-430)/w));
-  s.style.width=w+'px';s.style.transformOrigin='top left';s.style.transform='scale('+k+')';
-  s.style.marginBottom=(-s.offsetHeight*(1-k))+'px';m.style.width=(w*k)+'px';
-}
-function tabFix(){
-  const bk=$('#lb-bk');if(!bk||ro)return;const d=tab==='deco',im=$('#lb-im');
-  bk.hidden=tab==='cover';if(im)im.hidden=tab==='cover';
-  bk.classList.toggle('deco',d);bk.classList.toggle('side',d&&wide());
-  if(!bk.hidden){fit();fill()}
-}
+
 function renderSide(){
   const fp=$('#lb-fp'),sk=$('#lb-sk');if(!fp||!sk)return;
   fp.innerHTML='<div class="lb-sh">Шрифт</div>'+FN.map(f=>`<button class="fnb${f[0]===deco.font?' on':''}" data-f="${f[0]}" style="font-family:${f[2]};font-style:${f[3]};font-weight:${f[4]}"><b>Аа</b> ${f[1]}</button>`).join('');
@@ -548,7 +521,7 @@ function tabFix(){
   layoutDeco();
   if(!bk.hidden){fit();fill()}
 }
-addEventListener('resize',layoutDeco);
+addEventListener('resize',()=>{layoutDeco();fit()});
 
   /* ===== ОТЗЫВЫ ===== */
 const st4=document.createElement('style');st4.textContent=`
@@ -622,4 +595,120 @@ sec.addEventListener('click',async e=>{
   }
 });
 sec.addEventListener('input',e=>{if(e.target.id==='lb-rt')rtxt=e.target.value});
+  /* ===== ЖАЛОБЫ НА КНИГИ ===== */
+const st5=document.createElement('style');st5.textContent=`
+.lb-th{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.lb-bm{position:relative;display:inline-block;flex:none}
+.lb-bm .lb-mn{top:42px;right:0}
+.lb-tt .lb-bm{margin-left:4px}`;
+document.head.appendChild(st5);
+let bmOpen=false,modOK=false,modState=0;
+const FLAG='<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>';
+const RSN=['Неприемлемый контент','Оскорбления или травля','Спам или реклама','Чужая работа (плагиат)','Другое'];
+
+async function chkMod(){
+  const SB=await getSB(),u=SB?(await SB.auth.getUser()).data.user:null;if(!u)return false;
+  const r=await SB.from('moderators').select('user_id').eq('user_id',u.id).maybeSingle();
+  return !!r.data;
+}
+function bookMenu(){
+  if(meId&&modState===0){modState=1;chkMod().then(v=>{modOK=v;modState=2;bmDraw()})}
+  const items=[];
+  if(meId&&cur&&cur.uid!==meId)items.push(['rep',FLAG,'Пожаловаться']);
+  if(meId&&cur&&modOK)items.push(['mdel',TRS,'Удалить книгу (модератор)']);
+  if(!items.length)return '<span class="lb-bm"></span>';
+  return `<span class="lb-bm"><button class="lb-ed" data-bm aria-label="Меню">${DOTS}</button>${bmOpen?`<div class="lb-mn">${items.map(a=>`<button data-bk="${a[0]}"${a[0]==='mdel'?' class="red"':''}>${a[1]}${a[2]}</button>`).join('')}</div>`:''}</span>`;
+}
+const bmDraw=()=>document.querySelectorAll('.lb-bm').forEach(x=>x.outerHTML=bookMenu());
+function injectMenu(){
+  const h=sec.querySelector('.lb-r h1');
+  if(h&&!sec.querySelector('.lb-th')){const w=document.createElement('div');w.className='lb-th';h.replaceWith(w);w.appendChild(h);w.insertAdjacentHTML('beforeend',bookMenu())}
+}
+function revForm(){
+  injectMenu();
+  const f=$('#lb-rf');if(!f)return;
+  if(!pend){f.innerHTML='';return}
+  f.innerHTML=`<textarea id="lb-rt" class="lb-desc" style="max-width:none;margin:10px 0 0;height:90px" maxlength="500" placeholder="Напиши отзыв о книге (по желанию)">${esc(rtxt)}</textarea>
+  <div class="lb-hint" style="margin:6px 0 8px">Можно без текста: тогда опубликуется только оценка ${pend} ★</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="lb-btn gn" id="lb-rs">${my[cur.id]?'Сохранить отзыв':'Опубликовать'}</button><button class="lb-btn gr" id="lb-rx">Отмена</button></div>`;
+}
+function tt(){
+  $('#lb-tt').innerHTML='<h2>'+esc(title)+'</h2>'+(ro?bookMenu():'<button class="lb-pen" id="lb-pen" aria-label="Изменить название">'+PEN+'</button>');
+}
+function reportBook(){
+  return new Promise(res=>{
+    const d=document.createElement('div');d.className='lb-md';
+    d.innerHTML=`<div class="lb-mb" style="text-align:left"><p style="font-weight:700;margin-bottom:10px">Пожаловаться на книгу «${esc(cur.title)}»</p>${RSN.map((t,i)=>`<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:14px"><input type="radio" name="rr" value="${i}"${i?'':' checked'}>${t}</label>`).join('')}<textarea id="rr-t" maxlength="300" placeholder="Что не так? (по желанию)" style="width:100%;height:70px;margin:8px 0 14px;border:1px solid #dfe5ea;border-radius:12px;padding:10px;font:inherit;outline:0"></textarea><div><button class="lb-btn gr" data-v="0">Отмена</button><button class="lb-btn rd" data-v="1">Отправить</button></div></div>`;
+    d.onclick=e=>{
+      const v=e.target.closest('[data-v]');if(!v&&e.target!==d)return;
+      const ok=v&&v.dataset.v==='1',i=d.querySelector('input:checked'),t=d.querySelector('#rr-t').value.trim();
+      d.remove();res(ok?RSN[+i.value]+(t?': '+t:''):null);
+    };
+    document.body.appendChild(d);
+  });
+}
+async function doReport(){
+  if(!meId){msg('Чтобы пожаловаться, войди в аккаунт.',0);return}
+  const why=await reportBook();if(!why)return;
+  const SB=await getSB();
+  const r=await SB.from('reports').insert({kind:'book',target_id:cur.id,reason:why.slice(0,300)});
+  if(r.error)msg('Не получилось отправить: '+r.error.message,0);else msg('Спасибо! Жалоба отправлена модераторам.',1);
+}
+async function modDel(){
+  if(!(await ask('Удалить книгу «'+cur.title+'» как модератор? Это нельзя отменить.','Удалить',1)))return;
+  const SB=await getSB(),id=cur.id;
+  const r=await SB.from('library_books').delete().eq('id',id).select('id');
+  if(r.error||!(r.data||[]).length){msg('Не получилось удалить: '+(r.error?r.error.message:'нет прав, проверь SQL из шага 1'),0);return}
+  await SB.from('reports').update({resolved:true}).eq('kind','book').eq('target_id',id);
+  note('Книга удалена модератором');cur=null;mode='list';await load();render();
+}
+sec.addEventListener('click',e=>{
+  const c=k=>e.target.closest(k);
+  if(c('[data-bm]')){bmOpen=!bmOpen;bmDraw();return}
+  if(c('[data-bk]')){const k=c('[data-bk]').dataset.bk;bmOpen=false;bmDraw();if(k==='rep')doReport();else modDel();return}
+  if(bmOpen&&!c('.lb-bm')){bmOpen=false;bmDraw()}
+});
+window.LBopen=async id=>{
+  MS.show('lib');await load();
+  if(!books.find(x=>x.id===id)){alert('Книга не найдена: возможно, она уже удалена.');return}
+  openBook(id);
+};
+
+/* раздел «Жалобы» в модерации маркета теперь знает про книги */
+if(window.Market){
+  Market.openBookReport=id=>window.LBopen(id);
+  Market.loadReports=async function(){
+    const el=document.getElementById('reportsQueue'),sb=window.SB;if(!el||!sb||!this.isMod)return;
+    const r=await sb.from('reports').select('*').eq('resolved',false).order('id',{ascending:false}).limit(50);
+    if(r.error){el.innerHTML='<p style="color:red">'+esc(r.error.message)+'</p>';return}
+    const L=r.data||[],ids=k=>L.filter(x=>x.kind===k).map(x=>x.target_id);
+    const q=(t,c,k)=>ids(k).length?sb.from(t).select(c).in('id',ids(k)):null;
+    const [ps,cs,bs]=await Promise.all([q('posts','id,body,image_url,user_id','post'),q('post_comments','id,body,user_id','comment'),q('library_books','id,title,author,user_id','book')]);
+    const M=z=>Object.fromEntries(((z&&z.data)||[]).map(x=>[x.id,x]));
+    const T={post:M(ps),comment:M(cs),book:M(bs)};
+    const us=[...new Set(L.map(x=>((T[x.kind]||{})[x.target_id]||{}).user_id).filter(Boolean))];
+    const nm=us.length?Object.fromEntries(((await sb.from('profiles').select('id,name').in('id',us)).data||[]).map(x=>[x.id,x.name])):{};
+    const KN={post:'Публикация',comment:'Комментарий',book:'Книга'};
+    el.innerHTML=L.map(x=>{
+      const t=(T[x.kind]||{})[x.target_id];
+      const body=!t?'<div style="color:#8a94a3;margin:6px 0">Уже удалено</div>'
+        :x.kind==='book'?`<div style="font-weight:700;margin:6px 0 2px">«${esc(t.title)}»</div><div style="color:#8a94a3;font-size:13px">Автор: ${esc(nm[t.user_id]||t.author||'Участник')}</div><button onclick="Market.openBookReport(${t.id})" style="margin-top:8px;padding:7px 14px;border:0;border-radius:10px;background:#eef1f6;font-weight:700;cursor:pointer">Открыть книгу</button>`
+        :`<div style="font-weight:700;margin:6px 0 2px">${esc(nm[t.user_id]||'Участник')}</div><div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(t.body)}</div>${t.image_url?`<img src="${esc(t.image_url)}" style="max-width:220px;border-radius:10px;margin-top:8px;display:block">`:''}`;
+      return `<div style="background:#fff;border-radius:18px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.05)">
+        <div style="font-size:12px;color:#8a94a3">${KN[x.kind]||x.kind} · ${esc(x.reason)}</div>${body}
+        <div style="display:flex;gap:8px;margin-top:12px">
+          ${t?`<button onclick="Market.reportDelete(${x.id},'${x.kind}',${x.target_id})" style="padding:9px 16px;border:0;border-radius:10px;background:#e63946;color:#fff;font-weight:700;cursor:pointer">Удалить</button>`:''}
+          <button onclick="Market.reportClose(${x.id})" style="padding:9px 16px;border:0;border-radius:10px;background:#eef1f6;font-weight:700;cursor:pointer">${t?'Отклонить':'Закрыть'}</button>
+        </div></div>`;
+    }).join('')||'<p style="color:#888">Жалоб нет</p>';
+  };
+  Market.reportDelete=async function(rid,kind,tid){
+    const N={post:'публикацию',comment:'комментарий',book:'книгу'},TB={post:'posts',comment:'post_comments',book:'library_books'};
+    if(!confirm('Удалить '+N[kind]+'?'))return;
+    const sb=window.SB,r=await sb.from(TB[kind]).delete().eq('id',tid).select();
+    if(r.error||!(r.data||[]).length)return alert('Не удалось удалить: '+(r.error?r.error.message:'нет прав, проверь SQL из шага 1'));
+    await sb.from('reports').update({resolved:true}).eq('target_id',tid).eq('kind',kind);
+    this.loadReports();
+  };
+}
 })();
