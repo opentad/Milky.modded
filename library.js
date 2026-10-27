@@ -143,48 +143,10 @@ function mineV(){
   const body=!meId&&!loading?'<div class="fr">Войди в аккаунт, чтобы видеть свои работы.</div>':sect('Опубликованные',P,AP,'',1)+sect('Черновики',D,AD,'',1)+sect('Архив',A,AA,'Если книгу не трогать 90 дней, она удалится автоматически.');
   sec.innerHTML=`<div class="top"><div><div class="cap">Библиотека</div><h1>Мои работы</h1></div><div class="lb-hb"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><button class="sw lb-up" data-a="new">${PLUS}Загрузить</button></div></div>${ok}<section class="card" style="margin-top:22px;max-width:560px">${body}</section>`;
 }
-function infoV(){
-  const b=cur,mine=my[b.id]||0,dt=new Date(b.date).toLocaleDateString('ru');
-  sec.innerHTML=`<button class="back" id="lb-back" style="margin:0 0 12px">${BACK}Назад</button>
-  <div class="lb-info"><div class="lb-l">${cover(b)}</div><div class="lb-r"><div class="lb-au">${esc(b.author)} · опубликовано ${dt}</div><h1>${esc(b.title)}</h1>
-  <div class="lb-stars">${[1,2,3,4,5].map(i=>`<button class="lb-st${i<=mine?' on':''}" data-r="${i}" aria-label="Оценка ${i}">★</button>`).join('')}</div>
-  <div class="lb-avg">${avg(b)}${mine?' · твоя оценка: '+mine:' · нажми на звезду, чтобы оценить'}</div><div class="fb" id="lb-msg"></div>
-  <h3>Описание</h3><p>${b.desc?esc(b.desc).replace(/\n/g,'<br>'):'Описания нет.'}</p>
-  <button class="lb-btn big" id="lb-read">Читать</button></div></div>`;
-}
+
 let tab='book',ccov='',cimg=null,cz=1,cx=.5,cy=.5;
-function editV(){
-  const ph=ro?'':' placeholder="Пиши здесь…"',r=ro?' readonly':'';
-  lastP=per();
-  sec.innerHTML=`<div class="lb-bar"><button class="back" id="lb-back" style="margin:0">${BACK}Назад</button><div class="r">${ro?'':`<button class="lb-btn" id="lb-word">${UPL}Загрузить из Word</button>`}</div></div>
-  ${ro?'':'<div class="lb-tabs"><button data-t="cover">Обложка</button><button data-t="book" class="on">Книга</button></div>'}
-  <div class="lb-tt" id="lb-tt"></div>
-  <div id="lb-cvp" hidden><div class="lb-cvw" id="lb-prev"></div><button class="lb-btn" id="lb-imgb">Загрузить картинку</button><div class="lb-rg" id="lb-rg" hidden><label>Размер<input type="range" id="lb-z" min="0.5" max="3" step="0.05" value="1"></label><label>Влево — вправо<input type="range" id="lb-x" min="0" max="1" step="0.01" value="0.5"></label><label>Вверх — вниз<input type="range" id="lb-y" min="0" max="1" step="0.01" value="0.5"></label></div></div>
-  <div id="lb-bk">${ro?'':'<textarea class="lb-desc" id="lb-desc" maxlength="500" placeholder="Описание книги: о чём она (по желанию)"></textarea>'}
-  <div class="lb-sp"><div class="pgw"><textarea class="pg meas" tabindex="-1" aria-hidden="true"></textarea><textarea class="pg" data-i="0"${r}${ph}></textarea><div class="pn"></div></div><div class="pgw"><textarea class="pg" data-i="1"${r}></textarea><div class="pn"></div></div></div>
-  <div class="lb-nav"><button class="go" id="lb-pv">‹</button><span id="lb-n"></span><button class="go" id="lb-nx">›</button></div></div>
-  ${ro?'':`<div class="lb-fin">${cur&&cur.status==='published'?'':'<button class="lb-btn gr" id="lb-draft">Сохранить черновик</button>'}<button class="lb-btn gn" id="lb-pub">${cur&&cur.status==='published'?'Сохранить':'Опубликовать'}</button></div>`}
-  <div class="fb" id="lb-msg" style="text-align:center"></div>
-  <input type="file" id="lb-file" accept=".docx" hidden><input type="file" id="lb-img" accept="image/*" hidden>`;
-  tas=[...sec.querySelectorAll('textarea.pg:not(.meas)')];meas=sec.querySelector('.meas');
-  if(!ro)sec.querySelector('#lb-desc').value=desc;
-  if(mode==='read'||cur)pages=paginate(cur.text);
-  if(per()===2&&pages.length%2)pages.push('');
-  tt();fill();
-}
-function drawCov(){
-  const c=$('#lb-cvs');if(!c||!cimg)return;const g=c.getContext('2d');
-  g.fillStyle='#fff';g.fillRect(0,0,240,320);
-  const s=Math.max(240/cimg.width,320/cimg.height)*cz,w=cimg.width*s,h=cimg.height*s;
-  g.drawImage(cimg,(240-w)*cx,(320-h)*cy,w,h);
-  ccov=c.toDataURL('image/jpeg',.75);
-}
-function covPrev(){
-  const p=$('#lb-prev');if(!p)return;
-  if(cimg){p.innerHTML='<canvas id="lb-cvs" width="240" height="320"></canvas>';drawCov()}
-  else p.innerHTML=cover({title,cover:ccov});
-  $('#lb-rg').hidden=!cimg;
-}
+
+
 const render=keep=>{if(mode==='list'||mode==='mine')ret=mode;mode==='list'?listV():mode==='mine'?mineV():mode==='info'?infoV():editV();if(!keep)window.scrollTo(0,0)};
 const msg=(t,ok)=>{const m=$('#lb-msg');if(m){m.className='fb '+(ok?'ok2':'bad');m.textContent=t}};
 function tt(){$('#lb-tt').innerHTML='<h2>'+esc(title)+'</h2>'+(ro?'':'<button class="lb-pen" id="lb-pen" aria-label="Изменить название">'+PEN+'</button>')}
@@ -206,19 +168,7 @@ function paginate(text){
   }
   return out.length?out:[''];
 }
-function fill(){
-  const P=per(),pn=sec.querySelectorAll('.pn');
-  sec.querySelector('.lb-sp').classList.toggle('one',P===1);
-  [0,1].forEach(k=>{const v=pages[P*sp+k]||'';if(tas[k].value!==v)tas[k].value=v;pn[k].textContent=P*sp+k+1});
-  $('#lb-n').textContent=(P===1?(sp+1):(2*sp+1)+'–'+Math.min(2*sp+2,pages.length))+' из '+pages.length;
-  $('#lb-pv').disabled=sp===0;$('#lb-nx').disabled=P*(sp+1)>=pages.length;
-}
-async function fetchText(){
-  const SB=await getSB();if(!SB)return false;
-  const r=await SB.from('library_books').select('body').eq('id',cur.id).single();
-  if(r.error){return false}
-  cur.text=r.data.body;return true;
-}
+
 function openBook(id){cur=books.find(b=>b.id===id);if(!cur)return;mode='info';render()}
 async function readBook(){
   const SB0=await getSB(),u0=SB0?(await SB0.auth.getUser()).data.user:null;
