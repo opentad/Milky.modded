@@ -46,8 +46,8 @@
   const KINDS = { status: 'Статусы', banner: 'Баннеры' };
 
   const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
-const COIN_P = 'M466 548V1430M1478 548V1430M466 548L966 1428L1478 548M352 870H1582M340 1100H1592';
-const COIN = `<i style="display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f2a900);box-shadow:inset 0 0 0 1px rgba(160,100,0,.35);vertical-align:-4px"><svg viewBox="250 390 1440 1180" width="15" height="12" fill="none" stroke-width="170" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(40 45)" d="${COIN_P}" stroke="#a86a00" stroke-opacity=".75"/><path transform="translate(-35 -40)" d="${COIN_P}" stroke="#fff4b8"/><path d="${COIN_P}" stroke="#f6b81f"/></svg></i>`;
+const COIN_P = 'M466 548V1430M1478 548V1430M466 548L966 1428L1478 548M352 880H1582M340 1090H1592';
+const COIN = `<i style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f2a900);box-shadow:inset 0 0 0 1px rgba(160,100,0,.35);vertical-align:-6px"><svg viewBox="250 390 1440 1180" width="19" height="16" fill="none" stroke-width="140" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(32 36)" d="${COIN_P}" stroke="#a86a00" stroke-opacity=".75"/><path transform="translate(-28 -32)" d="${COIN_P}" stroke="#fff4b8"/><path d="${COIN_P}" stroke="#f6b81f"/></svg></i>`;
 const CART_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>';
 const CART_KEY = 'mk_cart', CART_MAX = 50, PAGE = 16;
   const FILTER_SVG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18l-7 8.2V19l-4 2v-8.8z"/></svg>';
