@@ -854,12 +854,13 @@ const ICON={
  tick:'M5.5 12.5l4.2 4.2L18.5 8',
  note:'M7 3.5h10a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2zM9.5 8h5M9.5 11.5h5M9.5 15h3',
  talk:'M12 3.5c-5 0-8.5 3.2-8.5 7.3 0 2 .9 3.8 2.4 5.1L5 20.5l4-1.8c.9.2 1.9.4 3 .4 5 0 8.5-3.2 8.5-7.3S17 3.5 12 3.5zM8.5 11h.01M12 11h.01M15.5 11h.01',
- arrow:'M5 12h14M13 6l6 6-6 6'
+ arrow:'M5 12h14M13 6l6 6-6 6',
+ bank:'M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 14V8A1.5 1.5 0 0 1 5 6.5zM12 9.3a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4zM6.5 11h.01M17.5 11h.01M6 18h12M8 20.5h8'
 };
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${ICON[k]}"/></svg>`;
-const RAIL=['home','chat','book','tasks','lib','doc','dipl','shop'];
+const RAIL=['home','chat','book','tasks','lib','bank'];
 const MENU=[
- ['Школа',[['home','Главная'],['chat','Мессенджер','','red'],['book','Мой дневник'],['tasks','Домашняя работа'],['lib','Библиотека'],['doc','Мои сертификаты'],['dipl','Мои дипломы'],['shop','Аттестационный центр']]],
+ ['Школа',[['home','Главная'],['chat','Мессенджер','','red'],['book','Мой дневник'],['tasks','Домашняя работа'],['lib','Библиотека'],['bank','MilkBank']]],
  ['Развитие',[['check','Тренажеры'],['crown','Гильдии'],['dipl','Годовой проект'],['club','Клубы Milky']]],
  ['Развлечения',[['feed','Лента','#d61fc4','cy'],['tube','MilkyTube','#d4202f'],['crown','Маркетплейс','#17c0e8'],['game','Игры','#e8a21a'],['bell','Новости','','red']]],
  ['Аккаунт',[['user','Профиль'],['exit','Выход']]]];
@@ -1074,6 +1075,7 @@ $('#drawer').addEventListener('click',e=>{
   else if(t==='Лента'){closeMenu();show('feed')}
   else if(t==='Маркетплейс'){ closeMenu(); show('market'); }
   else if(t==='Библиотека'){ closeMenu(); show('lib'); }
+  else if(t==='MilkBank'){ closeMenu(); show('bank'); }
 });
 /* ---------- страница «Домашние задания» (как на school.милки.рф) ---------- */
 (function(){
@@ -1149,6 +1151,7 @@ rCl();rHw();rGr();show('home');
 <script src="feed.js?v=10"></script>
 <script src="market.js?v=11"></script>
   <script src="library.js?v=1"></script>
+  <script src="bank.js?v=1"></script>
   <script src="mod.js?v=1"></script>
   <script>
 (function(){
@@ -1156,7 +1159,7 @@ rCl();rHw();rGr();show('home');
   window.PGON=true;
   addEventListener('load',()=>{
     if(location.hash.indexOf('#/@')===0)return;
-    if(['feed','market','prof'].includes(p))MS.show(p);
+    if(['feed','market','prof','bank'].includes(p))MS.show(p);
   });
 })();
 </script>
