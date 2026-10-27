@@ -186,6 +186,21 @@ h1{font-weight:300;font-size:26.5px;line-height:1.05;color:#4d4d4d;margin-top:6p
 a, button, input, textarea {
   cursor: url('карарарар.png'), pointer;
 }
+  html{background:#f6fbff}
+body{background:transparent!important}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(circle at 90% 6%,rgba(167,139,250,.25),transparent 38%),
+    radial-gradient(circle at 5% 45%,rgba(56,189,248,.20),transparent 40%),
+    radial-gradient(circle at 88% 90%,rgba(196,181,253,.22),transparent 40%),
+    linear-gradient(160deg,#f6fbff 0%,#eaf6fd 45%,#efeafe 100%);
+}
+.card,.lc,.dc,.gc,.dd,.rest,.sc,.hws-box{
+  background:rgba(255,255,255,.75);
+  backdrop-filter:blur(10px);
+}
+.rail{background:rgba(255,255,255,.85)}
 </style>
 </head>
 <body>
