@@ -48,9 +48,9 @@
     }
   };
 
-   /* ---------- ДЗ: Лаборатория явлений (физика, §1) ---------- */
+  /* ---------- ДЗ: Лаборатория явлений (физика, §1) ---------- */
   X.D.phys1 = {
-    img: 'formulogia.jpg',
+    img: 'kvantonomika.jpg',
     task: ['Физика / Тема: что изучает физика', 'Пройди 5 опытов в симуляции «Лаборатория явлений», потом пройди тест.'],
     mat: [], sims: ['phys1'],
     test: [{ q: 'Что изучает физика? Объясни своими словами.', k: 't' }]
@@ -63,10 +63,26 @@
       const h = e => { const m = /^fiz:ok:(\d)$/.exec(String(e.data)); if (m) c.ok(+m[1]); };
       addEventListener('message', h); return () => { removeEventListener('message', h); f.remove(); }; } });
 
+  /* ---------- ДЗ: Лаборатория животных (биология, §1 «Зоология — наука о животных») ---------- */
+  X.D.bio1 = {
+    img: 'ecoznanie2.jpg',
+    task: ['Биология / Тема: зоология — наука о животных', 'Пройди 5 станций в симуляции «Лаборатория животных», потом пройди тест.'],
+    mat: [], sims: ['bio1'],
+    test: [{ q: 'Что изучает зоология? Объясни своими словами.', k: 't' }]
+  };
+  X.SIM.bio1 = Object.assign({ t: 'Лаборатория животных', btn: 'Перейти к симуляции',
+    d: 'Пройди 5 станций лаборатории животных.',
+    m: ['Станция 1', 'Станция 2', 'Станция 3', 'Станция 4', 'Станция 5'] },
+    { mount(r, c) { const f = document.createElement('iframe'); f.src = 'learn/biology/biology1.html'; f.allow = 'fullscreen';
+      f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:18px'; r.appendChild(f);
+      const h = e => { const m = /^bio:ok:(\d)$/.exec(String(e.data)); if (m) c.ok(+m[1]); };
+      addEventListener('message', h); return () => { removeEventListener('message', h); f.remove(); }; } });
+
   /* ---------- список домашних заданий: [id, предмет, метка, «сдать до»] ---------- */
   const LIST = [
     ['numroad', 'Алгебра', '', '30 Октября 20:00'],
-     ['phys1', 'Физика', '', '30 Октября 20:00']
+    ['phys1', 'Физика', '', '30 Октября 20:00'],
+    ['bio1', 'Биология', '', '30 Октября 20:00']
   ];
   MS.HW.splice(0, MS.HW.length);
   LIST.forEach(w => MS.HW.push(w));
