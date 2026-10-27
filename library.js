@@ -608,4 +608,77 @@ function tabFix(){
   if(!bk.hidden){fit();fill()}
 }
 addEventListener('resize',layoutDeco);
+
+  /* ===== ОТЗЫВЫ ===== */
+const st4=document.createElement('style');st4.textContent=`
+.rvi{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--ln)}
+.rvi:last-child{border:0}
+.rva{flex:none;width:40px;height:40px;border-radius:50%;color:#fff;font-weight:700;display:grid;place-items:center}
+.rvb{flex:1;min-width:0}
+.rvn{font-weight:600;font-size:14px}
+.rvn small{font-weight:400;color:var(--mu);font-size:11px;margin-left:8px}
+.rvm{background:var(--pl);color:var(--bt);border-radius:9px;padding:1px 8px;font-size:10px;font-weight:600;margin-left:6px}
+.rvs{color:#f5b81c;font-size:15px;letter-spacing:1px}
+.rvs i{font-style:normal;color:#d5dbe0}
+.rvt{font-size:14px;line-height:1.6;color:#566170;margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}`;
+document.head.appendChild(st4);
+let pend=0,rtxt='',revs=[];
+
+function openBook(id){cur=books.find(b=>b.id===id);if(!cur)return;pend=0;rtxt='';revs=[];mode='info';render()}
+function infoV(){
+  const b=cur,mine=my[b.id]||0,dt=new Date(b.date).toLocaleDateString('ru'),sh=pend||mine;
+  sec.innerHTML=`<button class="back" id="lb-back" style="margin:0 0 12px">${BACK}Назад</button>
+  <div class="lb-info"><div class="lb-l">${cover(b)}</div><div class="lb-r"><div class="lb-au">${esc(b.author)} · опубликовано ${dt}</div><h1>${esc(b.title)}</h1>
+  <div class="lb-stars">${[1,2,3,4,5].map(i=>`<button class="lb-st${i<=sh?' on':''}" data-r="${i}" aria-label="Оценка ${i}">★</button>`).join('')}</div>
+  <div class="lb-avg">${avg(b)}${mine?' · твоя оценка: '+mine:' · нажми на звезду, чтобы оценить'}</div>
+  <div id="lb-rf"></div><div class="fb" id="lb-msg"></div>
+  <h3>Описание</h3><p>${b.desc?esc(b.desc).replace(/\n/g,'<br>'):'Описания нет.'}</p>
+  <button class="lb-btn big" id="lb-read">Читать</button></div></div>
+  <section class="card" style="margin-top:22px"><div class="hd"><h2>Отзывы</h2><span id="lb-rc"></span></div><div id="lb-rv"><div class="fr">Загружаем…</div></div></section>`;
+  revForm();loadRev();
+}
+function revForm(){
+  const f=$('#lb-rf');if(!f)return;
+  if(!pend){f.innerHTML='';return}
+  f.innerHTML=`<textarea id="lb-rt" class="lb-desc" style="max-width:none;margin:10px 0 0;height:90px" maxlength="500" placeholder="Напиши отзыв о книге (по желанию)">${esc(rtxt)}</textarea>
+  <div class="lb-hint" style="margin:6px 0 8px">Можно без текста: тогда опубликуется только оценка ${pend} ★</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="lb-btn gn" id="lb-rs">${my[cur.id]?'Сохранить отзыв':'Опубликовать'}</button><button class="lb-btn gr" id="lb-rx">Отмена</button></div>`;
+}
+function rate(r){
+  if(!meId){msg('Чтобы оценить книгу, войди в аккаунт.',0);return}
+  const old=revs.find(x=>x.user_id===meId);
+  if(!pend&&old)rtxt=old.comment||'';
+  pend=r;
+  sec.querySelectorAll('.lb-st').forEach(b=>b.classList.toggle('on',+b.dataset.r<=r));
+  revForm();const t=$('#lb-rt');if(t)t.focus();
+}
+async function loadRev(){
+  const SB=await getSB(),id=cur&&cur.id;if(!SB||!id)return;
+  const r=await SB.from('library_rates').select('user_id,rating,comment,created_at').eq('book_id',id).order('created_at',{ascending:false}).limit(100);
+  if(!cur||cur.id!==id||!$('#lb-rv'))return;
+  if(r.error){$('#lb-rv').innerHTML='<div class="lb-ok bad">Не удалось загрузить отзывы: '+esc(r.error.message)+'. Проверь, что SQL из шага 1 выполнен.</div>';return}
+  revs=r.data||[];
+  const ids=[...new Set(revs.map(x=>x.user_id))];
+  const P=ids.length?Object.fromEntries(((await SB.from('profiles').select('id,name').in('id',ids)).data||[]).map(x=>[x.id,x.name])):{};
+  if(!cur||cur.id!==id||!$('#lb-rv'))return;
+  revs.forEach(x=>x.name=(P[x.user_id]||'Участник').trim()||'Участник');
+  revs.sort((a,b)=>(b.user_id===meId)-(a.user_id===meId));
+  $('#lb-rv').innerHTML=revs.length?revs.map(x=>{
+    const h=hue(x.name),n=Math.max(1,Math.min(5,x.rating|0));
+    return `<div class="rvi"><div class="rva" style="background:linear-gradient(160deg,hsl(${h},70%,62%),hsl(${(h+35)%360},65%,46%))">${esc(x.name.charAt(0).toUpperCase()||'?')}</div><div class="rvb"><div class="rvn">${esc(x.name)}${x.user_id===meId?'<span class="rvm">твой отзыв</span>':''}<small>${new Date(x.created_at).toLocaleDateString('ru')}</small></div><div class="rvs">${'★'.repeat(n)}<i>${'★'.repeat(5-n)}</i></div>${x.comment?`<div class="rvt">${esc(x.comment)}</div>`:''}</div></div>`}).join(''):'<div class="fr">Отзывов пока нет. Напиши первый отзыв.</div>';
+  $('#lb-rc').textContent=revs.length?'Всего: '+revs.length:'';
+}
+sec.addEventListener('click',async e=>{
+  const c=k=>e.target.closest(k);
+  if(c('#lb-rx')){pend=0;rtxt='';sec.querySelectorAll('.lb-st').forEach(b=>b.classList.toggle('on',+b.dataset.r<=(my[cur.id]||0)));revForm();return}
+  if(c('#lb-rs')){
+    const SB=await getSB();if(!SB||!meId||!pend)return;
+    const t=($('#lb-rt').value||'').trim().slice(0,500),btn=c('#lb-rs');btn.disabled=true;
+    const res=await SB.from('library_rates').upsert({book_id:cur.id,user_id:meId,rating:pend,comment:t||null},{onConflict:'book_id,user_id'});
+    if(res.error){btn.disabled=false;msg('Не получилось: '+res.error.message,0);return}
+    const old=my[cur.id];if(old)cur.rs-=old;else cur.rc++;cur.rs+=pend;my[cur.id]=pend;
+    pend=0;rtxt='';infoV();msg('Спасибо! Отзыв опубликован.',1);
+  }
+});
+sec.addEventListener('input',e=>{if(e.target.id==='lb-rt')rtxt=e.target.value});
 })();
