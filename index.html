@@ -269,6 +269,7 @@ body::before{
 
   <section id="v-hw" hidden></section>
   <section id="v-sim" hidden></section>
+  <section id="v-games" hidden></section>
 </main>
 
 <button class="fab" id="done" hidden>Готово</button>
@@ -1013,6 +1014,15 @@ function rPick(){
   $('#ready').innerHTML=weekHTML(false);
   $('#done').disabled=!n;
 }
+function rGames(){
+ const g=$('#v-games');
+ if(!document.getElementById('gm-css')){const st=document.createElement('style');st.id='gm-css';st.textContent='.gmg{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:14px}@media(max-width:700px){.gmg{grid-template-columns:1fr}}.gmc{background:rgba(255,255,255,.75);backdrop-filter:blur(10px);border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}.gmc .ban{height:150px;font-size:60px}.gmc h3{font-size:18px;font-weight:700;margin:14px 8px 4px}.gmc p{font-size:12px;color:var(--mu);margin-bottom:12px}';document.head.appendChild(st)}
+ g.innerHTML='<h2 class="sec" style="margin-top:0">Игры</h2><div class="gmg"><article class="gmc"><div class="ban" style="background:linear-gradient(160deg,#c9f0f8,#7ad3f0)">🧱</div><h3>Jump Brick Jump</h3><p>Прыгай по блокам</p><button class="join" data-game="jbj">Играть</button></article></div>';
+ g.onclick=e=>{
+  if(e.target.closest('[data-game]'))g.innerHTML='<button class="back" id="gback">← К играм</button><iframe src="jbj/index.html" style="width:100%;height:calc(100vh - 150px);border:0;border-radius:18px;background:#fff" allow="fullscreen"></iframe>';
+  else if(e.target.closest('#gback'))rGames();
+ };
+}
 function show(v){
   
   view=v;
@@ -1026,6 +1036,8 @@ $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden
 if(v==='hws')window.rHws();
   if(v==='home')rHome();
   if(v==='pick')rPick();
+  if(v==='games')rGames();
+  if(v==='games'){const g=$('#v-games');if(!g.firstChild)g.innerHTML='<iframe src="jbj/index.html" style="width:100%;height:calc(100vh - 90px);border:0;border-radius:18px;background:#fff" allow="fullscreen"></iframe>'}
   if(v==='review')$('#rv').innerHTML=weekHTML(false);
   window.scrollTo(0,0);
 }
@@ -1091,6 +1103,7 @@ $('#drawer').addEventListener('click',e=>{
   else if(t==='Маркетплейс'){ closeMenu(); show('market'); }
   else if(t==='Библиотека'){ closeMenu(); show('lib'); }
   else if(t==='MilkBank'){ closeMenu(); show('bank'); }
+  else if(t==='Игры'){ closeMenu(); show('games'); }
 });
 /* ---------- страница «Домашние задания» (как на school.милки.рф) ---------- */
 (function(){
