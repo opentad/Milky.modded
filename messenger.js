@@ -667,6 +667,7 @@ await loadVotes();
     if(!m.length){if(CL[c.id])return null;m.push({w:'sys',x:'Чат создан',t:Date.parse(c.created_at)})}
     return{id:c.id,code:c.invite_code,uids:u,title:c.title||'',un:un[c.id]||0,m:u.map(x=>nmap[x]||'Участник'),msgs:m}}).filter(Boolean));
  const yh=await sb.from('yari_messages').select('role,text,created_at').order('created_at',{ascending:false}).limit(100);
+ if(yh.error)toast('История Yari не загрузилась: '+yh.error.message);
   const ym=(yh.data||[]).reverse().map(r=>({w:r.role==='user'?ME:'Yari',x:r.text,uid:r.role==='user'?me.id:'yari',t:Date.parse(r.created_at)}));
   C.unshift({id:'yari',bot:1,uids:[],m:[ME,'Yari'],title:'Yari',un:0,msgs:[{w:'sys',x:'Это Yari, ИИ-бот. Спрашивай что угодно',t:(ym[0]?ym[0].t:N)-1},...ym]});
 }
@@ -987,7 +988,7 @@ async function yCall(b){
   let j={};try{j=await r.json()}catch(e){}
   return{ok:r.ok,j};
 }
-async function yariStatus(){try{const r=await yCall({mode:'milky_status'});if(r.ok){YL.left=r.j.left;YL.limit=r.j.limit;if(sel==='yari'){rFoot();if(iOpen)rInfo()}}}catch(e){}}
+async function yariStatus(){try{const r=await yCall({mode:'milky_status'});if(r.ok){YL.left=r.j.left;YL.limit=r.j.limit;if(sel==='yari'){rFoot();if(iOpen)rInfo()}}else toast('Счётчик токенов не получен: '+(r.j.error||r.j.message||'ошибка'))}catch(e){toast('Счётчик токенов: нет связи')}}
 async function sendYari(){
   const x=dr.trim(),yc=()=>C.find(z=>z.id==='yari');
   if(!x||yBusy||!yc())return;
@@ -997,7 +998,7 @@ async function sendYari(){
   const add=(w,t,u,tmp)=>{const c=yc();if(c)c.msgs.push({w,x:t,uid:u,tmp:tmp,t:Date.now()})};
   add(ME,x,me.id);add('Yari','печатает...','yari',1);
   rFoot();rMsgs();rList();
-  await sb.from('yari_messages').insert({role:'user',text:x});
+  const e1=await sb.from('yari_messages').insert({role:'user',text:x});if(e1.error)toast('Ваше сообщение не сохранилось: '+e1.error.message);
   let rp='',ok=0;
   try{
     const r=await yCall({mode:'milky',text:x,history:hist});
@@ -1007,7 +1008,7 @@ async function sendYari(){
   }catch(e){rp='Нет связи с Yari, попробуй ещё раз.'}
   const c=yc();
   if(c){c.msgs=c.msgs.filter(m=>!m.tmp);c.msgs.push({w:'Yari',x:rp,uid:ok?'yari':undefined,t:Date.now()})}
-  if(ok)sb.from('yari_messages').insert({role:'assistant',text:rp});
+  if(ok){const e2=await sb.from('yari_messages').insert({role:'assistant',text:rp});if(e2.error)toast('Ответ Yari не сохранился: '+e2.error.message)}
   yBusy=0;rMsgs();rList();rFoot();if(iOpen)rInfo();
   const i=$('#mgi');if(i)i.focus();
 }
