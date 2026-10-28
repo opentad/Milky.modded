@@ -1003,6 +1003,7 @@ async function sendYari(){
   try{
     const r=await yCall({mode:'milky',text:x,history:hist});
     if(r.j.left!=null){YL.left=r.j.left;YL.limit=r.j.limit||YL.limit}
+   if(r.j.saveError)toast('Расход не записался: '+r.j.saveError);
     ok=r.ok&&!!r.j.reply;
     rp=ok?r.j.reply:(r.j.error==='limit'?'Лимит на сегодня закончился. Он обновится завтра.':'Yari сейчас не отвечает, попробуй чуть позже.');
   }catch(e){rp='Нет связи с Yari, попробуй ещё раз.'}
