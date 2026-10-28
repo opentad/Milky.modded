@@ -341,7 +341,7 @@ function rFoot(){
   f.innerHTML=(eOpen?'<div class="mg-em2">'+EM.map(e=>'<button data-e="'+e+'">'+e+'</button>').join('')+'</div>':'')+
    (rep?'<div class="mg-pf mg-rp">'+ic('reply')+'<span><b>'+esc(rep.w)+'</b> '+esc(rep.x)+'</span><button id="mgrx">'+ic('close')+'</button></div>':'')+
     (pf?'<div class="mg-pf">'+ic('clip')+esc(pf.n)+' · '+pf.s+'<button id="mgpx">'+ic('close')+'</button></div>':'')+
-    (c.bot?'<div style="font-size:11.5px;color:#8e959c;margin:0 0 6px 4px">Осталось '+YL.left+' из '+YL.limit+' токенов</div>':'')+
+    (c.bot?'<div style="font-size:11.5px;color:#8e959c;margin:0 0 6px 4px">Осталось '+YL.left+' из '+YL.limit+' токенов · '+(YU?'Вы вошли: '+esc(YU.email)+' <a data-ylogout style="color:#8774e1;cursor:pointer">выйти</a>':'<a data-ylogin style="color:#8774e1;cursor:pointer">Войти в Yari</a>')+'</div>'':'')+
    (err?'<div class="mg-er">'+err+'</div>':'')+
     '<div class="mg-fr"><button class="mg-sm" id="mgem"'+dis+'>'+ic('smile')+'</button>'+
     '<textarea id="mgi" rows="1" name="msg" enterkeyhint="send" data-lpignore="true" data-1p-ignore autocomplete="off" placeholder="'+(c.sys?'Только чтение':'Напишите сообщение…')+'"'+dis+'>'+esc(dr)+'</textarea>'+
@@ -435,6 +435,8 @@ sec.addEventListener('click',e=>{
   else if(b('[data-inv]')){const c=cur();if(c)copy(link(c))}
   else if(b('#mgjn'))join($('#mgjc').value);
   else if(b('#mgout'))sb.auth.signOut();
+   else if(b('[data-ylogin]'))yLoginModal();
+else if(b('[data-ylogout]'))yLogout();
    else if(b('#mgdots')){menuOpen=menuOpen?0:1;rHead()}
   else if(b('#mgpoll')){menuOpen=0;rHead();pollModal()}
   else if(b('.mg-hd>.mg-w')||b('.mg-hi')){const c=cur();if(c&&!c.sys){iOpen=iOpen?0:1;rInfo();if(!iOpen)rMsgs();else{loadBl().then(rInfo);refreshSeen().then(rInfo)}}}
@@ -978,6 +980,7 @@ tch=sb.channel('typing',{config:{broadcast:{self:false}}}).on('broadcast',{event
 }
  const YARI_URL='https://prvwpqesbbmtzezxqcsl.supabase.co/functions/v1/super-responder',YARI_KEY='sb_publishable_RkmMP4ixAddQZ_gUZiacvQ_5PXN5L_v',YARI_AVA='yari.png';
 let YL={left:3000,limit:3000},yBusy=0;
+ let yb=null,YU=null;
 async function yCall(b){
   const s=await sb.auth.getSession();
   const r=await fetch(YARI_URL+(b.mode==='milky'?'/milky-chat':'/milky-status'),{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+YARI_KEY,apikey:YARI_KEY,'x-milky-token':s.data.session.access_token},body:JSON.stringify(b)});
@@ -1007,6 +1010,32 @@ async function sendYari(){
   if(ok)sb.from('yari_messages').insert({role:'assistant',text:rp});
   yBusy=0;rMsgs();rList();rFoot();if(iOpen)rInfo();
   const i=$('#mgi');if(i)i.focus();
+}
+ function yLoginModal(){
+  const S='width:100%;height:44px;border:1px solid #e3e8ee;border-radius:14px;padding:0 14px;font:inherit;font-size:14px;outline:0;margin-bottom:8px';
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;inset:0;z-index:70;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:20px';
+  d.innerHTML='<div class="mg-pm"><h3>Вход в Yari</h3><p style="font-size:13px;line-height:1.45;margin-bottom:10px">Войди в свой аккаунт Yari: лимиты станут как на сайте Yari, а аккаунт привяжется к Милки.</p><input id="yle" type="email" placeholder="Почта Yari" style="'+S+'"><input id="ylp" type="password" placeholder="Пароль Yari" style="'+S+'"><div class="pe" id="yler"></div><div class="pb"><button id="ylc">Отмена</button><button class="ok" id="ylo">Войти</button></div></div>';
+  document.body.appendChild(d);
+  d.addEventListener('click',async e=>{
+    const id=e.target.id;
+    if(e.target===d||id==='ylc')d.remove();
+    else if(id==='ylo'){
+      const em=d.querySelector('#yle').value.trim(),pw=d.querySelector('#ylp').value,er=d.querySelector('#yler');
+      if(!em||!pw){er.textContent='Введи почту и пароль';return}
+      e.target.disabled=true;
+      const r=await yb.auth.signInWithPassword({email:em,password:pw});
+      if(r.error){er.textContent=tr(r.error.message);e.target.disabled=false;return}
+      YU=r.data.user;
+      await sb.from('yari_links').upsert({user_id:me.id,yari_user_id:YU.id,yari_email:YU.email});
+      d.remove();yariStatus();rFoot();toast('Аккаунт Yari подключён');
+    }
+  });
+}
+async function yLogout(){
+  await yb.auth.signOut();YU=null;
+  await sb.from('yari_links').delete().eq('user_id',me.id);
+  yariStatus();rFoot();
 }
 async function yClear(){
   if(!confirm('Очистить историю переписки с Yari?'))return;
@@ -1072,7 +1101,9 @@ setInterval(()=>{if(mOpen&&!document.hidden)refreshSeen().then(rMem)},30000);
 const lib=document.createElement('script');lib.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 lib.onload=async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY);window.SB=sb;document.dispatchEvent(new Event('sb'));window.SB=sb;document.dispatchEvent(new Event('sb'));
-  const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
+ yb=window.supabase.createClient('https://prvwpqesbbmtzezxqcsl.supabase.co',YARI_KEY,{auth:{storageKey:'yari-auth'}});
+const ys=await yb.auth.getSession();YU=ys.data.session?ys.data.session.user:null; 
+ const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
   sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;setTimeout(boot,0)}});
   if(J)MS.show('msg');else boot();
 };
