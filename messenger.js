@@ -341,7 +341,7 @@ function rFoot(){
   f.innerHTML=(eOpen?'<div class="mg-em2">'+EM.map(e=>'<button data-e="'+e+'">'+e+'</button>').join('')+'</div>':'')+
    (rep?'<div class="mg-pf mg-rp">'+ic('reply')+'<span><b>'+esc(rep.w)+'</b> '+esc(rep.x)+'</span><button id="mgrx">'+ic('close')+'</button></div>':'')+
     (pf?'<div class="mg-pf">'+ic('clip')+esc(pf.n)+' · '+pf.s+'<button id="mgpx">'+ic('close')+'</button></div>':'')+
-    (c.bot?'<div style="font-size:11.5px;color:#8e959c;margin:0 0 6px 4px">Осталось '+YL.left+' из '+YL.limit+' токенов · '+(YU?'Вы вошли: '+esc(YU.email)+' <a data-ylogout style="color:#8774e1;cursor:pointer">выйти</a>':'<a data-ylogin style="color:#8774e1;cursor:pointer">Войти в Yari</a>')+'</div>'':'')+
+    (c.bot?'<div style="font-size:11.5px;color:#8e959c;margin:0 0 6px 4px">Осталось '+YL.left+' из '+YL.limit+' токенов · '+(YU?'Вы вошли: '+esc(YU.email)+' <a data-ylogout style="color:#8774e1;cursor:pointer">выйти</a>':'<a data-ylogin style="color:#8774e1;cursor:pointer">Войти в Yari</a>')+'</div>':'')+
    (err?'<div class="mg-er">'+err+'</div>':'')+
     '<div class="mg-fr"><button class="mg-sm" id="mgem"'+dis+'>'+ic('smile')+'</button>'+
     '<textarea id="mgi" rows="1" name="msg" enterkeyhint="send" data-lpignore="true" data-1p-ignore autocomplete="off" placeholder="'+(c.sys?'Только чтение':'Напишите сообщение…')+'"'+dis+'>'+esc(dr)+'</textarea>'+
