@@ -94,6 +94,8 @@
     </div>
     <span id="status"></span>
     <button id="btnPlay" class="primary">▶ Играть</button>
+    <button id="btnLvl" class="primary">В список</button>
+    <button id="btnX">✕</button>
   </header>
 
   <div id="main">
@@ -696,6 +698,31 @@
       $('testFrame').src = 'about:blank';
     }
   });
+
+  /* ---------- В список уровней ---------- */
+  $('btnX').onclick = function () { parent.postMessage({ type: 'jbj-close' }, location.origin); };
+  $('btnLvl').onclick = function () {
+    var b = $('btnLvl'), l = cur();
+    if (!cfg.supabaseUrl || !cfg.supabaseKey) { setStatus('Нет ключей в config.js', true); return; }
+    if (!has(l, '@') || !has(l, 'E')) { setStatus('Нужны герой и выход', true); return; }
+    var one = R.sanitize(Object.assign({}, game, { levels: [l] }));
+    b.disabled = true;
+    fetch(cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/jbj_levels', {
+      method: 'POST',
+      headers: {
+        apikey: cfg.supabaseKey,
+        Authorization: 'Bearer ' + cfg.supabaseKey,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({ data: one, author: game.author || '' })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      setStatus('Уровень добавлен в список ✓');
+    }).catch(function (e) {
+      setStatus('Не вышло: ' + e.message, true);
+    }).then(function () { b.disabled = false; });
+  };
 
   /* ---------- Обновить всё ---------- */
   function refreshAll() {
