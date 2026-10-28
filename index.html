@@ -245,7 +245,7 @@ body::before{
       <div class="hd" style="margin-top:22px"><h2 class="sec" style="margin:0">Расписание занятий</h2><div class="nav"><button class="dt">Назад</button><button class="dt">Далее</button></div></div>
       <div class="wk" id="week" style="margin-top:14px"></div>
     </div>
-    <footer class="foot">Не имеет отношения к ООО «Милки Компани» <b>·</b> 2026<br><a href="privacy.html" style="color:inherit">Политика конфиденциальности</a></footer>
+    <footer class="foot">Не имеет отношения к ООО «Милки Компани» <b>·</b> 2026<br><a id="rulesLink" style="float:right;cursor:pointer;text-decoration:underline">Правила платформы</a><a href="privacy.html" style="color:inherit">Политика конфиденциальности</a></footer>
   </section>
 
   <!-- ВЫБОР -->
@@ -1176,6 +1176,88 @@ rCl();rHw();rGr();show('home');
     if(location.hash.indexOf('#/@')===0)return;
     if(['feed','market','prof','bank'].includes(p))MS.show(p);
   });
+})();
+</script>
+  <style>
+#rulesBox{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:99999;padding:12px}
+#rulesBox.on{display:flex}
+.rl-card{background:#fff;color:#222;max-width:480px;width:100%;max-height:92vh;overflow:auto;border-radius:16px;padding:20px;position:relative}
+.rl-card h2{margin:0 0 12px;font-size:20px}
+.rl-card ol{padding-left:20px;margin:0 0 12px;font-size:15px;line-height:1.45}
+.rl-card li{margin-bottom:8px}
+.rl-x{position:absolute;top:8px;right:14px;font-size:28px;cursor:pointer;display:none;color:#888}
+.rl-bar{position:relative;height:52px;border-radius:26px;background:#d9d9d9;overflow:hidden;user-select:none;touch-action:none;margin-top:14px}
+.rl-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#4caf50}
+.rl-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 58px;font-size:13px;font-weight:600;color:#444;pointer-events:none}
+.rl-hd{position:absolute;left:0;top:0;width:52px;height:52px;border-radius:50%;background:#999;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;touch-action:none}
+.rl-hd.ok{background:#2e7d32}
+</style>
+<div id="rulesBox"><div class="rl-card">
+ <span class="rl-x" id="rlX">×</span>
+ <h2>Правила платформы</h2>
+ <ol>
+  <li>Запрещено использовать фото парней и девушек с открытым ауратом, как на аватарках, так и в постах.</li>
+  <li>Запрещено ставить ники по типу "Мр*зь", "666" и подобные им.</li>
+  <li>Запрещено использовать нецензурную лексику, переходить на личности и оскорблять друг друга — разрешена лишь конструктивная критика ДЕЙСТВИЙ человека, а не его самого.</li>
+  <li>Запрещено выкладывать личные фото — ради вашей же конфиденциальности.</li>
+  <li>Запрещено флудить и спамить как в комментариях, так и постами.</li>
+ </ol>
+ <p style="font-size:14px;line-height:1.45">За несоблюдение правил модераторы вправе удалить вашу публикацию или комментарий, а аккаунт — забанить. Уважайте друг друга и следите за своими словами.<br>Всем приятного времяпрепровождения на платформе! :)</p>
+ <div class="rl-bar" id="rlBar"><div class="rl-fill" id="rlFill"></div><div class="rl-txt" id="rlTxt"></div><div class="rl-hd" id="rlHd">🔒</div></div>
+</div></div>
+<script>
+(function(){
+ var SEC=45, T='Я обязуюсь соблюдать правила в полном объеме';
+ var $=function(i){return document.getElementById(i)};
+ var box=$('rulesBox'),bar=$('rlBar'),fill=$('rlFill'),txt=$('rlTxt'),hd=$('rlHd'),x=$('rlX');
+ var timer,unlocked=false,forced=false,accepted=false,sb=null,drag=false;
+
+ function show(f){
+  forced=f; box.classList.add('on');
+  if(!f){bar.style.display='none';x.style.display='block';return}
+  bar.style.display='block';x.style.display='none';
+  unlocked=false;hd.className='rl-hd';hd.textContent='🔒';hd.style.left='0';fill.style.width='0';
+  var left=SEC;txt.textContent=T+' ('+left+')';
+  clearInterval(timer);
+  timer=setInterval(function(){
+   left--;
+   if(left>0){txt.textContent=T+' ('+left+')';return}
+   clearInterval(timer);unlocked=true;hd.className='rl-hd ok';hd.textContent='➜';
+   txt.textContent=T+' — проведите ползунок до конца';
+  },1000);
+ }
+ function accept(){
+  accepted=true;forced=false;box.classList.remove('on');
+  if(sb)sb.auth.updateUser({data:{rules_ok:new Date().toISOString()}});
+ }
+ function check(u){
+  if(!u||accepted||(u.user_metadata&&u.user_metadata.rules_ok))return;
+  if(forced&&box.classList.contains('on'))return;
+  show(true);
+ }
+ function init(){
+  if(sb||!window.SB)return; sb=window.SB;
+  sb.auth.getSession().then(function(r){check(r.data.session&&r.data.session.user)});
+  sb.auth.onAuthStateChange(function(ev,s){if(ev==='SIGNED_IN'||ev==='INITIAL_SESSION')check(s&&s.user)});
+ }
+ init(); document.addEventListener('sb',init);
+
+ hd.addEventListener('pointerdown',function(e){if(!unlocked)return;drag=true;hd.setPointerCapture(e.pointerId)});
+ hd.addEventListener('pointermove',function(e){
+  if(!drag)return;
+  var r=bar.getBoundingClientRect(),max=r.width-52,p=Math.max(0,Math.min(max,e.clientX-r.left-26));
+  hd.style.left=p+'px';fill.style.width=(p+26)+'px';
+ });
+ hd.addEventListener('pointerup',function(){
+  if(!drag)return;drag=false;
+  var max=bar.getBoundingClientRect().width-52;
+  if(parseFloat(hd.style.left)>=max-3)accept();
+  else{hd.style.left='0';fill.style.width='0'}
+ });
+ x.onclick=function(){box.classList.remove('on')};
+ document.addEventListener('click',function(e){
+  if(e.target.closest&&e.target.closest('#rulesLink')){e.preventDefault();show(false)}
+ });
 })();
 </script>
 </body>
