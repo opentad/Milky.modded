@@ -80,9 +80,9 @@ function syncMenu(){
 async function init(){
   const sb=SB_();if(!sb)return;
   const u=(await sb.auth.getUser()).data.user;
-  if(!u){isMod=false;syncMenu();return}
+  if(!u){isMod=false;window.IS_MOD=false;syncMenu();return}
   const r=await sb.from('moderators').select('user_id').eq('user_id',u.id).maybeSingle();
-  isMod=!!r.data;syncMenu();
+  isMod=!!r.data;window.IS_MOD=isMod;syncMenu();
 }
 document.addEventListener('sb',()=>{init();const sb=SB_();if(sb)sb.auth.onAuthStateChange(()=>setTimeout(init,0))});
 if(SB_())init();
