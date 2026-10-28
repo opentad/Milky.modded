@@ -1037,7 +1037,7 @@ if(v==='hws')window.rHws();
   if(v==='home')rHome();
   if(v==='pick')rPick();
   if(v==='games'&&window.JBJ)JBJ.open();
-  if(v==='games'){const g=$('#v-games');if(!g.firstChild)g.innerHTML='<iframe src="jbj/index.html" style="width:100%;height:calc(100vh - 90px);border:0;border-radius:18px;background:#fff" allow="fullscreen"></iframe>'}
+  if(v==='games'&&window.JBJ)JBJ.open();
   if(v==='review')$('#rv').innerHTML=weekHTML(false);
   window.scrollTo(0,0);
 }
