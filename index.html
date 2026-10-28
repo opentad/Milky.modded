@@ -1036,7 +1036,7 @@ $('#done').hidden=v!=='pick';$('#approve').hidden=v!=='review';$('#chat').hidden
 if(v==='hws')window.rHws();
   if(v==='home')rHome();
   if(v==='pick')rPick();
-  if(v==='games')rGames();
+  if(v==='games'&&window.JBJ)JBJ.open();
   if(v==='games'){const g=$('#v-games');if(!g.firstChild)g.innerHTML='<iframe src="jbj/index.html" style="width:100%;height:calc(100vh - 90px);border:0;border-radius:18px;background:#fff" allow="fullscreen"></iframe>'}
   if(v==='review')$('#rv').innerHTML=weekHTML(false);
   window.scrollTo(0,0);
@@ -1180,7 +1180,8 @@ rCl();rHw();rGr();show('home');
 <script src="market.js?v=11"></script>
   <script src="library.js?v=1"></script>
   <script src="bank.js?v=1"></script>
-  <script src="mod.js?v=1"></script>
+  <script src="mod.js?v=2"></script>
+  <script src="jbj.js?v=1"></script>
   <script>
 (function(){
   const p=localStorage.getItem('mpage');
