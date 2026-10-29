@@ -1,4 +1,4 @@
-/* MilkOffice: сетка инструментов, пока одна карточка (GDevelop) */
+/* MilkOffice: сетка инструментов, пока одна карточка (редактор игр на основе GDevelop) */
 (function(){
   const st=document.createElement('style');
   st.textContent='.ofg{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:14px}@media(max-width:700px){.ofg{grid-template-columns:1fr}}.ofc{background:rgba(255,255,255,.75);backdrop-filter:blur(10px);border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}.ofc .ban{height:150px;font-size:60px}.ofc h3{font-size:18px;font-weight:700;margin:14px 8px 4px}.ofc p{font-size:12px;color:var(--mu);margin:0 14px 14px;line-height:1.5}';
@@ -8,9 +8,9 @@
 
   const CARDS=[
     {id:'gdevelop',emoji:'🎮',bg:'linear-gradient(160deg,#c9f0f8,#7ad3f0)',
-     title:'GDevelop',
-     text:'Конструктор игр без программирования. Игра собирается из блоков и событий: 2D и 3D, управление пальцем, уровни, сохранения. Готовую игру можно выложить на Milky.',
-     url:'https://editor.gdevelop.io'}
+     title:'Редактор игр',
+     text:'Конструктор игр без программирования на основе GDevelop. Игра собирается из блоков и событий: 2D и 3D, управление пальцем, уровни. Проект сохраняй файлом на устройство.',
+     url:'https://opentad.github.io/GDevelop/'}
   ];
 
   function home(){
