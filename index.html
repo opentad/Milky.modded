@@ -270,6 +270,7 @@ body::before{
   <section id="v-hw" hidden></section>
   <section id="v-sim" hidden></section>
   <section id="v-games" hidden></section>
+  <section id="v-office" hidden></section>
 </main>
 
 <button class="fab" id="done" hidden>Готово</button>
@@ -1106,6 +1107,7 @@ $('#drawer').addEventListener('click',e=>{
   else if(t==='Библиотека'){ closeMenu(); show('lib'); }
   else if(t==='MilkBank'){ closeMenu(); show('bank'); }
   else if(t==='Игры'){ closeMenu(); show('games'); }
+  else if(t==='MilkOffice'){ closeMenu(); show('office'); }
 });
 /* ---------- страница «Домашние задания» (как на school.милки.рф) ---------- */
 (function(){
@@ -1182,7 +1184,8 @@ rCl();rHw();rGr();show('home');
 <script src="market.js?v=11"></script>
   <script src="library.js?v=1"></script>
   <script src="bank.js?v=1"></script>
-  <script src="mod.js?v=2"></script>
+  <script src="office.js?v=1"></script>
+<script src="mod.js?v=2"></script>
   <script src="jj.js?v=1"></script>
   <script>
 (function(){
