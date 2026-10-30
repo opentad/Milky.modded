@@ -7,13 +7,16 @@ const col=n=>PAL[hs(n||'?')%PAL.length];
 const ini=n=>(n||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const p2=n=>String(n).padStart(2,'0');
 const dt=t=>{const d=new Date(t);return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes())};
+const tm=t=>{const d=new Date(t);return p2(d.getHours())+':'+p2(d.getMinutes())};
+const nz=s=>String(s||'').trim().toLowerCase().replace(/ё/g,'е').replace(/\s+/g,' ');
 const IC={
  ok:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM8 12.3l2.8 2.8 5.2-5.6',
  ban:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM6 6l12 12',
  dots:'M12 5.5h.01M12 12h.01M12 18.5h.01',
  trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7',
  search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
- flag:'M6 21V4M6 4h11l-2 4 2 4H6'};
+ flag:'M6 21V4M6 4h11l-2 4 2 4H6',
+ key:'M15 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM11.5 13.5L4 21M7 18l2.5 2.5'};
 const ic=(k,w)=>`<svg viewBox="0 0 24 24" style="width:${w||18}px;height:${w||18}px;flex:none"><path d="${IC[k]}"${k==='dots'?' style="stroke-width:3.2"':''}/></svg>`;
 const SB_=()=>window.SB||null;
 function note(t){let d=document.getElementById('md-note');if(!d){d=document.createElement('div');d.id='md-note';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:200;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
@@ -51,6 +54,8 @@ css.textContent=`
 .md-bt button{height:40px;padding:0 18px;border-radius:14px;font-weight:700;background:#eef3f8}
 .md-bt .ok{background:var(--cy);color:#fff}
 .md-bt .rd,.md-bt .rd2{background:#e5314a;color:#fff}
+.md-code{font-size:28px;font-weight:800;letter-spacing:5px;color:var(--bt);margin:6px 0}
+.md-w{color:#d97706;font-weight:600;font-size:12.5px;margin-top:8px}
 .md-bg{position:fixed;inset:0;z-index:150;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:20px}
 .md-box{background:#fff;border-radius:22px;padding:22px;width:min(420px,100%);max-height:90vh;overflow:auto}
 .md-box h3{font-size:18px;font-weight:800;margin-bottom:8px}
@@ -61,7 +66,7 @@ css.textContent=`
 .md-red{width:100%;height:42px;border-radius:14px;background:#e5314a;color:#fff;font-weight:700}`;
 document.head.appendChild(css);
 
-let isMod=false,P=[],PM={},B={},R=[],tab='f',q='',view='list',menu=null;
+let isMod=false,P=[],PM={},B={},R=[],W=[],tab='f',q='',view='list',menu=null;
 const sec=document.createElement('section');sec.id='v-mod';sec.hidden=true;
 document.querySelector('.main').appendChild(sec);
 
@@ -91,22 +96,26 @@ async function load(){
   const sb=SB_();
   if(!sb||!isMod){sec.innerHTML='<div class="md-e">Нет доступа</div>';return}
   sec.innerHTML='<div class="md-e">Загружаем…</div>';
-  const [p,b,r]=await Promise.all([
+  const [p,b,r,w]=await Promise.all([
     sb.from('profiles').select('id,name,fio,gender,avatar_url,last_seen').order('fio',{nullsFirst:false}),
     sb.from('bans').select('user_id,reason,until_at'),
-    sb.from('reports').select('id,kind,target,target_user,reporter,note,snap,created_at').eq('status','open').order('id',{ascending:false})]);
+    sb.from('reports').select('id,kind,target,target_user,reporter,note,snap,created_at').eq('status','open').order('id',{ascending:false}),
+    sb.rpc('mod_pw_list')]);
   if(p.error){sec.innerHTML='<div class="md-e">Ошибка: '+esc(p.error.message)+'. Проверь, что SQL выполнен.</div>';return}
   P=p.data||[];PM=Object.fromEntries(P.map(x=>[x.id,x]));
   const now=Date.now();
   B=Object.fromEntries((b.data||[]).filter(x=>!x.until_at||Date.parse(x.until_at)>now).map(x=>[x.user_id,x]));
   R=r.data||[];
+  W=w.error?[]:(w.data||[]);
   draw();
 }
 function draw(){
-  const rep=view==='rep';
-  sec.innerHTML=`<div class="md-h"><div>${rep?'<button class="md-back" data-back>‹ Назад</button>':''}<h1>${rep?'Жалобы':'Комната модераторов'}</h1><p>${rep?'Открытые жалобы пользователей':'Ученики по полу, жалобы и блокировки'}</p></div>${rep?'':`<div class="md-rel"><button class="md-ib" data-hm aria-label="Ещё">${ic('dots')}</button>${menu==='h'?`<div class="md-pop"><button data-reps>${ic('flag')}Жалобы${R.length?' ('+R.length+')':''}</button></div>`:''}</div>`}</div>`+
-  (rep?'<div id="md-l"></div>':'<div class="md-tabs" id="md-tb"></div><label class="md-s">'+ic('search')+'<input id="md-q" placeholder="Поиск по ФИО или имени" autocomplete="off" value="'+esc(q)+'"></label><div id="md-l"></div>');
-  if(rep)reps();else{tabs();list()}
+  const sub=view!=='list';
+  const T=view==='rep'?['Жалобы','Открытые жалобы пользователей']:view==='pw'?['Заявки на вход','Забыли пароль: свяжись с учеником и уточни, подавал ли он заявку в это время']:['Комната модераторов','Ученики по полу, жалобы и блокировки'];
+  const wn=W.filter(x=>x.status==='pending').length;
+  sec.innerHTML=`<div class="md-h"><div>${sub?'<button class="md-back" data-back>‹ Назад</button>':''}<h1>${T[0]}</h1><p>${T[1]}</p></div>${sub?'':`<div class="md-rel"><button class="md-ib" data-hm aria-label="Ещё">${ic('dots')}</button>${menu==='h'?`<div class="md-pop"><button data-reps>${ic('flag')}Жалобы${R.length?' ('+R.length+')':''}</button><button data-pws>${ic('key')}Заявки на вход${wn?' ('+wn+')':''}</button></div>`:''}</div>`}</div>`+
+  (sub?'<div id="md-l"></div>':'<div class="md-tabs" id="md-tb"></div><label class="md-s">'+ic('search')+'<input id="md-q" placeholder="Поиск по ФИО или имени" autocomplete="off" value="'+esc(q)+'"></label><div id="md-l"></div>');
+  if(view==='rep')reps();else if(view==='pw')pws();else{tabs();list()}
 }
 function tabs(){
   const n=k=>P.filter(x=>k==='n'?!x.gender:x.gender===k).length;
@@ -124,6 +133,18 @@ function reps(){
   const nm=id=>{const x=PM[id];return x?(x.fio||x.name):'Пользователь'};
   document.getElementById('md-l').innerHTML=R.map(r=>`<div class="md-card"><div class="md-ct"><b>${K[r.kind]||r.kind}</b><small>${dt(r.created_at)}</small></div><small>От: ${esc(nm(r.reporter))} · На: ${esc(nm(r.target_user))}</small>${r.snap?`<p class="md-sn">${esc(r.snap)}</p>`:''}${r.note?`<p><b>Жалоба:</b> ${esc(r.note)}</p>`:''}<div class="md-bt">${r.kind!=='profile'?`<button class="rd" data-rdel="${r.id}">Удалить ${r.kind==='post'?'пост':'комментарий'}</button>`:''}<button data-rban="${r.id}">Бан автора</button><button data-rok="${r.id}">Отклонить</button></div></div>`).join('')||'<div class="md-e">Жалоб нет</div>';
 }
+function pws(){
+  const now=Date.now();
+  document.getElementById('md-l').innerHTML=W.map(w=>{
+    const head=`<div class="md-ct"><b>${esc(w.fio)}</b><small>${dt(w.created_at)}</small></div>`;
+    if(w.status==='approved'){
+      const u=PM[w.user_id],live=Date.parse(w.expires_at)>now;
+      return `<div class="md-card">${head}${live?`<small>Профиль: ${esc(u?(u.fio||u.name||''):'')}${u&&u.name?' ('+esc(u.name)+')':''}</small><div class="md-code">${esc(w.code)}</div><small>Назови код ученику лично. Действует до ${tm(w.expires_at)}</small>`:'<p class="md-w">Код истёк. Если ученику всё ещё нужно, он может подать заявку заново.</p>'}<div class="md-bt"><button data-pwno="${w.id}">${live?'Отозвать':'Убрать'}</button></div></div>`;
+    }
+    const M=P.filter(x=>nz(x.fio)===nz(w.fio));
+    return `<div class="md-card">${head}${M.length?`<small>Подходящих профилей: ${M.length}</small>`:'<p class="md-w">Профиль с таким ФИО не найден</p>'}<div class="md-bt">${M.map(x=>`<button class="ok" data-pwok="${w.id}|${x.id}">Одобрить${M.length>1?': '+esc(x.name||'?'):''}</button>`).join('')}<button class="rd" data-pwno="${w.id}">Отклонить</button></div></div>`;
+  }).join('')||'<div class="md-e">Заявок нет</div>';
+}
 
 sec.addEventListener('click',async e=>{
   const t=e.target,b=k=>t.closest(k);let x;
@@ -131,6 +152,7 @@ sec.addEventListener('click',async e=>{
   if((x=b('[data-tab]'))){tab=x.dataset.tab;tabs();list()}
   else if(b('[data-hm]')){menu=menu==='h'?null:'h';draw()}
   else if(b('[data-reps]')){view='rep';menu=null;draw()}
+  else if(b('[data-pws]')){view='pw';menu=null;draw()}
   else if(b('[data-back]')){view='list';draw()}
   else if((x=b('[data-rm]'))){menu=menu===x.dataset.rm?null:x.dataset.rm;list()}
   else if((x=b('[data-op]'))){menu=null;list();MS.show('prof');if(window.PF)PF.open(x.dataset.op)}
@@ -143,6 +165,18 @@ sec.addEventListener('click',async e=>{
     const r=await SB_().rpc('mod_resolve',{p_id:+x.dataset.rok,p_text:'Отклонено'});
     if(r.error)return note(r.error.message);
     R=R.filter(z=>z.id!=x.dataset.rok);reps();
+  }
+  else if((x=b('[data-pwok]'))){
+    const a=x.dataset.pwok.split('|');x.disabled=true;
+    const r=await SB_().rpc('mod_pw_approve',{p_id:+a[0],p_user:a[1]});
+    if(r.error){x.disabled=false;return note(r.error.message)}
+    note('Код выдан');load();
+  }
+  else if((x=b('[data-pwno]'))){
+    x.disabled=true;
+    const r=await SB_().rpc('mod_pw_reject',{p_id:+x.dataset.pwno});
+    if(r.error){x.disabled=false;return note(r.error.message)}
+    load();
   }
 });
 sec.addEventListener('input',e=>{if(e.target.id==='md-q'){q=e.target.value;list()}});
