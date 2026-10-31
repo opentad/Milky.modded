@@ -87,6 +87,10 @@ st.textContent=`
 .fm-lk svg{width:30px;height:30px}
 .fm-lk.on{color:#3fc3ee}
 .fm-dp{position:absolute;left:0;right:0;bottom:0;max-height:75%;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:16px;z-index:4}
+#fm-pl{position:fixed;inset:0;z-index:999;margin:0;padding:0;border-radius:0;background:rgba(10,14,20,.92);display:flex;align-items:center;justify-content:center}
+#fm-pl[hidden]{display:none}
+.fm-wr{position:relative;width:min(100%,calc(94vh * 9 / 16));width:min(100%,calc(94dvh * 9 / 16))}
+.fm-wr>.fm-row{position:absolute;top:10px;left:10px;margin:0;z-index:3}
 @media(max-width:640px){.fm-hero{padding:22px 20px}.fm-hero h1{font-size:28px}}`;
 document.head.appendChild(st);
 
@@ -288,7 +292,6 @@ function openFlash(id){
   ${x.description?`<p class="fm-ds">${esc(x.description).replace(/\n/g,'<br>')}</p>`:'<p class="fm-ds">Описания нет.</p>'}</div></div>
   ${mine?'<div class="fm-row"><button class="fm-btn g" data-del>Удалить</button></div>':''}</div></div>`;
   pl.querySelector('video').onerror=()=>{pl.querySelector('.fm-pe').hidden=false};
-  pl.scrollIntoView({behavior:'smooth',block:'start'});
   x.views=(x.views||0)+1;paint();
    ready().then(S=>S&&S.from('flash_likes').select('flash_id').eq('flash_id',id)).then(r=>{if(r&&r.data&&r.data.length){const b=pl.querySelector('[data-like]');if(b)b.classList.add('on')}}).catch(()=>{});
   ready().then(S=>S&&S.rpc('flash_view',{fid:id})).catch(()=>{});
@@ -296,6 +299,7 @@ function openFlash(id){
 
 sec.addEventListener('click',async e=>{
   const t=e.target;
+   if(t.id==='fm-pl')return closePlayer();
   const tg=t.closest('[data-tag]');
   if(tg){q='#'+tg.dataset.tag;const i=$('#fm-q');if(i)i.value=q;return paint()}
    if(t.tagName==='VIDEO'){t.paused?t.play():t.pause();return}
