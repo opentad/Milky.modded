@@ -685,7 +685,8 @@ function authView(msg){
   '<div class="mg-warn">НЕ ВВОДИТЬ ПАРОЛЬ ОТ НАСТОЯЩЕГО АККАУНТА MILKY SCHOOL</div><p class="mg-ai">Почта и пароль нужны только для идентификации и сохранения истории переписки.</p>'+
   (am==='up'?'<input id="mgan" placeholder="Имя в чате" autocomplete="off"><input id="mgfio" placeholder="ФИО полностью" autocomplete="off"><p class="mg-ai">ФИО нужно, чтобы понять, что ты из школы. Оно показывается мелким бледным текстом под именем.</p>':'')+
   '<input id="mgae" type="email" placeholder="Почта" autocomplete="off"><input id="mgpw" type="password" placeholder="Пароль (от 6 символов)" autocomplete="off">'+
-  (am==='up'?'<label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.4;margin:4px 0 8px"><input type="checkbox" id="mgcns" style="width:auto;height:auto;margin:2px 0 0;padding:0"><span>Я даю <a href="consent.html" target="_blank">согласие на обработку персональных данных</a> и ознакомлен(а) с <a href="privacy.html" target="_blank">политикой конфиденциальности</a>. Если мне нет 18 лет, мой родитель согласен.</span></label>':'')+
+  (am==='in'?'<a id="mgfg" style="display:block;text-align:right;font-size:12.5px;color:var(--bt);cursor:pointer;margin:-2px 0 8px">Забыли пароль?</a>':'')+
+   (am==='up'?'<label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.4;margin:4px 0 8px"><input type="checkbox" id="mgcns" style="width:auto;height:auto;margin:2px 0 0;padding:0"><span>Я даю <a href="consent.html" target="_blank">согласие на обработку персональных данных</a> и ознакомлен(а) с <a href="privacy.html" target="_blank">политикой конфиденциальности</a>. Если мне нет 18 лет, мой родитель согласен.</span></label>':'')+
    '<div class="mg-er" id="mgaer">'+(msg||'')+'</div><button class="mg-go" id="mgag">'+(am==='in'?'Войти':'Зарегистрироваться')+'</button><button class="mg-go" id="mgsw" style="background:none;color:var(--bt);margin-top:4px">'+(am==='in'?'Нет аккаунта? Регистрация':'Уже есть аккаунт? Войти')+'</button><p class="mg-ai" style="font-size:10.5px;opacity:.6;text-align:center;margin:12px 0 0">Не имеет отношения к ООО «Милки Компани»</p></div>';
 }
  function checkFio(s){
@@ -715,6 +716,35 @@ au.addEventListener('click',async e=>{
   if(!r.data.session)bad('Подтверди почту по письму или выключи «Confirm email» в Supabase');
 });
 au.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=$('#mgag');if(b)b.click()}});
+ function forgotView(step,msg,when){
+  $('#mgb').hidden=true;au.hidden=false;
+  const back='<button class="mg-go" id="fgback" style="background:none;color:var(--bt);margin-top:4px">Назад ко входу</button>';
+  if(step==='req')au.innerHTML='<div class="mg-ac"><h2>Забыли пароль?</h2><p class="mg-ai">Введи своё ФИО полностью, как при регистрации. Заявка уйдёт модератору, он свяжется с владельцем ФИО и проверит, что это он.</p><input id="fgfio" placeholder="Фамилия Имя Отчество" autocomplete="off"><div class="mg-er" id="fger">'+(msg||'')+'</div><button class="mg-go" id="fgsend">Отправить заявку</button><button class="mg-go" id="fghave" style="background:#eaf8fd;color:var(--bt)">У меня уже есть код</button>'+back+'</div>';
+  else if(step==='sent')au.innerHTML='<div class="mg-ac"><h2>Заявка отправлена</h2><p class="mg-ai">Время заявки: <b>'+when+'</b>. Модератор свяжется с владельцем этого ФИО и назовёт время. Если подтвердят, что это был он, модератор выдаст одноразовый код.</p><button class="mg-go" id="fghave">У меня есть код</button>'+back+'</div>';
+  else au.innerHTML='<div class="mg-ac"><h2>Новый пароль</h2><input id="fgcode" placeholder="Код от модератора" autocomplete="off"><input id="fgpw" type="password" placeholder="Новый пароль (от 6 символов)" autocomplete="off"><div class="mg-er" id="fger">'+(msg||'')+'</div><button class="mg-go" id="fgset">Сменить пароль</button>'+back+'</div>';
+}
+au.addEventListener('click',async e=>{
+  const id=(e.target.closest('[id]')||{}).id;
+  if(id==='mgfg')return forgotView('req');
+  if(id==='fgback')return authView();
+  if(id==='fghave')return forgotView('code');
+  if(id==='fgsend'){
+    const f=$('#fgfio').value.trim().replace(/\s+/g,' '),er=$('#fger');
+    if(f.split(' ').length!==3){er.textContent='Введи ФИО полностью: три слова';return}
+    e.target.disabled=true;
+    const r=await sb.rpc('pw_request',{p_fio:f});
+    if(r.error){er.textContent='Не получилось: '+r.error.message;e.target.disabled=false;return}
+    const d=new Date();forgotView('sent',null,p2(d.getHours())+':'+p2(d.getMinutes()));
+  }
+  if(id==='fgset'){
+    const code=$('#fgcode').value.trim(),pw=$('#fgpw').value,er=$('#fger');
+    if(!code||pw.length<6){er.textContent='Введи код и новый пароль (от 6 символов)';return}
+    e.target.disabled=true;
+    const r=await sb.functions.invoke('reset-password',{body:{code,password:pw}});
+    if(r.error){let m='Не получилось. Попробуй ещё раз.';try{const j=await r.error.context.json();if(j&&j.error)m=j.error}catch(x){}er.textContent=m;e.target.disabled=false;return}
+    am='in';authView('Пароль изменён. Теперь войди с новым паролем.');
+  }
+});
 
  function notify(c,m){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
