@@ -71,6 +71,22 @@ st.textContent=`
 .fm-pi b{display:block;font-size:20px;font-weight:700;line-height:1.3}
 .fm-pi small{display:block;color:var(--mu);font-size:12px;margin-top:6px}
 .fm-ds{font-size:14px;line-height:1.6;color:#566170;margin-top:12px}
+.fm-plw{justify-content:center}
+.fm-wr{width:min(100%,calc74vh * 9 / 16))}
+.fm-pv{width:100%;border-radius:24px}
+.fm-pv video{cursor:pointer}
+.fm-pe{z-index:1}
+.fm-pe[hidden]{display:none}
+.fm-xx{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:16px;z-index:3}
+.fm-bt{position:absolute;left:0;right:64px;bottom:0;padding:50px 14px 16px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.7));z-index:2}
+.fm-au{font-weight:700;font-size:15px}
+.fm-tt{display:block;margin-top:6px;font-size:14px;font-weight:600;cursor:pointer}
+.fm-bt .fm-tg span{background:none;color:#fff;padding:0;margin-right:4px}
+.fm-side{position:absolute;right:8px;bottom:80px;display:flex;flex-direction:column;gap:18px;align-items:center;color:#fff;z-index:2;font-size:12px;font-weight:600}
+.fm-lk{display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff}
+.fm-lk svg{width:30px;height:30px}
+.fm-lk.on{color:#3fc3ee}
+.fm-dp{position:absolute;left:0;right:0;bottom:0;max-height:75%;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:16px;z-index:4}
 @media(max-width:640px){.fm-hero{padding:22px 20px}.fm-hero h1{font-size:28px}}`;
 document.head.appendChild(st);
 
@@ -262,11 +278,15 @@ function openFlash(id){
   openId=id;
   const mine=uid&&x.user_id===uid;
   pl.hidden=false;
-  pl.innerHTML=`<div class="fm-plw"><div class="fm-pv"><video src="${esc(x.url)}" controls autoplay playsinline></video><div class="fm-pe" hidden>Видео ещё обрабатывается. Подожди минуту-две и открой снова.</div></div>
-    <div class="fm-pi"><b>${esc(x.title)}</b><small>${esc(x.author)}, ${(x.views||0)+1} просм., ${dt(x.created_at)}</small>
-    ${(x.tags||[]).length?`<div class="fm-tg">${x.tags.map(t=>`<span data-tag="${esc(t)}">#${esc(t)}</span>`).join('')}</div>`:''}
-    ${x.description?`<p class="fm-ds">${esc(x.description).replace(/\n/g,'<br>')}</p>`:''}
-    <div class="fm-row"><button class="fm-btn g" data-x>Закрыть</button>${mine?'<button class="fm-btn g" data-del>Удалить</button>':''}</div></div></div>`;
+ pl.innerHTML=`<div class="fm-plw"><div class="fm-wr"><div class="fm-pv"><video src="${esc(x.url)}" autoplay loop playsinline></video><div class="fm-pe" hidden>Видео ещё обрабатывается. Подожди минуту-две и открой снова.</div>
+  <button class="fm-xx" data-x>✕</button>
+  <div class="fm-side"><button class="fm-lk" data-like><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>Нравится</button><div>${(x.views||0)+1} просм.</div></div>
+  <div class="fm-bt"><div class="fm-au">${esc(x.author)}</div><b class="fm-tt" data-info>${esc(x.title)}</b>
+  ${(x.tags||[]).length?`<div class="fm-tg">${x.tags.map(t=>`<span data-tag="${esc(t)}">#${esc(t)}</span>`).join('')}</div>`:''}</div>
+  <div class="fm-dp" hidden><div class="fm-row" style="margin:0 0 8px;justify-content:space-between;align-items:center"><b>Описание</b><button class="fm-btn g" data-dx>Закрыть</button></div>
+  <b>${esc(x.title)}</b><small style="display:block;color:var(--mu);margin-top:6px">${(x.views||0)+1} просм., ${dt(x.created_at)}</small>
+  ${x.description?`<p class="fm-ds">${esc(x.description).replace(/\n/g,'<br>')}</p>`:'<p class="fm-ds">Описания нет.</p>'}</div></div>
+  ${mine?'<div class="fm-row"><button class="fm-btn g" data-del>Удалить</button></div>':''}</div></div>`;
   pl.querySelector('video').onerror=()=>{pl.querySelector('.fm-pe').hidden=false};
   pl.scrollIntoView({behavior:'smooth',block:'start'});
   x.views=(x.views||0)+1;paint();
@@ -277,6 +297,10 @@ sec.addEventListener('click',async e=>{
   const t=e.target;
   const tg=t.closest('[data-tag]');
   if(tg){q='#'+tg.dataset.tag;const i=$('#fm-q');if(i)i.value=q;return paint()}
+   if(t.tagName==='VIDEO'){t.paused?t.play():t.pause();return}
+  if(t.closest('[data-like]')){t.closest('[data-like]').classList.toggle('on');return}
+  if(t.closest('[data-info]')){const dp=$('#fm-pl .fm-dp');if(dp)dp.hidden=false;return}
+  if(t.closest('[data-dx]')){const dp=$('#fm-pl .fm-dp');if(dp)dp.hidden=true;return}
   const c=t.closest('[data-o]');
   if(c)return openFlash(c.dataset.o);
   if(t.closest('[data-x]'))return closePlayer();
