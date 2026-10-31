@@ -106,7 +106,7 @@ async function load(){
   const now=Date.now();
   B=Object.fromEntries((b.data||[]).filter(x=>!x.until_at||Date.parse(x.until_at)>now).map(x=>[x.user_id,x]));
   R=r.data||[];
-  W=w.error?[]:(w.data||[]);if(w.error)note('Заявки: '+w.error.message);
+  W=w.error?[]:(w.data||[]).map(x=>({...x,status:x.status==='new'?'pending':x.status,expires_at:x.approved_at?new Date(Date.parse(x.approved_at)+3600000).toISOString():null}));if(w.error)note('Заявки: '+w.error.message);
   draw();
 }
 function draw(){
