@@ -732,7 +732,7 @@ au.addEventListener('click',async e=>{
     const f=$('#fgfio').value.trim().replace(/\s+/g,' '),er=$('#fger');
     if(f.split(' ').length!==3){er.textContent='Введи ФИО полностью: три слова';return}
     e.target.disabled=true;
-    const r=await sb.rpc('pw_request',{p_fio:f});
+    const r=await sb.rpc('pw_reset_request',{p_fio:f});
     if(r.error){er.textContent='Не получилось: '+r.error.message;e.target.disabled=false;return}
     const d=new Date();forgotView('sent',null,p2(d.getHours())+':'+p2(d.getMinutes()));
   }
@@ -1113,7 +1113,7 @@ sec.addEventListener('change',async e=>{
   else{err='';pf={n:n,s:fsz(f.size),b:f}}
   rFoot();
 });
-async function boot(){
+async function boot0(){
   if(!sb)return;
   if(!me){if(ch){sb.removeChannel(ch);ch=null}C.splice(0);sel=null;LIVE=0;badge();authView();return}
   au.hidden=true;au.innerHTML='';$('#mgb').hidden=true;
@@ -1126,6 +1126,18 @@ async function boot(){
   else if(!sel&&matchMedia('(min-width:821px)').matches&&C.length)sel=[...C].sort((a,b)=>last(b).t-last(a).t)[0].id;
   renderAll();live();
 }
+ async function boot(){
+  try{
+    await Promise.race([boot0(),new Promise((_,no)=>setTimeout(()=>no(new Error('сервер не ответил за 15 секунд')),15000))]);
+  }catch(e){
+    $('#mgb').hidden=true;au.hidden=false;
+    au.innerHTML='<div class="mg-ac"><h2>Не загрузилось</h2><p class="mg-ai">'+esc(e.message||String(e))+'</p><button class="mg-go" id="mgretry">Повторить</button><button class="mg-go" id="mgreset" style="background:none;color:var(--bt)">Сбросить вход и обновить</button></div>';
+  }
+}
+au.addEventListener('click',e=>{
+  if(e.target.closest('#mgretry'))boot();
+  if(e.target.closest('#mgreset')){Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k));location.reload()}
+});
  setInterval(touch,30000);
 document.addEventListener('visibilitychange',touch);
 setInterval(()=>{if(mOpen&&!document.hidden)refreshSeen().then(rMem)},30000);
