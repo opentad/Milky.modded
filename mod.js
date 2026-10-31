@@ -106,7 +106,7 @@ async function load(){
   const now=Date.now();
   B=Object.fromEntries((b.data||[]).filter(x=>!x.until_at||Date.parse(x.until_at)>now).map(x=>[x.user_id,x]));
   R=r.data||[];
-  W=w.error?[]:(w.data||[]);
+  W=w.error?[]:(w.data||[]);if(w.error)note('Заявки: '+w.error.message);
   draw();
 }
 function draw(){
