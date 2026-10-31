@@ -168,13 +168,13 @@ sec.addEventListener('click',async e=>{
   }
   else if((x=b('[data-pwok]'))){
     const a=x.dataset.pwok.split('|');x.disabled=true;
-    const r=await SB_().rpc('mod_pw_approve',{p_id:+a[0],p_user:a[1]});
+    const r=await SB_().rpc('mod_pw_approve',{p_id:a[0],p_user:a[1]});
     if(r.error){x.disabled=false;return note(r.error.message)}
     note('Код выдан');load();
   }
   else if((x=b('[data-pwno]'))){
     x.disabled=true;
-    const r=await SB_().rpc('mod_pw_reject',{p_id:+x.dataset.pwno});
+    const r=await SB_().rpc('mod_pw_reject',{p_id:x.dataset.pwno});
     if(r.error){x.disabled=false;return note(r.error.message)}
     load();
   }
