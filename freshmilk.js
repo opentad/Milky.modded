@@ -91,6 +91,23 @@ st.textContent=`
 #fm-pl[hidden]{display:none}
 .fm-wr{position:relative;width:min(100%,calc(94vh * 9 / 16));width:min(100%,calc(94dvh * 9 / 16))}
 .fm-wr>.fm-row{position:absolute;top:10px;left:10px;margin:0;z-index:3}
+.fm-g{grid-template-columns:repeat(5,1fr)}
+@media(max-width:640px){.fm-g{grid-template-columns:repeat(2,1fr)}}
+.fm-tabs{display:flex;gap:10px;margin-top:14px}
+.fm-tabs button{height:36px;padding:0 18px;border-radius:12px;background:#fff;color:#566170;font-weight:600;font-size:14px}
+.fm-tabs button.on{background:#34404e;color:#fff}
+.fm-dp{position:absolute;left:0;right:0;bottom:0;top:auto;max-height:70%;background:#fff;border-radius:20px 20px 0 0;display:flex;flex-direction:column;padding:0;overflow:hidden;z-index:5}
+.fm-dp[hidden]{display:none}
+@media(orientation:landscape){.fm-dp{left:auto;top:0;width:min(400px,42vw);max-height:none;border-radius:20px 0 0 20px}}
+.fm-dh{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #eef1f4}
+.fm-xx2{width:32px;height:32px;font-size:18px;color:#566170}
+.fm-db{flex:1;overflow:auto;padding:14px 16px}
+.fm-cm{margin-bottom:14px;font-size:14px;line-height:1.4}
+.fm-cm small{color:var(--mu);font-size:11px}
+.fm-cm p{margin:2px 0 0;word-break:break-word}
+.fm-cm button{color:var(--mu);font-size:12px;margin-top:2px}
+.fm-cf{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eef1f4}
+.fm-cf input{flex:1;min-width:0;border:1px solid #dfe5ea;border-radius:20px;padding:0 14px;height:40px;font:inherit;outline:0}
 @media(max-width:640px){.fm-hero{padding:22px 20px}.fm-hero h1{font-size:28px}}`;
 document.head.appendChild(st);
 
@@ -100,6 +117,7 @@ document.querySelector('.main').appendChild(sec);
 
 /* ---------- состояние и связь с Supabase ---------- */
 let list=[],q='',uid=null,loadErr=false,openId=null,msgT=null;
+   let tab='all',cms=[];
 const ready=()=>new Promise(ok=>{
   if(window.SB)return ok(window.SB);
   let n=0;const t=setInterval(()=>{if(window.SB||++n>120){clearInterval(t);ok(window.SB||null)}},250);
@@ -141,8 +159,8 @@ const imgCover=f=>new Promise((ok,no)=>{
 
 /* ---------- страница ---------- */
 function shell(){
-  sec.innerHTML=`<div class="fm-hero"><div><small>${window.MS?MS.ic('tube'):''}FreshMilk</small><h1>Flashes</h1>
-    <p>Короткие вертикальные видео школы: до ${LIM.maxSec} секунд, качество до ${LIM.maxSide}p. Квадратные тоже подходят.</p></div>
+  sec.innerHTML=`<div class="fm-hero"><div><small>${window.MS?MS.ic('tube'):''}Видео</small><h1>FreshMilk</h1>
+    <p>Короткие вертикальные видео: до ${LIM.maxSec} секунд, качество до ${LIM.maxSide}p. Квадратные тоже подходят.</p></div>
     <button class="sw" id="fm-new">Загрузить Flash</button></div>
     <div class="fm-msg" id="fm-msg"></div>
     <div class="fm-panel" id="fm-up" hidden>
@@ -166,6 +184,7 @@ function shell(){
     </div>
     <div class="fm-panel" id="fm-pl" hidden></div>
     <div class="fm-bar"><input class="fm-q" id="fm-q" placeholder="Поиск по названию, автору или #хэштегу" value="${esc(q)}"></div>
+    <div class="fm-tabs"><button data-tab="all" class="${tab==='all'?'on':''}">Все</button><button data-tab="vid" class="${tab==='vid'?'on':''}">Видео</button><button data-tab="fl" class="${tab==='fl'?'on':''}">Flashes</button></div>
     <div id="fm-list"></div>`;
   initUpload();
 }
@@ -177,6 +196,7 @@ const card=x=>`<div class="fm-c" data-o="${esc(x.id)}"><div class="fm-th"${bg(x.
 
 function paint(){
   const box=$('#fm-list');if(!box)return;
+   if(tab==='vid'){box.innerHTML='<div class="fr">Тут пока ничего нет.</div>';return}
   const s=q.replace(/^#/,'').toLowerCase();
   const f=list.filter(x=>!s||(x.title||'').toLowerCase().includes(s)||(x.author||'').toLowerCase().includes(s)||(x.tags||[]).some(t=>t.includes(s)));
   box.innerHTML=f.length?`<div class="fm-g">${f.map(card).join('')}</div>`
@@ -284,17 +304,38 @@ function openFlash(id){
   pl.hidden=false;
  pl.innerHTML=`<div class="fm-plw"><div class="fm-wr"><div class="fm-pv"><video src="${esc(x.url)}" autoplay loop playsinline></video><div class="fm-pe" hidden>Видео ещё обрабатывается. Подожди минуту-две и открой снова.</div>
   <button class="fm-xx" data-x>✕</button>
-  <div class="fm-side"><button class="fm-lk" data-like><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg><span id="lk-n">${x.likes||0}</span></button><div>${(x.views||0)+1} просм.</div></div>
+  <div class="fm-side"><button class="fm-lk" data-like><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg><span id="lk-n">${x.likes||0}</span></button>
+  <button class="fm-lk" data-cm><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span id="cm-n">0</span></button>
+  <div>${(x.views||0)+1} просм.</div></div>
   <div class="fm-bt"><div class="fm-au">${esc(x.author)}</div><b class="fm-tt" data-info>${esc(x.title)}</b>
-  ${(x.tags||[]).length?`<div class="fm-tg">${x.tags.map(t=>`<span data-tag="${esc(t)}">#${esc(t)}</span>`).join('')}</div>`:''}</div>
-  <div class="fm-dp" hidden><div class="fm-row" style="margin:0 0 8px;justify-content:space-between;align-items:center"><b>Описание</b><button class="fm-btn g" data-dx>Закрыть</button></div>
-  <b>${esc(x.title)}</b><small style="display:block;color:var(--mu);margin-top:6px">${(x.views||0)+1} просм., ${dt(x.created_at)}</small>
-  ${x.description?`<p class="fm-ds">${esc(x.description).replace(/\n/g,'<br>')}</p>`:'<p class="fm-ds">Описания нет.</p>'}</div></div>
-  ${mine?'<div class="fm-row"><button class="fm-btn g" data-del>Удалить</button></div>':''}</div></div>`;
+  ${(x.tags||[]).length?`<div class="fm-tg">${x.tags.map(t=>`<span data-tag="${esc(t)}">#${esc(t)}</span>`).join('')}</div>`:''}</div></div>
+  ${mine?'<div class="fm-row"><button class="fm-btn g" data-del>Удалить</button></div>':''}</div></div><div class="fm-dp" id="fm-dp" hidden></div>`;
   pl.querySelector('video').onerror=()=>{pl.querySelector('.fm-pe').hidden=false};
   x.views=(x.views||0)+1;paint();
+   cms=[];loadComments(id);
    ready().then(S=>S&&S.from('flash_likes').select('flash_id').eq('flash_id',id)).then(r=>{if(r&&r.data&&r.data.length){const b=pl.querySelector('[data-like]');if(b)b.classList.add('on')}}).catch(()=>{});
   ready().then(S=>S&&S.rpc('flash_view',{fid:id})).catch(()=>{});
+}
+
+   async function loadComments(id){
+  const S=await ready();if(!S)return;
+  const r=await S.from('flash_comments').select('id,user_id,author,text,created_at').eq('flash_id',id).order('created_at',{ascending:false}).limit(200);
+  if(openId!==id)return;
+  cms=r.data||[];
+  const n=$('#cm-n');if(n)n.textContent=cms.length;
+  const dp=$('#fm-dp');if(dp&&!dp.hidden&&dp.dataset.m==='c')showComments();
+}
+function showComments(){
+  const dp=$('#fm-dp');if(!dp)return;
+  dp.innerHTML=`<div class="fm-dh"><b>Комментарии ${cms.length}</b><button class="fm-xx2" data-dx>✕</button></div>
+  <div class="fm-db">${cms.length?cms.map(c=>`<div class="fm-cm"><b>${esc(c.author)}</b> <small>${dt(c.created_at)}</small><p>${esc(c.text)}</p>${uid&&c.user_id===uid?`<button data-cdel="${esc(c.id)}">Удалить</button>`:''}</div>`).join(''):'<p class="fm-ds">Комментариев пока нет. Напиши первый!</p>'}</div>
+  <div class="fm-cf"><input id="cm-t" maxlength="500" placeholder="Введите текст комментария"><button class="fm-btn" data-csend>Отправить</button></div>`;
+}
+function openPanel(m){
+  const dp=$('#fm-dp'),x=list.find(a=>a.id===openId);if(!dp||!x)return;
+  dp.hidden=false;dp.dataset.m=m;
+  if(m==='c')return showComments();
+  dp.innerHTML=`<div class="fm-dh"><b>Описание</b><button class="fm-xx2" data-dx>✕</button></div><div class="fm-db"><b>${esc(x.title)}</b><small style="display:block;color:var(--mu);margin-top:6px">${x.views||0} просм., ${dt(x.created_at)}</small><p class="fm-ds">${x.description?esc(x.description).replace(/\n/g,'<br>'):'Описания нет.'}</p></div>`;
 }
 
 sec.addEventListener('click',async e=>{
@@ -318,8 +359,25 @@ sec.addEventListener('click',async e=>{
     }
     delete lk.dataset.busy;return;
   }
-  if(t.closest('[data-info]')){const dp=$('#fm-pl .fm-dp');if(dp)dp.hidden=false;return}
-  if(t.closest('[data-dx]')){const dp=$('#fm-pl .fm-dp');if(dp)dp.hidden=true;return}
+  if(t.closest('[data-info]'))return openPanel('i');
+  if(t.closest('[data-cm]'))return openPanel('c');
+  if(t.closest('[data-dx]')){const dp=$('#fm-dp');if(dp)dp.hidden=true;return}
+  const tb=t.closest('[data-tab]');
+  if(tb){tab=tb.dataset.tab;sec.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b===tb));return paint()}
+  const cs=t.closest('[data-csend]');
+  if(cs){
+    const inp=$('#cm-t'),v=inp?inp.value.trim():'';
+    if(!v||!openId||cs.dataset.busy)return;
+    cs.dataset.busy='1';
+    const S=await ready();
+    if(S){
+      const r=await S.from('flash_comments').insert({flash_id:openId,author:window.ME_NAME||'Участник',text:v});
+      if(!r.error)await loadComments(openId);
+    }
+    delete cs.dataset.busy;return;
+  }
+  const cd=t.closest('[data-cdel]');
+  if(cd){const S=await ready();if(S){await S.from('flash_comments').delete().eq('id',cd.dataset.cdel);loadComments(openId)}return}
   const c=t.closest('[data-o]');
   if(c)return openFlash(c.dataset.o);
   if(t.closest('[data-x]'))return closePlayer();
