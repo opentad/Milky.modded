@@ -87,6 +87,7 @@ const ready=()=>new Promise(ok=>{
 const say=t=>{const m=$('#fm-msg');if(!m)return;m.textContent=t;clearTimeout(msgT);msgT=setTimeout(()=>{m.textContent=''},9000)};
 const fnErr=async e=>{try{const j=await e.context.json();if(j&&j.error)return j.error}catch(x){}return 'Не удалось загрузить видео. Проверь интернет и попробуй ещё раз.'};
 const fresh=x=>Date.now()-new Date(x.created_at)<LIM.freshMin*60000;
+const waitTxt=s=>{const t=Math.ceil(s/60),h=Math.floor(t/60),m=t%60;return h?h+' ч '+m+' мин':m+' мин'};
 const parseTags=s=>[...new Set(s.split(/[\s,]+/)
   .map(x=>x.replace(/^#+/,'').toLowerCase().replace(/[^a-zа-яё0-9_]/g,'').slice(0,30))
   .filter(Boolean))];
@@ -126,7 +127,8 @@ function shell(){
     <div class="fm-msg" id="fm-msg"></div>
     <div class="fm-panel" id="fm-up" hidden>
       <div class="fm-rules">До ${LIM.maxSec} секунд, до ${LIM.maxMB} МБ, вертикальное или квадратное, не выше ${LIM.maxSide}p (720×1280), формат mp4 или mov. Чтобы видео прошло, сними его в настройках камеры в качестве HD (720p).</div>
-      <label class="fm-btn g" style="display:inline-flex;align-items:center;cursor:pointer">Выбрать видео<input type="file" id="vf" accept="video/mp4,video/quicktime,.mp4,.mov" hidden></label>
+      <div class="fm-err" id="lim"></div>
+      <label class="fm-btn g" id="vfl" style="display:inline-flex;align-items:center;cursor:pointer">Выбрать видео<input type="file" id="vf" accept="video/mp4,video/quicktime,.mp4,.mov" hidden></label>
       <div class="fm-info" id="info"></div>
       <div class="fm-err" id="e"></div>
       <div class="fm-form" id="form" hidden>
@@ -187,7 +189,16 @@ function initUpload(){
     g('#form').hidden=true;g('#pub').disabled=true;
     g('#ti').value='';g('#de').value='';g('#tg').value='';
   };
-  $('#fm-new').onclick=()=>{box.hidden=!box.hidden;if(!box.hidden)box.scrollIntoView({behavior:'smooth',block:'nearest'})};
+  const checkLimit=async()=>{
+    g('#lim').textContent='';g('#vfl').hidden=false;
+    const S=await ready();if(!S)return;
+    try{
+      const r=await S.rpc('flash_wait');
+      const left=r&&!r.error?Number(r.data)||0:0;
+      if(left>0){g('#lim').textContent='Один Flash в сутки. Следующий можно загрузить через '+waitTxt(left)+'.';g('#vfl').hidden=true}
+    }catch(x){}
+  };
+  $('#fm-new').onclick=()=>{box.hidden=!box.hidden;if(!box.hidden){box.scrollIntoView({behavior:'smooth',block:'nearest'});checkLimit()}};
   g('#cn').onclick=()=>{if(busy)return;drop();box.hidden=true};
 
   g('#vf').onchange=async e=>{
