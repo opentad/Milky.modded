@@ -185,7 +185,7 @@ async function loadList(){
   try{
     if(!uid){const u=await S.auth.getUser();uid=u.data&&u.data.user?u.data.user.id:null}
     const r=await S.from('flashes')
-      .select('id,user_id,author,title,description,tags,url,cover,dur,w,h,views,created_at')
+      .select('id,user_id,author,title,description,tags,url,cover,dur,w,h,views,likes,created_at')
       .order('created_at',{ascending:false}).limit(60);
     if(r.error)throw r.error;
     list=r.data||[];
@@ -280,7 +280,7 @@ function openFlash(id){
   pl.hidden=false;
  pl.innerHTML=`<div class="fm-plw"><div class="fm-wr"><div class="fm-pv"><video src="${esc(x.url)}" autoplay loop playsinline></video><div class="fm-pe" hidden>Видео ещё обрабатывается. Подожди минуту-две и открой снова.</div>
   <button class="fm-xx" data-x>✕</button>
-  <div class="fm-side"><button class="fm-lk" data-like><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>Нравится</button><div>${(x.views||0)+1} просм.</div></div>
+  <div class="fm-side"><button class="fm-lk" data-like><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg><span id="lk-n">${x.likes||0}</span></button><div>${(x.views||0)+1} просм.</div></div>
   <div class="fm-bt"><div class="fm-au">${esc(x.author)}</div><b class="fm-tt" data-info>${esc(x.title)}</b>
   ${(x.tags||[]).length?`<div class="fm-tg">${x.tags.map(t=>`<span data-tag="${esc(t)}">#${esc(t)}</span>`).join('')}</div>`:''}</div>
   <div class="fm-dp" hidden><div class="fm-row" style="margin:0 0 8px;justify-content:space-between;align-items:center"><b>Описание</b><button class="fm-btn g" data-dx>Закрыть</button></div>
@@ -290,6 +290,7 @@ function openFlash(id){
   pl.querySelector('video').onerror=()=>{pl.querySelector('.fm-pe').hidden=false};
   pl.scrollIntoView({behavior:'smooth',block:'start'});
   x.views=(x.views||0)+1;paint();
+   ready().then(S=>S&&S.from('flash_likes').select('flash_id').eq('flash_id',id)).then(r=>{if(r&&r.data&&r.data.length){const b=pl.querySelector('[data-like]');if(b)b.classList.add('on')}}).catch(()=>{});
   ready().then(S=>S&&S.rpc('flash_view',{fid:id})).catch(()=>{});
 }
 
@@ -298,7 +299,21 @@ sec.addEventListener('click',async e=>{
   const tg=t.closest('[data-tag]');
   if(tg){q='#'+tg.dataset.tag;const i=$('#fm-q');if(i)i.value=q;return paint()}
    if(t.tagName==='VIDEO'){t.paused?t.play():t.pause();return}
-  if(t.closest('[data-like]')){t.closest('[data-like]').classList.toggle('on');return}
+  const lk=t.closest('[data-like]');
+  if(lk){
+    if(!openId||lk.dataset.busy)return;
+    lk.dataset.busy='1';
+    const S=await ready();
+    if(S){
+      const r=await S.rpc('flash_like',{fid:openId});
+      if(!r.error&&r.data){
+        lk.classList.toggle('on',r.data.liked);
+        $('#lk-n').textContent=r.data.likes;
+        const x=list.find(a=>a.id===openId);if(x)x.likes=r.data.likes;
+      }
+    }
+    delete lk.dataset.busy;return;
+  }
   if(t.closest('[data-info]')){const dp=$('#fm-pl .fm-dp');if(dp)dp.hidden=false;return}
   if(t.closest('[data-dx]')){const dp=$('#fm-pl .fm-dp');if(dp)dp.hidden=true;return}
   const c=t.closest('[data-o]');
