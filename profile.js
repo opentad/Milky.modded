@@ -408,15 +408,15 @@ function draw(){
   <div class="pf-hd">${mine?'':CMT.dots('<button data-pacc>Пожаловаться на аккаунт</button>'+(CMT.mod()&&window.MOD?'<button data-pmore data-danger>Модерация</button>':''))}<div class="pf-ava"><span class="pf-big${mine?' pf-me':''}${p.ava_square?' sq':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:''}</div>
    <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
     <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
-    <div class="pf-sd"><div class="pf-ss"><div><b>${S.np}</b><small>публикаций</small></div><div><b>${S.nf}</b><small>подписчиков</small></div><div><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div></div>
+    <div class="pf-sd"><div class="pf-bs">${btns}</div></div></div><div class="pf-ss pf-ss2"><div data-tabgo="1"><b>${S.np}</b><small>публикаций</small></div><div data-flw="fol"><b>${S.nf}</b><small>подписчиков</small></div><div data-flw="sub"><b>${S.ng}</b><small>подписок</small></div></div></div>
   ${mine&&S.crop?cropHtml():''}
   ${mine&&S.ed?editHtml():''}
   ${mine&&S.dsg?designHtml():''}
-  <div class="pf-g${mine?'':' o'}">${menu}<div>
+  <div class="pf-g${mine?'':' o'}">${menu}<div>${tabsHtml()}${S.tb==='fm'?fmHtml():''}<div${S.tb==='fm'?' hidden':''}>
    ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea>${S.pimg?`<div class="pf-pv"><img src="${esc(S.pimg.url)}" alt=""><button class="pf-b g" data-prm>Убрать фото</button></div>`:''}<div class="r"><button class="pf-b g" data-pph>${ic('img')}Фото</button><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
    ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div style="flex:1;min-width:0"><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}</div><small class="pf-tm">${dt(x.created_at)}</small>${CMT.dots((mine?'':`<button data-pm="${x.id}">Пожаловаться</button>`)+(mine||CMT.mod()?`<button data-del="${x.id}" data-danger>Удалить</button>`:''))}</div>${x.body.trim()?`<p>${esc(x.body)}</p>`:''}${x.image_url?`<img class="pf-pimg" src="${esc(x.image_url)}" alt="" loading="lazy">`:''}
      <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button></div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
-  </div><aside>${ppl('Подписки',S.sub,S.ng)}${ppl('Подписчики',S.fol,S.nf)}</aside></div>`);
+  </div></div><aside></aside></div>`);
   if(S.crop)paint();
   // Код для вставки в блок карточки или информации:
 `<div class="pf-x">
@@ -487,10 +487,126 @@ async function loadUserPurchases(){
   S.purchasesList=list;S.dk='status';S.dsg=true;draw();
 }
 
+/* ===== вкладки профиля, FreshMilk, окно подписок ===== */
+const css3=document.createElement('style');
+css3.textContent=`
+.pf-ss2{margin-left:auto;padding:46px 46px 0 0;flex:none}
+.pf-ss2>div{cursor:pointer}
+.pf-tb{display:flex;justify-content:center;margin:0 0 16px}
+.pf-tb button{padding:6px 26px;font-size:17px;font-weight:700;color:#9aa5b0;background:transparent;border:0;border-left:1px solid var(--pln);cursor:pointer}
+.pf-tb button:first-child{border-left:0}
+.pf-tb button.on{color:var(--cy,#17b3e6)}
+.pf-fc{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.pf-fc button{height:44px;padding:0 24px;border-radius:22px;background:#fff;color:var(--ptx);font-weight:700;border:0;cursor:pointer}
+.pf-fc button.on{background:#34404e;color:#fff}
+.pf-fg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pf-ft{position:relative;aspect-ratio:9/16;border-radius:18px;overflow:hidden;background:#222;border:0;padding:0;cursor:pointer}
+.pf-ft video,.pf-ft img{width:100%;height:100%;object-fit:cover;display:block}
+.pf-ft span{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 10px;color:#fff;font-size:12.5px;font-weight:600;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.65));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+[data-theme=dark] #v-prof .pf-fc button{background:#1b212b}
+.fw-bg{position:fixed;inset:0;z-index:9999;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:16px}
+.fw-box{background:#fff;border-radius:28px;width:min(1000px,100%);max-height:88vh;display:flex;flex-direction:column;padding:26px 30px;color:#1f2937}
+.fw-h{display:flex;justify-content:space-between;align-items:flex-start}
+.fw-h small{color:#17b3e6;font-weight:700;font-size:11px;letter-spacing:.05em}
+.fw-h h3{font-size:28px;font-weight:800;display:flex;gap:10px;align-items:center;margin:4px 0}
+.fw-h h3 i{font-style:normal;font-size:12px;background:#e3f6fd;color:#17b3e6;border-radius:12px;padding:4px 10px}
+.fw-sub{color:#7a8594;font-size:13px;margin-bottom:14px}
+.fw-x{border:0;background:#f0f2f5;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;font-weight:700;color:#1f2937}
+.fw-s{width:100%;height:46px;border:1px solid #e3e8ee;border-radius:16px;padding:0 16px;font:inherit;outline:0;background:#f7f9fb;margin-bottom:14px;color:#1f2937}
+.fw-l{overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
+.fw-c{display:flex;gap:12px;align-items:center;border:1px solid #e6e9ef;border-radius:18px;padding:10px 12px;min-width:0}
+.fw-p{display:flex;gap:12px;align-items:center;flex:1;min-width:0;background:transparent;border:0;text-align:left;cursor:pointer;color:inherit;font:inherit;padding:0}
+.fw-p span{min-width:0}
+.fw-a{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;background-size:cover;background-position:center}
+.fw-p b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fw-p small{color:#7a8594;font-size:12px}
+.fw-b{flex:none;height:38px;padding:0 16px;border-radius:12px;border:0;background:#17b3e6;color:#fff;font-weight:700;font-size:12.5px;cursor:pointer}
+.fw-b.g{background:#e8f7ee;color:#2fa876}
+.fw-e{grid-column:1/-1;text-align:center;color:#7a8594;padding:30px 0}
+@media(max-width:700px){.fw-l{grid-template-columns:1fr}.fw-box{padding:20px}.fw-h h3{font-size:22px}.pf-ss2{padding:10px 0 0;margin-left:0}.pf-fg{gap:8px}}
+[data-theme=dark] .fw-box{background:#1b212b;color:#e8ecf3}
+[data-theme=dark] .fw-c{border-color:#2d3544}
+[data-theme=dark] .fw-s{background:#232a36;border-color:#2d3544;color:#e8ecf3}
+[data-theme=dark] .fw-x{background:#2d3544;color:#e8ecf3}`;
+document.head.appendChild(css3);
+
+const tabsHtml=()=>`<div class="pf-tb"><button data-tb="posts" class="${S.tb==='fm'?'':'on'}">Публикации</button><button data-tb="fm" class="${S.tb==='fm'?'on':''}">FreshMilk</button></div>`;
+
+function fmHtml(){
+  const f=S.fmf||'all',n=S.fn||6;
+  const chips=[['all','Все'],['video','Видео'],['fl','Flashes']].map(([k,l])=>`<button data-fmf="${k}" class="${f===k?'on':''}">${l}</button>`).join('');
+  let body;
+  if(f==='video'||(S.fl&&!S.fl.length))body='<div class="pf-x pf-em">Тут пока ничего нет</div>';
+  else if(S.fl===undefined)body='<div class="pf-x pf-em">Загружаем…</div>';
+  else body='<div class="pf-fg">'+S.fl.slice(0,n).map(fi=>{
+    const vu=fi.video_url||fi.url||fi.video||'',po=fi.thumb_url||fi.thumbnail||fi.poster||fi.cover_url||fi.preview_url||'',tt=fi.title||'';
+    return `<button class="pf-ft" data-fl="${fi.id}">${po?`<img src="${esc(po)}" alt="" loading="lazy">`:vu?`<video src="${esc(vu)}#t=0.1" preload="metadata" muted playsinline></video>`:''}${tt?`<span>${esc(tt)}</span>`:''}</button>`}).join('')+'</div>'+(S.fl.length>n?'<button class="pf-b g" data-fmmore style="margin:14px auto 0">Показать ещё</button>':'');
+  return `<div class="pf-fc">${chips}</div>${body}`;
+}
+
+async function loadFl(){
+  const SB=db(),s=S;let rows=null;
+  for(const c of ['user_id','author_id','author','owner','uid']){
+    const r=await SB.from('flashes').select('*').eq(c,s.id).limit(60);
+    if(!r.error){rows=r.data||[];break}
+  }
+  if(S!==s)return;
+  if(!rows)note('Не удалось загрузить флэши');
+  S.fl=(rows||[]).sort((a,b)=>String(b.created_at||b.id).localeCompare(String(a.created_at||a.id),undefined,{numeric:true}));
+  draw();
+}
+
+function openFl(id){
+  if(window.FL&&FL.open)return FL.open(id,S.fl);
+  if(window.FM&&FM.open)return FM.open(id);
+  note('Просмотр флэша подключим следующим шагом');
+}
+
+async function fwModal(kind){
+  const SB=db(),s=S,sub=kind==='sub';
+  const d=document.createElement('div');d.className='fw-bg';
+  d.innerHTML=`<div class="fw-box"><div class="fw-h"><div><small>ПРОФИЛЬ</small><h3>${sub?'Подписки':'Подписчики'}<i>${sub?s.ng:s.nf}</i></h3></div><button class="fw-x" data-c>✕</button></div><div class="fw-sub">${sub?'Люди, на которых подписан этот профиль':'Люди, которые подписаны на этот профиль'}</div><input class="fw-s" placeholder="Найти по имени или нику" autocomplete="off"><div class="fw-l"><div class="fw-e">Загружаем…</div></div></div>`;
+  document.body.appendChild(d);
+  let L=[];const mf=new Set(),list=d.querySelector('.fw-l'),inp=d.querySelector('.fw-s');
+  const show=()=>{
+    const q=inp.value.trim().toLowerCase();
+    const R=L.filter(u=>!q||((u.name||'')+' '+(u.nick||'')).toLowerCase().includes(q));
+    list.innerHTML=R.map(u=>`<div class="fw-c"><button class="fw-p" data-o="${u.id}"><span class="fw-a" style="background-color:${col(u.name)};${u.avatar_url?`background-image:url('${esc(u.avatar_url)}')`:''}">${u.avatar_url?'':esc(ini(u.name))}</span><span><b>${esc(u.name||'Без имени')}</b>${u.nick?`<small>@${esc(u.nick)}</small>`:''}</span></button>${u.id===s.me.id?'':`<button class="fw-b${mf.has(u.id)?' g':''}" data-f="${u.id}">${mf.has(u.id)?'Вы подписаны':'Подписаться'}</button>`}</div>`).join('')||'<div class="fw-e">Никого не найдено</div>';
+  };
+  d.addEventListener('click',async e=>{
+    const t=e.target;
+    if(t===d||t.closest('[data-c]')){d.remove();return}
+    const o=t.closest('[data-o]');if(o){d.remove();render(o.dataset.o);return}
+    const f=t.closest('[data-f]');
+    if(f){
+      const id=f.dataset.f,on=mf.has(id);on?mf.delete(id):mf.add(id);show();
+      const r=on?await SB.from('follows').delete().match({follower:s.me.id,followee:id}):await SB.from('follows').insert({followee:id});
+      if(r.error){on?mf.add(id):mf.delete(id);show();note('Не получилось: '+r.error.message)}
+    }
+  });
+  inp.addEventListener('input',show);
+  const r=await SB.from('follows').select(sub?'followee':'follower').match(sub?{follower:s.id}:{followee:s.id}).limit(2000);
+  if(r.error){list.innerHTML='<div class="fw-e">Не удалось загрузить: '+esc(r.error.message)+'</div>';return}
+  const ids=(r.data||[]).map(x=>sub?x.followee:x.follower),ch=[];
+  for(let i=0;i<ids.length;i+=80)ch.push(ids.slice(i,i+80));
+  const res=await Promise.all(ch.map(c=>Promise.all([
+    SB.from('profiles').select('id,name,nick,avatar_url').in('id',c),
+    SB.from('follows').select('followee').eq('follower',s.me.id).in('followee',c)])));
+  res.forEach(([p,m])=>{L.push(...(p.data||[]));(m.data||[]).forEach(z=>mf.add(z.followee))});
+  L.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ru'));
+  show();
+}
+
 async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
   if(t.id==='pfDsg'){S.dsg=false;draw();return}
   if(b('[data-go]'))MS.show('msg');
+  else if((x=b('[data-tb]'))){S.tb=x.dataset.tb;draw();if(S.tb==='fm'&&S.fl===undefined)loadFl()}
+  else if((x=b('[data-fmf]'))){S.fmf=x.dataset.fmf;S.fn=6;draw()}
+  else if(b('[data-fmmore]')){S.fn=(S.fn||6)+6;draw()}
+  else if((x=b('[data-fl]')))openFl(x.dataset.fl);
+  else if((x=b('[data-flw]')))fwModal(x.dataset.flw);
+  else if(b('[data-tabgo]')){S.tb='posts';draw()}
     else if(b('[data-pmore]')){if(window.MOD)MOD.menu('profile',S.id,S.id,()=>render(S.id))}
   else if((x=b('[data-pm]')))CMT.report('post',+x.dataset.pm,S.id);
     else if(b('[data-pacc]'))CMT.report('profile',0,S.id);
