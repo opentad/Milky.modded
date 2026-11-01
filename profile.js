@@ -578,7 +578,7 @@ function fmHtml(){
   if(f==='video'||(S.fl&&!S.fl.length))body='<div class="pf-x pf-em">Тут пока ничего нет</div>';
   else if(S.fl===undefined)body='<div class="pf-x pf-em">Загружаем…</div>';
   else body='<div class="pf-fg">'+S.fl.slice(0,n).map(fi=>{
-    const vu=fi.video_url||fi.url||fi.video||'',po=fi.thumb_url||fi.thumbnail||fi.poster||fi.cover_url||fi.preview_url||'',tt=fi.title||'';
+    const vu=fi.video_url||fi.url||fi.video||'',po=fi.cover||fi.thumb_url||fi.thumbnail||fi.poster||fi.cover_url||fi.preview_url||'',tt=fi.title||'';
     return `<button class="pf-ft" data-fl="${fi.id}">${po?`<img src="${esc(po)}" alt="" loading="lazy">`:vu?`<video src="${esc(vu)}#t=0.1" preload="metadata" muted playsinline></video>`:''}${tt?`<span>${esc(tt)}</span>`:''}</button>`}).join('')+'</div>'+(S.fl.length>n?'<button class="pf-b g" data-fmmore style="margin:14px auto 0">Показать ещё</button>':'');
   return `<div class="pf-fc">${chips}</div>${body}`;
 }
@@ -586,7 +586,7 @@ function fmHtml(){
 async function loadFl(){
   const SB=db(),s=S;let rows=null;
   for(const c of ['user_id','author_id','author','owner','uid']){
-    const r=await SB.from('flashes').select('*').eq(c,s.id).limit(60);
+    const r=await SB.from('flashes').select('*').eq(c,s.id).limit(1000);
     if(!r.error){rows=r.data||[];break}
   }
   if(S!==s)return;
