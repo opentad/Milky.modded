@@ -216,9 +216,10 @@ if(urls.length){
   const M=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
   S={me,id,mine,p:pr.data,np:np.count||0,nf:nf.count||0,ng:ng.count||0,fw:!!(fw&&fw.data),posts:ps.data,
      liked:new Set(((lk&&lk.data)||[]).map(x=>x.post_id)),fol:fol.map(i=>M[i]).filter(Boolean),sub:sub.map(i=>M[i]).filter(Boolean),
-     ed:false,dsg:false,dk:'status',purchasesList:[],ev:{},fm:{},draft:'',cd:null,crop:null,pimg:null};
+     ed:false,dsg:false,dk:'status',purchasesList:[],ev:{},fm:{},draft:'',cd:null,crop:null,pimg:null,bk:undefined};
   setHash(pr.data.nick||id);
   draw();
+  loadBk();
 }
 const ppl=(t,a,n)=>`<div class="pf-x"><div class="pf-sh"><h3>${t}</h3><small>${n}</small></div>${a.map(u=>`<button class="pf-pp" data-open="${u.id}">${av(u,'pf-a')}<span>${esc(u.name)}</span></button>`).join('')||'<small class="pf-mu">Пока никого</small>'}</div>`;
 const mi=(k,t)=>`<div class="pf-mi off">${ic(k)}<span>${t}</span><small>скоро</small></div>`;
@@ -407,8 +408,8 @@ function draw(){
   put(`<div class="pf-cv${p.cover_url?' img':''}"${p.cover_url?` style="background-image:url('${esc(p.cover_url)}')"`:''}></div>
   <div class="pf-hd">${mine?'':CMT.dots('<button data-pacc>Пожаловаться на аккаунт</button>'+(CMT.mod()&&window.MOD?'<button data-pmore data-danger>Модерация</button>':''))}<div class="pf-ava"><span class="pf-big${mine?' pf-me':''}${p.ava_square?' sq':''}"${mine?' data-ava role="button" aria-label="Сменить фото"':''} style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(shown))}</span>${p.plate_url?`<img class="pf-pl" src="${esc(p.plate_url)}" alt="">`:''}</div>
    <div class="pf-w"><h2>${esc(shown)}</h2>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}<div class="pf-nk"><span>${nick}</span>${sn?`<span class="pf-bd">${sn}</span>`:''}</div>
-    <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
-    <div class="pf-sd"><div class="pf-bs">${btns}</div></div></div><div class="pf-ss pf-ss2"><div data-tabgo="1"><b>${S.np}</b><small>публикаций</small></div><div data-flw="fol"><b>${S.nf}</b><small>подписчиков</small></div><div data-flw="sub"><b>${S.ng}</b><small>подписок</small></div></div></div>
+    <div class="pf-st">${p.status?esc(p.status):''}</div>${tags.length?`<div class="pf-tg">${tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}</div>
+   <div class="pf-sc"><div class="pf-ss pf-ss2"><div data-tabgo="1"><b>${S.np}</b><small>публикаций</small></div><div data-flw="fol"><b>${S.nf}</b><small>подписчиков</small></div><div data-flw="sub"><b>${S.ng}</b><small>подписок</small></div></div><div class="pf-bs">${btns}</div></div></div>
   ${mine&&S.crop?cropHtml():''}
   ${mine&&S.ed?editHtml():''}
   ${mine&&S.dsg?designHtml():''}
@@ -416,13 +417,8 @@ function draw(){
    ${mine?`<div class="pf-x pf-comp">${av(p,'pf-a')}<div class="in"><textarea id="pf-t" maxlength="2000" placeholder="Что нового?">${esc(S.draft)}</textarea>${S.pimg?`<div class="pf-pv"><img src="${esc(S.pimg.url)}" alt=""><button class="pf-b g" data-prm>Убрать фото</button></div>`:''}<div class="r"><button class="pf-b g" data-pph>${ic('img')}Фото</button><button class="pf-b" data-pub>Опубликовать</button></div></div></div>`:''}
    ${S.posts.map(x=>`<article class="pf-x pf-p"><div class="pf-ph">${av(p,'pf-a')}<div style="flex:1;min-width:0"><b>${esc(shown)}</b>${p.fio?`<span class="pf-fio">${esc(SF(p.fio))}</span>`:''}</div><small class="pf-tm">${dt(x.created_at)}</small>${CMT.dots((mine?'':`<button data-pm="${x.id}">Пожаловаться</button>`)+(mine||CMT.mod()?`<button data-del="${x.id}" data-danger>Удалить</button>`:''))}</div>${x.body.trim()?`<p>${esc(x.body)}</p>`:''}${x.image_url?`<img class="pf-pimg" src="${esc(x.image_url)}" alt="" loading="lazy">`:''}
      <div class="pf-ac"><button data-like="${x.id}" class="${S.liked.has(x.id)?'on':''}">${ic('heart')}${cn(x.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(x.id)}</button></div>${CMT.html(x.id,S.id,S.p.comments_off)}</article>`).join('')||`<div class="pf-x pf-em">${mine?'Публикаций пока нет. Напиши первую выше.':'Публикаций пока нет.'}</div>`}
-  </div></div><aside></aside></div>`);
+  </div></div><aside>${booksHtml()}</aside></div>`);
   if(S.crop)paint();
-  // Код для вставки в блок карточки или информации:
-`<div class="pf-x">
-   <small class="pfo-lb">Время на сайте</small>
-   <div class="pfo-tx">${window.formatOnlineTime ? window.formatOnlineTime(p.online_seconds) : '0 мин'}</div>
- </div>`
 }
 
 sec.addEventListener('input',e=>{
@@ -490,7 +486,8 @@ async function loadUserPurchases(){
 /* ===== вкладки профиля, FreshMilk, окно подписок ===== */
 const css3=document.createElement('style');
 css3.textContent=`
-.pf-ss2{margin-left:auto;padding:46px 46px 0 0;flex:none}
+.pf-sc{margin-left:auto;padding:46px 46px 0 0;flex:none;display:flex;flex-direction:column;align-items:center;gap:16px}
+.pf-sc .pf-bs{justify-content:center;flex-wrap:wrap}
 .pf-ss2>div{cursor:pointer}
 .pf-tb{display:flex;justify-content:center;margin:0 0 16px}
 .pf-tb button{padding:6px 26px;font-size:17px;font-weight:700;color:#9aa5b0;background:transparent;border:0;border-left:1px solid var(--pln);cursor:pointer}
@@ -504,6 +501,14 @@ css3.textContent=`
 .pf-ft video,.pf-ft img{width:100%;height:100%;object-fit:cover;display:block}
 .pf-ft span{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 10px;color:#fff;font-size:12.5px;font-weight:600;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.65));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 [data-theme=dark] #v-prof .pf-fc button{background:#1b212b}
+.pf-bk{display:flex;gap:12px;align-items:center;width:100%;padding:9px 0;background:transparent;border:0;text-align:left;cursor:pointer;color:var(--ptx);font:inherit}
+.pf-bk+.pf-bk{border-top:1px solid var(--pln)}
+.pf-bkc{flex:none;width:48px;height:68px;border-radius:8px;background:#e9edf3 center/cover}
+.pf-bkt{min-width:0;flex:1}
+.pf-bkt b{display:block;font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.pf-bkst{display:flex;gap:4px;align-items:center;margin-top:5px;font-size:13px;font-weight:700;color:var(--pmu)}
+.pf-bkst svg{width:16px;height:16px;flex:none}
+#v-prof .pf-bkst svg path{fill:#f5b301;stroke:#f5b301}
 .fw-bg{position:fixed;inset:0;z-index:9999;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:16px}
 .fw-box{background:#fff;border-radius:28px;width:min(1000px,100%);max-height:88vh;display:flex;flex-direction:column;padding:26px 30px;color:#1f2937}
 .fw-h{display:flex;justify-content:space-between;align-items:flex-start}
@@ -523,7 +528,7 @@ css3.textContent=`
 .fw-b{flex:none;height:38px;padding:0 16px;border-radius:12px;border:0;background:#17b3e6;color:#fff;font-weight:700;font-size:12.5px;cursor:pointer}
 .fw-b.g{background:#e8f7ee;color:#2fa876}
 .fw-e{grid-column:1/-1;text-align:center;color:#7a8594;padding:30px 0}
-@media(max-width:700px){.fw-l{grid-template-columns:1fr}.fw-box{padding:20px}.fw-h h3{font-size:22px}.pf-ss2{padding:10px 0 0;margin-left:0}.pf-fg{gap:8px}}
+@media(max-width:700px){.fw-l{grid-template-columns:1fr}.fw-box{padding:20px}.fw-h h3{font-size:22px}.pf-sc{padding:10px 0 0;margin-left:0;align-items:flex-start}.pf-fg{gap:8px}}
 [data-theme=dark] .fw-box{background:#1b212b;color:#e8ecf3}
 [data-theme=dark] .fw-c{border-color:#2d3544}
 [data-theme=dark] .fw-s{background:#232a36;border-color:#2d3544;color:#e8ecf3}
@@ -531,6 +536,37 @@ css3.textContent=`
 document.head.appendChild(css3);
 
 const tabsHtml=()=>`<div class="pf-tb"><button data-tb="posts" class="${S.tb==='fm'?'':'on'}">Публикации</button><button data-tb="fm" class="${S.tb==='fm'?'on':''}">FreshMilk</button></div>`;
+
+/* ===== Книги автора: 3 самые популярные книги, вместо имени автора — звёзды ===== */
+const bkNum=v=>{const n=+v;return isNaN(n)?0:n};
+const bkReads=b=>bkNum(b.reads!=null?b.reads:b.reads_count!=null?b.reads_count:b.views!=null?b.views:b.views_count!=null?b.views_count:b.read_count);
+const bkStars=b=>bkNum(b.stars!=null?b.stars:b.stars_count!=null?b.stars_count:b.star_count!=null?b.star_count:b.rating!=null?b.rating:b.likes!=null?b.likes:b.likes_count);
+const bkCover=b=>b.cover_url||b.cover||b.image_url||b.image||b.poster||'';
+const bkTitle=b=>b.title||b.name||'Без названия';
+
+function booksHtml(){
+  const b=S.bk;
+  if(!b||!b.length)return '';
+  return `<div class="pf-x"><div class="pf-sh"><h3>Книги автора</h3><small>${b.length}</small></div>`+
+    b.map(x=>`<button class="pf-bk" data-bk="${esc(x.id)}"><span class="pf-bkc"${bkCover(x)?` style="background-image:url('${esc(bkCover(x))}')"`:''}></span><span class="pf-bkt"><b>${esc(bkTitle(x))}</b><span class="pf-bkst">${ic('star')}${bkStars(x)}</span></span></button>`).join('')+`</div>`;
+}
+
+async function loadBk(){
+  const SB=db(),s=S;if(!SB||!s)return;let rows=null;
+  for(const c of ['user_id','author_id','author','owner','uid']){
+    const r=await SB.from('books').select('*').eq(c,s.id).limit(100);
+    if(!r.error){rows=r.data||[];break}
+  }
+  if(S!==s)return;
+  S.bk=(rows||[]).sort((a,b)=>(bkReads(b)-bkReads(a))||(bkStars(b)-bkStars(a))).slice(0,3);
+  draw();
+}
+
+function openBk(id){
+  if(window.LB&&LB.open)return LB.open(id);
+  if(window.BK&&BK.open)return BK.open(id);
+  note('Открытие книги подключим следующим шагом');
+}
 
 function fmHtml(){
   const f=S.fmf||'all',n=S.fn||6;
@@ -601,6 +637,7 @@ async function act(e){
   const t=e.target,b=k=>t.closest(k),SB=db();let x;
   if(t.id==='pfDsg'){S.dsg=false;draw();return}
   if(b('[data-go]'))MS.show('msg');
+  else if((x=b('[data-bk]')))openBk(x.dataset.bk);
   else if((x=b('[data-tb]'))){S.tb=x.dataset.tb;draw();if(S.tb==='fm'&&S.fl===undefined)loadFl()}
   else if((x=b('[data-fmf]'))){S.fmf=x.dataset.fmf;S.fn=6;draw()}
   else if(b('[data-fmmore]')){S.fn=(S.fn||6)+6;draw()}
