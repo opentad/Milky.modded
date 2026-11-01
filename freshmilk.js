@@ -295,20 +295,40 @@ function paint(){
     :`<div class="fr">${loadErr?'Flashes не загрузились. Обнови страницу.':list.length?'Ничего не найдено.':'Здесь пока пусто. Загрузи первый Flash!'}</div>`;
 }
 
+const PAGE=60;let loadTk=0;
 async function loadList(){
   const S=await ready();loadErr=false;
   if(!S){loadErr=true;loaded=true;list=[];return paint()}
+  const tk=++loadTk;
+  let from=0,all=[];
   try{
     if(!uid){const u=await S.auth.getUser();uid=u.data&&u.data.user?u.data.user.id:null}
-    const r=await S.from('flashes')
-      .select(COLS)
-      .order('created_at',{ascending:false}).limit(60);
-    if(r.error)throw r.error;
-    list=r.data||[];
-  }catch(e){list=[];loadErr=true}
-  loaded=true;
-  paint();
-  if(view==='feed'&&!$('#fm-sc'))buildFeed();
+    for(;;){
+      const r=await S.from('flashes').select(COLS)
+        .order('created_at',{ascending:false}).order('id',{ascending:false})
+        .range(from,from+PAGE-1);
+      if(r.error)throw r.error;
+      if(tk!==loadTk)return;
+      const rows=r.data||[];
+      all=all.concat(rows);list=all.slice();
+      if(from===0){loaded=true;paint();if(view==='feed'&&!$('#fm-sc'))buildFeed()}
+      else{paint();addToFeed(rows)}
+      if(rows.length<PAGE)break;
+      from+=PAGE;
+    }
+  }catch(e){
+    if(tk!==loadTk)return;
+    if(!all.length){list=[];loadErr=true}
+    loaded=true;paint();
+  }
+}
+function addToFeed(rows){
+  const sc=$('#fm-sc');if(!sc||!io)return;
+  const have=new Set([...sc.children].map(c=>c.dataset.id));
+  rows.filter(x=>URL_OK.test(x.url||'')&&!have.has(String(x.id))).forEach(x=>{
+    sc.insertAdjacentHTML('beforeend',item(x));
+    io.observe(sc.lastElementChild);
+  });
 }
 
 /* ---------- загрузка ---------- */
@@ -406,6 +426,9 @@ function buildFeed(startId){
   if(io){io.disconnect();io=null}
   openId=null;cmFor=null;
   const items=list.filter(x=>URL_OK.test(x.url||''));
+  if(startId!=null&&!items.some(x=>String(x.id)===String(startId))){
+    const ex=extra[startId];if(ex&&URL_OK.test(ex.url||''))items.unshift(ex);
+  }
   if(!items.length){
     fe.innerHTML=`<div class="fm-fe">${!loaded?'Загружаем…':loadErr?'Flashes не загрузились. Обнови страницу.':'Здесь пока пусто. Загрузи первый Flash!'}</div>`;
     return;
@@ -684,6 +707,21 @@ sec.addEventListener('keydown',e=>{
 new MutationObserver(()=>{
   if(!sec.getClientRects().length&&view!=='home')setView('home');
 }).observe(sec,{attributes:true,attributeFilter:['hidden','class','style']});
+
+/* ---------- открыть конкретный Flash из профиля ---------- */
+window.FM={open:id=>{
+  MS.show('fm');
+  let n=0;
+  const t=setInterval(async()=>{
+    if(!($('#fm-home')&&loaded)){if(++n>80)clearInterval(t);return}
+    clearInterval(t);
+    if(!byId(id)){
+      const S=await ready();
+      try{const r=await S.from('flashes').select(COLS).eq('id',id).maybeSingle();if(r.data)extra[r.data.id]=r.data}catch(e){}
+    }
+    setView('feed',id);
+  },150);
+}};
 
 /* ---------- подключение к меню ---------- */
 window.RV=window.RV||{};
