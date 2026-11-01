@@ -538,11 +538,9 @@ document.head.appendChild(css3);
 const tabsHtml=()=>`<div class="pf-tb"><button data-tb="posts" class="${S.tb==='fm'?'':'on'}">Публикации</button><button data-tb="fm" class="${S.tb==='fm'?'on':''}">FreshMilk</button></div>`;
 
 /* ===== Книги автора: 3 самые популярные книги, вместо имени автора — звёзды ===== */
-const bkNum=v=>{const n=+v;return isNaN(n)?0:n};
-const bkReads=b=>bkNum(b.reads!=null?b.reads:b.reads_count!=null?b.reads_count:b.views!=null?b.views:b.views_count!=null?b.views_count:b.read_count);
-const bkStars=b=>bkNum(b.stars!=null?b.stars:b.stars_count!=null?b.stars_count:b.star_count!=null?b.star_count:b.rating!=null?b.rating:b.likes!=null?b.likes:b.likes_count);
-const bkCover=b=>b.cover_url||b.cover||b.image_url||b.image||b.poster||'';
-const bkTitle=b=>b.title||b.name||'Без названия';
+const bkCover=b=>b.cover||'';
+const bkTitle=b=>b.title||'Без названия';
+const bkStars=b=>b.st||'0';
 
 function booksHtml(){
   const b=S.bk;
@@ -552,14 +550,19 @@ function booksHtml(){
 }
 
 async function loadBk(){
-  const SB=db(),s=S;if(!SB||!s)return;let rows=null;
-  for(const c of ['user_id','author_id','author','owner','uid']){
-    const r=await SB.from('books').select('*').eq(c,s.id).limit(100);
-    if(!r.error){rows=r.data||[];break}
-  }
+  const SB=db(),s=S;if(!SB||!s)return;
+  const r=await SB.from('library_books').select('id,title,cover,reads,status,archived_at').eq('user_id',s.id).is('archived_at',null).limit(100);
   if(S!==s)return;
-  S.bk=(rows||[]).sort((a,b)=>(bkReads(b)-bkReads(a))||(bkStars(b)-bkStars(a))).slice(0,3);
-  draw();
+  let rows=(r.error?[]:(r.data||[])).filter(x=>!['draft','rejected','pending','hidden'].includes(String(x.status||'').toLowerCase()));
+  rows.sort((x,y)=>(+y.reads||0)-(+x.reads||0));
+  rows=rows.slice(0,3);
+  if(rows.length){
+    const q=await SB.from('library_rates').select('book_id,rating').in('book_id',rows.map(x=>x.id));
+    if(S!==s)return;
+    const m={};(q.data||[]).forEach(z=>{(m[z.book_id]=m[z.book_id]||[]).push(+z.rating||0)});
+    rows.forEach(x=>{const a=m[x.id]||[];x.st=a.length?(a.reduce((p,c)=>p+c,0)/a.length).toFixed(1).replace('.',','):'0'});
+  }
+  S.bk=rows;draw();
 }
 
 function openBk(id){
