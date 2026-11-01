@@ -13,6 +13,7 @@ const users=()=>USERS;
 const esc=t=>String(t).replace(/[<>&"]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]));
 const fmt=n=>Number(n).toLocaleString('ru-RU');
 const ic=k=>window.MS?MS.ic(k):'';
+const KN=k=>({npd:'ИП на НПД',ip:'ИП',ooo:'ООО'})[String(k||'').toLowerCase()]||'ИП';
 const COL=['#17b3e6','#e8793a','#3b8f2f','#9b59d0','#e5517a','#2d6a9f'];
 const ava=u=>{let h=0;for(const c of u.n)h=(h*31+c.charCodeAt(0))>>>0;return u.av?`<i style="background:url('${esc(u.av)}') center/cover"></i>`:`<i style="background:${COL[h%COL.length]}">${esc(u.n.trim()[0]||'?')}</i>`};
 const sg=o=>(o.t==='in'||o.t==='sale')?1:-1;
@@ -115,21 +116,39 @@ function lst(){
   $('#bk-list').innerHTML=L.length?L.map(u=>`<button class="bk-p" data-pick="${u.id}">${ava(u)}<span><b>${esc(u.n)}</b><small>@${esc(u.nick||'')}</small></span></button>`).join(''):`<div class="bk-mu">${t==='freq'?'Пока не было операций':'Никого не найдено'}</div>`;
 }
 
-/* ===== расчётный счёт проекта (ИП / ООО) ===== */
+/* ===== расчётный счёт проекта (ИП на НПД / ИП / ООО) ===== */
 function bzPanel(){
   if(!bzo)return '';
-  const z=BZ||{},K=z.kind==='ooo'?'ООО':'ИП';
+  const z=BZ||{},K=KN(z.kind),kd=String(z.kind||'').toLowerCase();
   if(z.status==='pending')return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Заявка на проверке у модераторов. Когда одобрят, откроется счёт.</div></section>`;
-  if(z.status==='active')return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Счёт ${esc(z.acc||'')}</div><div style="font-size:30px;font-weight:800;margin:6px 0">${fmt(z.balance)} МК</div>${z.frozen?`<div class="bk-fb" style="color:#e5314a">Счёт заморожен: не хватает на взнос ${z.fee} МК. Пополни его.</div>`:''}<div class="bk-mu">Следующий взнос ${z.fee} МК: ${new Date(z.fee_until).toLocaleDateString('ru-RU')}. Комиссия при выводе ${z.commission}%.</div><input class="bk-in" id="bz-s" inputmode="numeric" placeholder="Сумма"><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzdep">Пополнить</button><button class="bk-x" data-a="bzwd">Вывести</button></div></section>`;
-  const rej=z.status==='rejected'?`<div class="bk-fb" style="color:#e5314a">Прошлая заявка отклонена: ${esc(z.reason||'')}</div>`:'';
+  if(z.status==='active'){
+    const rule=kd==='npd'?'Ты работаешь одна, сотрудников нанимать нельзя. Зато просто и без лишних правил.'
+      :kd==='ip'?'Зарплаты сотрудникам и взнос платятся со счёта проекта сами. Если денег не хватит, недостающее спишется с твоих личных монет.'
+      :'Зарплаты сотрудникам и взнос платятся со счёта проекта сами. Если денег не хватит, счёт заморозится, а через 30 дней компания закроется. Личные монеты при этом не пострадают, потеряешь только деньги проекта.';
+    return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Счёт ${esc(z.acc||'')}</div><div style="font-size:30px;font-weight:800;margin:6px 0">${fmt(z.balance)} МК</div>${z.debt>0?`<div class="bk-fb" style="color:#e5314a">Штраф: ${fmt(z.debt)} МК${z.debt_note?' ('+esc(z.debt_note)+')':''}. Спишется, когда на счёте появятся деньги.</div>`:''}${z.frozen?`<div class="bk-fb" style="color:#e5314a">Счёт заморожен: не хватает денег на взнос, зарплату или штраф. Пополни счёт.</div>`:''}<div class="bk-mu">Следующий взнос ${z.fee} МК: ${new Date(z.fee_until).toLocaleDateString('ru-RU')}. Комиссия при выводе ${z.commission}%.</div><div class="bk-mu">${rule}</div><input class="bk-in" id="bz-s" inputmode="numeric" placeholder="Сумма"><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzdep">Пополнить</button><button class="bk-x" data-a="bzwd">Вывести</button></div></section>`;
+  }
+  const rej=z.status==='rejected'?`<div class="bk-fb" style="color:#e5314a">Прошлая заявка отклонена: ${esc(z.reason||'')}</div>`
+    :z.status==='closed'?`<div class="bk-fb" style="color:#e5314a">${esc(z.reason||'Прошлая компания закрыта')}. Можно открыть новую.</div>`:'';
   const terms=`<div class="bk-mu">Условия: комиссия ${z.commission}% при выводе денег проекта на личный счёт, взнос ${z.fee} МК раз в 3 месяца. Заявку проверяет модератор.</div>`;
   const tx='style="color:#566170;font-size:13px;line-height:1.5;margin:8px 0"';
   if(bzStep==='num')return `<section class="card"><div class="hd"><h2>Открыть расчётный счёт</h2></div>${rej}<div class="bk-mu">Впиши номер своего ИП (15 цифр) или ООО (13 цифр).</div><input class="bk-in" id="bz-num" inputmode="numeric" maxlength="15" placeholder="Номер ИП или ООО"><div class="bk-fb" id="bz-fb"></div>${terms}<div class="bk-act"><button class="bk-go" data-a="bznext">Продолжить</button><button class="bk-x" data-a="bzx">Закрыть</button></div><button class="bk-ch" data-a="bzno" style="margin-top:10px">У меня нет ИП или ООО</button></section>`;
-  if(bzStep==='info')return `<section class="card"><div class="hd"><h2>Что такое ИП и ООО</h2></div><div ${tx}><b>ИП</b> — один человек ведёт дело сам и отвечает за него всем своим имуществом. Проще: не нужны устав и уставный капитал. Для небольшого дела: рисунки на заказ, мини-магазин, блог.</div><div ${tx}><b>ООО</b> — компания, которую создают один или несколько учредителей. Они отвечают только вложенным капиталом, а не всем имуществом. Сложнее, зато подходит для команды и больших планов.</div><div ${tx}><b>Как оформляют ИП в реальности.</b> Нужны паспорт и ИНН. Подаёшь заявление в налоговую (через Госуслуги, МФЦ или лично), выбираешь вид деятельности и налоги. Примерно за 3 рабочих дня вносят в реестр и дают номер ОГРНИП (15 цифр). Обычно с 18 лет.</div><div ${tx}><b>Как оформляют ООО.</b> Нужны название, юридический адрес, устав, директор и уставный капитал (минимум 10 000 ₽). Регистрируют тоже в налоговой, дают номер ОГРН (13 цифр).</div><div ${tx}><b>Расчётный счёт в настоящем банке.</b> Приносишь паспорт, ИНН, номер ОГРНИП или ОГРН и выписку из реестра. У ООО ещё устав и документ о назначении директора. Банк проверяет документы несколько дней и открывает счёт.</div><div class="bk-mu">Суммы и сроки меняются, точные смотри на сайте налоговой (nalog.gov.ru).</div><div ${tx}><b>В Милки всё проще:</b> выбери форму, заполни анкету, модератор проверит и откроет счёт.</div><div class="bk-act"><button class="bk-go" data-a="bzip">Оформить игровое ИП</button><button class="bk-go" data-a="bzooo">Оформить игровое ООО</button></div><div class="bk-act"><button class="bk-x" data-a="bzback">Назад</button></div></section>`;
-  return `<section class="card"><div class="hd"><h2>Анкета проекта (${bzKind==='ooo'?'ООО':'ИП'})</h2></div><div class="bk-mu">Название проекта</div><input class="bk-in" id="bz-n" maxlength="40" placeholder="Например: Студия Радуга"><div class="bk-mu" style="margin-top:8px">Чем занимается (коротко)</div><input class="bk-in" id="bz-a" maxlength="100" placeholder="Например: рисую аватарки на заказ"><div class="bk-mu" style="margin-top:8px">Кто вы и про что проект</div><textarea class="bk-in" id="bz-o" maxlength="950" style="height:100px;padding:10px;resize:none" placeholder="Минимум 20 символов: кто ты, что будешь делать, чем проект интересен"></textarea><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzsend">Подать заявку</button><button class="bk-x" data-a="bzback">Назад</button></div></section>`;
+  if(bzStep==='info')return `<section class="card"><div class="hd"><h2>Чем отличаются ИП на НПД, ИП и ООО</h2></div>
+<div ${tx}><b>ИП на НПД (самозанятый-ИП)</b> — один человек ведёт дело сам и отвечает за него всем своим имуществом. НПД — налог для самозанятых: маленький (4% с доходов от людей, 6% от компаний), без деклараций и взносов, но доход до 2,4 млн ₽ в год и <b>нельзя нанимать сотрудников</b>. Для небольшого дела: рисунки на заказ, мини-магазин, блог.</div>
+<div ${tx}><b>ИП</b> (обычный, например на упрощёнке) — тоже один владелец и тоже отвечает всем своим имуществом. Зато можно нанимать сотрудников и расти без потолка дохода. Платит фиксированные страховые взносы и сдаёт отчётность.</div>
+<div ${tx}><b>ООО</b> — компания, которую создают один или несколько учредителей. Они рискуют только вложенным капиталом, а не личным имуществом. Бизнес можно продать, нанять директора и бухгалтера и самому не работать. Сложнее: нужны устав, адрес и уставный капитал.</div>
+<div ${tx}><b>Как оформляют ИП в реальности.</b> Нужны паспорт и ИНН. Подаёшь заявление в налоговую (через Госуслуги, МФЦ или лично), выбираешь вид деятельности и налоги. Примерно за 3 рабочих дня вносят в реестр и дают номер ОГРНИП (15 цифр). Обычно с 18 лет.</div>
+<div ${tx}><b>Как оформляют ООО.</b> Нужны название, юридический адрес, устав, директор и уставный капитал (минимум 10 000 ₽). Регистрируют тоже в налоговой, дают номер ОГРН (13 цифр).</div>
+<div ${tx}><b>Расчётный счёт в настоящем банке.</b> Приносишь паспорт, ИНН, номер ОГРНИП или ОГРН и выписку из реестра. У ООО ещё устав и документ о назначении директора. Банк проверяет документы несколько дней и открывает счёт.</div>
+<div class="bk-mu">Суммы и сроки меняются, точные смотри на сайте налоговой (nalog.gov.ru).</div>
+<div ${tx}><b>В Милки всё проще:</b> выбери форму, заполни анкету, модератор проверит и откроет счёт. ИП на НПД работает один. ИП нанимает до 3 человек на пять должностей. ООО нанимает без лимита на любые должности, включая директора и бухгалтера.</div>
+<div class="bk-act"><button class="bk-go" data-a="bznpd">ИП на НПД</button><button class="bk-go" data-a="bzip">ИП</button><button class="bk-go" data-a="bzooo">ООО</button></div><div class="bk-act"><button class="bk-x" data-a="bzback">Назад</button></div></section>`;
+  const isIp=bzKind!=='ooo';
+  const kSel=isIp?`<div class="bk-mu" style="margin-top:8px">Форма</div><select class="bk-in" id="bz-k"><option value="npd"${bzKind==='npd'?' selected':''}>ИП на НПД: один, без сотрудников</option><option value="ip"${bzKind==='ip'?' selected':''}>ИП: можно нанимать до 3 человек</option></select>`:'';
+  return `<section class="card"><div class="hd"><h2>Анкета проекта (${KN(bzKind)})</h2></div>${kSel}<div class="bk-mu" style="margin-top:8px">Название проекта</div><input class="bk-in" id="bz-n" maxlength="40" placeholder="Например: Студия Радуга"><div class="bk-mu" style="margin-top:8px">Чем занимается (коротко)</div><input class="bk-in" id="bz-a" maxlength="100" placeholder="Например: рисую аватарки на заказ"><div class="bk-mu" style="margin-top:8px">Кто вы и про что проект</div><textarea class="bk-in" id="bz-o" maxlength="950" style="height:100px;padding:10px;resize:none" placeholder="Минимум 20 символов: кто ты, что будешь делать, чем проект интересен"></textarea><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzsend">Подать заявку</button><button class="bk-x" data-a="bzback">Назад</button></div></section>`;
 }
 async function bzApply(){
-  const f=$('#bz-fb'),btn=$('[data-a="bzsend"]'),o=$('#bz-o').value.trim();
+  const f=$('#bz-fb'),btn=$('[data-a="bzsend"]'),o=$('#bz-o').value.trim(),ks=$('#bz-k');
+  if(ks)bzKind=ks.value;
   if(o.length<20){f.style.color='#d97706';f.textContent='Опиши проект подробнее: минимум 20 символов';return}
   btn.disabled=true;f.style.color='#566170';f.textContent='Отправляю…';
   const r=await window.SB.rpc('biz_apply',{p_kind:bzKind,p_name:$('#bz-n').value,p_activity:$('#bz-a').value,p_about:(bzNum?'Номер: '+bzNum+'. ':'')+o});
@@ -191,13 +210,14 @@ sec.addEventListener('click',e=>{
   else if(a==='bz'){bzo=!bzo;render()}
   else if(a==='bzx'){bzo=false;bzStep='num';render()}
   else if(a==='bzno'){bzStep='info';render()}
+  else if(a==='bznpd'){bzKind='npd';bzNum='';bzStep='form';render()}
   else if(a==='bzip'){bzKind='ip';bzNum='';bzStep='form';render()}
   else if(a==='bzooo'){bzKind='ooo';bzNum='';bzStep='form';render()}
   else if(a==='bzback'){bzStep='num';render()}
   else if(a==='bznext'){
     const v=($('#bz-num').value||'').replace(/\s/g,''),f=$('#bz-fb');
     if(!/^(\d{13}|\d{15})$/.test(v)){f.style.color='#d97706';f.textContent='Нужно 15 цифр (ИП) или 13 цифр (ООО)';return}
-    bzNum=v;bzKind=v.length===15?'ip':'ooo';bzStep='form';render();
+    bzNum=v;bzKind=v.length===15?'npd':'ooo';bzStep='form';render();
   }
   else if(a==='bzsend')bzApply();
   else if(a==='bzdep')bzMoney('biz_deposit');
