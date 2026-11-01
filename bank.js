@@ -4,7 +4,7 @@ const $=s=>document.querySelector(s);
 const KEY='milkbank_v1';
 
 /* ===== ДАННЫЕ (Supabase: profiles.coins, transfers, purchases, функция send_coins) ===== */
-let ME=null,BAL=null,USERS=[],OPS=[],FREQ={};
+let ME=null,BAL=null,USERS=[],OPS=[],FREQ={},BZ=null,bzo=false;
 const syncCn=()=>document.querySelectorAll('.cn').forEach(e=>{if(BAL!==null)e.textContent=BAL});
 const users=()=>USERS;
 
@@ -92,9 +92,10 @@ function render(){
   }else if(open&&pick){
     panel=`<section class="card" id="bk-tr"><div class="hd"><h2>Перевод</h2></div><div class="bk-sel"><div class="bk-p">${ava(pick)}<span><b>${esc(pick.n)}</b><small>@${esc(pick.nick||'')}</small></span></div><button class="bk-ch" data-a="back">Сменить</button></div><input class="bk-in" id="bk-a" inputmode="numeric" placeholder="Сумма (у тебя ${b===null?'…':fmt(b)})" autocomplete="off"><input class="bk-in" id="bk-c" maxlength="100" placeholder="Комментарий (необязательно)" autocomplete="off"><div class="bk-fb" id="bk-fb"></div><div class="bk-act"><button class="bk-go" data-a="send">Перевести</button><button class="bk-x" data-a="cancel">Отмена</button></div></section>`;
   }
+  panel+=bzPanel();
   sec.innerHTML=`<div class="bk">
   <div class="bk-hero"><div class="bk-l">На личном счету:</div><div class="bk-n">${b===null?'…':fmt(b)}<span class="coin"></span></div>
-   <div class="bk-r"><button class="bk-b" data-a="tr">${ic('arrow')}Перевести</button><button class="bk-b" disabled>Открыть расчётный счёт <em>скоро</em></button></div>
+   <div class="bk-r"><button class="bk-b" data-a="tr">${ic('arrow')}Перевести</button><button class="bk-b" data-a="bz">${BZ&&BZ.status==='active'?'Счёт проекта':'Открыть расчётный счёт'}</button></div>
    ${note?`<div class="bk-ok">${esc(note)}</div>`:''}</div>
   ${panel}
   <section class="card"><div class="hd"><h2>Частые операции</h2></div>${fq.length?fq.map(u=>`<button class="bk-p" data-pick="${u.id}">${ava(u)}<span><b>${esc(u.n)}</b><small>переводов: ${FREQ[u.id]}</small></span></button>`).join(''):'<div class="bk-mu">Пока не было операций</div>'}</section>
@@ -111,6 +112,28 @@ function lst(){
   const L=base.filter(u=>!ql||u.n.toLowerCase().includes(ql)||(u.nick||'').toLowerCase().includes(ql));
   $('#bk-tabs').innerHTML=`<button class="${t==='freq'?'on':''}" data-tab="freq">Частые</button><button class="${t==='all'?'on':''}" data-tab="all">Все</button>`;
   $('#bk-list').innerHTML=L.length?L.map(u=>`<button class="bk-p" data-pick="${u.id}">${ava(u)}<span><b>${esc(u.n)}</b><small>@${esc(u.nick||'')}</small></span></button>`).join(''):`<div class="bk-mu">${t==='freq'?'Пока не было операций':'Никого не найдено'}</div>`;
+}
+
+  function bzPanel(){
+  if(!bzo)return '';
+  const z=BZ||{},K=z.kind==='ooo'?'ООО':'ИП';
+  if(!z.status||z.status==='rejected')return `<section class="card"><div class="hd"><h2>Заявка на проект</h2></div>${z.status==='rejected'?`<div class="bk-fb" style="color:#e5314a">Прошлая заявка отклонена: ${esc(z.reason||'')}</div>`:''}<div class="bk-mu">Комиссия при выводе: ${z.commission}%. Взнос раз в 3 месяца: ${z.fee} МК. Заявку проверяет модератор.</div><select class="bk-in" id="bz-k"><option value="ip">ИП</option><option value="ooo">ООО</option></select><input class="bk-in" id="bz-n" maxlength="40" placeholder="Название проекта"><input class="bk-in" id="bz-a" maxlength="100" placeholder="Чем занимается"><textarea class="bk-in" id="bz-o" maxlength="1000" style="height:100px;padding:10px;resize:none" placeholder="Кто вы и про что проект (от 20 символов)"></textarea><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzsend">Подать заявку</button><button class="bk-x" data-a="bzx">Закрыть</button></div></section>`;
+  if(z.status==='pending')return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Заявка на проверке у модераторов. Когда одобрят, откроется счёт.</div></section>`;
+  return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Счёт ${esc(z.acc||'')}</div><div style="font-size:30px;font-weight:800;margin:6px 0">${fmt(z.balance)} МК</div>${z.frozen?`<div class="bk-fb" style="color:#e5314a">Счёт заморожен: не хватает на взнос ${z.fee} МК. Пополни его.</div>`:''}<div class="bk-mu">Следующий взнос ${z.fee} МК: ${new Date(z.fee_until).toLocaleDateString('ru-RU')}. Комиссия при выводе ${z.commission}%.</div><input class="bk-in" id="bz-s" inputmode="numeric" placeholder="Сумма"><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzdep">Пополнить</button><button class="bk-x" data-a="bzwd">Вывести</button></div></section>`;
+}
+async function bzApply(){
+  const f=$('#bz-fb'),btn=$('[data-a="bzsend"]');
+  btn.disabled=true;f.style.color='#566170';f.textContent='Отправляю…';
+  const r=await window.SB.rpc('biz_apply',{p_kind:$('#bz-k').value,p_name:$('#bz-n').value,p_activity:$('#bz-a').value,p_about:$('#bz-o').value});
+  if(r.error){btn.disabled=false;f.style.color='#d97706';f.textContent=r.error.message;return}
+  note='Заявка отправлена модераторам';await load();
+}
+async function bzMoney(fn){
+  const a=parseInt($('#bz-s').value,10),f=$('#bz-fb');
+  if(!(a>0)){f.style.color='#d97706';f.textContent='Введи сумму больше нуля';return}
+  const r=await window.SB.rpc(fn,{amt:a});
+  if(r.error){f.style.color='#d97706';f.textContent=r.error.message.includes('no_money')?'Не хватает монет':r.error.message;return}
+  note=fn==='biz_deposit'?'Счёт проекта пополнен':'Выведено на личный счёт';await load();
 }
 
 async function send(){
@@ -137,6 +160,7 @@ async function load(){
     const nm={};USERS=[];
     (pr.data||[]).forEach(p=>{nm[p.id]=p.name||p.nick||'Пользователь';if(p.id!==ME&&p.name)USERS.push({id:p.id,n:p.name,nick:p.nick||'',av:p.avatar_url||''})});
     BAL=co.data&&co.data.coins!=null?co.data.coins:0;syncCn();
+    try{const z=await sb.rpc('biz_my');BZ=z.data||null}catch(e){}
     FREQ={};OPS=[];
     (tr.data||[]).forEach(t=>{const out=t.from_id===ME,ts=Date.parse(t.created_at);if(out)FREQ[t.to_id]=(FREQ[t.to_id]||0)+1;
       if(ts>=msN)OPS.push({t:out?'out':'in',amt:t.amount,who:nm[out?t.to_id:t.from_id]||'Пользователь',cm:t.comment||'',ts})});
@@ -156,6 +180,11 @@ sec.addEventListener('click',e=>{
   else if(a==='back'){pick=null;q='';render()}
   else if(a==='cancel'){open=false;pick=null;q='';render()}
   else if(a==='send')send();
+else if(a==='bz'){bzo=!bzo;render()}
+else if(a==='bzx'){bzo=false;render()}
+else if(a==='bzsend')bzApply();
+else if(a==='bzdep')bzMoney('biz_deposit');
+else if(a==='bzwd')bzMoney('biz_withdraw');
 });
 sec.addEventListener('input',e=>{if(e.target.id==='bk-q'){q=e.target.value;lst()}});
 
