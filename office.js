@@ -13,10 +13,14 @@
      url:'https://opentad.github.io/GDevelop/'}
   ];
 
-  function home(){
-    root().innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofg">'+
-      CARDS.map(c=>`<article class="ofc"><div class="ban" style="background:${c.bg}">${c.emoji}</div><h3>${c.title}</h3><p>${c.text}</p><button class="join" data-of="${c.id}">Открыть</button></article>`).join('')+'</div>';
+  async function home(){
+  let z=null;try{z=(await window.SB.rpc('biz_my')).data}catch(e){}
+  if((!z||z.status!=='active')&&!window.IS_MOD){
+    root().innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofc" style="padding:30px 18px"><div class="ban" style="height:auto;font-size:50px">🔒</div><h3>Офис закрыт</h3><p>Он открывается владельцам проектов (ИП и ООО). Подай заявку в MilkBank: кнопка «Открыть расчётный счёт».</p></div>';return;
   }
+  root().innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofg">'+
+    CARDS.map(c=>`<article class="ofc"><div class="ban" style="background:${c.bg}">${c.emoji}</div><h3>${c.title}</h3><p>${c.text}</p><button class="join" data-of="${c.id}">Открыть</button></article>`).join('')+'</div>';
+}
 
   function openTool(id){
     const c=CARDS.find(x=>x.id===id);if(!c)return;
