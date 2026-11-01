@@ -16,7 +16,8 @@ const IC={
  trash:'M4 7h16M9 7V4.5h6V7M6.5 7l.9 12.5h9.2L17.5 7',
  search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
  flag:'M6 21V4M6 4h11l-2 4 2 4H6',
- key:'M15 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM11.5 13.5L4 21M7 18l2.5 2.5'};
+ key:'M15 4a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM11.5 13.5L4 21M7 18l2.5 2.5',
+ biz:'M4 8h16v11H4zM9 8V5h6v3M4 13h16'};
 const ic=(k,w)=>`<svg viewBox="0 0 24 24" style="width:${w||18}px;height:${w||18}px;flex:none"><path d="${IC[k]}"${k==='dots'?' style="stroke-width:3.2"':''}/></svg>`;
 const SB_=()=>window.SB||null;
 function note(t){let d=document.getElementById('md-note');if(!d){d=document.createElement('div');d.id='md-note';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:200;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
@@ -66,7 +67,7 @@ css.textContent=`
 .md-red{width:100%;height:42px;border-radius:14px;background:#e5314a;color:#fff;font-weight:700}`;
 document.head.appendChild(css);
 
-let isMod=false,P=[],PM={},B={},R=[],W=[],tab='f',q='',view='list',menu=null;
+let isMod=false,P=[],PM={},B={},R=[],W=[],Z=[],tab='f',q='',view='list',menu=null;
 const sec=document.createElement('section');sec.id='v-mod';sec.hidden=true;
 document.querySelector('.main').appendChild(sec);
 
@@ -96,26 +97,28 @@ async function load(){
   const sb=SB_();
   if(!sb||!isMod){sec.innerHTML='<div class="md-e">Нет доступа</div>';return}
   sec.innerHTML='<div class="md-e">Загружаем…</div>';
-  const [p,b,r,w]=await Promise.all([
+  const [p,b,r,w,z]=await Promise.all([
     sb.from('profiles').select('id,name,fio,gender,avatar_url,last_seen').order('fio',{nullsFirst:false}),
     sb.from('bans').select('user_id,reason,until_at'),
     sb.from('reports').select('id,kind,target,target_user,reporter,note,snap,created_at').eq('status','open').order('id',{ascending:false}),
-    sb.rpc('mod_pw_list')]);
+    sb.rpc('mod_pw_list'),
+    sb.from('businesses').select('id,owner,kind,name,activity,about,created_at').eq('status','pending').order('id')]);
   if(p.error){sec.innerHTML='<div class="md-e">Ошибка: '+esc(p.error.message)+'. Проверь, что SQL выполнен.</div>';return}
   P=p.data||[];PM=Object.fromEntries(P.map(x=>[x.id,x]));
   const now=Date.now();
   B=Object.fromEntries((b.data||[]).filter(x=>!x.until_at||Date.parse(x.until_at)>now).map(x=>[x.user_id,x]));
   R=r.data||[];
+  Z=z.error?[]:(z.data||[]);
   W=w.error?[]:(w.data||[]).map(x=>({...x,status:x.status==='new'?'pending':x.status,expires_at:x.approved_at?new Date(Date.parse(x.approved_at)+3600000).toISOString():null}));if(w.error)note('Заявки: '+w.error.message);
   draw();
 }
 function draw(){
   const sub=view!=='list';
-  const T=view==='rep'?['Жалобы','Открытые жалобы пользователей']:view==='pw'?['Заявки на вход','Забыли пароль: свяжись с учеником и уточни, подавал ли он заявку в это время']:['Комната модераторов','Ученики по полу, жалобы и блокировки'];
+  const T=view==='rep'?['Жалобы','Открытые жалобы пользователей']:view==='pw'?['Заявки на вход','Забыли пароль: свяжись с учеником и уточни, подавал ли он заявку в это время']:view==='biz'?['Заявки на бизнес','Проверь название и описание: без копий чужих проектов и запрещённого']:['Комната модераторов','Ученики по полу, жалобы и блокировки'];
   const wn=W.filter(x=>x.status==='pending').length;
-  sec.innerHTML=`<div class="md-h"><div>${sub?'<button class="md-back" data-back>‹ Назад</button>':''}<h1>${T[0]}</h1><p>${T[1]}</p></div>${sub?'':`<div class="md-rel"><button class="md-ib" data-hm aria-label="Ещё">${ic('dots')}</button>${menu==='h'?`<div class="md-pop"><button data-reps>${ic('flag')}Жалобы${R.length?' ('+R.length+')':''}</button><button data-pws>${ic('key')}Заявки на вход${wn?' ('+wn+')':''}</button></div>`:''}</div>`}</div>`+
+  sec.innerHTML=`<div class="md-h"><div>${sub?'<button class="md-back" data-back>‹ Назад</button>':''}<h1>${T[0]}</h1><p>${T[1]}</p></div>${sub?'':`<div class="md-rel"><button class="md-ib" data-hm aria-label="Ещё">${ic('dots')}</button>${menu==='h'?`<div class="md-pop"><button data-reps>${ic('flag')}Жалобы${R.length?' ('+R.length+')':''}</button><button data-pws>${ic('key')}Заявки на вход${wn?' ('+wn+')':''}</button><button data-bzs>${ic('biz')}Заявки на бизнес${Z.length?' ('+Z.length+')':''}</button></div>`:''}</div>`}</div>`+
   (sub?'<div id="md-l"></div>':'<div class="md-tabs" id="md-tb"></div><label class="md-s">'+ic('search')+'<input id="md-q" placeholder="Поиск по ФИО или имени" autocomplete="off" value="'+esc(q)+'"></label><div id="md-l"></div>');
-  if(view==='rep')reps();else if(view==='pw')pws();else{tabs();list()}
+  if(view==='rep')reps();else if(view==='pw')pws();else if(view==='biz')bzs();else{tabs();list()}
 }
 function tabs(){
   const n=k=>P.filter(x=>k==='n'?!x.gender:x.gender===k).length;
@@ -145,6 +148,10 @@ function pws(){
     return `<div class="md-card">${head}${M.length?`<small>Подходящих профилей: ${M.length}</small>`:'<p class="md-w">Профиль с таким ФИО не найден</p>'}<div class="md-bt">${M.map(x=>`<button class="ok" data-pwok="${w.id}|${x.id}">Одобрить${M.length>1?': '+esc(x.name||'?'):''}</button>`).join('')}<button class="rd" data-pwno="${w.id}">Отклонить</button></div></div>`;
   }).join('')||'<div class="md-e">Заявок нет</div>';
 }
+function bzs(){
+  const nm=id=>{const x=PM[id];return x?(x.fio||x.name||'Пользователь')+(x.name&&x.fio?' ('+x.name+')':''):'Пользователь'};
+  document.getElementById('md-l').innerHTML=Z.map(z=>`<div class="md-card"><div class="md-ct"><b>${z.kind==='ooo'?'ООО':'ИП'} «${esc(z.name)}»</b><small>${dt(z.created_at)}</small></div><small>Заявитель: ${esc(nm(z.owner))}</small><p style="margin-top:6px"><b>Чем занимается:</b> ${esc(z.activity)}</p><p class="md-sn">${esc(z.about)}</p><div class="md-bt"><button class="ok" data-bzok="${z.id}">Одобрить</button><button class="rd" data-bzno="${z.id}">Отклонить</button></div></div>`).join('')||'<div class="md-e">Заявок нет</div>';
+}
 
 sec.addEventListener('click',async e=>{
   const t=e.target,b=k=>t.closest(k);let x;
@@ -153,6 +160,7 @@ sec.addEventListener('click',async e=>{
   else if(b('[data-hm]')){menu=menu==='h'?null:'h';draw()}
   else if(b('[data-reps]')){view='rep';menu=null;draw()}
   else if(b('[data-pws]')){view='pw';menu=null;draw()}
+  else if(b('[data-bzs]')){view='biz';menu=null;draw()}
   else if(b('[data-back]')){view='list';draw()}
   else if((x=b('[data-rm]'))){menu=menu===x.dataset.rm?null:x.dataset.rm;list()}
   else if((x=b('[data-op]'))){menu=null;list();MS.show('prof');if(window.PF)PF.open(x.dataset.op)}
@@ -178,6 +186,13 @@ sec.addEventListener('click',async e=>{
     if(r.error){x.disabled=false;return note(r.error.message)}
     load();
   }
+  else if((x=b('[data-bzok]'))){
+    x.disabled=true;
+    const r=await SB_().rpc('biz_review',{p_id:+x.dataset.bzok,p_ok:true,p_reason:null});
+    if(r.error){x.disabled=false;return note(r.error.message)}
+    note('Проект одобрен, счёт открыт');Z=Z.filter(z=>z.id!=x.dataset.bzok);bzs();
+  }
+  else if((x=b('[data-bzno]'))){bzNo(+x.dataset.bzno)}
 });
 sec.addEventListener('input',e=>{if(e.target.id==='md-q'){q=e.target.value;list()}});
 
@@ -215,6 +230,22 @@ function delModal(uid){
       const r=await SB_().rpc('mod_del_user',{p_user:uid});
       if(r.error){d.querySelector('#md-er').textContent=r.error.message;bt.disabled=false;return}
       d.remove();note('Аккаунт удалён');load();
+    }
+  });
+}
+function bzNo(id){
+  const z=Z.find(a=>a.id===id);if(!z)return;
+  const d=modal(`<h3>Отклонить заявку</h3><p class="md-p"><b>${z.kind==='ooo'?'ООО':'ИП'} «${esc(z.name)}»</b><br>Причину увидит ученик.</p><textarea id="md-r" maxlength="300" placeholder="Причина отказа (обязательно)"></textarea><div class="md-er" id="md-er"></div><div class="md-bt"><button data-c>Отмена</button><button class="rd2" data-ok>Отклонить</button></div>`);
+  d.addEventListener('click',async e=>{
+    const bt=e.target.closest('button');if(!bt)return;
+    if(bt.hasAttribute('data-c'))d.remove();
+    else if(bt.hasAttribute('data-ok')){
+      const n=d.querySelector('#md-r').value.trim();
+      if(n.length<3){d.querySelector('#md-er').textContent='Напиши причину';return}
+      bt.disabled=true;
+      const r=await SB_().rpc('biz_review',{p_id:id,p_ok:false,p_reason:n});
+      if(r.error){d.querySelector('#md-er').textContent=r.error.message;bt.disabled=false;return}
+      d.remove();note('Заявка отклонена');Z=Z.filter(a=>a.id!==id);bzs();
     }
   });
 }
