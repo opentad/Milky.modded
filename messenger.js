@@ -1146,8 +1146,8 @@ const lib=document.createElement('script');lib.src='https://cdn.jsdelivr.net/npm
 lib.onload=async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY);window.SB=sb;document.dispatchEvent(new Event('sb'));window.SB=sb;document.dispatchEvent(new Event('sb'));
  yb=window.supabase.createClient('https://prvwpqesbbmtzezxqcsl.supabase.co',YARI_KEY,{auth:{storageKey:'yari-auth'}});
-const ys=await yb.auth.getSession();YU=ys.data.session?ys.data.session.user:null; 
- const s=await sb.auth.getSession();me=s.data.session?s.data.session.user:null;
+try{const ys=await Promise.race([yb.auth.getSession(),new Promise(r=>setTimeout(()=>r({data:{}}),4000))]);YU=ys.data&&ys.data.session?ys.data.session.user:null}catch(e){YU=null}
+ let s={data:{}};try{s=await Promise.race([sb.auth.getSession(),new Promise(r=>setTimeout(()=>r({data:{}}),6000))])}catch(e){}me=s.data&&s.data.session?s.data.session.user:null;
   sb.auth.onAuthStateChange((ev,ss)=>{const u=ss?ss.user:null;if((u&&u.id)!==(me&&me.id)){me=u;setTimeout(boot,0)}});
   if(J)MS.show('msg');else boot();
 };
