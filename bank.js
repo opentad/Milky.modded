@@ -5,6 +5,7 @@ const KEY='milkbank_v1';
 
 /* ===== ДАННЫЕ (Supabase: profiles.coins, transfers, purchases, функция send_coins) ===== */
 let ME=null,BAL=null,USERS=[],OPS=[],FREQ={},BZ=null,bzo=false;
+let bzStep='num',bzKind=null,bzNum='';
 const syncCn=()=>document.querySelectorAll('.cn').forEach(e=>{if(BAL!==null)e.textContent=BAL});
 const users=()=>USERS;
 
@@ -114,19 +115,26 @@ function lst(){
   $('#bk-list').innerHTML=L.length?L.map(u=>`<button class="bk-p" data-pick="${u.id}">${ava(u)}<span><b>${esc(u.n)}</b><small>@${esc(u.nick||'')}</small></span></button>`).join(''):`<div class="bk-mu">${t==='freq'?'Пока не было операций':'Никого не найдено'}</div>`;
 }
 
-  function bzPanel(){
+/* ===== расчётный счёт проекта (ИП / ООО) ===== */
+function bzPanel(){
   if(!bzo)return '';
   const z=BZ||{},K=z.kind==='ooo'?'ООО':'ИП';
-  if(!z.status||z.status==='rejected')return `<section class="card"><div class="hd"><h2>Заявка на проект</h2></div>${z.status==='rejected'?`<div class="bk-fb" style="color:#e5314a">Прошлая заявка отклонена: ${esc(z.reason||'')}</div>`:''}<div class="bk-mu">Комиссия при выводе: ${z.commission}%. Взнос раз в 3 месяца: ${z.fee} МК. Заявку проверяет модератор.</div><select class="bk-in" id="bz-k"><option value="ip">ИП</option><option value="ooo">ООО</option></select><input class="bk-in" id="bz-n" maxlength="40" placeholder="Название проекта"><input class="bk-in" id="bz-a" maxlength="100" placeholder="Чем занимается"><textarea class="bk-in" id="bz-o" maxlength="1000" style="height:100px;padding:10px;resize:none" placeholder="Кто вы и про что проект (от 20 символов)"></textarea><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzsend">Подать заявку</button><button class="bk-x" data-a="bzx">Закрыть</button></div></section>`;
   if(z.status==='pending')return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Заявка на проверке у модераторов. Когда одобрят, откроется счёт.</div></section>`;
-  return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Счёт ${esc(z.acc||'')}</div><div style="font-size:30px;font-weight:800;margin:6px 0">${fmt(z.balance)} МК</div>${z.frozen?`<div class="bk-fb" style="color:#e5314a">Счёт заморожен: не хватает на взнос ${z.fee} МК. Пополни его.</div>`:''}<div class="bk-mu">Следующий взнос ${z.fee} МК: ${new Date(z.fee_until).toLocaleDateString('ru-RU')}. Комиссия при выводе ${z.commission}%.</div><input class="bk-in" id="bz-s" inputmode="numeric" placeholder="Сумма"><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzdep">Пополнить</button><button class="bk-x" data-a="bzwd">Вывести</button></div></section>`;
+  if(z.status==='active')return `<section class="card"><div class="hd"><h2>${K} «${esc(z.name)}»</h2></div><div class="bk-mu">Счёт ${esc(z.acc||'')}</div><div style="font-size:30px;font-weight:800;margin:6px 0">${fmt(z.balance)} МК</div>${z.frozen?`<div class="bk-fb" style="color:#e5314a">Счёт заморожен: не хватает на взнос ${z.fee} МК. Пополни его.</div>`:''}<div class="bk-mu">Следующий взнос ${z.fee} МК: ${new Date(z.fee_until).toLocaleDateString('ru-RU')}. Комиссия при выводе ${z.commission}%.</div><input class="bk-in" id="bz-s" inputmode="numeric" placeholder="Сумма"><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzdep">Пополнить</button><button class="bk-x" data-a="bzwd">Вывести</button></div></section>`;
+  const rej=z.status==='rejected'?`<div class="bk-fb" style="color:#e5314a">Прошлая заявка отклонена: ${esc(z.reason||'')}</div>`:'';
+  const terms=`<div class="bk-mu">Условия: комиссия ${z.commission}% при выводе денег проекта на личный счёт, взнос ${z.fee} МК раз в 3 месяца. Заявку проверяет модератор.</div>`;
+  const tx='style="color:#566170;font-size:13px;line-height:1.5;margin:8px 0"';
+  if(bzStep==='num')return `<section class="card"><div class="hd"><h2>Открыть расчётный счёт</h2></div>${rej}<div class="bk-mu">Впиши номер своего ИП (15 цифр) или ООО (13 цифр).</div><input class="bk-in" id="bz-num" inputmode="numeric" maxlength="15" placeholder="Номер ИП или ООО"><div class="bk-fb" id="bz-fb"></div>${terms}<div class="bk-act"><button class="bk-go" data-a="bznext">Продолжить</button><button class="bk-x" data-a="bzx">Закрыть</button></div><button class="bk-ch" data-a="bzno" style="margin-top:10px">У меня нет ИП или ООО</button></section>`;
+  if(bzStep==='info')return `<section class="card"><div class="hd"><h2>Что такое ИП и ООО</h2></div><div ${tx}><b>ИП</b> — один человек ведёт дело сам и отвечает за него всем своим имуществом. Проще: не нужны устав и уставный капитал. Для небольшого дела: рисунки на заказ, мини-магазин, блог.</div><div ${tx}><b>ООО</b> — компания, которую создают один или несколько учредителей. Они отвечают только вложенным капиталом, а не всем имуществом. Сложнее, зато подходит для команды и больших планов.</div><div ${tx}><b>Как оформляют ИП в реальности.</b> Нужны паспорт и ИНН. Подаёшь заявление в налоговую (через Госуслуги, МФЦ или лично), выбираешь вид деятельности и налоги. Примерно за 3 рабочих дня вносят в реестр и дают номер ОГРНИП (15 цифр). Обычно с 18 лет.</div><div ${tx}><b>Как оформляют ООО.</b> Нужны название, юридический адрес, устав, директор и уставный капитал (минимум 10 000 ₽). Регистрируют тоже в налоговой, дают номер ОГРН (13 цифр).</div><div ${tx}><b>Расчётный счёт в настоящем банке.</b> Приносишь паспорт, ИНН, номер ОГРНИП или ОГРН и выписку из реестра. У ООО ещё устав и документ о назначении директора. Банк проверяет документы несколько дней и открывает счёт.</div><div class="bk-mu">Суммы и сроки меняются, точные смотри на сайте налоговой (nalog.gov.ru).</div><div ${tx}><b>В Милки всё проще:</b> выбери форму, заполни анкету, модератор проверит и откроет счёт.</div><div class="bk-act"><button class="bk-go" data-a="bzip">Оформить игровое ИП</button><button class="bk-go" data-a="bzooo">Оформить игровое ООО</button></div><div class="bk-act"><button class="bk-x" data-a="bzback">Назад</button></div></section>`;
+  return `<section class="card"><div class="hd"><h2>Анкета проекта (${bzKind==='ooo'?'ООО':'ИП'})</h2></div><div class="bk-mu">Название проекта</div><input class="bk-in" id="bz-n" maxlength="40" placeholder="Например: Студия Радуга"><div class="bk-mu" style="margin-top:8px">Чем занимается (коротко)</div><input class="bk-in" id="bz-a" maxlength="100" placeholder="Например: рисую аватарки на заказ"><div class="bk-mu" style="margin-top:8px">Кто вы и про что проект</div><textarea class="bk-in" id="bz-o" maxlength="950" style="height:100px;padding:10px;resize:none" placeholder="Минимум 20 символов: кто ты, что будешь делать, чем проект интересен"></textarea><div class="bk-fb" id="bz-fb"></div><div class="bk-act"><button class="bk-go" data-a="bzsend">Подать заявку</button><button class="bk-x" data-a="bzback">Назад</button></div></section>`;
 }
 async function bzApply(){
-  const f=$('#bz-fb'),btn=$('[data-a="bzsend"]');
+  const f=$('#bz-fb'),btn=$('[data-a="bzsend"]'),o=$('#bz-o').value.trim();
+  if(o.length<20){f.style.color='#d97706';f.textContent='Опиши проект подробнее: минимум 20 символов';return}
   btn.disabled=true;f.style.color='#566170';f.textContent='Отправляю…';
-  const r=await window.SB.rpc('biz_apply',{p_kind:$('#bz-k').value,p_name:$('#bz-n').value,p_activity:$('#bz-a').value,p_about:$('#bz-o').value});
+  const r=await window.SB.rpc('biz_apply',{p_kind:bzKind,p_name:$('#bz-n').value,p_activity:$('#bz-a').value,p_about:(bzNum?'Номер: '+bzNum+'. ':'')+o});
   if(r.error){btn.disabled=false;f.style.color='#d97706';f.textContent=r.error.message;return}
-  note='Заявка отправлена модераторам';await load();
+  note='Заявка отправлена модераторам';bzStep='num';bzNum='';bzKind=null;await load();
 }
 async function bzMoney(fn){
   const a=parseInt($('#bz-s').value,10),f=$('#bz-fb');
@@ -180,11 +188,20 @@ sec.addEventListener('click',e=>{
   else if(a==='back'){pick=null;q='';render()}
   else if(a==='cancel'){open=false;pick=null;q='';render()}
   else if(a==='send')send();
-else if(a==='bz'){bzo=!bzo;render()}
-else if(a==='bzx'){bzo=false;render()}
-else if(a==='bzsend')bzApply();
-else if(a==='bzdep')bzMoney('biz_deposit');
-else if(a==='bzwd')bzMoney('biz_withdraw');
+  else if(a==='bz'){bzo=!bzo;render()}
+  else if(a==='bzx'){bzo=false;bzStep='num';render()}
+  else if(a==='bzno'){bzStep='info';render()}
+  else if(a==='bzip'){bzKind='ip';bzNum='';bzStep='form';render()}
+  else if(a==='bzooo'){bzKind='ooo';bzNum='';bzStep='form';render()}
+  else if(a==='bzback'){bzStep='num';render()}
+  else if(a==='bznext'){
+    const v=($('#bz-num').value||'').replace(/\s/g,''),f=$('#bz-fb');
+    if(!/^(\d{13}|\d{15})$/.test(v)){f.style.color='#d97706';f.textContent='Нужно 15 цифр (ИП) или 13 цифр (ООО)';return}
+    bzNum=v;bzKind=v.length===15?'ip':'ooo';bzStep='form';render();
+  }
+  else if(a==='bzsend')bzApply();
+  else if(a==='bzdep')bzMoney('biz_deposit');
+  else if(a==='bzwd')bzMoney('biz_withdraw');
 });
 sec.addEventListener('input',e=>{if(e.target.id==='bk-q'){q=e.target.value;lst()}});
 
