@@ -1,38 +1,223 @@
-/* MilkOffice: сетка инструментов, пока одна карточка (редактор игр на основе GDevelop) */
+/* MilkOffice: вкладки Главная / Финансы / Команда / Бизнесы (модераторам) / Вакансии */
 (function(){
-  const st=document.createElement('style');
-  st.textContent='.ofg{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:14px}@media(max-width:700px){.ofg{grid-template-columns:1fr}}.ofc{background:rgba(255,255,255,.75);backdrop-filter:blur(10px);border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}.ofc .ban{height:150px;font-size:60px}.ofc h3{font-size:18px;font-weight:700;margin:14px 8px 4px}.ofc p{font-size:12px;color:var(--mu);margin:0 14px 14px;line-height:1.5}';
-  document.head.appendChild(st);
+const st=document.createElement('style');
+st.textContent=`
+.of-tabs{display:flex;gap:8px;margin:14px 0;overflow-x:auto;scrollbar-width:none}
+.of-tabs button{display:flex;gap:8px;align-items:center;height:42px;padding:0 16px;border-radius:14px;background:#fff;color:#566170;font-weight:700;white-space:nowrap;border:0;cursor:pointer}
+.of-tabs button.on{background:#34404e;color:#fff}
+.of-tabs svg,.of-i svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.of-m{font-size:13px;font-weight:600;color:#2fa876;margin:0 0 10px}.of-m:empty{display:none}.of-m.e{color:#d6407f}
+.ofp{background:rgba(255,255,255,.8);border-radius:20px;padding:18px;box-shadow:0 6px 30px rgba(0,0,0,.04);margin-bottom:14px}
+.ofp h3{font-size:17px;font-weight:800;margin:0 0 10px}
+.ofp small{display:block;color:var(--mu);font-size:12px}
+.of-p{font-size:14px;line-height:1.5;color:#566170;margin:0}
+.of-em{text-align:center;color:var(--mu);padding:22px 0}
+.of-g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:700px){.of-g{grid-template-columns:1fr 1fr}}
+.of-g .ofp{margin:0}.of-g b{display:block;font-size:22px;font-weight:800;margin-top:4px}
+.up{color:#2fa876}.dn{color:#d6407f}
+.of-ch{display:flex;gap:6px;align-items:flex-end;height:80px}
+.of-ch i{flex:1;background:#2fa876;border-radius:4px 4px 0 0}.of-ch i.n{background:#d6407f}
+.of-r{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #eef1f4;font-size:14px}
+.of-r:first-of-type{border-top:0}
+.of-r>span{min-width:0;overflow-wrap:anywhere}
+.of-r small{display:block}
+.of-in,.ofp select,.ofp textarea{width:100%;border:1px solid #dfe5ea;border-radius:12px;padding:11px;font:inherit;outline:0;background:#fff;margin:6px 0}
+.ofp textarea{height:70px;resize:none}
+.of-bt{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.of-bt button{height:38px;padding:0 16px;border-radius:12px;border:0;font-weight:700;cursor:pointer;background:var(--cy,#17b3e6);color:#fff}
+.of-bt button.g{background:#eef3f8;color:#566170}.of-bt button.r{background:#e5314a}
+.of-tag{display:inline-block;background:#e3f6fd;color:#17b3e6;border-radius:10px;padding:2px 9px;font-size:11px;font-weight:700;margin-right:6px}
+.ofg{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:14px}@media(max-width:700px){.ofg{grid-template-columns:1fr}}
+.ofc{background:rgba(255,255,255,.75);backdrop-filter:blur(10px);border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}
+.ofc .ban{height:150px;font-size:60px;display:grid;place-items:center}.ofc h3{font-size:18px;font-weight:700;margin:14px 8px 4px}.ofc p{font-size:12px;color:var(--mu);margin:0 14px 14px;line-height:1.5}`;
+document.head.appendChild(st);
 
-  const root=()=>document.getElementById('v-office');
+const root=()=>document.getElementById('v-office');
+const $=s=>root().querySelector(s);
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const IC={home:'M3 11l9-8 9 8M5 10v10h14V10',fin:'M4 20V10M10 20V4M16 20v-8M22 20H2',
+  team:'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M17 11a2.5 2.5 0 1 0 0-5M21 19c0-2-1.5-3.5-4-4',
+  jobs:'M4 8h16v11H4zM9 8V5h6v3M4 13h16',all:'M4 5h16v14H4zM4 10h16M9 5v14'};
+const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
+const ROLES=['Маркетолог','Исполнитель','Поддержка'];
+const CARDS=[{id:'gdevelop',emoji:'🎮',bg:'linear-gradient(160deg,#c9f0f8,#7ad3f0)',title:'Редактор игр',
+  text:'Конструктор игр без программирования на основе GDevelop. 2D и 3D, управление пальцем, уровни. Проект сохраняй файлом на устройство.',
+  url:'https://opentad.github.io/GDevelop/'}];
+const fd=t=>t?new Date(t).toLocaleDateString('ru-RU'):'';
+const mk=n=>(+n||0)+' мк';
+const KIND=k=>String(k||'').toUpperCase()==='IP'?'ИП':String(k||'');
+let O=null,tab='jobs',FB=null,applyFor=null,view=null,qAll='';
+const R=async(n,a)=>{const r=await window.SB.rpc(n,a||{});if(r.error)throw r.error;return r.data};
+const say=(t,bad)=>{const m=$('#of-m');if(m){m.textContent=t||'';m.className='of-m'+(bad?' e':'')}};
+const own=()=>O&&O.own&&O.own.status==='active'?O.own:null;
+const isOOO=b=>b&&!['ИП','IP'].includes(String(b.kind).toUpperCase());
+const tabs=()=>{
+  const t=[];
+  if(own()||O.staff.length||O.mod)t.push(['home','Главная']);
+  if(own())t.push(['fin','Финансы']);
+  if(own()||O.staff.length)t.push(['team','Команда']);
+  if(O.mod)t.push(['all','Бизнесы']);
+  t.push(['jobs','Вакансии']);
+  return t;
+};
+const twice=(b,t1)=>{
+  if(!b.dataset.sure){b.dataset.sure='1';b.dataset.t0=b.textContent;b.textContent=t1;
+    setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent=b.dataset.t0}},4000);return false}
+  return true;
+};
 
-  const CARDS=[
-    {id:'gdevelop',emoji:'🎮',bg:'linear-gradient(160deg,#c9f0f8,#7ad3f0)',
-     title:'Редактор игр',
-     text:'Конструктор игр без программирования на основе GDevelop. Игра собирается из блоков и событий: 2D и 3D, управление пальцем, уровни. Проект сохраняй файлом на устройство.',
-     url:'https://opentad.github.io/GDevelop/'}
-  ];
-
-  async function home(){
-  let z=null;try{z=(await window.SB.rpc('biz_my')).data}catch(e){}
-  if((!z||z.status!=='active')&&!window.IS_MOD){
-    root().innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofc" style="padding:30px 18px"><div class="ban" style="height:auto;font-size:50px">🔒</div><h3>Офис закрыт</h3><p>Он открывается владельцам проектов (ИП и ООО). Подай заявку в MilkBank: кнопка «Открыть расчётный счёт».</p></div>';return;
-  }
-  root().innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofg">'+
-    CARDS.map(c=>`<article class="ofc"><div class="ban" style="background:${c.bg}">${c.emoji}</div><h3>${c.title}</h3><p>${c.text}</p><button class="join" data-of="${c.id}">Открыть</button></article>`).join('')+'</div>';
+function shell(){
+  root().innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="of-tabs">'+
+    tabs().map(t=>`<button data-ot="${t[0]}" class="${tab===t[0]?'on':''}">${ic(t[0])}<span>${t[1]}</span></button>`).join('')+
+    '</div><div class="of-m" id="of-m"></div><div id="of-b"></div>';
+  show();
+}
+async function show(){
+  const b=$('#of-b');if(!b)return;
+  b.innerHTML='<div class="of-em">Загружаем…</div>';
+  try{
+    if(view&&view.t==='blog')await blogView(view.b,view.n);
+    else await ({home,fin,team,all,jobs}[tab])();
+  }catch(e){b.innerHTML='';say(e.message||'Не получилось',1)}
 }
 
-  function openTool(id){
-    const c=CARDS.find(x=>x.id===id);if(!c)return;
-    root().innerHTML='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><button class="back" id="of-back" style="margin:0">← К разделу</button><a class="sw" style="display:inline-flex;align-items:center;text-decoration:none" href="'+c.url+'" target="_blank" rel="noopener">Открыть в новой вкладке</a></div><iframe src="'+c.url+'" allow="fullscreen;autoplay;clipboard-read;clipboard-write" style="width:100%;height:calc(100vh - 150px);border:0;border-radius:18px;background:#fff"></iframe>';
+/* ---------- Главная ---------- */
+async function home(){
+  const o=own(),SB=window.SB;let h='';
+  if(o){
+    const bl=await SB.from('biz_blogs').select('title').eq('biz_id',o.id).maybeSingle();
+    h+=`<div class="ofp"><h3>Блог бизнеса</h3>`+(bl.data
+      ?`<p class="of-p">Блог «${esc(bl.data.title)}» создан.</p><div class="of-bt"><button data-oa="blog" data-b="${o.id}" data-n="${esc(o.name)}">Перейти в блог</button></div>`
+      :`<p class="of-p">Блог получит название вашего бизнеса: «${esc(o.name)}». Название потом не меняется.</p><div class="of-bt"><button data-oa="blogmk">Создать блог</button></div>`)+'</div>';
+  }else if(O.own){
+    h+=`<div class="ofp"><h3>Ваш бизнес «${esc(O.own.name)}»</h3><p class="of-p">Статус заявки: ${esc(O.own.status)}. Разделы Офиса откроются после одобрения.</p></div>`;
   }
+  if(O.staff.length)h+='<div class="ofp"><h3>Где вы работаете</h3>'+O.staff.map(s=>`<div class="of-r"><span><b>${esc(s.name)}</b><small>${esc(s.role)}${s.salary?', '+mk(s.salary):''}</small></span><div class="of-bt" style="margin:0"><button class="g" data-oa="blog" data-b="${s.biz_id}" data-n="${esc(s.name)}">Блог</button></div></div>`).join('')+'</div>';
+  if(o||O.staff.length)h+='<div class="ofg">'+CARDS.map(c=>`<article class="ofc"><div class="ban" style="background:${c.bg}">${c.emoji}</div><h3>${c.title}</h3><p>${c.text}</p><button class="join" data-oa="tool" data-id="${c.id}">Открыть</button></article>`).join('')+'</div>';
+  $('#of-b').innerHTML=h||'<div class="of-em">Пока здесь пусто</div>';
+}
 
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-of]');
-    if(b){openTool(b.dataset.of);return}
-    if(e.target.closest('#of-back'))home();
-  });
+async function blogView(bid,name){
+  const SB=window.SB;
+  const bl=await SB.from('biz_blogs').select('title').eq('biz_id',bid).maybeSingle();
+  const ps=bl.data?(await SB.from('biz_posts').select('id,body,created_at').eq('biz_id',bid).order('id',{ascending:false}).limit(50)).data||[]:[];
+  const can=(own()&&own().id===bid)||O.staff.some(s=>s.biz_id===bid&&s.role==='Маркетолог');
+  $('#of-b').innerHTML=`<button class="back" data-oa="back">← Назад</button><div class="ofp"><h3>${esc(bl.data?bl.data.title:name)}</h3>`+
+    (bl.data?(can?'<textarea id="of-pt" maxlength="2000" placeholder="Что нового в бизнесе?"></textarea><div class="of-bt"><button data-oa="post" data-b="'+bid+'">Опубликовать</button></div>':''):'<p class="of-p">Блога пока нет.</p>')+'</div>'+
+    ps.map(p=>`<div class="ofp"><small>${fd(p.created_at)}</small><p class="of-p" style="white-space:pre-wrap;color:inherit">${esc(p.body)}</p></div>`).join('');
+}
 
-  window.RV=window.RV||{};
-  window.RV.office=home;
+/* ---------- Финансы ---------- */
+function chart(ops){
+  const m={},now=new Date();now.setHours(0,0,0,0);
+  for(let i=0;i<14;i++){const d=new Date(now);d.setDate(d.getDate()-i);m[d.toDateString()]=0}
+  ops.forEach(o=>{const k=new Date(o.created_at);k.setHours(0,0,0,0);const s=k.toDateString();if(s in m)m[s]+=+o.amount});
+  const v=Object.values(m).reverse(),mx=Math.max(1,...v.map(Math.abs));
+  return '<div class="of-ch">'+v.map(n=>`<i class="${n<0?'n':''}" style="height:${Math.max(3,Math.abs(n)/mx*76)}px"></i>`).join('')+'</div>';
+}
+async function fin(){
+  const bid=FB||(own()&&own().id),d=await R('biz_fin',{bid}),ops=d.ops||[],lim=Date.now()-30*864e5;
+  let inc=0,exp=0;
+  ops.forEach(o=>{if(new Date(o.created_at)>=lim){const a=+o.amount;if(a>0)inc+=a;else exp-=a}});
+  $('#of-b').innerHTML=(FB?'<button class="back" data-oa="all">← К списку</button>':'')+
+    `<div class="of-g"><div class="ofp"><small>Баланс</small><b>${mk(d.balance)}</b><small>Счёт ${esc(d.acc||'')}</small></div>`+
+    `<div class="ofp"><small>Доходы за 30 дней</small><b class="up">+${inc}</b></div>`+
+    `<div class="ofp"><small>Расходы за 30 дней</small><b class="dn">−${exp}</b></div>`+
+    `<div class="ofp"><small>Прибыль за 30 дней</small><b class="${inc-exp<0?'dn':'up'}">${inc-exp}</b></div></div>`+
+    `<div class="ofp"><h3>Движение за 14 дней</h3>${chart(ops)}</div>`+
+    `<div class="ofp"><h3>Операции</h3>${ops.length?ops.slice(0,50).map(o=>`<div class="of-r"><span>${esc(o.title)}<small>${fd(o.created_at)}</small></span><b class="${+o.amount<0?'dn':'up'}">${+o.amount>0?'+':''}${o.amount}</b></div>`).join(''):'<div class="of-em">Операций пока нет</div>'}</div>`+
+    (d.fee_until?`<div class="ofp"><small>Квартальный взнос оплачен до ${fd(d.fee_until)}</small></div>`:'');
+}
+
+/* ---------- Команда ---------- */
+async function team(){
+  const o=own();let h='';
+  if(o){
+    if(!isOOO(o))h+='<div class="ofp"><h3>Команда</h3><p class="of-p">Нанимать сотрудников могут только ООО. У ИП работает один владелец.</p></div>';
+    else{
+      const d=await R('biz_team',{bid:o.id});
+      h+=`<div class="ofp"><h3>Новая вакансия</h3><select id="of-vr">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select><textarea id="of-vd" maxlength="500" placeholder="Что делать и что нужно уметь. Зарплату обсудите с кандидатом."></textarea><div class="of-bt"><button data-oa="vacmk">Опубликовать</button></div></div>`;
+      h+='<div class="ofp"><h3>Открытые вакансии</h3>'+((d.vacs||[]).map(v=>`<div class="of-r"><span><span class="of-tag">${esc(v.role)}</span>${esc(v.descr)}</span><div class="of-bt" style="margin:0"><button class="g" data-oa="vacx" data-id="${v.id}">Закрыть</button></div></div>`).join('')||'<div class="of-em">Нет открытых вакансий</div>')+'</div>';
+      h+='<div class="ofp"><h3>Отклики</h3>'+((d.apps||[]).map(a=>`<div class="of-r" style="display:block"><b>${esc(a.name||'Без имени')}</b> <span class="of-tag">${esc(a.role)}</span><small>${esc(a.msg)}</small><input class="of-in" id="of-s${a.id}" type="number" min="0" placeholder="Договорённая зарплата, мк"><div class="of-bt"><button data-oa="yes" data-id="${a.id}">Принять</button><button class="g" data-oa="no" data-id="${a.id}">Отклонить</button></div></div>`).join('')||'<div class="of-em">Откликов пока нет</div>')+'</div>';
+      h+='<div class="ofp"><h3>Сотрудники</h3>'+((d.staff||[]).map(s=>`<div class="of-r"><span><b>${esc(s.name||'Без имени')}</b><small>${esc(s.role)}${s.salary?', '+mk(s.salary):''}</small></span><div class="of-bt" style="margin:0"><button class="g" data-oa="end" data-id="${s.id}">Уволить</button></div></div>`).join('')||'<div class="of-em">Пока никого</div>')+'</div>';
+    }
+  }
+  if(O.staff.length)h+='<div class="ofp"><h3>Мои места работы</h3>'+O.staff.map(s=>`<div class="of-r"><span><b>${esc(s.name)}</b><small>${esc(s.role)}${s.salary?', '+mk(s.salary):''}</small></span><div class="of-bt" style="margin:0"><button class="g" data-oa="end" data-id="${s.id}">Уволиться</button></div></div>`).join('')+'</div>';
+  $('#of-b').innerHTML=h||'<div class="of-em">Пока пусто</div>';
+}
+
+/* ---------- Бизнесы (модераторам) ---------- */
+async function all(){
+  FB=null;
+  const L=await R('biz_all');
+  const f=L.filter(b=>!qAll||(b.name+' '+(b.owner_name||'')+' '+(b.acc||'')).toLowerCase().includes(qAll));
+  $('#of-b').innerHTML=`<input class="of-in" id="of-q" placeholder="Поиск по названию, владельцу или счёту" value="${esc(qAll)}"><div class="ofp">`+
+    (f.map(b=>`<div class="of-r" style="display:block"><b>${esc(b.name)}</b> <span class="of-tag">${esc(KIND(b.kind))}</span><span class="of-tag">${esc(b.status)}</span>${b.frozen?'<span class="of-tag" style="background:#ffe3e8;color:#d6407f">заморожен</span>':''}<small>Владелец: ${esc(b.owner_name||'—')}. Счёт: ${esc(b.acc||'нет')}. Баланс: ${mk(b.balance)}. ${esc(b.activity||'')}</small><div class="of-bt"><button class="g" data-oa="fin" data-b="${b.id}">Финансы</button><button class="g" data-oa="blog" data-b="${b.id}" data-n="${esc(b.name)}">Блог</button></div></div>`).join('')||'<div class="of-em">Ничего не найдено</div>')+'</div>';
+}
+
+/* ---------- Вакансии (видят все) ---------- */
+async function jobs(){
+  const L=await R('biz_jobs');
+  const lab={new:'Отклик отправлен',yes:'Принят',no:'Отклонён'};
+  $('#of-b').innerHTML=(tabs().length===1?'<div class="ofp"><p class="of-p">Остальные разделы Офиса открываются владельцам бизнесов и их сотрудникам. Здесь можно найти работу в ООО.</p></div>':'')+
+    (L.map(v=>`<div class="ofp"><h3>${esc(v.name)} <span class="of-tag">${esc(v.role)}</span></h3><p class="of-p">${esc(v.descr)}</p>`+
+      (v.my?`<small style="margin-top:8px">${lab[v.my]||''}</small>`
+        :applyFor===v.id?`<textarea id="of-am" maxlength="500" placeholder="Расскажи о себе и опыте"></textarea><div class="of-bt"><button data-oa="send" data-id="${v.id}">Отправить</button><button class="g" data-oa="applyx">Отмена</button></div>`
+        :`<div class="of-bt"><button data-oa="apply" data-id="${v.id}">Откликнуться</button></div>`)+'</div>').join('')||'<div class="of-em">Открытых вакансий пока нет</div>');
+}
+
+/* ---------- клики ---------- */
+document.addEventListener('click',async e=>{
+  const r=root();if(!r||!r.contains(e.target))return;
+  const t=e.target,ot=t.closest('[data-ot]');
+  if(ot){tab=ot.dataset.ot;FB=null;view=null;applyFor=null;shell();return}
+  const b=t.closest('[data-oa]');if(!b)return;
+  const a=b.dataset.oa,id=b.dataset.id;
+  try{
+    if(a==='back'){view=null;show();return}
+    if(a==='tool'){
+      const c=CARDS.find(x=>x.id===id);if(!c)return;
+      r.innerHTML='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><button class="back" id="of-back" style="margin:0">← К разделу</button><a class="sw" style="display:inline-flex;align-items:center;text-decoration:none" href="'+c.url+'" target="_blank" rel="noopener">Открыть в новой вкладке</a></div><iframe src="'+c.url+'" allow="fullscreen;autoplay;clipboard-read;clipboard-write" style="width:100%;height:calc(100vh - 150px);border:0;border-radius:18px;background:#fff"></iframe>';
+      return;
+    }
+    if(a==='blog'){view={t:'blog',b:+b.dataset.b,n:b.dataset.n};show();return}
+    if(a==='fin'){FB=+b.dataset.b;tab='fin';shell();return}
+    if(a==='all'){FB=null;tab='all';shell();return}
+    if(a==='blogmk'){await R('biz_blog_make',{bid:own().id});say('Блог создан');show();return}
+    if(a==='post'){const v=$('#of-pt').value;await R('biz_post',{bid:+b.dataset.b,pbody:v});say('Опубликовано');show();return}
+    if(a==='vacmk'){await R('biz_vac_create',{bid:own().id,prole:$('#of-vr').value,pdescr:$('#of-vd').value});say('Вакансия опубликована');show();return}
+    if(a==='vacx'){await R('biz_vac_close',{vid:+id});show();return}
+    if(a==='yes'||a==='no'){
+      const s=document.getElementById('of-s'+id);
+      await R('biz_app_decide',{aid:+id,ok:a==='yes',sal:a==='yes'?(+(s&&s.value)||0):0});
+      say(a==='yes'?'Сотрудник принят':'Отклик отклонён');show();return;
+    }
+    if(a==='end'){
+      if(!twice(b,'Точно?'))return;
+      await R('biz_staff_end',{sid:+id});
+      O=await R('biz_office');O.staff=O.staff||[];say('Готово');
+      if(!tabs().some(x=>x[0]===tab))tab=tabs()[0][0];
+      shell();return;
+    }
+    if(a==='apply'){applyFor=+id;show();return}
+    if(a==='applyx'){applyFor=null;show();return}
+    if(a==='send'){await R('biz_apply',{vid:+id,pmsg:$('#of-am').value});applyFor=null;say('Отклик отправлен');show();return}
+  }catch(err){say(err.message||'Не получилось',1)}
+});
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#of-back'))init()});
+document.addEventListener('input',e=>{
+  if(e.target.id==='of-q'){qAll=e.target.value.trim().toLowerCase();const p=e.target.selectionStart;all().then(()=>{const q=$('#of-q');if(q){q.focus();q.setSelectionRange(p,p)}})}
+});
+
+async function init(){
+  const r=root();if(!r)return;
+  r.innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="of-em">Загружаем…</div>';
+  try{O=await R('biz_office')}catch(e){O=null}
+  if(!O){r.innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofp"><p class="of-p">Чтобы открыть Офис, войди в аккаунт.</p></div>';return}
+  O.staff=O.staff||[];FB=null;view=null;applyFor=null;
+  tab=tabs()[0][0];shell();
+}
+window.RV=window.RV||{};
+window.RV.office=init;
 })();
