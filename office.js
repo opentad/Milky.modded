@@ -52,7 +52,7 @@ const KIND=k=>({npd:'ИП на НПД',ip:'ИП',ooo:'ООО'})[String(k||'').to
 const lk=b=>String(b&&b.kind||'').toLowerCase();
 const canHire=b=>!!b&&lk(b)!=='npd';
 const norm=o=>{if(o){o.staff=o.staff||[];o.offers=o.offers||[];o.founds=o.founds||[]}return o};
-let O=null,tab='jobs',FB=null,applyFor=null,view=null,qAll='',fineFor=null;
+let O=null,tab='jobs',FB=null,applyFor=null,view=null,qAll='',fineFor=null,stF='act';
 const R=async(n,a)=>{const r=await window.SB.rpc(n,a||{});if(r.error)throw r.error;return r.data};
 const say=(t,bad)=>{const m=$('#of-m');if(m){m.textContent=t||'';m.className='of-m'+(bad?' e':'')}};
 const own=()=>O&&O.own&&O.own.status==='active'?O.own:null;
@@ -177,11 +177,14 @@ async function team(){
 async function all(){
   FB=null;
   const L=await R('biz_all');
-  const f=L.filter(b=>!qAll||(b.name+' '+(b.owner_name||'')+' '+(b.acc||'')).toLowerCase().includes(qAll));
-  $('#of-b').innerHTML=`<input class="of-in" id="of-q" placeholder="Поиск по названию, владельцу или счёту" value="${esc(qAll)}"><div class="ofp">`+
+  const SF={act:b=>b.status==='active',pend:b=>b.status==='pending',old:b=>b.status==='rejected'||b.status==='closed'};
+  const f=L.filter(SF[stF]).filter(b=>!qAll||(b.name+' '+(b.owner_name||'')+' '+(b.acc||'')).toLowerCase().includes(qAll));
+  const chips='<div class="of-bt" style="margin:0 0 8px">'+[['act','Работают'],['pend','На проверке'],['old','Отклонённые и закрытые']].map(([k,l])=>`<button class="${stF===k?'':'g'}" data-oa="stf" data-k="${k}">${l} · ${L.filter(SF[k]).length}</button>`).join('')+'</div>';
+  $('#of-b').innerHTML=chips+`<input class="of-in" id="of-q" placeholder="Поиск по названию, владельцу или счёту" value="${esc(qAll)}"><div class="ofp">`+
     (f.map(b=>`<div class="of-r" style="display:block"><b>${esc(b.name)}</b> <span class="of-tag">${esc(KIND(b.kind))}</span><span class="of-tag">${esc(b.status)}</span>${b.frozen?'<span class="of-tag w">заморожен</span>':''}${b.debt>0?'<span class="of-tag w">штраф '+b.debt+'</span>':''}<small>Владелец: ${esc(b.owner_name||'—')}. Счёт: ${esc(b.acc||'нет')}. Баланс: ${mk(b.balance)}. ${esc(b.activity||'')}</small>`+
       (fineFor===b.id
         ?`<input class="of-in" id="of-fa" type="number" min="1" placeholder="Сумма штрафа, мк"><input class="of-in" id="of-fr" maxlength="100" placeholder="Причина штрафа"><div class="of-bt"><button class="r" data-oa="fineok" data-b="${b.id}">Выписать штраф</button><button class="g" data-oa="finex">Отмена</button></div>`
+        :stF==='old'?`<div class="of-bt"><button class="r" data-oa="bizdel" data-b="${b.id}">Удалить из списка</button></div>`
         :`<div class="of-bt"><button class="g" data-oa="fin" data-b="${b.id}">Финансы</button><button class="g" data-oa="blog" data-b="${b.id}" data-n="${esc(b.name)}">Блог</button>${b.status==='active'?`<button class="g" data-oa="fine" data-b="${b.id}">Штраф</button>`:''}</div>`)+
       '</div>').join('')||'<div class="of-em">Ничего не найдено</div>')+'</div>';
 }
@@ -214,6 +217,11 @@ document.addEventListener('click',async e=>{
     if(a==='blog'){view={t:'blog',b:+b.dataset.b,n:b.dataset.n};show();return}
     if(a==='fin'){FB=+b.dataset.b;tab='fin';shell();return}
     if(a==='all'){FB=null;tab='all';shell();return}
+    if(a==='stf'){stF=b.dataset.k;show();return}
+    if(a==='bizdel'){
+      if(!twice(b,'Точно?'))return;
+      await R('biz_forget',{p_id:+b.dataset.b});say('Удалено');show();return;
+    }
     if(a==='fine'){fineFor=+b.dataset.b;show();return}
     if(a==='finex'){fineFor=null;show();return}
     if(a==='fineok'){
