@@ -51,6 +51,7 @@ const mk=n=>(+n||0)+' мк';
 const KIND=k=>({npd:'ИП на НПД',ip:'ИП',ooo:'ООО'})[String(k||'').toLowerCase()]||String(k||'');
 const lk=b=>String(b&&b.kind||'').toLowerCase();
 const canHire=b=>!!b&&lk(b)!=='npd';
+const norm=o=>{if(o){o.staff=o.staff||[];o.offers=o.offers||[];o.founds=o.founds||[]}return o};
 let O=null,tab='jobs',FB=null,applyFor=null,view=null,qAll='',fineFor=null;
 const R=async(n,a)=>{const r=await window.SB.rpc(n,a||{});if(r.error)throw r.error;return r.data};
 const say=(t,bad)=>{const m=$('#of-m');if(m){m.textContent=t||'';m.className='of-m'+(bad?' e':'')}};
@@ -58,10 +59,10 @@ const own=()=>O&&O.own&&O.own.status==='active'?O.own:null;
 /* бизнес, которым я управляю: свой или как директор */
 const mgrBiz=()=>{const o=own();if(o)return o;const s=O.staff.find(x=>x.role==='Директор');return s?{id:s.biz_id,kind:s.kind,name:s.name}:null};
 /* бизнес, чьи финансы я вижу: свой, как директор или как бухгалтер */
-const finBiz=()=>{const o=own();if(o)return o;const s=O.staff.find(x=>x.role==='Директор'||x.role==='Бухгалтер');return s?{id:s.biz_id,kind:s.kind,name:s.name}:null};
+const finBiz=()=>{const o=own();if(o)return o;const s=O.staff.find(x=>x.role==='Директор'||x.role==='Бухгалтер');if(s)return{id:s.biz_id,kind:s.kind,name:s.name};const f=O.founds[0];return f?{id:f.biz_id,kind:'ooo',name:f.name}:null};
 const tabs=()=>{
   const t=[];
-  if(own()||O.staff.length||O.mod)t.push(['home','Главная']);
+  if(own()||O.staff.length||O.offers.length||O.founds.length||O.mod)t.push(['home','Главная']);
   if(finBiz())t.push(['fin','Финансы']);
   if(mgrBiz()||O.staff.length)t.push(['team','Команда']);
   if(O.mod)t.push(['all','Бизнесы']);
@@ -92,6 +93,7 @@ async function show(){
 /* ---------- Главная ---------- */
 async function home(){
   const o=own(),SB=window.SB;let h='';
+  if(O.offers.length)h+='<div class="ofp"><h3>Вам предлагают долю</h3>'+O.offers.map(f=>`<div class="of-r" style="display:block"><b>${esc(f.name)}</b><small>${esc(f.from_name||'Игрок')} отдаёт вам ${f.share}% ${f.price>0?'за '+mk(f.price):'бесплатно'}. Вы станете сооснователем.</small><div class="of-bt"><button data-oa="offyes" data-id="${f.id}">Принять</button><button class="g" data-oa="offno" data-id="${f.id}">Отказаться</button></div></div>`).join('')+'</div>';
   if(o){
     h+=`<div class="ofp"><h3>${esc(o.name)} <span class="of-tag">${esc(KIND(o.kind))}</span></h3><p class="of-p">Баланс счёта: ${mk(o.balance)}.${lk(o)==='npd'?' Сотрудников нанимать нельзя.':''}</p></div>`;
     if(o.frozen)h+=`<div class="ofp of-wn">Счёт заморожен: не хватает денег на взнос, зарплату или штраф.${o.debt>0?' Штраф: '+mk(o.debt)+(o.debt_note?' ('+esc(o.debt_note)+')':'')+'.':''} Пополни счёт в MilkBank.${lk(o)==='ooo'?' Если долги не оплатить 30 дней, компания закроется.':''}</div>`;
@@ -104,15 +106,24 @@ async function home(){
     h+=`<div class="ofp"><h3>Ваш бизнес «${esc(O.own.name)}»</h3><p class="of-p">Статус: ${esc(S)}.${O.own.reason?' '+esc(O.own.reason)+'.':''}${O.own.status==='pending'?' Разделы Офиса откроются после одобрения.':''}</p></div>`;
   }
   if(O.staff.length)h+='<div class="ofp"><h3>Где вы работаете</h3>'+O.staff.map(s=>`<div class="of-r"><span><b>${esc(s.name)}</b> <span class="of-tag">${esc(KIND(s.kind))}</span><small>${esc(s.role)}${s.salary?', '+mk(s.salary)+' в месяц':''}</small></span><div class="of-bt" style="margin:0"><button class="g" data-oa="blog" data-b="${s.biz_id}" data-n="${esc(s.name)}">Блог</button></div></div>`).join('')+'</div>';
+  if(o&&lk(o)==='ooo')h+=await founders(o.id,o.name);
+  for(const f of O.founds)h+=await founders(f.biz_id,f.name);
   if(o||O.staff.length)h+='<div class="ofg">'+CARDS.map(c=>`<article class="ofc"><div class="ban" style="background:${c.bg}">${c.emoji}</div><h3>${c.title}</h3><p>${c.text}</p><button class="join" data-oa="tool" data-id="${c.id}">Открыть</button></article>`).join('')+'</div>';
   $('#of-b').innerHTML=h||'<div class="of-em">Пока здесь пусто</div>';
+}
+
+async function founders(bid,name){
+  let d;try{d=await R('biz_founders_info',{p_bid:bid})}catch(e){return ''}
+  const rows=(d.list||[]).map(x=>`<div class="of-r"><span><b>${esc(x.name||'Игрок')}</b>${x.nick?' @'+esc(x.nick):''}<small>${x.is_owner?'Главный владелец':'Сооснователь'}</small></span><b>${x.share}%</b></div>`).join('');
+  const out=(d.out||[]).map(x=>`<div class="of-r"><span>Предложено: ${esc(x.to_name||'игроку')}, ${x.share}%${x.price>0?' за '+mk(x.price):' бесплатно'}</span><div class="of-bt" style="margin:0"><button class="g" data-oa="offx" data-id="${x.id}">Отозвать</button></div></div>`).join('');
+  return `<div class="ofp"><h3>Сооснователи: ${esc(name)}</h3>${rows}<small style="margin-top:8px">Твоя доля: ${d.me}%. Прибыль делится по долям: когда главный владелец выводит деньги со счёта, каждый получает свою часть.</small>${out?'<h3 style="margin-top:14px">Мои предложения</h3>'+out:''}<h3 style="margin-top:14px">Предложить долю</h3><input class="of-in" id="of-on-${bid}" placeholder="Ник игрока" autocomplete="off"><input class="of-in" id="of-os-${bid}" type="number" min="1" max="49" placeholder="Сколько % отдать"><input class="of-in" id="of-op-${bid}" type="number" min="0" placeholder="Цена в монетах (0 — бесплатно)"><small>Можно позвать сооснователя или продать часть своей доли. Главный владелец всегда держит не меньше 51%. Всего сооснователей до 5.</small><div class="of-bt"><button data-oa="offmk" data-b="${bid}">Предложить</button></div></div>`;
 }
 
 async function blogView(bid,name){
   const SB=window.SB;
   const bl=await SB.from('biz_blogs').select('title').eq('biz_id',bid).maybeSingle();
   const ps=bl.data?(await SB.from('biz_posts').select('id,body,created_at').eq('biz_id',bid).order('id',{ascending:false}).limit(50)).data||[]:[];
-  const can=(own()&&own().id===bid)||O.staff.some(s=>s.biz_id===bid&&BLOG.includes(s.role));
+  const can=(own()&&own().id===bid)||O.founds.some(f=>f.biz_id===bid)||O.staff.some(s=>s.biz_id===bid&&BLOG.includes(s.role));
   $('#of-b').innerHTML=`<button class="back" data-oa="back">← Назад</button><div class="ofp"><h3>${esc(bl.data?bl.data.title:name)}</h3>`+
     (bl.data?(can?'<textarea id="of-pt" maxlength="2000" placeholder="Что нового в бизнесе?"></textarea><div class="of-bt"><button data-oa="post" data-b="'+bid+'">Опубликовать</button></div>':''):'<p class="of-p">Блога пока нет.</p>')+'</div>'+
     ps.map(p=>`<div class="ofp"><small>${fd(p.created_at)}</small><p class="of-p" style="white-space:pre-wrap;color:inherit">${esc(p.body)}</p></div>`).join('');
@@ -151,9 +162,9 @@ async function team(){
     if(!canHire(m))h+='<div class="ofp"><h3>Команда</h3><p class="of-p">ИП на НПД работает один: на этом налоге нанимать сотрудников нельзя. Чтобы нанимать, открой ИП или ООО.</p></div>';
     else{
       const d=await R('biz_team',{bid:m.id});
-      h+=`<div class="ofp"><h3>Новая вакансия</h3><select id="of-vr">${(d.roles||[]).map(r=>`<option>${esc(r)}</option>`).join('')}</select><textarea id="of-vd" maxlength="500" placeholder="Что делать и что нужно уметь. Зарплату обсудите с кандидатом."></textarea><small>${lk(m)==='ip'?'ИП нанимает до 3 человек. ':''}Зарплата выплачивается раз в месяц со счёта проекта сама.</small><div class="of-bt"><button data-oa="vacmk">Опубликовать</button></div></div>`;
-      h+='<div class="ofp"><h3>Открытые вакансии</h3>'+((d.vacs||[]).map(v=>`<div class="of-r"><span><span class="of-tag">${esc(v.role)}</span>${esc(v.descr)}</span><div class="of-bt" style="margin:0"><button class="g" data-oa="vacx" data-id="${v.id}">Закрыть</button></div></div>`).join('')||'<div class="of-em">Нет открытых вакансий</div>')+'</div>';
-      h+='<div class="ofp"><h3>Отклики</h3>'+((d.apps||[]).map(a=>`<div class="of-r" style="display:block"><b>${esc(a.name||'Без имени')}</b> <span class="of-tag">${esc(a.role)}</span><small>${esc(a.msg)}</small><input class="of-in" id="of-s${a.id}" type="number" min="0" placeholder="Договорённая зарплата в месяц, мк"><div class="of-bt"><button data-oa="yes" data-id="${a.id}">Принять</button><button class="g" data-oa="no" data-id="${a.id}">Отклонить</button></div></div>`).join('')||'<div class="of-em">Откликов пока нет</div>')+'</div>';
+      h+=`<div class="ofp"><h3>Новая вакансия</h3><select id="of-vr">${(d.roles||[]).map(r=>`<option>${esc(r)}</option>`).join('')}</select><textarea id="of-vd" maxlength="500" placeholder="Что делать и что нужно уметь."></textarea><input class="of-in" id="of-vs" type="number" min="0" max="100000" placeholder="Зарплата в месяц, мк"><label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0"><input type="checkbox" id="of-vn"> Зарплату можно обсудить</label><small>${lk(m)==='ip'?'ИП нанимает до 3 человек. ':''}Зарплата выплачивается раз в месяц со счёта проекта сама.</small><div class="of-bt"><button data-oa="vacmk">Опубликовать</button></div></div>`;
+      h+='<div class="ofp"><h3>Открытые вакансии</h3>'+((d.vacs||[]).map(v=>`<div class="of-r"><span><span class="of-tag">${esc(v.role)}</span>${esc(v.descr)}<small>${mk(v.salary)} в месяц, ${v.negotiable?'можно обсудить':'без обсуждения'}</small></span><div class="of-bt" style="margin:0"><button class="g" data-oa="vacx" data-id="${v.id}">Закрыть</button></div></div>`).join('')||'<div class="of-em">Нет открытых вакансий</div>')+'</div>';
+      h+='<div class="ofp"><h3>Отклики</h3>'+((d.apps||[]).map(a=>`<div class="of-r" style="display:block"><b>${esc(a.name||'Без имени')}</b> <span class="of-tag">${esc(a.role)}</span><small>${esc(a.msg)}</small>${a.negotiable?`<small>Зарплата в вакансии: ${mk(a.salary)}, можно обсудить</small><input class="of-in" id="of-s${a.id}" type="number" min="0" value="${+a.salary||0}" placeholder="Договорённая зарплата в месяц, мк">`:`<small>Зарплата без обсуждения: ${mk(a.salary)} в месяц</small>`}<div class="of-bt"><button data-oa="yes" data-id="${a.id}">Принять</button><button class="g" data-oa="no" data-id="${a.id}">Отклонить</button></div></div>`).join('')||'<div class="of-em">Откликов пока нет</div>')+'</div>';
       h+='<div class="ofp"><h3>Сотрудники</h3>'+((d.staff||[]).map(s=>`<div class="of-r"><span><b>${esc(s.name||'Без имени')}</b><small>${esc(s.role)}${s.salary?', '+mk(s.salary)+' в месяц':''}</small></span>${s.role==='Директор'&&!own()?'':`<div class="of-bt" style="margin:0"><button class="g" data-oa="end" data-id="${s.id}">Уволить</button></div>`}</div>`).join('')||'<div class="of-em">Пока никого</div>')+'</div>';
     }
   }
@@ -180,7 +191,7 @@ async function jobs(){
   const L=await R('biz_jobs');
   const lab={new:'Отклик отправлен',yes:'Принят',no:'Отклонён'};
   $('#of-b').innerHTML=(tabs().length===1?'<div class="ofp"><p class="of-p">Остальные разделы Офиса открываются владельцам бизнесов и их сотрудникам. Здесь можно найти работу в ИП или ООО.</p></div>':'')+
-    (L.map(v=>`<div class="ofp"><h3>${esc(v.name)} <span class="of-tag">${esc(v.role)}</span></h3><p class="of-p">${esc(v.descr)}</p>`+
+    (L.map(v=>`<div class="ofp"><h3>${esc(v.name)} <span class="of-tag">${esc(v.role)}</span></h3><p class="of-p">${esc(v.descr)}</p><small style="margin-top:6px"><b>${mk(v.salary)} в месяц</b>, ${v.negotiable?'можно обсудить':'без обсуждения'}</small>`+
       (v.my?`<small style="margin-top:8px">${lab[v.my]||''}</small>`
         :applyFor===v.id?`<textarea id="of-am" maxlength="500" placeholder="Расскажи о себе и опыте"></textarea><div class="of-bt"><button data-oa="send" data-id="${v.id}">Отправить</button><button class="g" data-oa="applyx">Отмена</button></div>`
         :`<div class="of-bt"><button data-oa="apply" data-id="${v.id}">Откликнуться</button></div>`)+'</div>').join('')||'<div class="of-em">Открытых вакансий пока нет</div>');
@@ -211,7 +222,7 @@ document.addEventListener('click',async e=>{
     }
     if(a==='blogmk'){await R('biz_blog_make',{bid:own().id});say('Блог создан');show();return}
     if(a==='post'){const v=$('#of-pt').value;await R('biz_post',{bid:+b.dataset.b,pbody:v});say('Опубликовано');show();return}
-    if(a==='vacmk'){const m=mgrBiz();await R('biz_vac_create',{bid:m.id,prole:$('#of-vr').value,pdescr:$('#of-vd').value});say('Вакансия опубликована');show();return}
+    if(a==='vacmk'){const m=mgrBiz();const vs=$('#of-vs').value;await R('biz_vac_create',{bid:m.id,prole:$('#of-vr').value,pdescr:$('#of-vd').value,psalary:vs===''?null:+vs,pnego:$('#of-vn').checked});say('Вакансия опубликована');show();return}
     if(a==='vacx'){await R('biz_vac_close',{vid:+id});show();return}
     if(a==='yes'||a==='no'){
       const s=document.getElementById('of-s'+id);
@@ -221,9 +232,21 @@ document.addEventListener('click',async e=>{
     if(a==='end'){
       if(!twice(b,'Точно?'))return;
       await R('biz_staff_end',{sid:+id});
-      O=await R('biz_office');O.staff=O.staff||[];say('Готово');
+      O=norm(await R('biz_office'));say('Готово');
       if(!tabs().some(x=>x[0]===tab))tab=tabs()[0][0];
       shell();return;
+    }
+    if(a==='offmk'){
+      const bd=+b.dataset.b,g=k=>document.getElementById(k+bd).value;
+      await R('biz_offer_make',{p_bid:bd,p_nick:g('of-on-'),p_share:+g('of-os-'),p_price:+(g('of-op-')||0)});
+      say('Предложение отправлено');show();return;
+    }
+    if(a==='offx'){await R('biz_offer_cancel',{p_id:+id});say('Предложение отозвано');show();return}
+    if(a==='offyes'||a==='offno'){
+      await R('biz_offer_answer',{p_id:+id,p_ok:a==='offyes'});
+      O=norm(await R('biz_office'));
+      if(!tabs().some(x=>x[0]===tab))tab=tabs()[0][0];
+      shell();say(a==='offyes'?'Вы теперь сооснователь':'Вы отказались');return;
     }
     if(a==='apply'){applyFor=+id;show();return}
     if(a==='applyx'){applyFor=null;show();return}
@@ -240,7 +263,7 @@ async function init(){
   r.innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="of-em">Загружаем…</div>';
   try{O=await R('biz_office')}catch(e){O=null}
   if(!O){r.innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofp"><p class="of-p">Чтобы открыть Офис, войди в аккаунт.</p></div>';return}
-  O.staff=O.staff||[];FB=null;view=null;applyFor=null;fineFor=null;
+  norm(O);FB=null;view=null;applyFor=null;fineFor=null;
   tab=tabs()[0][0];shell();
 }
 window.RV=window.RV||{};
