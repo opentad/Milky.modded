@@ -9,6 +9,7 @@ const p2=n=>String(n).padStart(2,'0');
 const dt=t=>{const d=new Date(t);return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes())};
 const tm=t=>{const d=new Date(t);return p2(d.getHours())+':'+p2(d.getMinutes())};
 const nz=s=>String(s||'').trim().toLowerCase().replace(/ё/g,'е').replace(/\s+/g,' ');
+const KN=k=>({npd:'ИП на НПД',ip:'ИП',ooo:'ООО'})[String(k||'').toLowerCase()]||'ИП';
 const IC={
  ok:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM8 12.3l2.8 2.8 5.2-5.6',
  ban:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM6 6l12 12',
@@ -150,7 +151,7 @@ function pws(){
 }
 function bzs(){
   const nm=id=>{const x=PM[id];return x?(x.fio||x.name||'Пользователь')+(x.name&&x.fio?' ('+x.name+')':''):'Пользователь'};
-  document.getElementById('md-l').innerHTML=Z.map(z=>`<div class="md-card"><div class="md-ct"><b>${z.kind==='ooo'?'ООО':'ИП'} «${esc(z.name)}»</b><small>${dt(z.created_at)}</small></div><small>Заявитель: ${esc(nm(z.owner))}</small><p style="margin-top:6px"><b>Чем занимается:</b> ${esc(z.activity)}</p><p class="md-sn">${esc(z.about)}</p><div class="md-bt"><button class="ok" data-bzok="${z.id}">Одобрить</button><button class="rd" data-bzno="${z.id}">Отклонить</button></div></div>`).join('')||'<div class="md-e">Заявок нет</div>';
+  document.getElementById('md-l').innerHTML=Z.map(z=>`<div class="md-card"><div class="md-ct"><b>${KN(z.kind)} «${esc(z.name)}»</b><small>${dt(z.created_at)}</small></div><small>Заявитель: ${esc(nm(z.owner))}</small><p style="margin-top:6px"><b>Чем занимается:</b> ${esc(z.activity)}</p><p class="md-sn">${esc(z.about)}</p><div class="md-bt"><button class="ok" data-bzok="${z.id}">Одобрить</button><button class="rd" data-bzno="${z.id}">Отклонить</button></div></div>`).join('')||'<div class="md-e">Заявок нет</div>';
 }
 
 sec.addEventListener('click',async e=>{
@@ -235,7 +236,7 @@ function delModal(uid){
 }
 function bzNo(id){
   const z=Z.find(a=>a.id===id);if(!z)return;
-  const d=modal(`<h3>Отклонить заявку</h3><p class="md-p"><b>${z.kind==='ooo'?'ООО':'ИП'} «${esc(z.name)}»</b><br>Причину увидит ученик.</p><textarea id="md-r" maxlength="300" placeholder="Причина отказа (обязательно)"></textarea><div class="md-er" id="md-er"></div><div class="md-bt"><button data-c>Отмена</button><button class="rd2" data-ok>Отклонить</button></div>`);
+  const d=modal(`<h3>Отклонить заявку</h3><p class="md-p"><b>${KN(z.kind)} «${esc(z.name)}»</b><br>Причину увидит ученик.</p><textarea id="md-r" maxlength="300" placeholder="Причина отказа (обязательно)"></textarea><div class="md-er" id="md-er"></div><div class="md-bt"><button data-c>Отмена</button><button class="rd2" data-ok>Отклонить</button></div>`);
   d.addEventListener('click',async e=>{
     const bt=e.target.closest('button');if(!bt)return;
     if(bt.hasAttribute('data-c'))d.remove();
