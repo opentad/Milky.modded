@@ -44,6 +44,13 @@
     });
   }
 
+  const GIFTS = [
+  { type: 'ordinary', name: 'Обычная сирень', price: 15, img: 'Обычная сирень.gif' },
+  { type: 'neon', name: 'Неоновая сирень', price: 20, img: 'Неоновая сирень.gif' },
+  { type: 'fire', name: 'Огненная сирень', price: 25, img: 'Огненная сирень.gif' },
+  { type: 'rainbow', name: 'Радужная сирень', price: 30, img: 'Радужная сирень.gif' }
+];
+
   const KINDS = { status: 'Статусы', banner: 'Баннеры' };
 
   const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
