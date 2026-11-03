@@ -1,5 +1,9 @@
-/* MilkOffice: вкладки Главная / Финансы / Команда / Бизнесы (модераторам) / Вакансии */
+/* MilkOffice: вкладки Главная / Финансы / Команда / Бизнесы (модераторам) / Вакансии / Инструменты (всем) */
 (function(){
+/* Размер панели Милки. 0 = определить само. Если будет зазор или наезд, впиши числа в пикселях:
+   PANEL_W: ширина боковой панели (компьютер), PANEL_H: высота верхней панели (телефон) */
+const PANEL_W=0,PANEL_H=0;
+
 const st=document.createElement('style');
 st.textContent=`
 .of-tabs{display:flex;gap:8px;margin:14px 0;overflow-x:auto;scrollbar-width:none}
@@ -32,7 +36,9 @@ st.textContent=`
 .of-tag.w{background:#ffe3e8;color:#d6407f}
 .ofg{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:14px}@media(max-width:700px){.ofg{grid-template-columns:1fr}}
 .ofc{background:rgba(255,255,255,.75);backdrop-filter:blur(10px);border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}
-.ofc .ban{height:150px;font-size:60px;display:grid;place-items:center}.ofc h3{font-size:18px;font-weight:700;margin:14px 8px 4px}.ofc p{font-size:12px;color:var(--mu);margin:0 14px 14px;line-height:1.5}`;
+.ofc .ban{height:150px;font-size:60px;display:grid;place-items:center}.ofc h3{font-size:18px;font-weight:700;margin:14px 8px 4px}.ofc p{font-size:12px;color:var(--mu);margin:0 14px 14px;line-height:1.5}
+.of-fs{position:fixed;z-index:5;background:#f6f7f3}
+.of-fs iframe{display:block;width:100%;height:100%;border:0;background:#fff}`;
 document.head.appendChild(st);
 
 const root=()=>document.getElementById('v-office');
@@ -40,11 +46,14 @@ const $=s=>root().querySelector(s);
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const IC={home:'M3 11l9-8 9 8M5 10v10h14V10',fin:'M4 20V10M10 20V4M16 20v-8M22 20H2',
   team:'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M17 11a2.5 2.5 0 1 0 0-5M21 19c0-2-1.5-3.5-4-4',
-  jobs:'M4 8h16v11H4zM9 8V5h6v3M4 13h16',all:'M4 5h16v14H4zM4 10h16M9 5v14'};
+  jobs:'M4 8h16v11H4zM9 8V5h6v3M4 13h16',all:'M4 5h16v14H4zM4 10h16M9 5v14',
+  tools:'M12 3l8 4v10l-8 4-8-4V7zM4 7l8 4 8-4M12 11v10'};
 const ic=k=>`<svg viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
-const CARDS=[{id:'gdevelop',emoji:'🎮',bg:'linear-gradient(160deg,#c9f0f8,#7ad3f0)',title:'Редактор игр',
-  text:'Конструктор игр без программирования на основе GDevelop. 2D и 3D, управление пальцем, уровни. Проект сохраняй файлом на устройство.',
-  url:'https://opentad.github.io/GDevelop/'}];
+/* картинка для карточки 3D-песочницы (рисуется кодом, отдельный файл не нужен) */
+const ART3D='<svg viewBox="0 0 160 120" width="160" height="120" fill="none" stroke-linejoin="round" stroke-linecap="round"><path d="M70 14l38 19v42L70 94 32 75V33z" fill="#ffffff" fill-opacity=".6" stroke="#1f6e43" stroke-width="3"/><path d="M32 33l38 19 38-19M70 52v42" stroke="#1f6e43" stroke-width="3"/><path d="M70 14l38 19-38 19-38-19z" fill="#2f8f5b" fill-opacity=".35"/><circle cx="122" cy="88" r="18" fill="#e8923a" stroke="#c4701f" stroke-width="3"/><ellipse cx="122" cy="88" rx="18" ry="6" stroke="#c4701f" stroke-width="2"/></svg>';
+const CARDS=[{id:'sandbox3d',art:ART3D,bg:'linear-gradient(160deg,#d9f2e3,#8fd4ad)',title:'3D-песочница',
+  text:'Лепи фигуры, красься, объединяй и вырезай. Готовые модели людей и животных. Скачивай .glb, .obj, .stl для игр и 3D-печати. Работа сохраняется сама.',
+  url:'tools/sandbox3d.html'}];
 const BLOG=['Маркетолог','Копирайтёр','Директор'];
 const fd=t=>t?new Date(t).toLocaleDateString('ru-RU'):'';
 const mk=n=>(+n||0)+' мк';
@@ -67,6 +76,7 @@ const tabs=()=>{
   if(mgrBiz()||O.staff.length)t.push(['team','Команда']);
   if(O.mod)t.push(['all','Бизнесы']);
   t.push(['jobs','Вакансии']);
+  t.push(['tools','Инструменты']);
   return t;
 };
 const twice=(b,t1)=>{
@@ -86,7 +96,7 @@ async function show(){
   b.innerHTML='<div class="of-em">Загружаем…</div>';
   try{
     if(view&&view.t==='blog')await blogView(view.b,view.n);
-    else await ({home,fin,team,all,jobs}[tab])();
+    else await ({home,fin,team,all,jobs,tools}[tab])();
   }catch(e){b.innerHTML='';say(e.message||'Не получилось',1)}
 }
 
@@ -108,7 +118,6 @@ async function home(){
   if(O.staff.length)h+='<div class="ofp"><h3>Где вы работаете</h3>'+O.staff.map(s=>`<div class="of-r"><span><b>${esc(s.name)}</b> <span class="of-tag">${esc(KIND(s.kind))}</span><small>${esc(s.role)}${s.salary?', '+mk(s.salary)+' в месяц':''}</small></span><div class="of-bt" style="margin:0"><button class="g" data-oa="blog" data-b="${s.biz_id}" data-n="${esc(s.name)}">Блог</button></div></div>`).join('')+'</div>';
   if(o&&lk(o)==='ooo')h+=await founders(o.id,o.name);
   for(const f of O.founds)h+=await founders(f.biz_id,f.name);
-  if(o||O.staff.length)h+='<div class="ofg">'+CARDS.map(c=>`<article class="ofc"><div class="ban" style="background:${c.bg}">${c.emoji}</div><h3>${c.title}</h3><p>${c.text}</p><button class="join" data-oa="tool" data-id="${c.id}">Открыть</button></article>`).join('')+'</div>';
   $('#of-b').innerHTML=h||'<div class="of-em">Пока здесь пусто</div>';
 }
 
@@ -193,11 +202,32 @@ async function all(){
 async function jobs(){
   const L=await R('biz_jobs');
   const lab={new:'Отклик отправлен',yes:'Принят',no:'Отклонён'};
-  $('#of-b').innerHTML=(tabs().length===1?'<div class="ofp"><p class="of-p">Остальные разделы Офиса открываются владельцам бизнесов и их сотрудникам. Здесь можно найти работу в ИП или ООО.</p></div>':'')+
+  $('#of-b').innerHTML=(!tabs().some(x=>x[0]==='home')?'<div class="ofp"><p class="of-p">Разделы про бизнес открываются владельцам бизнесов и их сотрудникам. Здесь можно найти работу в ИП или ООО, а во вкладке «Инструменты» есть программы для работы.</p></div>':'')+
     (L.map(v=>`<div class="ofp"><h3>${esc(v.name)} <span class="of-tag">${esc(v.role)}</span></h3><p class="of-p">${esc(v.descr)}</p><small style="margin-top:6px"><b>${mk(v.salary)} в месяц</b>, ${v.negotiable?'можно обсудить':'без обсуждения'}</small>`+
       (v.my?`<small style="margin-top:8px">${lab[v.my]||''}</small>`
         :applyFor===v.id?`<textarea id="of-am" maxlength="500" placeholder="Расскажи о себе и опыте"></textarea><div class="of-bt"><button data-oa="send" data-id="${v.id}">Отправить</button><button class="g" data-oa="applyx">Отмена</button></div>`
         :`<div class="of-bt"><button data-oa="apply" data-id="${v.id}">Откликнуться</button></div>`)+'</div>').join('')||'<div class="of-em">Открытых вакансий пока нет</div>');
+}
+
+/* ---------- Инструменты (видят все) ---------- */
+async function tools(){
+  $('#of-b').innerHTML='<div class="ofg" style="margin-top:0">'+CARDS.map(c=>`<article class="ofc"><div class="ban" style="background:${c.bg}">${c.art}</div><h3>${esc(c.title)}</h3><p>${esc(c.text)}</p><button class="join" data-oa="tool" data-id="${c.id}">Открыть</button></article>`).join('')+'</div>';
+}
+
+/* инструмент на весь экран, видна только панель Милки */
+function fit(){
+  const w=document.getElementById('of-fs'),r=root();if(!w||!r)return;
+  const rc=r.getBoundingClientRect();
+  if(innerWidth>700){w.style.left=(PANEL_W||Math.max(0,Math.round(rc.left)))+'px';w.style.top='0';}
+  else{w.style.left='0';w.style.top=(PANEL_H||Math.max(0,Math.round(rc.top)))+'px';}
+  w.style.right='0';w.style.bottom='0';
+}
+addEventListener('resize',fit);
+function openTool(c){
+  scrollTo(0,0);
+  root().innerHTML='<div class="of-fs" id="of-fs"><iframe src="'+esc(c.url)+'" allow="fullscreen;autoplay;clipboard-read;clipboard-write"></iframe></div>';
+  /* точка отсчёта берётся от пустого корня, поэтому замеряем после вставки */
+  fit();
 }
 
 /* ---------- клики ---------- */
@@ -211,8 +241,7 @@ document.addEventListener('click',async e=>{
     if(a==='back'){view=null;show();return}
     if(a==='tool'){
       const c=CARDS.find(x=>x.id===id);if(!c)return;
-      r.innerHTML='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><button class="back" id="of-back" style="margin:0">← К разделу</button><a class="sw" style="display:inline-flex;align-items:center;text-decoration:none" href="'+c.url+'" target="_blank" rel="noopener">Открыть в новой вкладке</a></div><iframe src="'+c.url+'" allow="fullscreen;autoplay;clipboard-read;clipboard-write" style="width:100%;height:calc(100vh - 150px);border:0;border-radius:18px;background:#fff"></iframe>';
-      return;
+      openTool(c);return;
     }
     if(a==='blog'){view={t:'blog',b:+b.dataset.b,n:b.dataset.n};show();return}
     if(a==='fin'){FB=+b.dataset.b;tab='fin';shell();return}
@@ -261,7 +290,6 @@ document.addEventListener('click',async e=>{
     if(a==='send'){await R('biz_apply',{vid:+id,pmsg:$('#of-am').value});applyFor=null;say('Отклик отправлен');show();return}
   }catch(err){say(err.message||'Не получилось',1)}
 });
-document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#of-back'))init()});
 document.addEventListener('input',e=>{
   if(e.target.id==='of-q'){qAll=e.target.value.trim().toLowerCase();const p=e.target.selectionStart;all().then(()=>{const q=$('#of-q');if(q){q.focus();q.setSelectionRange(p,p)}})}
 });
