@@ -38,7 +38,17 @@ st.textContent=`
 .ofc{background:rgba(255,255,255,.75);backdrop-filter:blur(10px);border-radius:20px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;text-align:center;padding-bottom:18px}
 .ofc .ban{height:150px;font-size:60px;display:grid;place-items:center}.ofc h3{font-size:18px;font-weight:700;margin:14px 8px 4px}.ofc p{font-size:12px;color:var(--mu);margin:0 14px 14px;line-height:1.5}
 .of-fs{position:fixed;z-index:5;background:#f6f7f3}
-.of-fs iframe{display:block;width:100%;height:100%;border:0;background:#fff}`;
+.of-fs iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+.obh{background:rgba(255,255,255,.85);border-radius:24px;box-shadow:0 6px 30px rgba(0,0,0,.04);overflow:hidden;margin-bottom:14px}
+.obh-cv{height:170px;background:linear-gradient(120deg,#8fd3f0,#a99bf0) center/cover no-repeat}
+.obh-bd{display:flex;gap:20px;align-items:flex-start;padding:0 24px 22px;flex-wrap:wrap}
+.obh-av{flex:none;width:120px;height:120px;border-radius:50%;margin-top:-52px;border:6px solid #fff;display:grid;place-items:center;color:#fff;font-size:40px;font-weight:700;background-size:cover;background-position:center;box-shadow:0 0 0 3px #e3f6fd}
+.obh-w{flex:1 1 240px;min-width:0;padding-top:14px}
+.obh-w h2{font-size:24px;font-weight:800;line-height:1.2;margin:0;overflow-wrap:anywhere}
+.obh-nk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;color:var(--mu);font-size:13px}
+.obh-w .of-bt{margin-top:12px}
+.obh-w .of-bt button.g{height:34px;padding:0 13px;font-size:12.5px}
+@media(max-width:700px){.obh-cv{height:120px}.obh-av{width:92px;height:92px;margin-top:-40px;font-size:30px}.obh-bd{padding:0 16px 18px;gap:14px}.obh-w h2{font-size:20px}}`;
 document.head.appendChild(st);
 
 const root=()=>document.getElementById('v-office');
@@ -100,6 +110,36 @@ async function show(){
   }catch(e){b.innerHTML='';say(e.message||'Не получилось',1)}
 }
 
+/* ---------- Блог: шапка как у профиля ---------- */
+const okImg=u=>/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u||'')?u:'';
+const PL=['#17b3e6','#8774e1','#e5617a','#5cc08a','#f0a04b','#4a8fd9'];
+const hue=t=>{let x=7;for(const c of String(t))x=(x*31+c.charCodeAt(0))>>>0;return PL[x%PL.length]};
+async function getBlog(bid){
+  const SB=window.SB;
+  let r=await SB.from('biz_blogs').select('title,avatar_url,cover_url').eq('biz_id',bid).maybeSingle();
+  if(r.error){r=await SB.from('biz_blogs').select('title').eq('biz_id',bid).maybeSingle();if(r.data)r.data.nomedia=true}
+  return r.data||null;
+}
+async function postCount(bid){const r=await window.SB.from('biz_posts').select('id',{count:'exact',head:true}).eq('biz_id',bid);return r.count||0}
+function blogHead(bid,bl,kind,np,go,name){
+  const m=mgrBiz(),ed=!!m&&m.id===bid&&!bl.nomedia,av=okImg(bl.avatar_url),cv=okImg(bl.cover_url),t=bl.title||name||'';
+  const w=np%10===1&&np%100!==11?'публикация':(np%10>=2&&np%10<=4&&(np%100<10||np%100>=20))?'публикации':'публикаций';
+  const bt=(go?`<button data-oa="blog" data-b="${bid}" data-n="${esc(t)}">Перейти в блог</button>`:'')+
+    (ed?`<button class="g" data-oa="bmav" data-b="${bid}">${av?'Сменить фото':'Добавить фото'}</button><button class="g" data-oa="bmcv" data-b="${bid}">${cv?'Сменить баннер':'Добавить баннер'}</button>${av?`<button class="g" data-oa="bmavx" data-b="${bid}">Убрать фото</button>`:''}${cv?`<button class="g" data-oa="bmcvx" data-b="${bid}">Убрать баннер</button>`:''}`:'');
+  return `<div class="obh"><div class="obh-cv"${cv?` style="background-image:url('${cv}')"`:''}></div><div class="obh-bd"><span class="obh-av" style="background-color:${hue(t)};${av?`background-image:url('${av}')`:''}">${av?'':esc((t.trim()[0]||'?').toUpperCase())}</span><div class="obh-w"><h2>${esc(t)}</h2><div class="obh-nk">${kind?`<span class="of-tag" style="margin:0">${esc(kind)}</span>`:''}<span>${np} ${w}</span></div>${bt?`<div class="of-bt">${bt}</div>`:''}</div></div></div>`;
+}
+/* картинка: обрезаем по центру и сжимаем в jpeg */
+function cropJpeg(file,w,h,q){
+  return new Promise((ok,no)=>{
+    const u=URL.createObjectURL(file),im=new Image();
+    im.onload=()=>{URL.revokeObjectURL(u);const c=document.createElement('canvas');c.width=w;c.height=h;const k=Math.max(w/im.width,h/im.height),sw=w/k,sh=h/k;
+      c.getContext('2d').drawImage(im,(im.width-sw)/2,(im.height-sh)/2,sw,sh,0,0,w,h);ok(c.toDataURL('image/jpeg',q))};
+    im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('Не удалось открыть картинку'))};
+    im.src=u;
+  });
+}
+function pick(cb){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>{if(i.files[0])cb(i.files[0])};i.click()}
+
 /* ---------- Главная ---------- */
 async function home(){
   const o=own(),SB=window.SB;let h='';
@@ -107,10 +147,9 @@ async function home(){
   if(o){
     h+=`<div class="ofp"><h3>${esc(o.name)} <span class="of-tag">${esc(KIND(o.kind))}</span></h3><p class="of-p">Баланс счёта: ${mk(o.balance)}.${lk(o)==='npd'?' Сотрудников нанимать нельзя.':''}</p></div>`;
     if(o.frozen)h+=`<div class="ofp of-wn">Счёт заморожен: не хватает денег на взнос, зарплату или штраф.${o.debt>0?' Штраф: '+mk(o.debt)+(o.debt_note?' ('+esc(o.debt_note)+')':'')+'.':''} Пополни счёт в MilkBank.${lk(o)==='ooo'?' Если долги не оплатить 30 дней, компания закроется.':''}</div>`;
-    const bl=await SB.from('biz_blogs').select('title').eq('biz_id',o.id).maybeSingle();
-    h+=`<div class="ofp"><h3>Блог бизнеса</h3>`+(bl.data
-      ?`<p class="of-p">Блог «${esc(bl.data.title)}» создан.</p><div class="of-bt"><button data-oa="blog" data-b="${o.id}" data-n="${esc(o.name)}">Перейти в блог</button></div>`
-      :`<p class="of-p">Блог получит название вашего бизнеса: «${esc(o.name)}». Название потом не меняется.</p><div class="of-bt"><button data-oa="blogmk">Создать блог</button></div>`)+'</div>';
+    const bl=await getBlog(o.id);
+    if(bl)h+=blogHead(o.id,bl,KIND(o.kind),await postCount(o.id),true,o.name);
+    else h+=`<div class="ofp"><h3>Блог бизнеса</h3><p class="of-p">Блог получит название вашего бизнеса: «${esc(o.name)}». Название потом не меняется.</p><div class="of-bt"><button data-oa="blogmk">Создать блог</button></div></div>`;
   }else if(O.own){
     const S={pending:'заявка на проверке',rejected:'заявка отклонена',closed:'компания закрыта'}[O.own.status]||O.own.status;
     h+=`<div class="ofp"><h3>Ваш бизнес «${esc(O.own.name)}»</h3><p class="of-p">Статус: ${esc(S)}.${O.own.reason?' '+esc(O.own.reason)+'.':''}${O.own.status==='pending'?' Разделы Офиса откроются после одобрения.':''}</p></div>`;
@@ -129,12 +168,14 @@ async function founders(bid,name){
 }
 
 async function blogView(bid,name){
-  const SB=window.SB;
-  const bl=await SB.from('biz_blogs').select('title').eq('biz_id',bid).maybeSingle();
-  const ps=bl.data?(await SB.from('biz_posts').select('id,body,created_at').eq('biz_id',bid).order('id',{ascending:false}).limit(50)).data||[]:[];
+  const SB=window.SB,b0=await getBlog(bid);
+  const ps=b0?(await SB.from('biz_posts').select('id,body,created_at').eq('biz_id',bid).order('id',{ascending:false}).limit(50)).data||[]:[];
   const can=(own()&&own().id===bid)||O.founds.some(f=>f.biz_id===bid)||O.staff.some(s=>s.biz_id===bid&&BLOG.includes(s.role));
-  $('#of-b').innerHTML=`<button class="back" data-oa="back">← Назад</button><div class="ofp"><h3>${esc(bl.data?bl.data.title:name)}</h3>`+
-    (bl.data?(can?'<textarea id="of-pt" maxlength="2000" placeholder="Что нового в бизнесе?"></textarea><div class="of-bt"><button data-oa="post" data-b="'+bid+'">Опубликовать</button></div>':''):'<p class="of-p">Блога пока нет.</p>')+'</div>'+
+  const sf=O.staff.find(s=>s.biz_id===bid),kd=own()&&own().id===bid?own().kind:(sf?sf.kind:'');
+  const np=b0?await postCount(bid):0;
+  $('#of-b').innerHTML='<button class="back" data-oa="back">← Назад</button>'+
+    (b0?blogHead(bid,b0,kd?KIND(kd):'',np,false,name):'<div class="ofp"><h3>'+esc(name)+'</h3><p class="of-p">Блога пока нет.</p></div>')+
+    (b0&&can?'<div class="ofp"><textarea id="of-pt" maxlength="2000" placeholder="Что нового в бизнесе?"></textarea><div class="of-bt"><button data-oa="post" data-b="'+bid+'">Опубликовать</button></div></div>':'')+
     ps.map(p=>`<div class="ofp"><small>${fd(p.created_at)}</small><p class="of-p" style="white-space:pre-wrap;color:inherit">${esc(p.body)}</p></div>`).join('');
 }
 
@@ -257,6 +298,12 @@ document.addEventListener('click',async e=>{
       await R('biz_fine',{p_id:+b.dataset.b,p_amt:+($('#of-fa').value||0),p_reason:$('#of-fr').value});
       fineFor=null;say('Штраф выписан');show();return;
     }
+    if(a==='bmav'||a==='bmcv'){
+      const isA=a==='bmav',bd=+b.dataset.b;
+      pick(async f=>{try{say('Загружаем…');const d=await cropJpeg(f,isA?320:1600,isA?320:400,isA?.86:.8);await R('biz_blog_media',{p_bid:bd,p_which:isA?'avatar':'cover',p_data:d});say('Сохранено');show()}catch(err){say(err.message||'Не получилось',1)}});
+      return;
+    }
+    if(a==='bmavx'||a==='bmcvx'){await R('biz_blog_media',{p_bid:+b.dataset.b,p_which:a==='bmavx'?'avatar':'cover',p_data:''});say('Убрано');show();return}
     if(a==='blogmk'){await R('biz_blog_make',{bid:own().id});say('Блог создан');show();return}
     if(a==='post'){const v=$('#of-pt').value;await R('biz_post',{bid:+b.dataset.b,pbody:v});say('Опубликовано');show();return}
     if(a==='vacmk'){const m=mgrBiz();const vs=$('#of-vs').value;await R('biz_vac_create',{bid:m.id,prole:$('#of-vr').value,pdescr:$('#of-vd').value,psalary:vs===''?null:+vs,pnego:$('#of-vn').checked});say('Вакансия опубликована');show();return}
