@@ -569,14 +569,24 @@ document.addEventListener('input',e=>{
   if(e.target.id==='of-q'){qAll=e.target.value.trim().toLowerCase();const p=e.target.selectionStart;all().then(()=>{const q=$('#of-q');if(q){q.focus();q.setSelectionRange(p,p)}})}
 });
 
-async function init(){
+async function init0(){
   const r=root();if(!r)return;
   r.innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="of-em">Загружаем…</div>';
   try{O=await R('biz_office')}catch(e){O=null}
   if(!O){r.innerHTML='<h2 class="sec" style="margin-top:0">MilkOffice</h2><div class="ofp"><p class="of-p">Чтобы открыть Офис, войди в аккаунт.</p></div>';return}
   norm(O);FB=null;view=null;applyFor=null;fineFor=null;
-  tab=tabs()[0][0];shell();
+  tab=tabs()[0][0];
+  if(want){pg='posts';PD='';if(PI){URL.revokeObjectURL(PI.url);PI=null}view={t:'blog',b:want.b,n:want.n};want=null}
+  shell();
 }
+let want=null,initBusy=false;
+async function init(){if(initBusy)return;initBusy=true;try{await init0()}finally{initBusy=false}}
+/* открыть страницу компании из других разделов (например, из ленты) */
+window.OF={open:(b,n)=>{
+  want={b:+b,n:n||''};
+  if(window.MS&&MS.show)MS.show('office');
+  setTimeout(()=>{if(want&&!initBusy)init()},300);
+}};
 window.RV=window.RV||{};
 window.RV.office=init;
 })();
