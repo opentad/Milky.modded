@@ -15,6 +15,10 @@ const hs=t=>{let x=7;for(const c of t)x=(x*31+c.charCodeAt(0))>>>0;return x};
 const col=n=>PAL[hs(n||'?')%PAL.length];
 const ini=n=>(n||'?').split(/[\s,]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const av=(p,c,id)=>`<button class="${c}" data-u="${id}" aria-label="Открыть профиль" style="background-color:${col(p.name)};${p.avatar_url?`background-image:url('${esc(p.avatar_url)}')`:''}">${p.avatar_url?'':esc(ini(p.name))}</button>`;
+const okImg=u=>/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u||'')?u:'';
+const avB=(z,id)=>{const a=okImg(z.avatar_url);return `<button class="fd-a" data-biz="${id}" data-n="${esc(z.title)}" aria-label="Открыть страницу компании" style="background-color:${col(z.title)};${a?`background-image:url('${a}')`:''}">${a?'':esc(ini(z.title))}</button>`};
+const KD={npd:'ИП на НПД',ip:'ИП',ooo:'ООО'};
+const kindOf=z=>KD[String(z&&z.kind||'').toLowerCase()]||'Компания';
 const p2=n=>String(n).padStart(2,'0');
 const dt=t=>{const d=new Date(t),n=new Date(),hm=p2(d.getHours())+':'+p2(d.getMinutes());return d.toDateString()===n.toDateString()?'Сегодня в '+hm:p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+hm};
 const seen=t=>{const d=Date.now()-Date.parse(t);if(!t||isNaN(d))return'';if(d<75000)return'В сети';const m=Math.floor(d/60000);if(m<60)return'Была '+m+' мин назад';const h=Math.floor(m/60);return h<24?'Была '+h+' ч назад':'Была '+Math.floor(h/24)+' дн назад'};
@@ -42,6 +46,7 @@ css.textContent=`
 .fd-ph{display:flex;gap:14px;align-items:center;padding:18px 24px 12px}
 .fd-ph b{display:block;font-size:16px;cursor:pointer}.fd-ph small{color:var(--mu)}
 .fd-fio{display:block;font-size:11px;font-weight:300;color:#9aa1a9;margin:1px 0 2px}
+.fd-tg{display:inline-block;background:var(--cybg);color:var(--cy2);border-radius:8px;padding:1px 9px;font-size:11px;font-weight:700}
 .fd-a{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:16px;background-size:cover;background-position:center;flex:none}
 .fd-bd{padding:0 24px 16px}.fd-bd p{line-height:1.65;font-size:15.5px;white-space:pre-wrap;overflow-wrap:anywhere}
 .fd-pimg{display:block;max-width:100%;border-radius:16px;margin-top:10px}
@@ -71,29 +76,34 @@ css.textContent=`
 @media(max-width:640px){.fd-h{font-size:28px}.fd-ph,.fd-bd,.fd-ac,.fd-cm,.fd-f,.fd-off{padding-left:16px;padding-right:16px}}`;
 document.head.appendChild(css);
 
-sec.innerHTML=`<h1 class="fd-h">Лента</h1><p class="fd-sub">Публикации учеников в одном месте.</p>
+sec.innerHTML=`<h1 class="fd-h">Лента</h1><p class="fd-sub">Публикации учеников и компаний в одном месте.</p>
 <div class="fd-bar"><label class="fd-s">${ic('search')}<input id="fd-q" placeholder="Найти публикацию или автора" autocomplete="off"></label>
 <div class="fd-ch"><div id="fd-fl"></div><div id="fd-so"></div></div></div>
 <div class="fd-g"><div id="fd-l"></div><aside class="fd-w"><small class="k">Люди рядом</small><h2>Кого читать</h2><label class="fd-s"><input id="fd-pq" placeholder="Найти ученика" autocomplete="off"></label><div id="fd-p"></div></aside></div>`;
 
 const FL=[['all','Всё'],['mine','Моя лента']],SO=[['pop','Популярное'],['new','Новое'],['disc','Обсуждаемое']];
-const st={f:'all',s:'new',q:'',pq:'',posts:[],people:[],me:null,fol:new Set(),liked:new Set(),cm:{},nm:{}};
+const st={f:'all',s:'new',q:'',pq:'',posts:[],people:[],me:null,fol:new Set(),bf:new Set(),bz:{},liked:new Set(),cm:{},nm:{}};
 let tok=0;
 function chips(){
   $('#fd-fl').innerHTML=FL.map(([k,l])=>`<button data-f="${k}" class="${st.f===k?'on':''}">${l}</button>`).join('');
   $('#fd-so').innerHTML=SO.map(([k,l])=>`<button data-s="${k}" class="${st.s===k?'on':''}">${l}</button>`).join('');
 }
 const who=id=>st.nm[id]||{name:'Участник'};
+const bzOf=p=>p.biz_id?(st.bz[p.biz_id]||{title:'Компания'}):null;
+const nameOf=p=>{const z=bzOf(p);return z?z.title:who(p.user_id).name};
 function posts(){
-  let a=st.posts.filter(p=>(st.f==='all'||st.fol.has(p.user_id)||p.user_id===st.me.id)&&(!st.q||(p.body+' '+who(p.user_id).name).toLowerCase().includes(st.q)));
+  let a=st.posts.filter(p=>(st.f==='all'||(p.biz_id?st.bf.has(p.biz_id):st.fol.has(p.user_id))||p.user_id===st.me.id)&&(!st.q||(p.body+' '+nameOf(p)).toLowerCase().includes(st.q)));
   if(st.s==='pop')a=[...a].sort((x,y)=>cn(y.post_likes)-cn(x.post_likes));
   if(st.s==='disc')a=[...a].sort((x,y)=>CMT.n(y.id)-CMT.n(x.id));
   $('#fd-l').innerHTML=a.map(p=>{
-    const w=who(p.user_id);
-    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${av(w,'fd-a',p.user_id)}<div style="flex:1;min-width:0"><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(SF(w.fio))}</span>`:''}${w.last_seen?`<small>${seen(w.last_seen)}</small>`:''}</div><small class="fd-tm">${dt(p.created_at)}</small>${CMT.dots((p.user_id!==st.me.id?'<button data-rep>Пожаловаться</button>':'')+(CMT.mod()?'<button data-pdel data-danger>Удалить</button>':''))}</div>
+    const z=bzOf(p),w=who(p.user_id);
+    const head=z
+      ?`${avB(z,p.biz_id)}<div style="flex:1;min-width:0"><b data-biz="${p.biz_id}" data-n="${esc(z.title)}">${esc(z.title)}</b><small><span class="fd-tg">${kindOf(z)}</span></small></div>`
+      :`${av(w,'fd-a',p.user_id)}<div style="flex:1;min-width:0"><b data-u="${p.user_id}">${esc(w.name)}</b>${w.fio?`<span class="fd-fio">${esc(SF(w.fio))}</span>`:''}${w.last_seen?`<small>${seen(w.last_seen)}</small>`:''}</div>`;
+    return `<article class="fd-p" data-id="${p.id}"><div class="fd-ph">${head}<small class="fd-tm">${dt(p.created_at)}</small>${CMT.dots((p.user_id!==st.me.id?'<button data-rep>Пожаловаться</button>':'')+(CMT.mod()?'<button data-pdel data-danger>Удалить</button>':''))}</div>
     <div class="fd-bd">${p.body.trim()?`<p>${esc(p.body)}</p>`:''}${p.image_url?`<img class="fd-pimg" src="${esc(p.image_url)}" alt="" loading="lazy">`:''}</div>
     <div class="fd-ac"><button data-like class="${st.liked.has(p.id)?'on':''}">${ic('heart')}${cn(p.post_likes)}</button><button disabled>${ic('cmt')}${CMT.n(p.id)}</button></div>
-    ${CMT.html(p.id,p.user_id,w.comments_off)}</article>`}).join('')
+    ${CMT.html(p.id,p.user_id,z?false:w.comments_off)}</article>`}).join('')
     ||'<div class="fd-e">Здесь пока пусто. '+(st.f==='mine'?'Подпишись на кого-нибудь справа.':'Опубликуй первый пост в своём профиле.')+'</div>';
 }
 function people(){
@@ -108,22 +118,32 @@ async function load(){try{await load2()}catch(e){$('#fd-l').innerHTML='<div clas
   if(!SB){$('#fd-l').innerHTML='<div class="fd-e">Нет связи с сервером. Проверь интернет и обнови страницу.</div>';return}
   const me=(await SB.auth.getUser()).data.user;if(tk!==tok)return;
   if(!me){$('#fd-l').innerHTML='<div class="fd-e">Чтобы увидеть ленту, войди в аккаунт.<br><button data-go="1" style="margin:14px auto 0;display:block;height:44px;padding:0 24px;border-radius:14px;background:var(--pk);color:#fff;font-weight:700">Войти</button></div>';$('#fd-p').innerHTML='';return}
-  const [ps,fo,pp]=await Promise.all([
-    SB.from('posts').select('id,user_id,body,image_url,created_at,post_likes(count)').order('created_at',{ascending:false}).limit(60),
+  const [ps,fo,pp,bfo]=await Promise.all([
+    SB.from('posts').select('id,user_id,biz_id,body,image_url,created_at,post_likes(count)').order('created_at',{ascending:false}).limit(60),
     SB.from('follows').select('followee').eq('follower',me.id),
-    SB.from('profiles').select('id,name,avatar_url,last_seen').neq('id',me.id).limit(40)]);
+    SB.from('profiles').select('id,name,avatar_url,last_seen').neq('id',me.id).limit(40),
+    SB.from('biz_follows').select('biz_id').eq('user_id',me.id)]);
   if(tk!==tok)return;
   if(ps.error){$('#fd-l').innerHTML='<div class="fd-e">Не удалось загрузить: '+esc(ps.error.message)+'. Проверь, что SQL выполнен.</div>';return}
   const ids=ps.data.map(x=>x.id);
   const [lk]=await Promise.all([
     ids.length?SB.from('post_likes').select('post_id').eq('user_id',me.id).in('post_id',ids):null,
     CMT.load(SB,me,ids,()=>posts())]);
-  const uids=[...new Set(ps.data.map(x=>x.user_id))];
+  const uids=[...new Set(ps.data.filter(x=>!x.biz_id).map(x=>x.user_id))];
   const nm=uids.length?await SB.from('profiles').select('id,name,fio,avatar_url,comments_off,last_seen').in('id',uids):null;
+  const bids=[...new Set(ps.data.map(x=>x.biz_id).filter(Boolean))];
+  let bz=null;
+  if(bids.length){
+    bz=await SB.from('biz_blogs').select('biz_id,title,avatar_url,kind').in('biz_id',bids);
+    if(bz.error)bz=await SB.from('biz_blogs').select('biz_id,title,avatar_url').in('biz_id',bids);
+    if(bz.error)bz=await SB.from('biz_blogs').select('biz_id,title').in('biz_id',bids);
+  }
   if(tk!==tok)return;
   st.me=me;st.posts=ps.data;st.people=pp.data||[];st.fol=new Set((fo.data||[]).map(x=>x.followee));
+  st.bf=new Set(((bfo&&bfo.data)||[]).map(x=>x.biz_id));
   st.liked=new Set(((lk&&lk.data)||[]).map(x=>x.post_id));
   st.nm=Object.fromEntries(((nm&&nm.data)||[]).map(x=>[x.id,x]));
+  st.bz=Object.fromEntries(((bz&&bz.data)||[]).map(x=>[x.biz_id,x]));
   chips();posts();people();
 }
 const pid=el=>+el.closest('.fd-p').dataset.id;
@@ -132,6 +152,7 @@ sec.addEventListener('click',async e=>{
   if(b('[data-go]'))MS.show('msg');
   else if((x=b('[data-f]'))){st.f=x.dataset.f;chips();posts()}
   else if((x=b('[data-s]'))){st.s=x.dataset.s;chips();posts()}
+  else if((x=b('[data-biz]'))){if(window.OF)OF.open(x.dataset.biz,x.dataset.n);else note('Страница компании пока не подключена')}
   else if((x=b('[data-u]'))){MS.show('prof');if(window.PF)PF.open(x.dataset.u)}
   else if(b('[data-like]')){
     const p=st.posts.find(z=>z.id===pid(t)),on=st.liked.has(p.id);
