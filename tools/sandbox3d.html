@@ -8,108 +8,137 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#f6f7f3;color:#1d2a24;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 body{display:flex;flex-direction:column}
-button{min-width:46px;height:50px;padding:2px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#1d2a24;background:#fff;border:1px solid #dde3dc;border-radius:10px;font-family:inherit}
-button svg{width:22px;height:22px;display:block;transition:transform .2s}
-button small{font-size:10px;line-height:1;font-weight:600;white-space:nowrap}
-button:disabled{opacity:.4}
+button{width:40px;height:40px;padding:0;color:#1d2a24;background:#fff;border:1px solid #dde3dc;border-radius:10px}
+button svg{width:24px;height:24px;display:block;margin:auto;transition:transform .2s}
 button.pri{background:#2f8f5b;border-color:#2f8f5b;color:#fff}
 button.on{background:#e7f4ec;border-color:#2f8f5b;color:#1f6e43}
-button.pri.on{background:#2f8f5b;color:#fff}
-button.tx{height:34px;min-width:44px;padding:0 9px;flex-direction:row;font:700 12px system-ui,sans-serif}
+button.tx{width:auto;min-width:36px;padding:0 9px;font:700 12px system-ui,sans-serif}
 #more.open svg{transform:rotate(180deg)}
 .rw{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .sp{flex:1}
-em{font-style:normal;font-size:12px;color:#66736c;white-space:nowrap}
-.hd{font-size:12px;font-weight:700;color:#1f6e43;margin:2px 0 4px}
-.nt{font-size:11px;color:#66736c;line-height:1.3;margin:0 0 4px}
 #top{display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding:5px;background:#fff;border-bottom:1px solid #dde3dc}
 #mn{flex:1;min-height:0;display:flex;flex-direction:column}
 #cw{flex:1;min-height:0;position:relative}
 #c{display:block;width:100%;height:100%;touch-action:none}
 #st{position:absolute;left:8px;bottom:6px;font-size:13px;color:#1d2a24;background:#ffffffcc;border-radius:8px;padding:2px 8px;pointer-events:none}
 #st:empty{display:none}
-#pn{background:#fff;border-top:1px solid #dde3dc;padding:6px;overflow-y:auto}
+#pn{background:#fff;border-top:1px solid #dde3dc;padding:6px;overflow-y:auto;max-height:46vh}
 #dr{display:none}
 .ctx{display:none}.ctx.v{display:block}
 .ctx.off{opacity:.35;pointer-events:none}
-#sw{display:flex;flex-wrap:wrap;gap:4px}
-#sw button{width:28px;min-width:28px;height:28px;padding:0;border-radius:50%}
-#wh{width:112px;height:112px;flex:none;touch-action:none}
-.cc{flex:1;min-width:150px}
-#cp{height:26px;border-radius:8px;border:1px solid #dde3dc;margin:4px 0 6px}
+#sw{display:contents}
+#sw button{width:30px;height:30px;border-radius:50%}
+#col{width:40px;height:34px;padding:0;border:1px solid #dde3dc;border-radius:8px;background:#fff}
 .sr{display:grid;grid-template-columns:18px 1fr 48px;align-items:center;gap:6px}
-.sr input{width:100%;height:30px;accent-color:#2f8f5b}
+.sr input,.sr2 input[type=range]{width:100%;height:30px;accent-color:#2f8f5b}
 .sr span{font-size:12px;color:#66736c;text-align:right}
-.sr2{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap}
+.sr2{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .sr2 button{flex:none}
-.sr2 em{min-width:56px}
-.sr2 input{flex:1;min-width:90px;width:auto;height:30px;accent-color:#2f8f5b}
-#tu{display:none;background:#e7f4ec;border:1px solid #2f8f5b;border-radius:10px;padding:6px 8px;margin-bottom:6px}
-#tu.v{display:block}
-#tn{font-weight:700;font-size:13px;color:#1f6e43}
-#tt{font-size:13px;line-height:1.35;margin:3px 0 6px}
-#tu .rw{margin:0}
-.hint{outline:3px solid #e8923a;outline-offset:1px;animation:pl 1s infinite}
-@keyframes pl{50%{outline-color:transparent}}
-@media (orientation:landscape){#mn{flex-direction:row}#pn{width:300px;border-top:0;border-left:1px solid #dde3dc}}
+.dt svg{display:block;color:#66736c}.dt.s svg{width:12px}.dt.m svg{width:22px}.dt.l svg{width:26px}
+input[type=text]{flex:1;min-width:0;height:36px;padding:0 8px;border:1px solid #dde3dc;border-radius:8px;background:#fff;color:#1d2a24;font:14px system-ui,sans-serif;user-select:text;-webkit-user-select:text}
+input[type=text]:read-only{background:#f2f5f1;color:#66736c}
+#tb button{flex:1;height:34px}
+.hint{font-size:12px;color:#66736c;margin:0 0 6px}
+.lb{font-size:12px;color:#66736c;min-width:46px}
+.lg{display:flex;flex-wrap:wrap;gap:5px;max-height:128px;overflow-y:auto;margin-bottom:6px}
+.lg button{height:36px}
+#pl{max-height:118px;overflow-y:auto}
+.pr{display:flex;gap:5px;margin-bottom:4px}
+.pr .op{flex:1;min-width:0;height:36px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr .dl{width:36px;height:36px}
+.dl.arm{background:#fde8e6;border-color:#d33;color:#d33}
+@media (orientation:landscape){#mn{flex-direction:row}#pn{width:300px;max-height:none;border-top:0;border-left:1px solid #dde3dc}}
 </style>
 </head>
 <body>
 <div id="top">
-<button data-add="cube" data-i="cube" data-n="Куб" data-t="Куб"></button><button data-add="sphere" data-i="sphere" data-n="Шар" data-t="Шар"></button><button data-add="cyl" data-i="cyl" data-n="Цилиндр" data-t="Цилиндр"></button><button data-add="cone" data-i="cone" data-n="Конус" data-t="Конус"></button><button data-add="torus" data-i="torus" data-n="Тор" data-t="Тор"></button>
-<button data-tool="d" data-i="lib" data-n="Модели" data-t="Готовые модели"></button><button id="tut" data-i="help" data-n="Обучение" data-t="Обучение"></button>
+<button data-add="cube" data-i="cube" data-t="Куб"></button><button data-add="sphere" data-i="sphere" data-t="Шар"></button><button data-add="cyl" data-i="cyl" data-t="Цилиндр"></button><button data-add="cone" data-i="cone" data-t="Конус"></button><button data-add="torus" data-i="torus" data-t="Тор"></button>
 <span class="sp"></span>
-<button id="und" data-i="undo" data-n="Отмена" data-t="Отменить"></button><button id="glb" class="pri" data-i="down" data-n="GLB" data-t="Скачать .glb"></button><button id="obj" data-i="down" data-n="OBJ" data-t="Скачать .obj"></button><button id="stl" data-i="down" data-n="STL" data-t="Скачать .stl"></button>
+<button id="und" data-i="undo" data-t="Отменить"></button><button id="glb" class="pri" data-i="down" data-t="Скачать .glb"></button><button id="obj" class="tx" data-t="Скачать .obj">OBJ</button><button id="stl" class="tx" data-t="Скачать .stl">STL</button>
 </div>
 <div id="mn">
 <div id="cw"><canvas id="c"></canvas><div id="st"></div></div>
 <div id="pn">
-<div id="tu"><div id="tn"></div><div id="tt"></div><div class="rw"><button class="tx" id="tb">Назад</button><button class="tx pri" id="tf">Далее</button><button class="tx" id="tq">Закрыть</button></div></div>
+<div class="rw" id="tb"><button class="tx" data-tab="1">Правка</button><button class="tx" data-tab="2">Проекты</button><button class="tx" data-tab="3">Город</button></div>
+
+<div id="t1">
 <div class="rw">
-<button data-tool="p" data-i="move" data-n="Двигать" data-t="Двигать"></button><button data-tool="s" data-i="size" data-n="Размер" data-t="Размер"></button><button data-tool="r" data-i="rot" data-n="Поворот" data-t="Поворот"></button><button data-tool="b" data-i="brush" data-n="Кисть" data-t="Кисть"></button><button data-tool="f" data-i="fill" data-n="Заливка" data-t="Заливка"></button><button data-tool="e" data-i="erase" data-n="Ластик" data-t="Ластик"></button><button data-tool="u" data-i="sculpt" data-n="Лепка" data-t="Лепка"></button><button data-tool="g" data-i="face" data-n="Грани" data-t="Грани"></button><button id="more" data-i="more" data-n="Ещё" data-t="Ещё"></button>
+<button data-tool="p" data-i="move" data-t="Двигать"></button><button data-tool="s" data-i="size" data-t="Размер"></button><button data-tool="r" data-i="rot" data-t="Поворот"></button><button data-tool="b" data-i="brush" data-t="Кисть"></button><button data-tool="f" data-i="fill" data-t="Заливка"></button><button data-tool="e" data-i="erase" data-t="Ластик"></button><button id="more" data-i="more" data-t="Ещё"></button>
 <span class="sp"></span>
-<button id="mir" data-i="mirror" data-n="Зеркало" data-t="Зеркало"></button><button id="dup" data-i="copy" data-n="Копия" data-t="Копия"></button><button id="del" data-i="trash" data-n="Удалить" data-t="Удалить"></button>
+<button id="mir" data-i="mirror" data-t="Зеркало"></button><button id="dup" data-i="copy" data-t="Копия"></button><button id="del" data-i="trash" data-t="Удалить"></button>
 </div>
 <div id="dr">
-<div class="rw"><button data-tool="h" data-i="edge" data-n="Кромки" data-t="Кромки"></button><button data-tool="v" data-i="vert" data-n="Вершины" data-t="Вершины"></button><button data-tool="k" data-i="mask" data-n="Маска" data-t="Маска"></button><button data-tool="m" data-i="gem" data-n="Материал" data-t="Материал"></button></div>
-<div class="rw"><button id="mu" data-i="multi" data-n="Несколько" data-t="Выбрать несколько"></button><button id="grp" data-i="grp" data-n="Группа" data-t="Группа"></button><button id="bu" data-i="uni" data-n="Объединить" data-t="Объединить"></button><button id="bs" data-i="sub" data-n="Вырезать" data-t="Вырезать"></button><button id="bi" data-i="isec" data-n="Пересечь" data-t="Пересечение"></button><button id="sd" data-i="subd" data-n="Разделить" data-t="Разделить грани"></button><button id="rl" data-i="round" data-n="Скруглить" data-t="Скруглить"></button><button id="img" data-i="img" data-n="Картинка" data-t="Своя картинка"></button><button id="snap" data-i="grid" data-n="Сетка" data-t="Привязка к сетке"></button></div>
+<div class="rw"><button data-tool="x" data-i="cut" data-t="Нарезка"></button><button data-tool="g" data-i="face" data-t="Грани"></button><button data-tool="h" data-i="edge" data-t="Кромки"></button><button data-tool="v" data-i="vert" data-t="Вершины"></button><button data-tool="u" data-i="sculpt" data-t="Лепка"></button><button data-tool="k" data-i="mask" data-t="Маска"></button><button data-tool="m" data-i="gem" data-t="Материал"></button></div>
+<div class="rw"><button id="mu" data-i="multi" data-t="Выбрать несколько"></button><button id="grp" data-i="grp" data-t="Группа"></button><button id="bu" data-i="uni" data-t="Объединить"></button><button id="bs" data-i="sub" data-t="Вырезать"></button><button id="bi" data-i="isec" data-t="Пересечение"></button><button id="sd" data-i="subd" data-t="Разделить грани"></button><button id="rl" data-i="round" data-t="Скруглить"></button><button id="img" data-i="img" data-t="Своя картинка"></button><button id="snap" data-i="grid" data-t="Привязка к сетке"></button></div>
 </div>
 <div class="ctx" id="sl"></div>
-<div class="ctx" id="cl"><div class="rw" style="align-items:flex-start"><canvas id="wh" width="112" height="112"></canvas><div class="cc"><em>Яркость</em><input type="range" id="cb" min="0" max="100" value="100" style="width:100%;height:30px;accent-color:#2f8f5b"><div id="cp"></div><div id="sw"></div></div></div></div>
-<div class="ctx" id="bz"><div class="sr2"><em>Размер кисти</em><input type="range" id="bsz" min="3" max="80" value="24"></div></div>
+<div class="ctx" id="cl"><div class="rw"><span id="sw"></span><input type="color" id="col" value="#e74c3c"><button id="pip" data-i="pip" data-t="Пипетка"></button></div></div>
+<div class="ctx" id="bz"><div class="sr2"><span class="dt s" data-i="dot"></span><input type="range" id="bsz" min="3" max="80" value="24"><span class="dt l" data-i="dot"></span></div></div>
 <div class="ctx" id="sc">
-<div class="sr2"><button id="su1" data-i="out" data-n="Вытянуть" data-t="Вытянуть"></button><button id="su2" data-i="in" data-n="Вдавить" data-t="Вдавить"></button><button id="su3" data-i="smooth" data-n="Сгладить" data-t="Сгладить"></button><em>Радиус</em><input type="range" id="rsz" min="0.1" max="1" step="0.05" value="0.3"></div>
-<div class="sr2"><button id="dyn" data-i="mesh" data-n="Динамика" data-t="Динамические грани"></button><em>Сила</em><input type="range" id="ssz" min="0.2" max="2" step="0.1" value="1"></div>
-<div class="sr2"><em>Слой</em><button class="tx" data-l="0" data-t="Основа">Основа</button><button class="tx" data-l="1">1</button><button class="tx" data-l="2">2</button><button class="tx" data-l="3">3</button><em>Сила слоя</em><input type="range" id="lk" min="0" max="1.5" step="0.05" value="1"></div>
-<div class="nt" id="sn"></div>
+<div class="sr2"><button id="su1" data-i="out" data-t="Вытянуть"></button><button id="su2" data-i="in" data-t="Вдавить"></button><button id="su3" data-i="smooth" data-t="Сгладить"></button><span class="dt s" data-i="dot"></span><input type="range" id="rsz" min="0.1" max="1" step="0.05" value="0.3"><span class="dt l" data-i="dot"></span></div>
+<div class="sr2"><button id="dyn" data-i="mesh" data-t="Динамические грани"></button><span class="dt m" data-i="sculpt"></span><input type="range" id="ssz" min="0.2" max="2" step="0.1" value="1"></div>
+<div class="sr2"><button class="tx" data-l="0" data-t="Основа">0</button><button class="tx" data-l="1">1</button><button class="tx" data-l="2">2</button><button class="tx" data-l="3">3</button><input type="range" id="lk" min="0" max="1.5" step="0.05" value="1"></div>
 </div>
-<div class="ctx" id="mp"><div class="sr2"><button id="ma" data-i="mask" data-n="Закрасить" data-t="Закрасить маской"></button><button id="mr" data-i="erase" data-n="Стереть" data-t="Стереть маску"></button><button id="mi" data-i="swap" data-n="Инверсия" data-t="Инвертировать"></button><button id="mc" data-i="x" data-n="Очистить" data-t="Очистить"></button><em>Радиус</em><input type="range" id="msz" min="0.1" max="1" step="0.05" value="0.3"></div></div>
+<div class="ctx" id="mp"><div class="sr2"><button id="ma" data-i="mask" data-t="Закрасить маской"></button><button id="mr" data-i="erase" data-t="Стереть маску"></button><button id="mi" data-i="swap" data-t="Инвертировать"></button><button id="mc" data-i="x" data-t="Очистить"></button><span class="dt s" data-i="dot"></span><input type="range" id="msz" min="0.1" max="1" step="0.05" value="0.3"><span class="dt l" data-i="dot"></span></div></div>
 <div class="ctx off" id="mt">
-<div class="sr2"><em>Металл</em><input type="range" id="mtm" min="0" max="1" step="0.02" value="0"></div>
-<div class="sr2"><em>Блеск</em><input type="range" id="mtg" min="0" max="1" step="0.02" value="0.15"></div>
-<div class="sr2"><em>Непрозрачность</em><input type="range" id="mto" min="0.1" max="1" step="0.02" value="1"></div>
+<div class="sr2"><span class="dt m" data-i="gem"></span><input type="range" id="mtm" min="0" max="1" step="0.02" value="0"></div>
+<div class="sr2"><span class="dt m" data-i="spark"></span><input type="range" id="mtg" min="0" max="1" step="0.02" value="0.15"></div>
+<div class="sr2"><span class="dt m" data-i="drop"></span><input type="range" id="mto" min="0.1" max="1" step="0.02" value="1"></div>
 </div>
 <div class="ctx off" id="fc">
-<div class="sr2"><em>Выдавить</em><input type="range" id="fx" min="-1" max="1" step="0.02" value="0"></div>
-<div class="sr2"><em>Масштаб</em><input type="range" id="fz" min="0.2" max="2" step="0.02" value="1"></div>
-<div class="sr2"><em>Угол грани</em><input type="range" id="ft" min="5" max="60" step="1" value="15"></div>
+<div class="sr2"><span class="dt m" data-i="in"></span><input type="range" id="fx" min="-1" max="1" step="0.02" value="0"><span class="dt m" data-i="out"></span></div>
+<div class="sr2"><span class="dt s" data-i="dot"></span><input type="range" id="fz" min="0.2" max="2" step="0.02" value="1"><span class="dt l" data-i="dot"></span></div>
+<div class="sr2"><span class="dt m" data-i="face"></span><input type="range" id="ft" min="5" max="60" step="1" value="15"></div>
 </div>
-<div class="ctx" id="lb"></div>
+<div class="ctx off" id="ct">
+<div class="sr2"><button class="tx" data-ax="0">X</button><button class="tx" data-ax="1">Y</button><button class="tx" data-ax="2">Z</button><input type="range" id="cps" min="0.05" max="0.95" step="0.01" value="0.5"><button class="tx pri" id="cgo">Разрезать</button></div>
+<div class="sr2"><span class="lb">Частей</span><input type="range" id="cnn" min="2" max="8" step="1" value="2"><span class="lb" id="cnl">2</span></div>
+<div class="sr2"><span class="lb">Зазор</span><input type="range" id="cgp" min="0" max="1.5" step="0.05" value="0.3"></div>
+</div>
+</div>
+
+<div id="t2" style="display:none">
+<div class="rw"><button class="tx" id="nk1">Новый предмет</button><button class="tx" id="nk2">Новая локация</button><span class="hint" id="kn" style="margin:0"></span></div>
+<div class="rw"><input type="text" id="pnm" placeholder="Название проекта" maxlength="40"></div>
+<div class="rw"><input type="text" id="nick" placeholder="Твой ник" maxlength="30"><button class="tx pri" id="sv" style="height:36px">Сохранить</button><button class="tx" id="sv2" style="height:36px">Как новый</button></div>
+<div id="pl"></div>
+</div>
+
+<div id="t3" style="display:none">
+<div class="hint" id="lh">Выбери предмет, потом нажми на землю на сцене</div>
+<div class="lg" id="lg"></div>
+<div class="rw"><button class="tx" id="rt" style="height:36px">Повернуть на 90°</button><button class="tx" id="ld" style="height:36px">Хватит ставить</button></div>
+<div class="rw"><input type="text" id="gu" placeholder="Ссылка на .glb"><button class="tx" id="gb" style="height:36px">Загрузить</button><button class="tx" id="gf" style="height:36px">Файл .glb</button></div>
+</div>
 </div>
 </div>
 <input type="file" id="fi" accept="image/*" style="display:none">
+<input type="file" id="gi" accept=".glb,model/gltf-binary" style="display:none">
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/","three-mesh-bvh":"https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.6/build/index.module.js","three-bvh-csg":"https://cdn.jsdelivr.net/npm/three-bvh-csg@0.0.16/build/index.module.js"}}
 </script>
 <script type="module">
+/* ---- Supabase: впиши свои данные (Project Settings -> API) ----
+SB_URL = Project URL, SB_KEY = anon public key. Пока пусто — проекты сохраняются только в этом браузере.
+Таблица (SQL Editor -> New query -> Run):
+create table if not exists sandbox_projects(
+ id bigint generated always as identity primary key,
+ nick text not null, name text not null, kind text not null default 'item',
+ data text not null, updated_at timestamptz not null default now());
+create index if not exists sandbox_projects_nick on sandbox_projects(nick);
+alter table sandbox_projects enable row level security;
+create policy "sandbox all" on sandbox_projects for all to anon using (true) with check (true);
+*/
+const SB_URL="";
+const SB_KEY="";
+
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {GLTFExporter} from "three/addons/exporters/GLTFExporter.js";
 import {OBJExporter} from "three/addons/exporters/OBJExporter.js";
 import {STLExporter} from "three/addons/exporters/STLExporter.js";
-import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {RoomEnvironment} from "three/addons/environments/RoomEnvironment.js";
-import {mergeVertices} from "three/addons/utils/BufferGeometryUtils.js";
+import {mergeVertices,mergeGeometries} from "three/addons/utils/BufferGeometryUtils.js";
 const $=id=>document.getElementById(id),Q=s=>document.querySelectorAll(s);
 const I={
 cube:`<path d="M12 3l8 4v10l-8 4-8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/>`,
@@ -134,12 +163,15 @@ down:`<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>`,
 undo:`<path d="M9 7L4 12l5 5M4 12h10a6 6 0 0 1 6 6"/>`,
 out:`<path d="M12 20V6M7 11l5-5 5 5M4 22h16"/>`,
 in:`<path d="M12 4v14M7 13l5 5 5-5M4 22h16"/>`,
+dot:`<circle cx="12" cy="12" r="8" fill="currentColor"/>`,
 edge:`<path d="M4 20L20 4"/><circle cx="4" cy="20" r="2" fill="currentColor"/><circle cx="20" cy="4" r="2" fill="currentColor"/>`,
 vert:`<circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>`,
 mask:`<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" fill-opacity=".5"/>`,
 swap:`<path d="M7 7h11l-3-3M17 17H6l3 3"/>`,
 x:`<path d="M6 6l12 12M18 6L6 18"/>`,
 gem:`<path d="M6 4h12l4 6-10 11L2 10z"/><path d="M2 10h20M9 4l-2 6 5 11 5-11-2-6"/>`,
+spark:`<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>`,
+drop:`<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>`,
 multi:`<rect x="4" y="4" width="16" height="16" rx="2" stroke-dasharray="3 3"/><path d="M9 12l2 2 4-4"/>`,
 grp:`<rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="3 3"/><rect x="7" y="7" width="5" height="5"/><rect x="12" y="12" width="5" height="5"/>`,
 uni:`<circle cx="9" cy="12" r="6" fill="currentColor" fill-opacity=".35"/><circle cx="15" cy="12" r="6" fill="currentColor" fill-opacity=".35"/>`,
@@ -150,38 +182,47 @@ round:`<rect x="4" y="4" width="16" height="16" rx="8"/>`,
 img:`<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>`,
 grid:`<path d="M4 4h16v16H4zM4 12h16M12 4v16"/>`,
 mesh:`<path d="M4 19L12 4l8 15zM8 11.5h8M6 15h12M12 4v15"/>`,
-lib:`<circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M6 10l6 2 6-2M9 22l3-7 3 7"/>`,
-help:`<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/>`};
-Q("[data-i]").forEach(b=>{b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+I[b.dataset.i]+'</svg>'+(b.dataset.n?'<small>'+b.dataset.n+'</small>':'');if(b.dataset.t)b.title=b.dataset.t});
+pip:`<path d="M15 4l5 5-3 3-5-5z"/><path d="M12 7L4 15v5h5l8-8"/>`,
+cut:`<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>`};
+const ic=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+I[k]+'</svg>';
+Q("[data-i]").forEach(b=>{b.innerHTML=ic(b.dataset.i);if(b.dataset.t)b.title=b.dataset.t});
 
 const cw=$("cw"),cv=$("c");
 const r=new THREE.WebGLRenderer({canvas:cv,antialias:true});r.setPixelRatio(Math.min(devicePixelRatio,2));
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xeef2ec);
 scene.environment=new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(),.04).texture;
-const cam=new THREE.PerspectiveCamera(45,1,.1,200);cam.position.set(5,4,7);
+const cam=new THREE.PerspectiveCamera(45,1,.1,300);cam.position.set(5,4,7);
 scene.add(new THREE.HemisphereLight(0xffffff,0x8899aa,.6));
 const dl=new THREE.DirectionalLight(0xffffff,1.1);dl.position.set(4,8,5);scene.add(dl);
-scene.add(new THREE.GridHelper(12,12,0xb8c4bb,0xd5ddd6));
+let grid=null,ground=null;
 const ruler=new THREE.Mesh(new THREE.PlaneGeometry(10,5),new THREE.MeshBasicMaterial({color:0xe8923a,transparent:true,opacity:.15,side:THREE.DoubleSide,depthWrite:false}));
 ruler.rotation.y=Math.PI/2;ruler.position.y=2.5;ruler.visible=false;scene.add(ruler);
 const ovMat=new THREE.MeshBasicMaterial({color:0xe8923a,transparent:true,opacity:.55,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+const cutMat=new THREE.MeshBasicMaterial({color:0xe8923a,transparent:true,opacity:.3,side:THREE.DoubleSide,depthWrite:false});
+const cpl=[];for(let i=0;i<7;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(1,1),cutMat);p.visible=false;scene.add(p);cpl.push(p)}
 const ct=new OrbitControls(cam,cv);ct.enableDamping=true;ct.target.set(0,.8,0);
 const group=new THREE.Group();scene.add(group);
 function size(){const w=cw.clientWidth,h=cw.clientHeight;if(!w||!h)return;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
 new ResizeObserver(size).observe(cw);
 
 const G={cube:()=>new THREE.BoxGeometry(1,1,1,10,10,10),sphere:()=>new THREE.SphereGeometry(.5,32,20),cyl:()=>new THREE.CylinderGeometry(.5,.5,1,32,10),cone:()=>new THREE.ConeGeometry(.5,1,32,10),torus:()=>new THREE.TorusGeometry(.35,.15,16,32)};
+const GL={cube:()=>new THREE.BoxGeometry(1,1,1),sphere:()=>new THREE.SphereGeometry(.5,16,10),cyl:()=>new THREE.CylinderGeometry(.5,.5,1,16,1),cone:()=>new THREE.ConeGeometry(.5,1,16,1),torus:G.torus};
 const N={cube:"Куб",sphere:"Шар",cyl:"Цилиндр",cone:"Конус",torus:"Тор",csg:"Фигура"};
-const S=512,AX=["x","y","z"],KEY="sandbox3d",MAXT=150000,ATT=["position","uv","color","l0","l1","l2"];
-const CFG={p:[-6,6,.1],s:[.1,6,.1],r:[-180,180,1]},CFS={p:[-6,6,.5],s:[.25,6,.25],r:[-180,180,15]};
+const S=512,AX=["x","y","z"],KEY="sandbox3d",MKEY="sandbox3d_meta",MAXT=150000,ATT=["position","uv","color","l0","l1","l2"];
 const COLS=["#e74c3c","#e8923a","#f1c40f","#2f8f5b","#4a90d9","#8e5bd1","#f1c9a0","#6b4a2b","#ffffff","#333333"];
 let sel=null,ss=[],boxes=[],tool="p",cnt=0,sb="u",str=1,bs=24,rad=.3,tol=15,col="#e74c3c",hist=[],last=null,dn=null,drag=false,tmr=0,fs=null,dro=false,mm=false,snap=false,dyn=false,al=-1,mkm="a";
-const SN={u:"Вытянуть: води пальцем по фигуре, поверхность растёт наружу. Оранжевое кольцо показывает радиус.",d:"Вдавить: поверхность вдавливается внутрь. Оранжевое кольцо показывает радиус.",m:"Сгладить: убирает бугры и острые углы, фигура не растёт. Оранжевое кольцо показывает радиус."};
+let kind="item",cur={id:null,name:""},arm=null,pick=false,ax=1,cp=.5,cn=2,cgv=.3,nickv="",warned=false,tab=1;
 const own=o=>o.userData.src||o;
-const cfg=()=>(snap?CFS:CFG)[tool];
+const cfg=()=>{
+ const R=kind==="loc"?20:6;
+ if(tool==="p")return[-R,R,snap?.5:.1];
+ if(tool==="s")return snap?[.25,R,.25]:[.1,R,.1];
+ return[-180,180,snap?15:1];
+};
 const rnd=(a,k)=>Array.from(a,v=>Math.round(v*k));
 const ek=(a,b)=>a<b?a*4194304+b:b*4194304+a;
-function say(t,ms){$("st").textContent=t;clearTimeout(tmr);tmr=setTimeout(()=>$("st").textContent="",ms||1800)}
+const rid=()=>"g"+Math.random().toString(36).slice(2,7);
+function say(t){$("st").textContent=t;clearTimeout(tmr);tmr=setTimeout(()=>$("st").textContent="",2200)}
 
 function weld(pa){const wid=new Int32Array(pa.count),mp=new Map();for(let i=0;i<pa.count;i++){const k=Math.round(pa.getX(i)*1e4)+","+Math.round(pa.getY(i)*1e4)+","+Math.round(pa.getZ(i)*1e4);let v=mp.get(k);if(v===undefined){v=mp.size;mp.set(k,v)}wid[i]=v}wid.n=mp.size;return wid}
 function wnorm(g){
@@ -213,7 +254,7 @@ function make(d,geo){
  let g=geo,mod=!!geo;
  if(!g){
   if(d.cg){g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(Float32Array.from(d.cg.p,v=>v/1000),3));g.setAttribute("uv",new THREE.BufferAttribute(Float32Array.from(d.cg.u,v=>v/10000),2));g.setIndex(new THREE.Uint32BufferAttribute(d.cg.x,1));mod=true}
-  else{g=G[d.t]();uvFix(g,d.t);if(d.g){const a=g.attributes.position.array;d.g.forEach((v,i)=>a[i]=v/1000);mod=true}}
+  else{g=(d.lo?GL:G)[d.t]();uvFix(g,d.t);if(d.g){const a=g.attributes.position.array;d.g.forEach((v,i)=>a[i]=v/1000);mod=true}}
  }
  const n=g.attributes.position.count;
  if(d.k&&d.k.length===n){g.setAttribute("color",new THREE.BufferAttribute(Float32Array.from({length:n*3},(_,i)=>1-.65*d.k[(i/3)|0]/100),3))}
@@ -225,14 +266,15 @@ function make(d,geo){
  if(d.i){const im=new Image();im.onload=()=>{x.drawImage(im,0,0);tx.needsUpdate=true};im.src=d.i}
  const mt=d.mt||[0,.85,1];
  const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({map:tx,metalness:mt[0],roughness:mt[1],opacity:mt[2],transparent:mt[2]<1,vertexColors:!!g.attributes.color}));
- m.userData={t:d.t,b:d.b,c,x,tx,sc:!!d.g,cg:!!d.cg||!!geo,sm:!!d.sm,gid:d.G||0,lk,tw:null};
+ m.userData={t:d.t,b:d.b,c,x,tx,sc:!!d.g,cg:!!d.cg||!!geo,sm:!!d.sm,gid:d.G||0,lk,tw:null,lo:!!d.lo,url:d.i||null,dirty:!d.i};
  m.name=N[d.t]+" "+(++cnt);
  m.position.fromArray(d.p);m.scale.fromArray(d.s);m.rotation.set(d.r[0],d.r[1],d.r[2]);
  group.add(m);if(d.m)twin(m);return m;
 }
 function ser(m){
  const u=m.userData,g=m.geometry,mt=m.material,P=g.attributes.position;
- const d={t:u.t,b:u.b,p:m.position.toArray(),s:m.scale.toArray(),r:[m.rotation.x,m.rotation.y,m.rotation.z],m:u.tw?1:0,i:u.c.toDataURL(),G:u.gid||0,mt:[mt.metalness,mt.roughness,mt.opacity],sm:u.sm?1:0};
+ if(u.dirty||!u.url){u.url=u.c.toDataURL();u.dirty=false}
+ const d={t:u.t,b:u.b,p:m.position.toArray(),s:m.scale.toArray(),r:[m.rotation.x,m.rotation.y,m.rotation.z],m:u.tw?1:0,i:u.url,G:u.gid||0,mt:[mt.metalness,mt.roughness,mt.opacity],sm:u.sm?1:0,lo:u.lo?1:0};
  if(u.cg)d.cg={p:rnd(P.array,1000),u:rnd(g.attributes.uv.array,10000),x:Array.from(g.index.array)};
  else if(u.sc)d.g=rnd(P.array,1000);
  if(g.attributes.color){const c=g.attributes.color.array,k=[];for(let i=0;i<c.length;i+=3)k.push(Math.round((1-c[i])/.65*100));d.k=k}
@@ -242,11 +284,37 @@ function ser(m){
 }
 const state=()=>JSON.stringify(group.children.filter(m=>!m.userData.src).map(ser));
 function loadState(j){clearFace();group.clear();select(null);JSON.parse(j).forEach(d=>make(d))}
-function store(s){try{localStorage.setItem(KEY,s)}catch(e){say("Память браузера заполнена")}}
+function store(s){try{localStorage.setItem(KEY,s)}catch(e){if(!warned){warned=true;say("Память браузера заполнена — сохраняй проект на вкладке «Проекты»")}}}
 function commit(){const s=state();if(s===hist[hist.length-1])return;hist.push(s);if(hist.length>15)hist.shift();store(s)}
 function undo(){if(hist.length<2)return say("Больше нечего отменять");hist.pop();loadState(hist[hist.length-1]);store(hist[hist.length-1])}
 function rm(m){const t=m.userData.tw;if(t)group.remove(t);group.remove(m);m.geometry.dispose()}
-function setGeo(o,ng){clearFace();o.userData.tp=null;const old=o.geometry;o.geometry=ng;old.dispose();o.userData.cg=true;const t=o.userData.tw;if(t)t.geometry=ng;nrm(o)}
+function setGeo(o,ng){clearFace();const old=o.geometry;o.geometry=ng;old.dispose();o.userData.cg=true;const t=o.userData.tw;if(t)t.geometry=ng;nrm(o)}
+const MK=m=>{m.userData.tx.needsUpdate=true;m.userData.dirty=true};
+
+/* ---- сетка: предмет или локация ---- */
+function setKind(k,mv){
+ kind=k;
+ if(grid){scene.remove(grid);grid.geometry.dispose()}
+ if(ground){scene.remove(ground);ground.geometry.dispose();ground=null}
+ if(k==="loc"){
+  grid=new THREE.GridHelper(40,40,0xaebcae,0xcfd9cf);
+  ground=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshBasicMaterial({color:0xe3ecdc}));
+  ground.rotation.x=-Math.PI/2;ground.position.y=-.02;scene.add(ground);
+  ct.maxDistance=90;
+ }else{
+  grid=new THREE.GridHelper(12,12,0xb8c4bb,0xd5ddd6);
+  ct.maxDistance=Infinity;
+ }
+ scene.add(grid);
+ if(mv){if(k==="loc"){cam.position.set(14,12,18);ct.target.set(0,0,0)}else{cam.position.set(5,4,7);ct.target.set(0,.8,0)}}
+ refresh();
+}
+function metaSave(){try{localStorage.setItem(MKEY,JSON.stringify({kind,id:cur.id,name:cur.name}))}catch(e){}}
+function newProj(k){
+ clearFace();group.clear();select(null);cur={id:null,name:""};$("pnm").value="";
+ setKind(k,true);snap=k==="loc";commit();metaSave();refList();refresh();
+ say(k==="loc"?"Новая локация: сетка 40×40":"Новый предмет: сетка 12×12");
+}
 
 function val(k){const a=AX[k];return tool==="p"?sel.position[a]:tool==="s"?sel.scale[a]:Math.round(sel.rotation[a]*180/Math.PI)}
 function sync(){
@@ -257,19 +325,21 @@ function sync(){
 function matSync(){if(!sel)return;const m=sel.material;$("mtm").value=m.metalness;$("mtg").value=1-m.roughness;$("mto").value=m.opacity}
 function refresh(){
  Q("[data-tool]").forEach(b=>b.classList.toggle("on",b.dataset.tool===tool));
- $("more").classList.toggle("on","hvkm".includes(tool));
+ $("more").classList.toggle("on","ghvukmx".includes(tool));
  $("mir").classList.toggle("on",!!(sel&&sel.userData.tw));
  $("mu").classList.toggle("on",mm);$("snap").classList.toggle("on",snap);$("dyn").classList.toggle("on",dyn);
  $("grp").classList.toggle("on",!!(sel&&sel.userData.gid));
  $("ma").classList.toggle("on",mkm==="a");$("mr").classList.toggle("on",mkm==="r");
  Q("[data-l]").forEach(b=>b.classList.toggle("on",+b.dataset.l===al+1));
+ Q("[data-ax]").forEach(b=>b.classList.toggle("on",+b.dataset.ax===ax));
+ $("cps").disabled=cn>2;$("pip").classList.toggle("on",pick);
+ $("kn").textContent="Сейчас: "+(kind==="loc"?"локация":"предмет");
  $("lk").disabled=al<0;if(sel&&al>=0)$("lk").value=sel.userData.lk[al];
  ["su1","su2","su3"].forEach((id,k)=>$(id).classList.toggle("on",sb==="udm"[k]));
- const sh={p:"sl",s:"sl",r:"sl",b:"cl bz",e:"bz",f:"cl",u:"sc",g:"fc",h:"fc",v:"fc",k:"mp",m:"mt",d:"lb"}[tool];
- ["sl","cl","bz","sc","fc","mp","mt","lb"].forEach(i=>$(i).classList.toggle("v",sh.includes(i)));
- $("sl").classList.toggle("off",!sel);$("mt").classList.toggle("off",!sel);
+ const sh={p:"sl",s:"sl",r:"sl",b:"cl bz",e:"bz",f:"cl",u:"sc",g:"fc",h:"fc",v:"fc",k:"mp",m:"mt",x:"ct"}[tool];
+ ["sl","cl","bz","sc","fc","mp","mt","ct"].forEach(i=>$(i).classList.toggle("v",sh.includes(i)));
+ $("sl").classList.toggle("off",!sel);$("mt").classList.toggle("off",!sel);$("ct").classList.toggle("off",!sel);
  if(tool==="m")matSync();
- $("sn").textContent=SN[sb];
  sync();
 }
 const members=o=>{const g=o.userData.gid;return (g?group.children.filter(m=>!m.userData.src&&m.userData.gid===g):[o]).filter(m=>m!==o).concat(o)};
@@ -432,241 +502,65 @@ async function bool(op){
  }catch(e){say("Не получилось, попробуй другие фигуры")}
 }
 
-/* ---- готовые модели ---- */
-const gid=()=>"g"+Math.random().toString(36).slice(2,7);
-const smin=(a,b,k)=>{const h=Math.max(k-Math.abs(a-b),0)/k;return Math.min(a,b)-h*h*k*.25};
-const E=(c,...a)=>({t:"e",a,c}),C=(c,...a)=>({t:"c",a,c}),LR=f=>[f(1),f(-1)];
-function dist(q,x,y,z){
- const a=q.a;
- if(q.t==="e"){const px=x-a[0],py=y-a[1],pz=z-a[2],k0=Math.hypot(px/a[3],py/a[4],pz/a[5]),k1=Math.hypot(px/(a[3]*a[3]),py/(a[4]*a[4]),pz/(a[5]*a[5]));return k1<1e-9?-Math.min(a[3],a[4],a[5]):k0*(k0-1)/k1}
- const pax=x-a[0],pay=y-a[1],paz=z-a[2],bx=a[3]-a[0],by=a[4]-a[1],bz=a[5]-a[2],h=Math.max(0,Math.min(1,(pax*bx+pay*by+paz*bz)/(bx*bx+by*by+bz*bz||1)));
- return Math.hypot(pax-bx*h,pay-by*h,paz-bz*h)-(a[6]+(a[7]-a[6])*h);
+/* ---- нарезка ---- */
+function bboxSel(){const b=new THREE.Box3();ss.forEach(m=>b.expandByObject(m));return b}
+function cutPlanes(b){
+ const lo=b.min.getComponent(ax),hi=b.max.getComponent(ax);
+ if(cn===2)return[lo+(hi-lo)*cp];
+ const a=[];for(let i=1;i<cn;i++)a.push(lo+(hi-lo)*i/cn);return a;
 }
-function surf(P,k,cell){
- const mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9];
- for(const q of P){const a=q.a,rr=q.t==="e"?[a[3],a[4],a[5]]:[Math.max(a[6],a[7]),Math.max(a[6],a[7]),Math.max(a[6],a[7])],lo=q.t==="e"?[a[0],a[1],a[2]]:[Math.min(a[0],a[3]),Math.min(a[1],a[4]),Math.min(a[2],a[5])],hi=q.t==="e"?lo:[Math.max(a[0],a[3]),Math.max(a[1],a[4]),Math.max(a[2],a[5])];for(let i=0;i<3;i++){mn[i]=Math.min(mn[i],lo[i]-rr[i]);mx[i]=Math.max(mx[i],hi[i]+rr[i])}}
- const pad=k+cell*2;for(let i=0;i<3;i++){mn[i]-=pad;mx[i]+=pad}
- const n=[0,1,2].map(i=>Math.ceil((mx[i]-mn[i])/cell)),px=n[0]+1,py=n[1]+1,pz=n[2]+1,D=new Float32Array(px*py*pz);
- for(let z=0;z<pz;z++)for(let y=0;y<py;y++)for(let x=0;x<px;x++){let d=1e9;const X=mn[0]+x*cell,Y=mn[1]+y*cell,Z=mn[2]+z*cell;for(const q of P)d=smin(d,dist(q,X,Y,Z),k);D[x+px*(y+py*z)]=d}
- const vi=new Int32Array(n[0]*n[1]*n[2]).fill(-1),pos=[],ED=[];
- for(let k0=0;k0<8;k0++)for(let b=0;b<3;b++)if(!(k0&(1<<b)))ED.push([k0,k0|(1<<b)]);
- const cv=[0,0,0,0,0,0,0,0];
- for(let z=0;z<n[2];z++)for(let y=0;y<n[1];y++)for(let x=0;x<n[0];x++){
-  let m=0;for(let k0=0;k0<8;k0++){const v=D[(x+(k0&1))+px*((y+((k0>>1)&1))+py*(z+(k0>>2)))];cv[k0]=v;if(v<0)m|=1<<k0}
-  if(m===0||m===255)continue;
-  let sx=0,sy=0,sz=0,c=0;
-  for(const [a,b] of ED){if((cv[a]<0)===(cv[b]<0))continue;const t=cv[a]/(cv[a]-cv[b]);sx+=(a&1)+((b&1)-(a&1))*t;sy+=((a>>1)&1)+(((b>>1)&1)-((a>>1)&1))*t;sz+=(a>>2)+((b>>2)-(a>>2))*t;c++}
-  vi[x+n[0]*(y+n[1]*z)]=pos.length/3;
-  pos.push(mn[0]+(x+sx/c)*cell,mn[1]+(y+sy/c)*cell,mn[2]+(z+sz/c)*cell);
- }
- const idx=[];
- for(let z=0;z<pz;z++)for(let y=0;y<py;y++)for(let x=0;x<px;x++){
-  const p=[x,y,z],d0=D[x+px*(y+py*z)];
-  for(let a=0;a<3;a++){
-   const b=(a+1)%3,c=(a+2)%3;
-   if(p[a]>=n[a]||p[b]<1||p[c]<1||p[b]>=n[b]||p[c]>=n[c])continue;
-   const q=p.slice();q[a]++;const d1=D[q[0]+px*(q[1]+py*q[2])];
-   if((d0<0)===(d1<0))continue;
-   const ids=[[-1,-1],[0,-1],[0,0],[-1,0]].map(([ob,oc])=>{const r2=p.slice();r2[b]+=ob;r2[c]+=oc;return vi[r2[0]+n[0]*(r2[1]+n[1]*r2[2])]});
-   if(d0<0)idx.push(ids[0],ids[1],ids[2],ids[0],ids[2],ids[3]);else idx.push(ids[0],ids[2],ids[1],ids[0],ids[3],ids[2]);
-  }
- }
- return {pos:Float32Array.from(pos),idx:Uint32Array.from(idx)};
+function cutPrev(){
+ const show=tool==="x"&&!!sel;let pl=[],b=null;
+ if(show){b=bboxSel();pl=cutPlanes(b)}
+ const c=new THREE.Vector3(),sz=new THREE.Vector3();if(show){b.getCenter(c);b.getSize(sz)}
+ cpl.forEach((p,i)=>{
+  p.visible=show&&i<pl.length;if(!p.visible)return;
+  const k=1.15;
+  if(ax===0){p.rotation.set(0,Math.PI/2,0);p.scale.set(sz.z*k+.2,sz.y*k+.2,1);p.position.set(pl[i],c.y,c.z)}
+  else if(ax===1){p.rotation.set(-Math.PI/2,0,0);p.scale.set(sz.x*k+.2,sz.z*k+.2,1);p.position.set(c.x,pl[i],c.z)}
+  else{p.rotation.set(0,0,0);p.scale.set(sz.x*k+.2,sz.y*k+.2,1);p.position.set(c.x,c.y,pl[i])}
+ });
 }
-const SK="#f1c9a0",SH="#4a90d9",PN="#3b4252",SO="#2b2b2b";
-const FIG={
- man:["Человек",{k:.05,cell:.03,P:[
-  E(SK,0,1.78,.02,.15,.19,.17),E(SK,0,1.76,.19,.025,.03,.03),C(SK,0,1.64,0,0,1.5,0,.065,.07),
-  E(SH,0,1.38,0,.21,.25,.12),E(SH,0,1.15,0,.17,.14,.1),E(PN,0,.98,0,.19,.14,.12),
-  ...LR(s=>C(SH,.22*s,1.5,0,.4*s,1.22,0,.065,.05)),...LR(s=>C(SK,.4*s,1.22,0,.5*s,.95,.03,.05,.04)),...LR(s=>E(SK,.52*s,.88,.03,.04,.07,.035)),
-  ...LR(s=>C(PN,.1*s,.95,0,.11*s,.52,.02,.09,.065)),...LR(s=>C(PN,.11*s,.52,.02,.11*s,.08,0,.065,.045)),...LR(s=>E(SO,.11*s,.045,.07,.055,.045,.11))]}],
- dog:["Собака",{k:.04,cell:.022,P:[
-  E("#c98b4a",0,.62,0,.17,.2,.42),E("#c98b4a",0,.66,.25,.19,.22,.22),E("#c98b4a",0,.62,-.25,.17,.19,.2),
-  C("#c98b4a",0,.75,.4,0,.92,.55,.1,.09),E("#c98b4a",0,.95,.65,.12,.12,.15),E("#e8c9a0",0,.9,.82,.06,.055,.1),E("#222222",0,.92,.93,.03,.025,.025),
-  ...LR(s=>E("#7a4a22",.09*s,1.04,.6,.035,.08,.05)),C("#c98b4a",0,.72,-.42,0,.9,-.62,.035,.02),
-  ...LR(s=>C("#c98b4a",.09*s,.5,.25,.09*s,.06,.27,.06,.035)),...LR(s=>C("#c98b4a",.09*s,.52,-.27,.09*s,.06,-.25,.07,.035)),
-  ...LR(s=>E("#e8c9a0",.09*s,.03,.3,.04,.03,.06)),...LR(s=>E("#e8c9a0",.09*s,.03,-.22,.04,.03,.06))]}],
- cat:["Кошка",{k:.035,cell:.018,P:[
-  E("#9a9a9a",0,.4,0,.12,.14,.3),E("#9a9a9a",0,.43,.17,.13,.15,.15),E("#9a9a9a",0,.4,-.18,.12,.13,.14),
-  E("#9a9a9a",0,.6,.33,.1,.09,.09),E("#e8c9c9",0,.57,.42,.04,.03,.03),...LR(s=>E("#7d7d7d",.06*s,.71,.33,.03,.05,.025)),
-  C("#9a9a9a",0,.45,-.3,0,.5,-.55,.035,.03),C("#9a9a9a",0,.5,-.55,0,.78,-.62,.03,.02),
-  ...LR(s=>C("#9a9a9a",.06*s,.34,.2,.06*s,.04,.22,.04,.025)),...LR(s=>C("#9a9a9a",.06*s,.34,-.2,.06*s,.04,-.18,.05,.025))]}],
- bird:["Птица",{k:.035,cell:.018,P:[
-  E("#4a90d9",0,.55,0,.2,.19,.3),E("#4a90d9",0,.82,.2,.1,.1,.1),E("#f1a23a",0,.8,.33,.025,.02,.06),
-  ...LR(s=>C("#2f6fb0",.17*s,.62,.05,.5*s,.52,-.12,.05,.02)),C("#2f6fb0",0,.5,-.26,0,.44,-.55,.06,.03),
-  ...LR(s=>C("#f1a23a",.06*s,.38,0,.06*s,.04,.02,.015,.012)),...LR(s=>E("#f1a23a",.06*s,.02,.04,.03,.015,.05))]}]
-};
-function atlasGeo(pos,idx){
- const nt=idx.length/3,P=new Float32Array(nt*9),U=new Float32Array(nt*6),I=new Uint32Array(nt*3),mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9],AXS=[[2,1],[0,2],[0,1]];
- for(let i=0;i<pos.length;i+=3)for(let j=0;j<3;j++){mn[j]=Math.min(mn[j],pos[i+j]);mx[j]=Math.max(mx[j],pos[i+j])}
- for(let t=0;t<nt;t++){
-  const v=[idx[3*t]*3,idx[3*t+1]*3,idx[3*t+2]*3],a=v[0],b=v[1],c=v[2];
-  const ux=pos[b]-pos[a],uy=pos[b+1]-pos[a+1],uz=pos[b+2]-pos[a+2],wx=pos[c]-pos[a],wy=pos[c+1]-pos[a+1],wz=pos[c+2]-pos[a+2];
-  const nn=[uy*wz-uz*wy,uz*wx-ux*wz,ux*wy-uy*wx],an=nn.map(Math.abs),ax=an[0]>=an[1]&&an[0]>=an[2]?0:an[1]>=an[2]?1:2,ng=nn[ax]<0,cell=ax*2+(ng?1:0),cx=cell%3,cy=(cell/3)|0,pq=AXS[ax];
-  for(let e=0;e<3;e++){
-   const o=v[e],q=3*t+e;P[3*q]=pos[o];P[3*q+1]=pos[o+1];P[3*q+2]=pos[o+2];
-   let u=(pos[o+pq[0]]-mn[pq[0]])/((mx[pq[0]]-mn[pq[0]])||1);const w=(pos[o+pq[1]]-mn[pq[1]])/((mx[pq[1]]-mn[pq[1]])||1);if(ng)u=1-u;
-   U[2*q]=(.02+.96*u+cx)/3;U[2*q+1]=(.02+.96*w+cy)/2;I[q]=q;
-  }
- }
- const g=new THREE.BufferGeometry();
- g.setAttribute("position",new THREE.BufferAttribute(P,3));g.setAttribute("uv",new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I,1));
- return g;
-}
-async function addFig(key){
- const [name,f]=FIG[key];say("Строю «"+name+"»…",8000);
- await new Promise(r=>setTimeout(r,40));
- try{
-  const m0=surf(f.P,f.k,f.cell),g=atlasGeo(m0.pos,m0.idx);
-  const m=make({t:"csg",b:f.P[0].c,p:[0,0,0],s:[1,1,1],r:[0,0,0],m:0,sm:1,mt:[0,.7,1]},g);
-  const x=m.userData.x,pa=g.attributes.position,uv=g.attributes.uv,nt=pa.count/3;
-  for(let t=0;t<nt;t++){
-   let cx=0,cy=0,cz=0;for(let e=0;e<3;e++){cx+=pa.getX(3*t+e);cy+=pa.getY(3*t+e);cz+=pa.getZ(3*t+e)}
-   cx/=3;cy/=3;cz/=3;let bd=1e9,bc=f.P[0].c;
-   for(const q of f.P){const d=dist(q,cx,cy,cz);if(d<bd){bd=d;bc=q.c}}
-   x.fillStyle=x.strokeStyle=bc;x.lineWidth=1.5;x.beginPath();
-   for(let e=0;e<3;e++){const px=uv.getX(3*t+e)*S,py=(1-uv.getY(3*t+e))*S;if(e)x.lineTo(px,py);else x.moveTo(px,py)}
-   x.closePath();x.fill();x.stroke();
-  }
-  m.userData.tx.needsUpdate=true;m.name=name;
-  select(m);ct.target.set(0,1,0);say("Готово: "+name);commit();
- }catch(e){say("Не получилось построить",3000)}
-}
-const R160="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/models/gltf/",RAW="https://raw.githubusercontent.com/mrdoob/three.js/r160/examples/models/gltf/",KH="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/";
-const web=f=>[R160+f,RAW+f];
-const MODELS={
- sol:["Солдат",web("Soldier.glb")],
- mic:["Женщина",web("Michelle.glb")],
- xb:["Андроид",web("Xbot.glb")],
- ces:["Человек 2",[KH+"CesiumMan/glTF-Binary/CesiumMan.glb"]],
- rob:["Робот",web("RobotExpressive/RobotExpressive.glb")],
- hor:["Конь",web("Horse.glb")],
- fla:["Фламинго",web("Flamingo.glb")],
- par:["Попугай",web("Parrot.glb")],
- sto:["Аист",web("Stork.glb")],
- fox:["Лиса",[KH+"Fox/glTF-Binary/Fox.glb"]]
-};
-const gl=new GLTFLoader();
-function loadUrl(us,i){i=i||0;return new Promise((ok,no)=>gl.load(us[i],ok,undefined,()=>{if(i+1<us.length)loadUrl(us,i+1).then(ok,no);else no()}))}
-function importScene(root,name){
- root.updateMatrixWorld(true);
- const parts=[],v=new THREE.Vector3(),box=new THREE.Box3();
- root.traverse(o=>{
-  if(!o.isMesh||!o.visible||!o.geometry.attributes.position)return;
-  const g=o.geometry,pa=g.attributes.position,n=pa.count,arr=new Float32Array(n*3);
-  const sk=o.isSkinnedMesh&&typeof o.applyBoneTransform==="function"&&g.attributes.skinIndex;
+async function doCut(){
+ if(!ss.length)return say("Сначала выбери фигуру");
+ say("Режу…");
+ let C;try{C=await import("three-bvh-csg")}catch(e){return say("Нужен интернет для этой функции")}
+ await new Promise(r=>setTimeout(r,30));
+ const src=ss.slice(),b=bboxSel(),pl=cutPlanes(b),a=ax,lo=b.min.getComponent(a),hi=b.max.getComponent(a);
+ const edges=[lo-1,...pl,hi+1],n=edges.length-1,big=Math.max(b.max.x-b.min.x,b.max.y-b.min.y,b.max.z-b.min.z)+4,ctr=b.getCenter(new THREE.Vector3());
+ const ev=new C.Evaluator();ev.useGroups=false;
+ const out=[];let fail=0;
+ for(const A of src){
+  let ba;try{ba=new C.Brush(bake(A),new THREE.MeshStandardMaterial());ba.updateMatrixWorld()}catch(e){fail++;continue}
   for(let i=0;i<n;i++){
-   v.fromBufferAttribute(pa,i);if(sk)o.applyBoneTransform(i,v);v.applyMatrix4(o.matrixWorld);
-   arr[3*i]=v.x;arr[3*i+1]=v.y;arr[3*i+2]=v.z;box.expandByPoint(v);
+   try{
+    const dims=[big,big,big];dims[a]=edges[i+1]-edges[i];
+    const bg=new THREE.BoxGeometry(dims[0],dims[1],dims[2]),cc=[ctr.x,ctr.y,ctr.z];
+    cc[a]=(edges[i]+edges[i+1])/2;bg.translate(cc[0],cc[1],cc[2]);
+    const uv=bg.attributes.uv;for(let j=0;j<uv.count;j++)uv.setXY(j,.002,.002);
+    const bb=new C.Brush(bg,new THREE.MeshStandardMaterial());bb.updateMatrixWorld();
+    const res=ev.evaluate(ba,bb,C.INTERSECTION),g0=res.geometry;
+    g0.deleteAttribute("normal");
+    const mg=mergeVertices(g0,1e-4);
+    if(mg.attributes.position.count)out.push({A,i,mg});
+   }catch(e){fail++}
   }
-  const uv=g.attributes.uv,u2=new Float32Array(n*2);
-  if(uv)for(let i=0;i<n;i++){u2[2*i]=uv.getX(i);u2[2*i+1]=1-uv.getY(i)}
-  const idx=g.index?new Uint32Array(g.index.array):Uint32Array.from({length:n},(_,i)=>i);
-  const mt=Array.isArray(o.material)?o.material[0]:o.material,img=mt&&mt.map&&mt.map.image;
-  parts.push({arr,u2,idx,img,col:img?"#ffffff":(mt&&mt.color?"#"+mt.color.getHexString():"#cccccc"),mt:[mt&&mt.metalness!==undefined?mt.metalness:0,mt&&mt.roughness!==undefined?mt.roughness:.85,mt&&mt.opacity!==undefined?mt.opacity:1]});
+ }
+ if(!out.length)return say("Не получилось разрезать эту фигуру");
+ const gids=Array.from({length:n},rid),pcs=[];
+ out.forEach(o=>{
+  const A=o.A,mt=A.material,m=make({t:"csg",b:A.userData.b,p:[0,0,0],s:[1,1,1],r:[0,0,0],m:0,mt:[mt.metalness,mt.roughness,mt.opacity]},o.mg);
+  m.position[AX[a]]=(o.i-(n-1)/2)*cgv;
+  m.userData.x.drawImage(A.userData.c,0,0);MK(m);
+  m.userData.gid=gids[o.i];pcs.push(m);
  });
- if(!parts.length)throw 0;
- const sz=box.getSize(new THREE.Vector3()),k=2.4/Math.max(sz.x,sz.y,sz.z,1e-6),cx=(box.min.x+box.max.x)/2,cz=(box.min.z+box.max.z)/2,y0=box.min.y,id=gid(),ms=[];
- parts.forEach((p,j)=>{
-  const a=p.arr;for(let i=0;i<a.length;i+=3){a[i]=(a[i]-cx)*k;a[i+1]=(a[i+1]-y0)*k;a[i+2]=(a[i+2]-cz)*k}
-  const g=new THREE.BufferGeometry();
-  g.setAttribute("position",new THREE.BufferAttribute(a,3));g.setAttribute("uv",new THREE.BufferAttribute(p.u2,2));g.setIndex(new THREE.BufferAttribute(p.idx,1));
-  const m=make({t:"csg",b:p.col,p:[0,0,0],s:[1,1,1],r:[0,0,0],m:0,G:id,mt:p.mt},g);
-  if(p.img){try{m.userData.x.drawImage(p.img,0,0,S,S);m.userData.tx.needsUpdate=true}catch(e){}}
-  m.name=name+" "+(j+1);ms.push(m);
- });
- select(ms[0]);ct.target.set(0,1,0);
+ clearFace();src.forEach(rm);setSel(pcs);commit();
+ say(fail?"Нарезано, но часть кусков не вышла":"Нарезано кусков: "+pcs.length);
 }
-async function addModel(key){
- const [name,us]=MODELS[key];say("Загружаю «"+name+"»…",30000);
- let gltf;try{gltf=await loadUrl(us)}catch(e){return say("Не загрузилось: нужен интернет",3000)}
- try{importScene(gltf.scene,name)}catch(e){return say("Не удалось разобрать модель",3000)}
- say("Готово: "+name);commit();
-}
-function sect(h,items){
- const lb=$("lb"),d=document.createElement("div");d.className="hd";d.textContent=h;lb.appendChild(d);
- const w=document.createElement("div");w.className="rw";
- items.forEach(([n,f])=>{const b=document.createElement("button");b.className="tx";b.textContent=n;b.onclick=f;w.appendChild(b)});
- lb.appendChild(w);
-}
-sect("Человек",[["Человек",()=>addFig("man")],["Солдат",()=>addModel("sol")],["Женщина",()=>addModel("mic")],["Андроид",()=>addModel("xb")],["Человек 2",()=>addModel("ces")],["Робот",()=>addModel("rob")]]);
-sect("Животные",[["Собака",()=>addFig("dog")],["Кошка",()=>addFig("cat")],["Птица",()=>addFig("bird")],["Конь",()=>addModel("hor")],["Фламинго",()=>addModel("fla")],["Попугай",()=>addModel("par")],["Аист",()=>addModel("sto")],["Лиса",()=>addModel("fox")]]);
-{const p=document.createElement("div");p.className="nt";p.textContent="Человек, Собака, Кошка и Птица: гладкие заготовки для лепки, работают без интернета. Остальные грузятся из интернета (Three.js, Khronos) в одной позе. Модель грубая? «Ещё» → «Разделить» добавит граней.";$("lb").appendChild(p)}
-
-/* ---- обучение ---- */
-const TUT=[
-["Добавь фигуру","Нажми «Куб» вверху экрана.","[data-add=cube]",()=>group.children.length>0],
-["Осмотр сцены","Крути: проведи одним пальцем по сцене. Приближай и сдвигай: двумя пальцами.","#c"],
-["Выбор фигуры","Коснись фигуры. Вокруг неё появится оранжевая рамка.","#c",()=>!!sel],
-["Двигать","Нажми «Двигать» и тяни ползунки X, Y, Z.","[data-tool=p]",()=>tool==="p"],
-["Размер","Нажми «Размер»: ползунки растягивают фигуру по осям.","[data-tool=s]",()=>tool==="s"],
-["Поворот","Нажми «Поворот»: ползунки вращают фигуру в градусах.","[data-tool=r]",()=>tool==="r"],
-["Кисть","Нажми «Кисть». Выбери цвет на круге, ползунок «Яркость» делает темнее или светлее. Води пальцем по фигуре. «Ластик» стирает, «Заливка» красит целиком.","[data-tool=b]",()=>tool==="b"],
-["Лепка","Нажми «Лепка». «Вытянуть» тянет наружу, «Вдавить» вжимает, «Сгладить» убирает бугры. Оранжевое кольцо — радиус кисти. Если фигура грубая, включи «Динамика».","[data-tool=u]",()=>tool==="u"],
-["Маска","«Маска» закрывает часть фигуры от лепки. «Инверсия» меняет закрытое и открытое.","[data-tool=k]",()=>tool==="k"],
-["Грани","Нажми «Грани» и коснись фигуры: выделится плоскость. «Выдавить» вытягивает её, «Масштаб» меняет размер. «Кромки» и «Вершины» (в «Ещё») работают так же.","[data-tool=g]",()=>!!fs],
-["Несколько фигур","Нажми «Несколько» и коснись двух фигур. Потом «Объединить», «Вырезать» (вычитает вторую из первой) или «Пересечь». «Группа» двигает фигуры вместе.","#mu",()=>mm],
-["Материал","«Металл» делает блеск как у металла, «Блеск» полирует, «Непрозрачность» даёт стекло.","[data-tool=m]",()=>tool==="m"],
-["Зеркало и копия","«Зеркало» отражает фигуру через красную плоскость, «Копия» дублирует, «Сетка» двигает по шагам, «Отмена» возвращает назад.","#mir"],
-["Готовые модели","Нажми «Модели» вверху: Человек, Собака, Кошка, Птица — гладкие заготовки для лепки. Ещё есть модели из интернета.","[data-tool=d]",()=>tool==="d"],
-["Сохранение","Работа сохраняется сама. «GLB», «OBJ», «STL» скачивают файл для игр и 3D-печати. Готово!","#glb"]
-];
-let ti=-1,t0=false;
-function setDr(v){dro=v;$("dr").style.display=v?"block":"none";$("more").classList.toggle("open",v)}
-function hint(s){
- Q(".hint").forEach(e=>e.classList.remove("hint"));if(!s)return;
- const e=document.querySelector(s);if(!e)return;
- if(e.closest("#dr")&&!dro)setDr(true);
- e.classList.add("hint");
-}
-const ttl=(ok)=>"Шаг "+(ti+1)+" из "+TUT.length+": "+TUT[ti][0]+(ok?" ✓":"");
-function tshow(i){
- ti=Math.max(0,Math.min(TUT.length-1,i));const s=TUT[ti];
- $("tu").classList.add("v");$("tut").classList.add("on");
- $("tn").textContent=ttl(false);$("tt").textContent=s[1];
- $("tb").disabled=ti===0;$("tf").textContent=ti===TUT.length-1?"Закончить":"Далее";
- t0=s[3]?!!s[3]():true;hint(s[2]);
-}
-function tclose(){ti=-1;$("tu").classList.remove("v");$("tut").classList.remove("on");hint(null)}
-$("tut").onclick=()=>{if(ti<0)tshow(0);else tclose()};
-$("tb").onclick=()=>tshow(ti-1);
-$("tf").onclick=()=>{if(ti>=TUT.length-1)tclose();else tshow(ti+1)};
-$("tq").onclick=tclose;
-setInterval(()=>{
- if(ti<0)return;const s=TUT[ti];if(!s[3])return;
- const ok=!!s[3]();$("tn").textContent=ttl(ok);
- if(ok&&!t0)tshow(ti+1);
-},500);
 
 /* ---- интерфейс ---- */
-COLS.forEach(c=>{const b=document.createElement("button");b.style.background=c;b.title=c;b.onclick=()=>setCol(c);$("sw").appendChild(b)});
-const wh=$("wh"),wx=wh.getContext("2d"),WS=112;let ch=0,cs=1,cvv=1,wd=false;
-function hsv(h,s,v){const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1))};return[f(5),f(3),f(1)]}
-const hx=a=>"#"+a.map(x=>Math.round(x*255).toString(16).padStart(2,"0")).join("");
-function drawWheel(){
- const im=wx.createImageData(WS,WS),c=WS/2,R=c-3;
- for(let y=0;y<WS;y++)for(let x=0;x<WS;x++){
-  const dx=x+.5-c,dy=y+.5-c,d=Math.hypot(dx,dy),i=(y*WS+x)*4;
-  if(d>R){im.data[i+3]=0;continue}
-  const q=hsv((Math.atan2(dy,dx)*180/Math.PI+360)%360,Math.min(1,d/R),cvv);
-  im.data[i]=q[0]*255;im.data[i+1]=q[1]*255;im.data[i+2]=q[2]*255;im.data[i+3]=255;
- }
- wx.clearRect(0,0,WS,WS);wx.putImageData(im,0,0);
- const a=ch*Math.PI/180,mx=c+Math.cos(a)*cs*R,my=c+Math.sin(a)*cs*R;
- wx.beginPath();wx.arc(mx,my,6,0,7);wx.lineWidth=3;wx.strokeStyle="#fff";wx.stroke();wx.lineWidth=1;wx.strokeStyle="#000";wx.stroke();
-}
-function applyCol(){col=hx(hsv(ch,cs,cvv));$("cp").style.background=col;drawWheel()}
-function setCol(hex){
- const r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
- let h=0;if(d){h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}
- ch=h;cs=mx?d/mx:0;cvv=mx;$("cb").value=Math.round(cvv*100);applyCol();
-}
-function wpick(e){const b=wh.getBoundingClientRect(),c=WS/2,R=c-3,dx=(e.clientX-b.left)/b.width*WS-c,dy=(e.clientY-b.top)/b.height*WS-c;ch=(Math.atan2(dy,dx)*180/Math.PI+360)%360;cs=Math.min(1,Math.hypot(dx,dy)/R);applyCol()}
-wh.onpointerdown=e=>{wd=true;wh.setPointerCapture(e.pointerId);wpick(e)};
-wh.onpointermove=e=>{if(wd)wpick(e)};
-wh.onpointerup=wh.onpointercancel=()=>{wd=false};
-$("cb").oninput=e=>{cvv=e.target.value/100;applyCol()};
-setCol("#e74c3c");
+COLS.forEach(c=>{const b=document.createElement("button");b.style.background=c;b.onclick=()=>{col=c;$("col").value=c};$("sw").appendChild(b)});
+$("col").oninput=e=>{col=e.target.value};
 $("bsz").oninput=e=>{bs=+e.target.value};
 const setRad=v=>{rad=+v;$("rsz").value=v;$("msz").value=v};
 $("rsz").oninput=e=>setRad(e.target.value);$("msz").oninput=e=>setRad(e.target.value);
@@ -683,6 +577,11 @@ $("lk").oninput=e=>{
 $("lk").onchange=commit;
 $("fx").oninput=applyFace;$("fz").oninput=applyFace;$("fx").onchange=faceDone;$("fz").onchange=faceDone;
 $("ft").oninput=e=>{tol=+e.target.value;if(fs&&fs.mode==="g"){const s=fs;selectFace({object:s.m,faceIndex:s.seed},"g")}};
+Q("[data-ax]").forEach(b=>b.onclick=()=>{ax=+b.dataset.ax;refresh()});
+$("cps").oninput=e=>{cp=+e.target.value};
+$("cnn").oninput=e=>{cn=+e.target.value;$("cnl").textContent=cn;refresh()};
+$("cgp").oninput=e=>{cgv=+e.target.value};
+$("cgo").onclick=doCut;
 function gx(a,k,v){
  const cur=val(k),c=new THREE.Vector3();ss.forEach(m=>c.add(m.position));c.multiplyScalar(1/ss.length);
  if(tool==="p"){const d=v-cur;ss.forEach(m=>m.position[a]+=d)}
@@ -706,16 +605,16 @@ AX.forEach((a,k)=>{
 const mtu=()=>{ss.forEach(m=>{const t=m.material,o=+$("mto").value,tr=o<1;if(t.transparent!==tr){t.transparent=tr;t.needsUpdate=true}t.metalness=+$("mtm").value;t.roughness=1-$("mtg").value;t.opacity=o})};
 ["mtm","mtg","mto"].forEach(id=>{$(id).oninput=mtu;$(id).onchange=commit});
 Q("[data-tool]").forEach(b=>b.onclick=()=>{
- tool=b.dataset.tool;if(!"ghv".includes(tool))clearFace();
- say(tool==="g"?"Нажми на грань фигуры":tool==="h"?"Нажми рядом с кромкой":tool==="v"?"Нажми рядом с вершиной":b.dataset.t);refresh();
+ tool=b.dataset.tool;if(!"ghv".includes(tool))clearFace();pick=false;
+ say(tool==="g"?"Нажми на грань фигуры":tool==="h"?"Нажми рядом с кромкой":tool==="v"?"Нажми рядом с вершиной":tool==="x"?"Выбери фигуру, ось и нажми «Разрезать»":b.dataset.t);refresh();
 });
-$("more").onclick=()=>setDr(!dro);
+$("more").onclick=()=>{dro=!dro;$("dr").style.display=dro?"block":"none";$("more").classList.toggle("open",dro)};
 Q("[data-add]").forEach(b=>b.onclick=()=>{select(make({t:b.dataset.add,b:"#4a90d9",p:[0,.5,0],s:[1,1,1],r:[0,0,0]}));commit();say(b.dataset.t)});
 $("und").onclick=undo;
 $("mu").onclick=()=>{mm=!mm;say(mm?"Нажимай на фигуры, чтобы выбрать несколько":"Выбор по одной");refresh()};
 $("grp").onclick=()=>{
  const g=ss.map(m=>m.userData.gid||0);
- if(ss.length>1&&!g.every(x=>x&&x===g[0])){const id="g"+Math.random().toString(36).slice(2,7);ss.forEach(m=>m.userData.gid=id);say("Группа: двигаются вместе")}
+ if(ss.length>1&&!g.every(x=>x&&x===g[0])){const id=rid();ss.forEach(m=>m.userData.gid=id);say("Группа: двигаются вместе")}
  else if(g[0]){ss.forEach(m=>m.userData.gid=0);say("Группа разобрана")}
  else return say("Нажми «Несколько» и выбери 2 фигуры");
  refresh();commit();
@@ -732,7 +631,7 @@ $("fi").onchange=e=>{
   const x=u.x;
   if(u.t==="cube"){for(let cx=0;cx<3;cx++)for(let cy=0;cy<2;cy++)x.drawImage(im,cx*S/3,(1-(cy+1)/2)*S,S/3,S/2)}
   else x.drawImage(im,0,0,S,S);
-  u.tx.needsUpdate=true;URL.revokeObjectURL(url);commit();say("Картинка наложена");
+  MK(sel.userData.tx?sel:sel);URL.revokeObjectURL(url);commit();say("Картинка наложена");
  };
  im.onerror=()=>say("Не удалось открыть картинку");im.src=url;
 };
@@ -744,7 +643,7 @@ $("mir").onclick=()=>{
 };
 $("dup").onclick=()=>{
  if(!sel)return say("Сначала выбери фигуру");clearFace();
- const gm={},nl=ss.map(m=>{const d=ser(m);d.p[0]+=.5;if(d.G)d.G=gm[d.G]||(gm[d.G]="g"+Math.random().toString(36).slice(2,7));return make(d)});
+ const gm={},nl=ss.map(m=>{const d=ser(m);d.p[0]+=.5;if(d.G)d.G=gm[d.G]||(gm[d.G]=rid());return make(d)});
  setSel(nl);commit();
 };
 $("del").onclick=()=>{
@@ -758,13 +657,13 @@ function strip(){
  return rs;
 }
 function unstrip(rs){rs.slice().reverse().forEach(s=>{const g=s.m.geometry;for(const n in s.a)g.setAttribute(n,s.a[n]);s.m.material.vertexColors=s.vc;s.m.material.needsUpdate=true})}
-function exp(kind){
+function exp(kind2){
  if(!group.children.length)return say("Сначала добавь фигуру");
- const sv=ss.slice();clearFace();select(null);ruler.visible=false;
+ const sv=ss.slice();clearFace();select(null);ruler.visible=false;cpl.forEach(p=>p.visible=false);
  const rs=strip(),back=()=>{unstrip(rs);setSel(sv)};
  try{
-  if(kind==="obj")dlf(new Blob([new OBJExporter().parse(group)],{type:"text/plain"}),"model.obj");
-  else if(kind==="stl")dlf(new Blob([new STLExporter().parse(group,{binary:true})],{type:"model/stl"}),"model.stl");
+  if(kind2==="obj")dlf(new Blob([new OBJExporter().parse(group)],{type:"text/plain"}),"model.obj");
+  else if(kind2==="stl")dlf(new Blob([new STLExporter().parse(group,{binary:true})],{type:"model/stl"}),"model.stl");
   else{
    new GLTFExporter().parse(group,res=>{dlf(new Blob([res],{type:"model/gltf-binary"}),"model.glb");back()},()=>{say("Ошибка экспорта");back()},{binary:true});
    return;
@@ -774,87 +673,59 @@ function exp(kind){
 }
 $("glb").onclick=()=>exp("glb");$("obj").onclick=()=>exp("obj");$("stl").onclick=()=>exp("stl");
 
+/* ---- пипетка ---- */
+$("pip").onclick=()=>{pick=!pick;say(pick?"Нажми на фигуру — возьму её цвет":"Пипетка выключена");refresh()};
+function samp(h){
+ const u=own(h.object).userData;
+ if(!h.uv)return say("Тут цвет не взять");
+ const px=Math.max(0,Math.min(S-1,Math.floor(h.uv.x*S))),py=Math.max(0,Math.min(S-1,Math.floor((1-h.uv.y)*S)));
+ const d=u.x.getImageData(px,py,1,1).data;
+ col="#"+[d[0],d[1],d[2]].map(v=>v.toString(16).padStart(2,"0")).join("");
+ $("col").value=col;say("Цвет взят: "+col);
+}
+
 /* ---- рисование и лепка ---- */
 function paint(h,er){
  const u=own(h.object).userData,x=u.x,px=h.uv.x*S,py=(1-h.uv.y)*S;
  x.fillStyle=x.strokeStyle=er?u.b:col;x.lineWidth=bs;x.lineCap="round";
  if(last&&Math.hypot(px-last.x,py-last.y)<S*.1){x.beginPath();x.moveTo(last.x,last.y);x.lineTo(px,py);x.stroke()}
  else{x.beginPath();x.arc(px,py,bs/2,0,7);x.fill()}
- last={x:px,y:py};u.tx.needsUpdate=true;
+ last={x:px,y:py};u.tx.needsUpdate=true;u.dirty=true;
 }
 function fill(h){
  const u=own(h.object).userData,x=u.x;x.fillStyle=col;
  if(u.t==="cube"){const cx=Math.min(2,Math.floor(h.uv.x*3)),cy=Math.min(1,Math.floor(h.uv.y*2));x.fillRect(cx*S/3,(1-(cy+1)/2)*S,S/3+1,S/2+1)}
  else{x.fillRect(0,0,S,S);u.b=col}
- u.tx.needsUpdate=true;
-}
-const cur=new THREE.Mesh(new THREE.RingGeometry(.9,1,48),new THREE.MeshBasicMaterial({color:0xe8923a,side:THREE.DoubleSide,depthTest:false,transparent:true}));
-cur.visible=false;cur.renderOrder=20;scene.add(cur);
-function ring(h){const n=h.face.normal.clone().transformDirection(h.object.matrixWorld);cur.position.copy(h.point);cur.lookAt(h.point.clone().add(n));cur.scale.setScalar(rad);cur.visible=true}
-const lsc=o=>(Math.abs(o.scale.x)+Math.abs(o.scale.y)+Math.abs(o.scale.z))/3||1;
-function topo(o){
- const g=o.geometry,pa=g.attributes.position,u=o.userData;
- if(u.tp&&u.tp.g===g&&u.tp.n===pa.count)return u.tp;
- const ix=g.index.array,wid=weld(pa),nw=wid.n,off=new Int32Array(nw+1);
- for(let i=0;i<pa.count;i++)off[wid[i]+1]++;
- for(let w=0;w<nw;w++)off[w+1]+=off[w];
- const fl=off.slice(0,nw),lst=new Int32Array(pa.count);
- for(let i=0;i<pa.count;i++)lst[fl[wid[i]]++]=i;
- const nb=Array.from({length:nw},()=>new Set());
- for(let t=0;t<ix.length;t+=3)for(let e=0;e<3;e++){const a=wid[ix[t+e]],b=wid[ix[t+(e+1)%3]];if(a!==b){nb[a].add(b);nb[b].add(a)}}
- return u.tp={g,n:pa.count,wid,nw,off,lst,nb:nb.map(q=>Int32Array.from(q))};
+ u.tx.needsUpdate=true;u.dirty=true;
 }
 function sculpt(h){
- const o=own(h.object),u=o.userData;
- if(al>=0&&u.lk[al]<.05)return say("Подними силу слоя");
- const R=rad/lsc(o),R2=R*R,p=h.object.worldToLocal(h.point.clone()),n0=h.face.normal.clone();
- if(dyn)splitLong(o,p,R*1.15,Math.max(.03/lsc(o),R*.4));
+ const o=own(h.object),p=h.object.worldToLocal(h.point.clone()),n=h.face.normal.clone();
+ if(al>=0&&o.userData.lk[al]<.05)return say("Подними силу слоя");
+ if(dyn)splitLong(o,p,rad*1.15,Math.max(.03,rad*.4));
  const g=o.geometry,pa=g.attributes.position,mk=g.attributes.color;
- if(!g.attributes.normal)nrm(o);
- const na=g.attributes.normal,T=topo(o),wid=T.wid,nw=T.nw,off=T.off,lst=T.lst,nb=T.nb;
  if(al>=0&&!g.attributes["l"+al])g.setAttribute("l"+al,new THREE.BufferAttribute(new Float32Array(pa.count*3),3));
- const ly=al>=0?g.attributes["l"+al]:null,lk=al>=0?u.lk[al]:1;
- const wt=new Float32Array(nw),dm=new Float32Array(nw).fill(-2),sn=new Uint8Array(nw),ids=[];
+ const ly=al>=0?g.attributes["l"+al]:null,lk=al>=0?o.userData.lk[al]:1,ids=[],ws=[];
+ let so=0,sw=0;
  for(let i=0;i<pa.count;i++){
-  const dx=pa.getX(i)-p.x,dy=pa.getY(i)-p.y,dz=pa.getZ(i)-p.z,d2=dx*dx+dy*dy+dz*dz;
-  if(d2>=R2)continue;
-  const w=wid[i],dt=na.getX(i)*n0.x+na.getY(i)*n0.y+na.getZ(i)*n0.z;
-  if(!sn[w]){sn[w]=1;const f=1-Math.sqrt(d2)/R;let s=f*f*(3-2*f);if(mk)s*=1-(1-mk.getX(i))/.65;wt[w]=s;ids.push(w)}
-  if(dt>dm[w])dm[w]=dt;
+  const x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i),d=Math.hypot(x-p.x,y-p.y,z-p.z);
+  if(d<rad){const w=1-d/rad;let s=w*w*(3-2*w);if(mk)s*=1-(1-mk.getX(i))/.65;if(s<=0)continue;ids.push(i);ws.push(s);so+=s*(x*n.x+y*n.y+z*n.z);sw+=s}
  }
- if(!ids.length)return;
- ids.forEach(w=>{wt[w]*=Math.max(0,Math.min(1,(dm[w]-.1)/.4))});
- let np=null;
- if(sb==="m"){
-  np=new Float32Array(ids.length*3);
-  ids.forEach((w,j)=>{
-   const r0=lst[off[w]],x=pa.getX(r0),y=pa.getY(r0),z=pa.getZ(r0),L=nb[w],s=wt[w];
-   if(!s||!L.length){np[3*j]=x;np[3*j+1]=y;np[3*j+2]=z;return}
-   let ax=0,ay=0,az=0;for(const q of L){const r=lst[off[q]];ax+=pa.getX(r);ay+=pa.getY(r);az+=pa.getZ(r)}
-   const a=Math.min(1,s*.7*str);
-   np[3*j]=x+(ax/L.length-x)*a;np[3*j+1]=y+(ay/L.length-y)*a;np[3*j+2]=z+(az/L.length-z)*a;
-  });
- }
- const dir=sb==="u"?1:-1;
- ids.forEach((w,j)=>{
-  const s=wt[w];if(!s)return;
-  for(let k=off[w];k<off[w+1];k++){
-   const i=lst[k],x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);let nx,ny,nz;
-   if(np){nx=np[3*j];ny=np[3*j+1];nz=np[3*j+2]}
-   else{const m=dir*.1*R*str*s;nx=x+n0.x*m;ny=y+n0.y*m;nz=z+n0.z*m}
-   pa.setXYZ(i,nx,ny,nz);
-   if(ly)ly.setXYZ(i,ly.getX(i)+(nx-x)/lk,ly.getY(i)+(ny-y)/lk,ly.getZ(i)+(nz-z)/lk);
-  }
+ if(!sw)return;const av=so/sw;
+ ids.forEach((i,j)=>{
+  const x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);
+  const k=sb==="m"?(av-(x*n.x+y*n.y+z*n.z))*ws[j]*.5*str:(sb==="u"?1:-1)*.03*str*ws[j];
+  pa.setXYZ(i,x+n.x*k,y+n.y*k,z+n.z*k);
+  if(ly)ly.setXYZ(i,ly.getX(i)+n.x*k/lk,ly.getY(i)+n.y*k/lk,ly.getZ(i)+n.z*k/lk);
  });
- pa.needsUpdate=true;if(ly)ly.needsUpdate=true;nrm(o);u.sc=true;
+ pa.needsUpdate=true;if(ly)ly.needsUpdate=true;nrm(o);o.userData.sc=true;
 }
 function maskPaint(h){
- const o=own(h.object),g=o.geometry,pa=g.attributes.position,p=h.object.worldToLocal(h.point.clone()),R=rad/lsc(o);
+ const o=own(h.object),g=o.geometry,pa=g.attributes.position,p=h.object.worldToLocal(h.point.clone());
  let c=g.attributes.color;
  if(!c){c=new THREE.BufferAttribute(new Float32Array(pa.count*3).fill(1),3);g.setAttribute("color",c);o.material.vertexColors=true;o.material.needsUpdate=true}
  for(let i=0;i<pa.count;i++){
   const d=Math.hypot(pa.getX(i)-p.x,pa.getY(i)-p.y,pa.getZ(i)-p.z);
-  if(d<R){const w=Math.min(1,(1-d/R)*1.6);let m=(1-c.getX(i))/.65;m=mkm==="a"?Math.max(m,w):Math.max(0,m-w);const v=1-.65*m;c.setXYZ(i,v,v,v)}
+  if(d<rad){const w=Math.min(1,(1-d/rad)*1.6);let m=(1-c.getX(i))/.65;m=mkm==="a"?Math.max(m,w):Math.max(0,m-w);const v=1-.65*m;c.setXYZ(i,v,v,v)}
  }
  c.needsUpdate=true;
 }
@@ -869,25 +740,30 @@ $("mc").onclick=()=>{
  if(sel.geometry.attributes.color){sel.geometry.deleteAttribute("color");sel.material.vertexColors=false;sel.material.needsUpdate=true}
  commit();say("Маска очищена");
 };
-function ray(e){
- const b=cv.getBoundingClientRect(),rc=new THREE.Raycaster();
- rc.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1),cam);
- return rc.intersectObjects(group.children,false)[0];
+function rc(e){
+ const b=cv.getBoundingClientRect(),q=new THREE.Raycaster();
+ q.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1),cam);
+ return q;
 }
-function act(h){if(tool==="b")paint(h,false);else if(tool==="e")paint(h,true);else if(tool==="u")sculpt(h);else if(tool==="k")maskPaint(h);if(tool==="u"||tool==="k")ring(h)}
+const ray=e=>rc(e).intersectObjects(group.children,false)[0];
+function gnd(e){const p=new THREE.Vector3();return rc(e).ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),p)?p:null}
+function act(h){if(tool==="b")paint(h,false);else if(tool==="e")paint(h,true);else if(tool==="u")sculpt(h);else if(tool==="k")maskPaint(h)}
 cv.addEventListener("pointerdown",e=>{
  if(!e.isPrimary)return;
- const h=ray(e);dn={x:e.clientX,y:e.clientY,t:Date.now(),h};
- if(h&&"beuk".includes(tool)){drag=true;ct.enabled=false;cv.setPointerCapture(e.pointerId);const o=own(h.object);if(!ss.includes(o))select(o);act(h)}
+ const h=ray(e);
+ if(pick){if(h)samp(h);else say("Пипетка выключена");pick=false;refresh();dn=null;return}
+ dn={x:e.clientX,y:e.clientY,t:Date.now(),h};
+ if(h&&!arm&&"beuk".includes(tool)){drag=true;ct.enabled=false;cv.setPointerCapture(e.pointerId);const o=own(h.object);if(!ss.includes(o))select(o);act(h)}
 },{capture:true});
 cv.addEventListener("pointermove",e=>{if(!drag||!e.isPrimary)return;const h=ray(e);if(h)act(h);else last=null});
 function up(e){
  if(!e.isPrimary)return;
  ct.enabled=true;
- if(drag){drag=false;last=null;dn=null;cur.visible=false;commit();return}
+ if(drag){drag=false;last=null;dn=null;commit();return}
  if(!dn)return;
  const tap=Math.hypot(e.clientX-dn.x,e.clientY-dn.y)<8&&Date.now()-dn.t<500,h=dn.h;dn=null;
  if(!tap)return;
+ if(arm){const p=gnd(e);if(p)putAt(p.x,p.z);return}
  if(tool==="f"){if(h){fill(h);commit()}}
  else if(mm){if(h)toggle(own(h.object))}
  else{select(h?own(h.object):null);if("ghv".includes(tool)&&h)selectFace(h,tool==="h"?"e":tool)}
@@ -895,12 +771,235 @@ function up(e){
 cv.addEventListener("pointerup",up,{capture:true});
 cv.addEventListener("pointercancel",up,{capture:true});
 
+/* ---- библиотека города ---- */
+const WIN=(m,w,h,d,wall,glass)=>{
+ const x=m.userData.x,cw3=S/3,ch=S/2;
+ x.fillStyle=wall;x.fillRect(0,0,S,S);
+ const fl=Math.max(1,Math.round(h/.4));
+ [[0,ch,d],[cw3,ch,d],[cw3,0,w],[2*cw3,0,w]].forEach(([px,py,fw])=>{
+  const cl=Math.max(1,Math.round(fw/.4)),ww=cw3/cl,hh=ch/fl;
+  for(let i=0;i<cl;i++)for(let j=0;j<fl;j++){
+   x.fillStyle=Math.random()<.18?"#ffe39a":glass;
+   x.fillRect(px+i*ww+ww*.2,py+j*hh+hh*.22,ww*.6,hh*.56);
+  }
+ });
+ x.fillStyle="#6f7780";x.fillRect(2*cw3,ch,cw3,ch);x.fillRect(0,0,cw3,ch);
+ MK(m);return m;
+};
+const prism=()=>{const g=new THREE.CylinderGeometry(.5,.5,1,3);g.rotateX(-Math.PI/2);return g};
+const wheels=()=>{const a=[];[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([i,j])=>{const c=new THREE.CylinderGeometry(.1,.1,.08,12,1);c.rotateZ(Math.PI/2);c.translate(i*.27,.1,j*.3);a.push(c)});return mergeGeometries(a)};
+const LIB=[
+{n:"Многоэтажка",f:a=>{WIN(a("cube","#b8bec8",[0,2,0],[1.2,4,1.2]),1.2,4,1.2,"#b8bec8","#7fb2d6")}},
+{n:"Небоскрёб",f:a=>{
+ WIN(a("cube","#7d93a8",[0,1.5,0],[1.6,3,1.6]),1.6,3,1.6,"#7d93a8","#bfe3f5");
+ WIN(a("cube","#7d93a8",[0,3.75,0],[1.1,1.5,1.1]),1.1,1.5,1.1,"#7d93a8","#bfe3f5");
+ WIN(a("cube","#7d93a8",[0,5.1,0],[.6,1.2,.6]),.6,1.2,.6,"#7d93a8","#bfe3f5");
+ a("cone","#555555",[0,6.2,0],[.1,1,.1]);}},
+{n:"Панельный дом",f:a=>{WIN(a("cube","#d8cfc0",[0,1.2,0],[2.6,2.4,1.1]),2.6,2.4,1.1,"#d8cfc0","#86b6d4")}},
+{n:"Дом с крышей",f:a=>{
+ WIN(a("cube","#f1e0c5",[0,.4,0],[1.3,.8,1]),1.3,.8,1,"#f1e0c5","#8fc1e0");
+ a("csg","#a8442f",[0,.983,0],[1.732,.733,1.1],{geo:prism()});}},
+{n:"Магазин",f:a=>{
+ WIN(a("cube","#e9d9a6",[0,.45,0],[2,.9,1.2]),2,.9,1.2,"#e9d9a6","#8fc1e0");
+ a("cube","#c0392b",[0,.7,.7],[2,.08,.3]);}},
+{n:"Дерево",f:a=>{a("cyl","#6b4a2b",[0,.4,0],[.18,.8,.18]);a("sphere","#2f8f5b",[0,1.1,0],[.9,.9,.9])}},
+{n:"Ёлка",f:a=>{a("cyl","#6b4a2b",[0,.15,0],[.12,.3,.12]);a("cone","#1f6e43",[0,.8,0],[.8,1.2,.8]);a("cone","#1f6e43",[0,1.4,0],[.55,.9,.55])}},
+{n:"Фонарь",f:a=>{a("cyl","#444444",[0,.7,0],[.06,1.4,.06]);a("sphere","#ffe39a",[0,1.45,0],[.2,.2,.2])}},
+{n:"Дорога",f:a=>{
+ const m=a("cube","#3d4247",[0,.025,0],[2,.05,6]),x=m.userData.x,cw3=S/3,ch=S/2;
+ x.fillStyle="#f2f2f2";for(let j=0;j<6;j++)x.fillRect(2*cw3+cw3/2-3,ch+j*ch/6+ch/24,6,ch/12);MK(m);}},
+{n:"Перекрёсток",f:a=>{a("cube","#3d4247",[0,.025,0],[2,.05,2])}},
+{n:"Тротуар",f:a=>{a("cube","#b9b6ae",[0,.04,0],[2,.08,2])}},
+{n:"Газон",f:a=>{a("cube","#8bbf7a",[0,.04,0],[2,.08,2])}},
+{n:"Вода",f:a=>{a("cube","#4a90d9",[0,.03,0],[3,.06,3])}},
+{n:"Машина",f:a=>{
+ a("cube","#d9534f",[0,.22,0],[.5,.2,1]);a("cube","#9fd3ee",[0,.4,-.05],[.42,.18,.5]);
+ a("csg","#222222",[0,0,0],[1,1,1],{geo:wheels()});}},
+{n:"Грузовик (GLB)",glb:"https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb",fit:2.2}
+];
+function placeItem(it,x,z){
+ clearFace();
+ const gid=rid(),list=[];
+ it.f((t,b,p,s,o)=>{
+  o=o||{};
+  const m=make({t,b,p:[x+p[0],p[1],z+p[2]],s,r:[0,0,0],m:0,lo:1},o.geo);
+  m.userData.gid=gid;list.push(m);return m;
+ });
+ if(list.length===1)list[0].userData.gid=0;
+ setSel(list);commit();
+}
+function putAt(x,z){
+ const q=kind==="loc"?1:.5,R=kind==="loc"?20:6;
+ x=Math.round(x/q)*q;z=Math.round(z/q)*q;
+ if(Math.abs(x)>R||Math.abs(z)>R)return say("Это за краем сетки");
+ placeItem(arm,x,z);
+}
+function libRef(){
+ Q("#lg button").forEach(b=>b.classList.toggle("on",!!arm&&b.dataset.n===arm.n));
+ $("lh").textContent=arm?"Ставим: "+arm.n+". Нажимай на землю на сцене":"Выбери предмет, потом нажми на землю на сцене";
+}
+LIB.forEach(it=>{
+ const b=document.createElement("button");b.className="tx";b.textContent=it.n;b.dataset.n=it.n;
+ b.onclick=()=>{
+  if(it.glb){arm=null;libRef();loadGLB(it.glb,it.n,it.fit);return}
+  arm=arm===it?null:it;libRef();
+ };
+ $("lg").appendChild(b);
+});
+$("ld").onclick=()=>{arm=null;libRef()};
+$("rt").onclick=()=>{
+ if(!sel)return say("Сначала поставь предмет");
+ const c=new THREE.Vector3();ss.forEach(m=>c.add(m.position));c.multiplyScalar(1/ss.length);
+ const q=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.PI/2);
+ ss.forEach(m=>{m.position.sub(c).applyQuaternion(q).add(c);m.quaternion.premultiply(q)});
+ sync();commit();
+};
+const flat=a=>{const n=a.count,s=a.itemSize,o=new Float32Array(n*s);for(let i=0;i<n;i++)for(let c=0;c<s;c++)o[i*s+c]=a["get"+"XYZW"[c]](i);return new THREE.BufferAttribute(o,s)};
+async function loadGLB(src,label,fit){
+ say("Загружаю: "+label+"…");
+ let M;try{M=await import("three/addons/loaders/GLTFLoader.js")}catch(e){return say("Нужен интернет для загрузки")}
+ let gl;
+ try{gl=await new Promise((ok,no)=>{const ld=new M.GLTFLoader();if(typeof src==="string")ld.load(src,ok,undefined,no);else ld.parse(src,"",ok,no)})}
+ catch(e){return say("Не получилось открыть модель (ссылка или формат)")}
+ gl.scene.updateMatrixWorld(true);
+ const ms=[];gl.scene.traverse(o=>{if(o.isMesh&&!o.isSkinnedMesh&&o.geometry&&o.geometry.attributes.position)ms.push(o)});
+ if(!ms.length)return say("В модели нет фигур");
+ if(ms.length>60)return say("Слишком много частей: "+ms.length);
+ let tris=0;ms.forEach(o=>{const g=o.geometry;tris+=(g.index?g.index.count:g.attributes.position.count)/3});
+ if(tris>MAXT/2)return say("Модель слишком тяжёлая: "+Math.round(tris)+" граней");
+ const bx=new THREE.Box3().setFromObject(gl.scene),sz=bx.getSize(new THREE.Vector3()),c=bx.getCenter(new THREE.Vector3()),sc=(fit||3)/(Math.max(sz.x,sz.y,sz.z)||1);
+ const px=Math.round(ct.target.x),pz=Math.round(ct.target.z),gid=rid(),list=[];
+ ms.forEach(o=>{
+  const s=o.geometry,n=s.attributes.position.count,g=new THREE.BufferGeometry();
+  g.setAttribute("position",flat(s.attributes.position));
+  g.setAttribute("uv",s.attributes.uv?flat(s.attributes.uv):new THREE.BufferAttribute(new Float32Array(n*2),2));
+  g.setIndex(new THREE.Uint32BufferAttribute(s.index?Array.from(s.index.array):Array.from({length:n},(_,i)=>i),1));
+  g.applyMatrix4(o.matrixWorld);g.translate(-c.x,-bx.min.y,-c.z);g.scale(sc,sc,sc);
+  const mt=Array.isArray(o.material)?o.material[0]:o.material,mp=mt&&mt.map&&mt.map.image;
+  if(mp&&s.attributes.uv){const uv=g.attributes.uv;for(let i=0;i<n;i++)uv.setY(i,1-uv.getY(i))}
+  const m=make({t:"csg",b:mt&&mt.color?"#"+mt.color.getHexString():"#cccccc",p:[px,0,pz],s:[1,1,1],r:[0,0,0],m:0,mt:[mt&&mt.metalness!=null?mt.metalness:0,mt&&mt.roughness!=null?mt.roughness:.85,mt&&mt.opacity!=null?mt.opacity:1]},g);
+  if(mp){try{m.userData.x.drawImage(mp,0,0,S,S);MK(m)}catch(e){}}
+  m.userData.gid=gid;list.push(m);
+ });
+ if(list.length===1)list[0].userData.gid=0;
+ setSel(list);commit();say("Модель добавлена");
+}
+$("gb").onclick=()=>{const u=$("gu").value.trim();if(!u)return say("Вставь ссылку на .glb");loadGLB(u,"модель",3)};
+$("gf").onclick=()=>$("gi").click();
+$("gi").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;loadGLB(await f.arrayBuffer(),f.name,3)};
+
+/* ---- проекты ---- */
+const PT="sandbox_projects",LS="sb3d_projects";
+const sbOn=()=>!!(SB_URL&&SB_KEY);
+const hd=x=>Object.assign({apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json"},x);
+async function sbq(path,opt){const rs=await fetch(SB_URL+"/rest/v1/"+PT+path,opt);if(!rs.ok)throw new Error("сервер "+rs.status);const t=await rs.text();return t?JSON.parse(t):null}
+const lsAll=()=>{try{return JSON.parse(localStorage.getItem(LS)||"{}")}catch(e){return{}}};
+const eq=encodeURIComponent;
+const ST={
+ async list(n){
+  if(sbOn())return sbq("?select=id,name,kind,updated_at&order=updated_at.desc&nick=eq."+eq(n),{headers:hd()});
+  return (lsAll()[n]||[]).map(p=>({id:p.id,name:p.name,kind:p.kind,updated_at:p.updated_at})).sort((a,b)=>b.updated_at.localeCompare(a.updated_at));
+ },
+ async get(n,id){
+  if(sbOn()){const rs=await sbq("?select=data&id=eq."+id+"&nick=eq."+eq(n),{headers:hd()});return rs&&rs[0]?rs[0].data:null}
+  const p=(lsAll()[n]||[]).find(x=>x.id===id);return p?p.data:null;
+ },
+ async put(n,id,name,kd,data){
+  const now=new Date().toISOString();
+  if(sbOn()){
+   if(id){const rs=await sbq("?id=eq."+id+"&nick=eq."+eq(n),{method:"PATCH",headers:hd({Prefer:"return=representation"}),body:JSON.stringify({name,kind:kd,data,updated_at:now})});if(rs&&rs.length)return id}
+   const rs=await sbq("",{method:"POST",headers:hd({Prefer:"return=representation"}),body:JSON.stringify({nick:n,name,kind:kd,data})});return rs[0].id;
+  }
+  const all=lsAll(),l=all[n]||(all[n]=[]);let p=id?l.find(x=>x.id===id):null;
+  if(p)Object.assign(p,{name,kind:kd,data,updated_at:now});else{id=Date.now();l.push({id,name,kind:kd,data,updated_at:now})}
+  localStorage.setItem(LS,JSON.stringify(all));return id;
+ },
+ async del(n,id){
+  if(sbOn()){await sbq("?id=eq."+id+"&nick=eq."+eq(n),{method:"DELETE",headers:hd()});return}
+  const all=lsAll();all[n]=(all[n]||[]).filter(x=>x.id!==id);localStorage.setItem(LS,JSON.stringify(all));
+ }
+};
+async function refList(){
+ const pl=$("pl"),n=nickv;
+ if(!n){pl.innerHTML='<div class="hint">Впиши ник — появятся твои проекты</div>';return}
+ let l;try{l=await ST.list(n)}catch(e){pl.innerHTML='<div class="hint">Не удалось получить список. Проверь связь</div>';return}
+ pl.innerHTML="";
+ if(!l||!l.length){pl.innerHTML='<div class="hint">Пока нет проектов. Нажми «Сохранить»</div>';return}
+ l.forEach(p=>{
+  const row=document.createElement("div");row.className="pr";
+  const o=document.createElement("button");o.className="tx op"+(p.id===cur.id?" on":"");
+  const dt=new Date(p.updated_at).toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+  o.textContent=(p.kind==="loc"?"Локация: ":"Предмет: ")+p.name+" ("+dt+")";
+  o.onclick=()=>openProj(p);
+  const d=document.createElement("button");d.className="dl";d.innerHTML=ic("trash");
+  d.onclick=async()=>{
+   if(!d.classList.contains("arm")){d.classList.add("arm");say("Нажми ещё раз, чтобы удалить");setTimeout(()=>d.classList.remove("arm"),2500);return}
+   try{await ST.del(n,p.id);if(cur.id===p.id)cur.id=null;say("Удалено");refList()}catch(e){say("Не удалось удалить")}
+  };
+  row.appendChild(o);row.appendChild(d);pl.appendChild(row);
+ });
+}
+async function openProj(p){
+ say("Открываю…");
+ let data;try{data=await ST.get(nickv,p.id)}catch(e){return say("Не удалось открыть")}
+ if(!data)return say("Проект не найден");
+ try{
+  const o=JSON.parse(data),arr=Array.isArray(o)?o:o.m;
+  setKind(Array.isArray(o)?"item":(o.kind||"item"),true);
+  loadState(JSON.stringify(arr));
+ }catch(e){return say("Файл проекта повреждён")}
+ snap=kind==="loc";
+ cur={id:p.id,name:p.name};$("pnm").value=p.name;
+ hist=[state()];store(hist[0]);metaSave();refList();refresh();say("Открыто: "+p.name);
+}
+async function saveProj(asNew){
+ if(!nickv)return say("Сначала впиши свой ник");
+ if(!group.children.length)return say("Пока нечего сохранять");
+ const name=$("pnm").value.trim()||(kind==="loc"?"Локация ":"Предмет ")+new Date().toLocaleDateString("ru-RU");
+ $("pnm").value=name;say("Сохраняю…");
+ try{
+  const id=await ST.put(nickv,asNew?null:cur.id,name,kind,'{"v":2,"kind":"'+kind+'","m":'+state()+'}');
+  cur={id,name};metaSave();refList();
+  say(sbOn()?"Сохранено на сервере":"Сервер не подключён: сохранено только в этом браузере");
+ }catch(e){say("Не удалось сохранить: "+(e.message||"ошибка"))}
+}
+$("nk1").onclick=()=>newProj("item");$("nk2").onclick=()=>newProj("loc");
+$("sv").onclick=()=>saveProj(false);$("sv2").onclick=()=>saveProj(true);
+function setNick(n,lock){
+ nickv=n;$("nick").value=n;$("nick").readOnly=!!lock;
+ if(!lock){try{localStorage.setItem("sb3d_nick",n)}catch(e){}}
+ refList();
+}
+$("nick").onchange=e=>setNick(e.target.value.trim(),false);
+addEventListener("message",e=>{const d=e.data;if(d&&typeof d==="object"&&typeof d.nick==="string"&&d.nick.trim())setNick(d.nick.trim().slice(0,30),true)});
+
+/* ---- вкладки ---- */
+function setTab(n){
+ tab=n;[1,2,3].forEach(i=>{$("t"+i).style.display=i===n?"block":"none"});
+ Q("[data-tab]").forEach(b=>b.classList.toggle("on",+b.dataset.tab===n));
+ if(n!==3){arm=null;libRef()}
+ if(n===2)refList();
+}
+Q("[data-tab]").forEach(b=>b.onclick=()=>setTab(+b.dataset.tab));
+
+/* ---- запуск ---- */
 const saved=localStorage.getItem(KEY)||"[]";
 try{loadState(saved)}catch(e){group.clear()}
-hist=[saved];refresh();
+hist=[saved];
+let meta={};try{meta=JSON.parse(localStorage.getItem(MKEY)||"{}")}catch(e){}
+cur={id:meta.id||null,name:meta.name||""};$("pnm").value=cur.name;
+if(meta.kind==="loc")snap=true;
+setKind(meta.kind==="loc"?"loc":"item",meta.kind==="loc");
+libRef();setTab(1);
+{
+ const q=new URLSearchParams(location.search).get("nick");
+ if(q&&q.trim())setNick(q.trim().slice(0,30),true);
+ else{let n="";try{n=localStorage.getItem("sb3d_nick")||""}catch(e){}if(n)setNick(n,false)}
+}
 r.setAnimationLoop(()=>{
  group.children.forEach(m=>{const w=m.userData.tw;if(w){w.geometry=m.geometry;w.position.set(-m.position.x,m.position.y,m.position.z);w.rotation.set(m.rotation.x,-m.rotation.y,-m.rotation.z);w.scale.set(-m.scale.x,m.scale.y,m.scale.z)}});
  ruler.visible=group.children.some(m=>m.userData.tw);
+ cutPrev();
  ct.update();boxes.forEach(b=>b.update());r.render(scene,cam);
 });
 </script>
