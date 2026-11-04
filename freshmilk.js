@@ -349,7 +349,7 @@ function initUpload(){
     try{
       const r=await S.rpc('flash_wait');
       const left=r&&!r.error?Number(r.data)||0:0;
-      if(left>0){g('#lim').textContent='Один Flash в сутки. Следующий можно загрузить через '+waitTxt(left)+'.';g('#vfl').hidden=true}
+      if(left>0){g('#lim').textContent='Два Flash в сутки. Следующий можно загрузить через '+waitTxt(left)+'.';g('#vfl').hidden=true}
     }catch(x){}
   };
   $('#fm-new').onclick=()=>{box.hidden=!box.hidden;if(!box.hidden){box.scrollIntoView({behavior:'smooth',block:'nearest'});checkLimit()}};
