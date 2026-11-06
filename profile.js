@@ -165,6 +165,13 @@ css.textContent=`
 [data-theme=dark] #v-prof .pf-big,[data-theme=dark] #v-prof .pf-dp-av{border-color:#1b212b}
 [data-theme=dark] #v-prof .pf-p-card{background:#232a36;border-color:#2d3544}
 [data-theme=dark] #v-prof .pf-p-card img{background:#1b212b}
+#v-prof{--pfc:#fff}
+[data-theme=dark] #v-prof{--pfc:#1b212b}
+#v-prof .pf-cv:after{display:block;content:"";left:0;right:0;top:auto;bottom:0;width:auto;height:80%;border-radius:0;background:linear-gradient(to bottom,transparent,var(--pfc) 96%)}
+#v-prof .pf-big{border:0;box-shadow:0 12px 32px rgba(0,0,0,.35),0 0 28px rgba(244,91,151,.30)}
+#v-prof .pf-ava{animation:pfFloat 5s ease-in-out infinite}
+@keyframes pfFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){#v-prof .pf-ava{animation:none}}
 @media(max-width:1100px){.pf-g,.pf-g.o{grid-template-columns:1fr}.pf-mn{display:flex;flex-wrap:wrap}.pf-mi{width:auto}.pf-f{grid-template-columns:1fr}}
 @media(max-width:640px){.pf-big{width:108px;height:108px;margin-top:-42px}.pf-cv{height:170px}.pf-ss>div{padding:0 12px}}`;
 document.head.appendChild(css);
