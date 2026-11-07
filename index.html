@@ -272,194 +272,411 @@ addEventListener('load',()=>{
   animate();
 </script>
 
-<!-- Холст для мишки -->
-<canvas id="bearCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99999;"></canvas>
+
+
+ 
+
+<!-- Интерактивный физический виджет: мишка и мячики -->
+<canvas id="physicsToysCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99999;"></canvas>
 
 <script>
-  const canvas = document.getElementById('bearCanvas');
-  const ctx = canvas.getContext('2d');
+  (function() {
+    const canvas = document.getElementById('physicsToysCanvas');
+    const ctx = canvas.getContext('2d');
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-  // Параметры мишки
-  const bear = {
-    x: window.innerWidth / 2,
-    y: window.innerHeight / 2,
-    radius: 35, // Размер туловища
-    vx: 0,      // Скорость по X
-    vy: 0,      // Скорость по Y
-    isDragging: false,
-    dragOffsetX: 0,
-    dragOffsetY: 0,
-    prevX: 0,
-    prevY: 0
-  };
+    const gravity = 0.35;
+    const wallBounce = 0.75;
+    const ballBounce = 0.85;  
+    const friction = 0.99;
+    const angularFriction = 0.985;
 
-  const gravity = 0.4;    // Гравитация (чтобы он падал вниз)
-  const bounce = 0.7;     // Упругость отскока от стен (0.7 = с давлением/отскоком)
-  const friction = 0.98;   // Сопротивление воздуха
+    const initialObjects = [
+      { type: 'bear', offsetX: -120, radius: 40, mass: 2.0 },
+      { type: 'soccer', offsetX: 0, radius: 30, mass: 1.0 },
+      { type: 'basket', offsetX: 120, radius: 35, mass: 1.2 }
+    ];
 
-  // Функция рисовки мишки
-  function drawBear() {
-    ctx.save();
-    ctx.translate(bear.x, bear.y);
+    let objects = [];
 
-    // Уши
-    ctx.fillStyle = '#8B4513';
-    ctx.beginPath();
-    ctx.arc(-25, -25, 12, 0, Math.PI * 2); // Левое ухо
-    ctx.arc(25, -25, 12, 0, Math.PI * 2);  // Правое ухо
-    ctx.fill();
+    function initObjects() {
+      const logicalWidth = window.innerWidth;
+      const logicalHeight = window.innerHeight;
+      objects = initialObjects.map(item => ({
+        type: item.type,
+        x: logicalWidth / 2 + item.offsetX,
+        y: 100, // Появляются сверху при загрузке
+        radius: item.radius,
+        mass: item.mass,
+        vx: (Math.random() - 0.5) * 2,
+        vy: 0,
+        angle: 0,
+        vAngle: 0,
+        isDragging: false,
+        dragOffsetX: 0,
+        dragOffsetY: 0,
+        prevX: 0,
+        prevY: 0
+      }));
+    }
 
-    // Внутренности ушек
-    ctx.fillStyle = '#FFC0CB';
-    ctx.beginPath();
-    ctx.arc(-25, -25, 6, 0, Math.PI * 2);
-    ctx.arc(25, -25, 6, 0, Math.PI * 2);
-    ctx.fill();
+    initObjects();
 
-    // Голова / Голова-Тело
-    ctx.fillStyle = '#A0522D';
-    ctx.beginPath();
-    ctx.arc(0, 0, bear.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#5c2d18';
-    ctx.stroke();
+    let activeDragId = null;
 
-    // Мордочка
-    ctx.fillStyle = '#F5DEB3';
-    ctx.beginPath();
-    ctx.arc(0, 8, 16, 0, Math.PI * 2);
-    ctx.fill();
+    // --- Отрисовка мишки ---
+    function drawBear(obj) {
+      const logicalHeight = window.innerHeight;
+      const shadowScale = Math.max(0.3, 1 - (logicalHeight - obj.y - obj.radius) / 400);
+      ctx.fillStyle = `rgba(0, 0, 0, ${0.3 * shadowScale})`;
+      ctx.beginPath();
+      ctx.ellipse(0, logicalHeight - obj.y - 10, obj.radius * shadowScale, obj.radius * 0.25 * shadowScale, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Носик
-    ctx.fillStyle = '#3e1d0f';
-    ctx.beginPath();
-    ctx.arc(0, 3, 5, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#8B4513';
+      ctx.beginPath();
+      ctx.arc(-28, -28, 14, 0, Math.PI * 2);
+      ctx.arc(28, -28, 14, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Глазки
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(-10, -8, 4, 0, Math.PI * 2); // Левый
-    ctx.arc(10, -8, 4, 0, Math.PI * 2);  // Правый
-    ctx.fill();
+      ctx.fillStyle = '#FFB6C1';
+      ctx.beginPath();
+      ctx.arc(-28, -28, 7, 0, Math.PI * 2);
+      ctx.arc(28, -28, 7, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Блик на глазках
-    ctx.fillStyle = '#FFF';
-    ctx.beginPath();
-    ctx.arc(-11, -9, 1.5, 0, Math.PI * 2);
-    ctx.arc(9, -9, 1.5, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#A0522D';
+      ctx.beginPath();
+      ctx.arc(0, 0, obj.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#5C2D18';
+      ctx.stroke();
 
-    // Улыбка
-    ctx.beginPath();
-    ctx.arc(0, 6, 6, 0.2 * Math.PI, 0.8 * Math.PI);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#3e1d0f';
-    ctx.stroke();
+      ctx.fillStyle = '#F5DEB3';
+      ctx.beginPath();
+      ctx.arc(0, 10, 18, 0, Math.PI * 2);
+      ctx.fill();
 
-    ctx.restore();
-  }
+      ctx.fillStyle = '#3E1D0F';
+      ctx.beginPath();
+      ctx.arc(0, 4, 6, 0, Math.PI * 2);
+      ctx.fill();
 
-  // Проверка: находится ли курсор над мишкой
-  function isCursorOnBear(x, y) {
-    const dx = x - bear.x;
-    const dy = y - bear.y;
-    return (dx * dx + dy * dy) <= (bear.radius + 10) * (bear.radius + 10);
-  }
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(-12, -8, 4.5, 0, Math.PI * 2);
+      ctx.arc(12, -8, 4.5, 0, Math.PI * 2);
+      ctx.fill();
 
-  // Отслеживаем движение мыши по всему окну
-  window.addEventListener('mousemove', (e) => {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(-13.5, -9.5, 1.8, 0, Math.PI * 2);
+      ctx.arc(10.5, -9.5, 1.8, 0, Math.PI * 2);
+      ctx.fill();
 
-    if (bear.isDragging) {
-      // Вычисляем скорость броска по разнице координат
-      bear.vx = mouseX - bear.prevX;
-      bear.vy = mouseY - bear.prevY;
-      bear.prevX = mouseX;
-      bear.prevY = mouseY;
+      ctx.beginPath();
+      ctx.arc(0, 8, 7, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#3E1D0F';
+      ctx.stroke();
 
-      bear.x = mouseX - bear.dragOffsetX;
-      bear.y = mouseY - bear.dragOffsetY;
-    } else {
-      // Если мышка над мишкой — включаем захват кликов для canvas, иначе выключаем!
-      if (isCursorOnBear(mouseX, mouseY)) {
-        canvas.style.pointerEvents = 'auto';
-        canvas.style.cursor = 'grab';
+      ctx.fillStyle = 'rgba(255, 105, 180, 0.35)';
+      ctx.beginPath();
+      ctx.arc(-20, 5, 6, 0, Math.PI * 2);
+      ctx.arc(20, 5, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // --- Отрисовка футбольного мяча ---
+    function drawSoccerBall(obj) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(0, 0, obj.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#222';
+      ctx.stroke();
+
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.arc(0, 0, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (let i = 0; i < 5; i++) {
+        const a = (i * Math.PI * 2) / 5;
+        const x = Math.cos(a) * 20;
+        const y = Math.sin(a) * 20;
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // --- Отрисовка баскетбольного мяча ---
+    function drawBasketball(obj) {
+      ctx.fillStyle = '#E65100';
+      ctx.beginPath();
+      ctx.arc(0, 0, obj.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#111';
+      ctx.stroke();
+
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-obj.radius, 0);
+      ctx.lineTo(obj.radius, 0);
+      ctx.moveTo(0, -obj.radius);
+      ctx.lineTo(0, obj.radius);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(-10, 0, 22, -Math.PI / 2, Math.PI / 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(10, 0, 22, Math.PI / 2, (Math.PI * 3) / 2);
+      ctx.stroke();
+    }
+
+    function drawObject(obj) {
+      ctx.save();
+      ctx.translate(obj.x, obj.y);
+      ctx.rotate(obj.angle);
+
+      if (obj.type === 'bear') drawBear(obj);
+      else if (obj.type === 'soccer') drawSoccerBall(obj);
+      else if (obj.type === 'basket') drawBasketball(obj);
+
+      ctx.restore();
+    }
+
+    function isCursorOnObject(x, y, obj) {
+      const dx = x - obj.x;
+      const dy = y - obj.y;
+      const hitRadius = obj.radius + 15;
+      return dx * dx + dy * dy <= hitRadius * hitRadius;
+    }
+
+    function resolveCollisions() {
+      for (let i = 0; i < objects.length; i++) {
+        for (let j = i + 1; j < objects.length; j++) {
+          const obj1 = objects[i];
+          const obj2 = objects[j];
+
+          const dx = obj2.x - obj1.x;
+          const dy = obj2.y - obj1.y;
+          const distance = Math.hypot(dx, dy);
+          const minDist = obj1.radius + obj2.radius;
+
+          if (distance < minDist && distance > 0) {
+            const nx = dx / distance;
+            const ny = dy / distance;
+
+            const overlap = minDist - distance;
+            const totalMass = obj1.mass + obj2.mass;
+
+            if (!obj1.isDragging) {
+              obj1.x -= nx * overlap * (obj2.mass / totalMass);
+              obj1.y -= ny * overlap * (obj2.mass / totalMass);
+            }
+            if (!obj2.isDragging) {
+              obj2.x += nx * overlap * (obj1.mass / totalMass);
+              obj2.y += ny * overlap * (obj1.mass / totalMass);
+            }
+
+            const rvx = obj2.vx - obj1.vx;
+            const rvy = obj2.vy - obj1.vy;
+            const velocityAlongNormal = rvx * nx + rvy * ny;
+
+            if (velocityAlongNormal < 0) {
+              const impulse = -(1 + ballBounce) * velocityAlongNormal / (1 / obj1.mass + 1 / obj2.mass);
+
+              if (!obj1.isDragging) {
+                obj1.vx -= (impulse / obj1.mass) * nx;
+                obj1.vy -= (impulse / obj1.mass) * ny;
+                obj1.vAngle += (Math.random() - 0.5) * 0.2;
+              }
+              if (!obj2.isDragging) {
+                obj2.vx += (impulse / obj2.mass) * nx;
+                obj2.vy += (impulse / obj2.mass) * ny;
+                obj2.vAngle += (Math.random() - 0.5) * 0.2;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Умное управление pointer-events: холст прозрачен для кликов по сайту, 
+    // но активируется, когда курсор наводится на игрушку
+    function updatePointerEvents(x, y) {
+      if (activeDragId !== null) return;
+      const hovered = objects.some(obj => isCursorOnObject(x, y, obj));
+      canvas.style.pointerEvents = hovered ? 'auto' : 'none';
+      canvas.style.cursor = hovered ? 'grab' : 'default';
+    }
+
+    function startDrag(clientX, clientY, identifier) {
+      for (let i = objects.length - 1; i >= 0; i--) {
+        const obj = objects[i];
+        if (isCursorOnObject(clientX, clientY, obj)) {
+          activeDragId = identifier;
+          canvas.style.pointerEvents = 'auto';
+          canvas.style.cursor = 'grabbing';
+          obj.isDragging = true;
+          obj.dragOffsetX = clientX - obj.x;
+          obj.dragOffsetY = clientY - obj.y;
+          obj.prevX = clientX;
+          obj.prevY = clientY;
+          obj.vx = 0;
+          obj.vy = 0;
+          obj.vAngle = 0;
+          
+          objects.splice(i, 1);
+          objects.push(obj);
+          break;
+        }
+      }
+    }
+
+    function moveDrag(clientX, clientY, identifier) {
+      if (activeDragId === identifier) {
+        const obj = objects.find(o => o.isDragging);
+        if (obj) {
+          obj.vx = clientX - obj.prevX;
+          obj.vy = clientY - obj.prevY;
+          obj.prevX = clientX;
+          obj.prevY = clientY;
+
+          obj.x = clientX - obj.dragOffsetX;
+          obj.y = clientY - obj.dragOffsetY;
+
+          obj.vAngle = obj.vx * 0.05;
+          obj.angle += obj.vAngle;
+        }
       } else {
-        canvas.style.pointerEvents = 'none';
+        updatePointerEvents(clientX, clientY);
+      }
+    }
+
+    function endDrag(identifier) {
+      if (activeDragId === identifier) {
+        objects.forEach(obj => {
+          if (obj.isDragging) {
+            obj.isDragging = false;
+          }
+        });
+        activeDragId = null;
         canvas.style.cursor = 'default';
       }
     }
-  });
 
-  window.addEventListener('mousedown', (e) => {
-    if (isCursorOnBear(e.clientX, e.clientY)) {
-      bear.isDragging = true;
-      bear.dragOffsetX = e.clientX - bear.x;
-      bear.dragOffsetY = e.clientY - bear.y;
-      bear.prevX = e.clientX;
-      bear.prevY = e.clientY;
-      canvas.style.cursor = 'grabbing';
-    }
-  });
+    // События мыши
+    window.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY, 'mouse'));
+    window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY, 'mouse'));
+    window.addEventListener('mouseup', () => endDrag('mouse'));
 
-  window.addEventListener('mouseup', () => {
-    if (bear.isDragging) {
-      bear.isDragging = false;
-      canvas.style.cursor = 'grab';
-    }
-  });
+    // Сенсорные события для телефонов/планшетов
+    window.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      startDrag(touch.clientX, touch.clientY, touch.identifier);
+    }, { passive: true });
 
-  // Анимация и физика падения/отскоков
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    if (!bear.isDragging) {
-      // Применяем гравитацию и трение
-      bear.vy += gravity;
-      bear.vx *= friction;
-      bear.vy *= friction;
-
-      bear.x += bear.vx;
-      bear.y += bear.vy;
-
-      // Отскок от пола
-      if (bear.y + bear.radius > canvas.height) {
-        bear.y = canvas.height - bear.radius;
-        bear.vy = -bear.vy * bounce;
+    window.addEventListener('touchmove', (e) => {
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.identifier === activeDragId) {
+          moveDrag(touch.clientX, touch.clientY, touch.identifier);
+          break;
+        }
       }
-      // Отскок от потолка
-      if (bear.y - bear.radius < 0) {
-        bear.y = bear.radius;
-        bear.vy = -bear.vy * bounce;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      let stillActive = false;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === activeDragId) {
+          stillActive = true;
+          break;
+        }
       }
-      // Отскок от правой стены
-      if (bear.x + bear.radius > canvas.width) {
-        bear.x = canvas.width - bear.radius;
-        bear.vx = -bear.vx * bounce;
+      if (!stillActive) {
+        endDrag(activeDragId);
       }
-      // Отскок от левой стены
-      if (bear.x - bear.radius < 0) {
-        bear.x = bear.radius;
-        bear.vx = -bear.vx * bounce;
+    });
+
+    // Автоматический возврат игрушек, если они случайно улетели за границы экрана
+    function checkBounds(obj, logicalWidth, logicalHeight) {
+      if (obj.y > logicalHeight + 200 || obj.y < -500 || obj.x > logicalWidth + 200 || obj.x < -200) {
+        obj.x = logicalWidth / 2 + (Math.random() - 0.5) * 100;
+        obj.y = 50;
+        obj.vx = 0;
+        obj.vy = 0;
       }
     }
 
-    drawBear();
-    requestAnimationFrame(animate);
-  }
+    function animate() {
+      const logicalWidth = window.innerWidth;
+      const logicalHeight = window.innerHeight;
 
-  animate();
+      ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+
+      objects.forEach(obj => {
+        if (!obj.isDragging) {
+          obj.vy += gravity;
+          obj.vx *= friction;
+          obj.vy *= friction;
+
+          obj.x += obj.vx;
+          obj.y += obj.vy;
+
+          obj.angle += obj.vAngle;
+          obj.vAngle *= angularFriction;
+
+          // Отскоки от стен и потолка/пола
+          if (obj.y + obj.radius > logicalHeight) {
+            obj.y = logicalHeight - obj.radius;
+            obj.vy = -obj.vy * wallBounce;
+            obj.vAngle = obj.vx * 0.04;
+          }
+          if (obj.y - obj.radius < 0) {
+            obj.y = obj.radius;
+            obj.vy = -obj.vy * wallBounce;
+            obj.vAngle = -obj.vx * 0.04;
+          }
+          if (obj.x + obj.radius > logicalWidth) {
+            obj.x = logicalWidth - obj.radius;
+            obj.vx = -obj.vx * wallBounce;
+            obj.vAngle = obj.vy * 0.04;
+          }
+          if (obj.x - obj.radius < 0) {
+            obj.x = obj.radius;
+            obj.vx = -obj.vx * wallBounce;
+            obj.vAngle = -obj.vy * 0.04;
+          }
+
+          checkBounds(obj, logicalWidth, logicalHeight);
+        }
+      });
+
+      resolveCollisions();
+      objects.forEach(obj => drawObject(obj));
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  })();
 </script>
-
 </body>
 </html>
