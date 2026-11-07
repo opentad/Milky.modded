@@ -14,35 +14,37 @@ function toast(t){let d=document.getElementById('cm-note');if(!d){d=document.cre
 const css=document.createElement('style');
 css.textContent=`
 .cm{margin-top:12px;padding-top:14px;border-top:1px solid var(--ln)}
-.fd-p .cm{margin:0;padding:14px 24px 18px}
+.fd-p .cm{margin:0;padding:12px 0 0;border-top:0}
 .cm-i{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
-.cm-a{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;background-size:cover;background-position:center}
-.cm-k .cm-a{width:38px;height:38px;font-size:12px;border-radius:12px}
+.cm-a{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;background-size:cover;background-position:center}
+.cm-k .cm-a{width:38px;height:38px;font-size:12px}
 .cm-bw{flex:1;min-width:0}
-.cm-b{background:#f8f9fb;border:1px solid var(--ln);border-radius:20px;padding:12px 16px}
+.cm-b{background:color-mix(in srgb,var(--tx) 8%,transparent);border:1px solid color-mix(in srgb,var(--tx) 16%,transparent);border-radius:18px;padding:12px 16px}
 .cm-b b{display:block;font-size:13.5px;font-weight:700;cursor:pointer;color:var(--tx)}
 .cm-b p{margin:4px 0 6px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;color:var(--tx)}
 .cm-m{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mu)}
-.cm-m button{font-size:11.5px;font-weight:700;color:#566170;display:flex;gap:5px;align-items:center}
+.cm-m button{font-size:11.5px;font-weight:700;color:var(--mu);display:flex;gap:5px;align-items:center}
 .cm-m button svg{width:18px;height:18px}
-.cm-m button.on{color:#f45b97}
-.cm-m button.on svg path{fill:#f45b97!important;stroke:#f45b97!important}
+.cm-m button svg path{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.cm-m button.on{color:#ff5c6a}
+.cm-m button.on svg path{fill:#ff5c6a!important;stroke:#ff5c6a!important}
 .cm-m .dg{color:#e5314a}
-.cm-k{margin-top:10px;padding-left:12px;border-left:2px solid #e8edf2}
+.cm-k{margin-top:10px;padding-left:12px;border-left:2px solid color-mix(in srgb,var(--tx) 16%,transparent)}
 .cm-k .cm-k{padding-left:0;border-left:0}
-.cm-more{display:block;margin:4px 0 10px;font-weight:700;font-size:13px;color:#f45b97}
+.cm-more{display:block;margin:4px 0 10px;font-weight:700;font-size:13px;color:#8b7bf0}
 .cm-f{display:flex;gap:10px;margin:6px 0 10px}
-.cm-f input{flex:1;min-width:0;height:46px;border:1px solid var(--ln);border-radius:16px;padding:0 16px;font:inherit;outline:0;color:var(--tx);background:#fff}
-.cm-f button{width:56px;height:46px;border-radius:16px;background:#f45b97;color:#fff;display:grid;place-items:center;flex:none}
+.cm-f input{flex:1;min-width:0;height:46px;border:1px solid color-mix(in srgb,var(--tx) 16%,transparent);border-radius:23px;padding:0 16px;font:inherit;outline:0;color:var(--tx);background:color-mix(in srgb,var(--tx) 6%,transparent)}
+.cm-f button{width:56px;height:46px;border-radius:23px;background:#8b7bf0;color:#fff;display:grid;place-items:center;flex:none}
 .cm-f svg{width:20px;height:20px}
+.cm-f svg path{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
 .cm-off{color:var(--mu);font-size:13px}
-.cm-fio{display:block;font-size:10px;font-weight:300;color:#9aa1a9;margin-top:1px}
+.cm-fio{display:block;font-size:11px;font-weight:300;color:var(--mu);margin-top:1px}
 .cm-b{position:relative}
 .cm-b>b{padding-right:34px}
 .cm-b .pm-w{position:absolute;top:4px;right:4px}
 .pm-w{display:inline-flex;align-items:center;flex:none}
-.pm-b{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:transparent;color:#8a94a3;display:grid;place-items:center;cursor:pointer}
-.pm-b:hover{background:rgba(0,0,0,.06)}
+.pm-b{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mu);display:grid;place-items:center;cursor:pointer}
+.pm-b:hover{background:rgba(128,128,128,.18)}
 .pm-h{display:none!important}
 .pf-tm,.fd-tm{white-space:nowrap}
 #pm-pop{position:fixed;z-index:10000;min-width:170px;padding:6px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
