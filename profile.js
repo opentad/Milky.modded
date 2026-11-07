@@ -165,9 +165,8 @@ css.textContent=`
 [data-theme=dark] #v-prof .pf-big,[data-theme=dark] #v-prof .pf-dp-av{border-color:#1b212b}
 [data-theme=dark] #v-prof .pf-p-card{background:#232a36;border-color:#2d3544}
 [data-theme=dark] #v-prof .pf-p-card img{background:#1b212b}
-#v-prof{--pfc:#fff}
-[data-theme=dark] #v-prof{--pfc:#1b212b}
-#v-prof .pf-cv:after{display:block;content:"";left:0;right:0;top:auto;bottom:0;width:auto;height:80%;border-radius:0;background:linear-gradient(to bottom,transparent,var(--pfc) 96%)}
+#v-prof .pf-cv{border-radius:0;-webkit-mask-image:linear-gradient(to bottom,#000 30%,transparent 100%);mask-image:linear-gradient(to bottom,#000 30%,transparent 100%)}
+#v-prof .pf-hd{background:transparent;box-shadow:none}
 #v-prof .pf-big{border:0;box-shadow:0 12px 32px rgba(0,0,0,.35),0 0 28px rgba(244,91,151,.30)}
 #v-prof .pf-ava{animation:pfFloat 5s ease-in-out infinite}
 @keyframes pfFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
