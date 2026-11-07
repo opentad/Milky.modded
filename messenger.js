@@ -617,9 +617,9 @@ const st5=document.createElement('style');st5.textContent='.mg-fr{align-items:fl
 }`.replace(/§/g,'.mg:not(.z)');
 document.head.appendChild(st6);
  const st7=document.createElement('style');st7.textContent=`
-#v-msg.mg{position:fixed;left:var(--rw,0px);top:0;right:0;bottom:0;width:auto;max-width:none;margin:0;padding:0;z-index:5;background:#fff}
+#v-msg.mg{position:fixed;left:var(--rw,0px);top:84px;right:0;bottom:0;width:auto;max-width:none;margin:0;padding:0;z-index:5;background:#fff}
 #v-msg.mg .mg-box{height:100%;min-height:0;border-radius:0;box-shadow:none}
-#v-msg.mg.fs{left:0}
+#v-msg.mg.fs{left:0;top:0}
 @media(max-width:820px){
  #v-msg.mg{left:0;top:var(--ht,64px)}
  #v-msg.mg.fs{top:0}
