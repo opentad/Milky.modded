@@ -33,8 +33,8 @@ input,textarea,select{font:inherit;color:var(--tx)}
 .mc{display:flex;align-items:center;font-size:14px;font-weight:600;color:#b8c0dc}
 .coin{display:inline-block;position:relative;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f0a500);box-shadow:inset 0 0 0 1px rgba(160,100,0,.35);margin-right:6px}
 .coin::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='250 390 1440 1180' fill='none' stroke-width='130' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath transform='translate(32 36)' d='M466 548V1430M1478 548V1430M466 548L966 1428L1478 548M352 880H1582M340 1090H1592' stroke='%23a86a00' stroke-opacity='.75'/%3E%3Cpath transform='translate(-28 -32)' d='M466 548V1430M1478 548V1430M466 548L966 1428L1478 548M352 880H1582M340 1090H1592' stroke='%23fff4b8'/%3E%3Cpath d='M466 548V1430M1478 548V1430M466 548L966 1428L1478 548M352 880H1582M340 1090H1592' stroke='%23f6b81f'/%3E%3C/svg%3E") center/80% no-repeat}
-.me{width:38px;height:38px;border-radius:50%;overflow:hidden;background:#1a2342;box-shadow:0 0 0 1.5px rgba(185,166,232,.5)}
-.me img{width:100%;height:100%;object-fit:cover}
+.myava{width:38px;height:38px;border-radius:50%;overflow:hidden;background:#1a2342;box-shadow:0 0 0 1.5px rgba(185,166,232,.5)}
+.myava img{width:100%;height:100%;object-fit:cover}
 .bd2{position:absolute;right:-6px;bottom:-5px;min-width:14px;height:14px;border-radius:7px;background:var(--rose);color:#2a1020;font-size:8.5px;font-weight:700;line-height:14px;text-align:center;padding:0 3px}
 
 /* основная часть */
@@ -130,7 +130,7 @@ const TABS=[['feed','feed','Лента'],['msg','chat','Чат'],['fm','flych','
 const TILES=[['office','office','MilkOffice'],['games','game','Игры'],['market','crown','Маркетплейс']];
 
 $('#bar').innerHTML='<nav class="tabs">'+TABS.map(t=>`<button class="tab" data-v="${t[0]}" aria-label="${t[2]}">${ic(t[1])}<span>${t[2]}</span>${t[0]==='msg'?'<b class="bd2 mgbd mgbd2" hidden>1</b>':''}</button>`).join('')+'</nav>'+
-  '<div class="side"><span class="mc"><span class="coin"></span><span class="cn">…</span></span><button class="me" id="me" aria-label="Профиль"><img src="ava.jpg" alt=""></button></div>';
+  '<div class="side"><span class="mc"><span class="coin"></span><span class="cn">…</span></span><button class="myava" id="me" aria-label="Профиль"><img src="ava.jpg" alt=""></button></div>';
 $('#tiles').innerHTML=TILES.map(t=>`<button class="tile" data-v="${t[0]}"><i>${ic(t[1])}</i>${t[2]}</button>`).join('');
 
 /* ---------- переключение экранов ---------- */
@@ -272,9 +272,194 @@ addEventListener('load',()=>{
   animate();
 </script>
 
+<!-- Холст для мишки -->
+<canvas id="bearCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99999;"></canvas>
 
- 
+<script>
+  const canvas = document.getElementById('bearCanvas');
+  const ctx = canvas.getContext('2d');
 
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // Параметры мишки
+  const bear = {
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+    radius: 35, // Размер туловища
+    vx: 0,      // Скорость по X
+    vy: 0,      // Скорость по Y
+    isDragging: false,
+    dragOffsetX: 0,
+    dragOffsetY: 0,
+    prevX: 0,
+    prevY: 0
+  };
+
+  const gravity = 0.4;    // Гравитация (чтобы он падал вниз)
+  const bounce = 0.7;     // Упругость отскока от стен (0.7 = с давлением/отскоком)
+  const friction = 0.98;   // Сопротивление воздуха
+
+  // Функция рисовки мишки
+  function drawBear() {
+    ctx.save();
+    ctx.translate(bear.x, bear.y);
+
+    // Уши
+    ctx.fillStyle = '#8B4513';
+    ctx.beginPath();
+    ctx.arc(-25, -25, 12, 0, Math.PI * 2); // Левое ухо
+    ctx.arc(25, -25, 12, 0, Math.PI * 2);  // Правое ухо
+    ctx.fill();
+
+    // Внутренности ушек
+    ctx.fillStyle = '#FFC0CB';
+    ctx.beginPath();
+    ctx.arc(-25, -25, 6, 0, Math.PI * 2);
+    ctx.arc(25, -25, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Голова / Голова-Тело
+    ctx.fillStyle = '#A0522D';
+    ctx.beginPath();
+    ctx.arc(0, 0, bear.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#5c2d18';
+    ctx.stroke();
+
+    // Мордочка
+    ctx.fillStyle = '#F5DEB3';
+    ctx.beginPath();
+    ctx.arc(0, 8, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Носик
+    ctx.fillStyle = '#3e1d0f';
+    ctx.beginPath();
+    ctx.arc(0, 3, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Глазки
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(-10, -8, 4, 0, Math.PI * 2); // Левый
+    ctx.arc(10, -8, 4, 0, Math.PI * 2);  // Правый
+    ctx.fill();
+
+    // Блик на глазках
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(-11, -9, 1.5, 0, Math.PI * 2);
+    ctx.arc(9, -9, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Улыбка
+    ctx.beginPath();
+    ctx.arc(0, 6, 6, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#3e1d0f';
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // Проверка: находится ли курсор над мишкой
+  function isCursorOnBear(x, y) {
+    const dx = x - bear.x;
+    const dy = y - bear.y;
+    return (dx * dx + dy * dy) <= (bear.radius + 10) * (bear.radius + 10);
+  }
+
+  // Отслеживаем движение мыши по всему окну
+  window.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    if (bear.isDragging) {
+      // Вычисляем скорость броска по разнице координат
+      bear.vx = mouseX - bear.prevX;
+      bear.vy = mouseY - bear.prevY;
+      bear.prevX = mouseX;
+      bear.prevY = mouseY;
+
+      bear.x = mouseX - bear.dragOffsetX;
+      bear.y = mouseY - bear.dragOffsetY;
+    } else {
+      // Если мышка над мишкой — включаем захват кликов для canvas, иначе выключаем!
+      if (isCursorOnBear(mouseX, mouseY)) {
+        canvas.style.pointerEvents = 'auto';
+        canvas.style.cursor = 'grab';
+      } else {
+        canvas.style.pointerEvents = 'none';
+        canvas.style.cursor = 'default';
+      }
+    }
+  });
+
+  window.addEventListener('mousedown', (e) => {
+    if (isCursorOnBear(e.clientX, e.clientY)) {
+      bear.isDragging = true;
+      bear.dragOffsetX = e.clientX - bear.x;
+      bear.dragOffsetY = e.clientY - bear.y;
+      bear.prevX = e.clientX;
+      bear.prevY = e.clientY;
+      canvas.style.cursor = 'grabbing';
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (bear.isDragging) {
+      bear.isDragging = false;
+      canvas.style.cursor = 'grab';
+    }
+  });
+
+  // Анимация и физика падения/отскоков
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!bear.isDragging) {
+      // Применяем гравитацию и трение
+      bear.vy += gravity;
+      bear.vx *= friction;
+      bear.vy *= friction;
+
+      bear.x += bear.vx;
+      bear.y += bear.vy;
+
+      // Отскок от пола
+      if (bear.y + bear.radius > canvas.height) {
+        bear.y = canvas.height - bear.radius;
+        bear.vy = -bear.vy * bounce;
+      }
+      // Отскок от потолка
+      if (bear.y - bear.radius < 0) {
+        bear.y = bear.radius;
+        bear.vy = -bear.vy * bounce;
+      }
+      // Отскок от правой стены
+      if (bear.x + bear.radius > canvas.width) {
+        bear.x = canvas.width - bear.radius;
+        bear.vx = -bear.vx * bounce;
+      }
+      // Отскок от левой стены
+      if (bear.x - bear.radius < 0) {
+        bear.x = bear.radius;
+        bear.vx = -bear.vx * bounce;
+      }
+    }
+
+    drawBear();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>
 
 </body>
 </html>
