@@ -1,4 +1,4 @@
-/* Милки-соцсеть: комната модераторов и жалобы */
+/* Милки-соцсеть: комната модераторов и жалобы (тёмная тема) */
 (function(){
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const PAL=['#f0a04b','#e5617a','#8774e1','#4fb9e6','#5cc08a','#e8793a','#4a8fd9'];
@@ -21,68 +21,69 @@ const IC={
  biz:'M4 8h16v11H4zM9 8V5h6v3M4 13h16'};
 const ic=(k,w)=>`<svg viewBox="0 0 24 24" style="width:${w||18}px;height:${w||18}px;flex:none"><path d="${IC[k]}"${k==='dots'?' style="stroke-width:3.2"':''}/></svg>`;
 const SB_=()=>window.SB||null;
-function note(t){let d=document.getElementById('md-note');if(!d){d=document.createElement('div');d.id='md-note';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#34404e;color:#fff;padding:12px 20px;border-radius:16px;z-index:200;font-size:13px;max-width:90vw';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
+function note(t){let d=document.getElementById('md-note');if(!d){d=document.createElement('div');d.id='md-note';d.style.cssText='position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2a3560;color:#fff;padding:12px 20px;border-radius:16px;z-index:200;font-size:13px;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.4)';document.body.appendChild(d)}d.textContent=t;d.hidden=false;clearTimeout(d._t);d._t=setTimeout(()=>d.hidden=true,3500)}
 function modal(h){const d=document.createElement('div');d.className='md-bg';d.innerHTML='<div class="md-box">'+h+'</div>';d.addEventListener('click',e=>{if(e.target===d)d.remove()});document.body.appendChild(d);return d}
 
 const css=document.createElement('style');
 css.textContent=`
 #v-mod{padding-bottom:70px}
 .md-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-top:6px}
-.md-h h1{font-size:30px;font-weight:800;color:var(--tx)}
+.md-h h1{font-size:28px;font-weight:700;color:var(--tx)}
 .md-h p{color:var(--mu);margin:4px 0 16px}
-.md-back{color:var(--bt);font-weight:700;margin-bottom:6px}
+.md-back{color:var(--lav);font-weight:700;margin-bottom:6px}
 .md-rel{position:relative;flex:none}
-.md-ib{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:#8a929b;background:#fff}
-.md-pop{position:absolute;right:0;top:46px;z-index:20;background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.18);padding:6px;min-width:210px}
-.md-pop button{display:flex;gap:10px;align-items:center;width:100%;height:42px;padding:0 14px;border-radius:12px;font-weight:600;font-size:13.5px;color:#34404e;text-align:left}
-.md-pop button:hover{background:var(--pl)}
-.md-pop .rd{color:#e5314a}
-.md-tabs{display:flex;gap:6px;background:#eef3f8;border-radius:16px;padding:5px;margin-bottom:12px}
-.md-tabs button{flex:1;height:40px;border-radius:12px;font-weight:600;font-size:13px;color:#8a929b}
-.md-tabs button.on{background:#fff;color:var(--bt);box-shadow:0 2px 10px rgba(0,0,0,.05)}
-.md-s{display:flex;gap:10px;align-items:center;height:46px;padding:0 16px;border:1px solid #e3e8ee;border-radius:16px;background:#fff;color:#9aa5b0;margin-bottom:14px}
+.md-ib{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:var(--mu);background:var(--card);border:1px solid var(--ln)}
+.md-pop{position:absolute;right:0;top:46px;z-index:20;background:var(--s2);border:1px solid var(--ln);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.55);padding:6px;min-width:210px}
+.md-pop button{display:flex;gap:10px;align-items:center;width:100%;height:42px;padding:0 14px;border-radius:12px;font-weight:600;font-size:13.5px;color:var(--tx);text-align:left}
+.md-pop button:active{background:var(--pl)}
+.md-pop .rd{color:var(--rose)}
+.md-tabs{display:flex;gap:6px;background:rgba(255,255,255,.05);border-radius:16px;padding:5px;margin-bottom:12px}
+.md-tabs button{flex:1;height:40px;border-radius:12px;font-weight:600;font-size:13px;color:var(--mu)}
+.md-tabs button.on{background:rgba(185,166,232,.14);color:var(--lav);box-shadow:inset 0 0 0 1px rgba(185,166,232,.28)}
+.md-s{display:flex;gap:10px;align-items:center;height:46px;padding:0 16px;border:1px solid var(--ln);border-radius:16px;background:var(--card);color:var(--mu);margin-bottom:14px}
 .md-s input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;color:var(--tx)}
-.md-row{display:flex;gap:12px;align-items:center;background:#fff;border-radius:18px;padding:10px 14px;margin-bottom:8px;box-shadow:0 4px 18px rgba(0,0,0,.04)}
+.md-row{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--ln);border-radius:18px;padding:10px 14px;margin-bottom:8px}
 .md-a{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;background-size:cover;background-position:center}
 .md-i{flex:1;min-width:0}
-.md-i b{display:block;font-size:14.5px}
+.md-i b{display:block;font-size:14.5px;color:var(--tx)}
 .md-i small{color:var(--mu);font-size:12px}
-.md-i em{color:#e5314a;font-style:normal;font-weight:600}
+.md-i em{color:var(--rose);font-style:normal;font-weight:600}
 .md-e{text-align:center;color:var(--mu);padding:30px 0}
-.md-card{background:#fff;border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 4px 18px rgba(0,0,0,.04)}
-.md-ct{display:flex;justify-content:space-between}
-.md-sn{background:#f4f6f8;border-radius:12px;padding:10px 12px;margin:8px 0;overflow-wrap:anywhere;white-space:pre-wrap}
+.md-card{background:var(--card);border:1px solid var(--ln);border-radius:20px;padding:16px;margin-bottom:12px;color:var(--tx)}
+.md-card small{color:var(--mu)}
+.md-ct{display:flex;justify-content:space-between;gap:10px}
+.md-sn{background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px;margin:8px 0;overflow-wrap:anywhere;white-space:pre-wrap;color:#c9d0e8}
 .md-bt{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:10px}
-.md-bt button{height:40px;padding:0 18px;border-radius:14px;font-weight:700;background:#eef3f8}
+.md-bt button{height:40px;padding:0 18px;border-radius:14px;font-weight:700;background:rgba(255,255,255,.08);color:var(--tx)}
 .md-bt .ok{background:var(--cy);color:#fff}
-.md-bt .rd,.md-bt .rd2{background:#e5314a;color:#fff}
-.md-code{font-size:28px;font-weight:800;letter-spacing:5px;color:var(--bt);margin:6px 0}
-.md-w{color:#d97706;font-weight:600;font-size:12.5px;margin-top:8px}
-.md-bg{position:fixed;inset:0;z-index:150;background:rgba(15,25,35,.45);display:grid;place-items:center;padding:20px}
-.md-box{background:#fff;border-radius:22px;padding:22px;width:min(420px,100%);max-height:90vh;overflow:auto}
-.md-box h3{font-size:18px;font-weight:800;margin-bottom:8px}
-.md-p{color:#566170;line-height:1.5;margin-bottom:10px}
-.md-box textarea,.md-box select{width:100%;border:1px solid #e3e8ee;border-radius:14px;padding:12px;font:inherit;outline:0;margin-bottom:8px}
+.md-bt .rd,.md-bt .rd2{background:#d9475f;color:#fff}
+.md-bt button:disabled{opacity:.55}
+.md-code{font-size:28px;font-weight:800;letter-spacing:5px;color:var(--lav);margin:6px 0}
+.md-w{color:#f2b35a;font-weight:600;font-size:12.5px;margin-top:8px}
+.md-bg{position:fixed;inset:0;z-index:150;background:rgba(4,6,14,.65);display:grid;place-items:center;padding:20px}
+.md-box{background:var(--s2);border:1px solid var(--ln);color:var(--tx);border-radius:22px;padding:22px;width:min(420px,100%);max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.md-box h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.md-p{color:#b8c0dc;line-height:1.5;margin-bottom:10px}
+.md-box textarea,.md-box select{width:100%;border:1px solid var(--ln);background:rgba(255,255,255,.05);color:var(--tx);border-radius:14px;padding:12px;font:inherit;outline:0;margin-bottom:8px}
+.md-box select option{background:#121a33;color:#e8ecf8}
 .md-box textarea{height:84px;resize:none}
-.md-er{color:#d97706;font-weight:600;font-size:12.5px;min-height:16px}
-.md-red{width:100%;height:42px;border-radius:14px;background:#e5314a;color:#fff;font-weight:700}`;
+.md-er{color:#f2b35a;font-weight:600;font-size:12.5px;min-height:16px}
+.md-red{width:100%;height:42px;border-radius:14px;background:#d9475f;color:#fff;font-weight:700}`;
 document.head.appendChild(css);
 
-let isMod=false,P=[],PM={},B={},R=[],W=[],Z=[],tab='f',q='',view='list',menu=null;
+let isMod=false,P=[],PM={},B={},R=[],W=[],Z=[],tab='f',q='',view='list',menu=null,unArm=null;
 const sec=document.createElement('section');sec.id='v-mod';sec.hidden=true;
 document.querySelector('.main').appendChild(sec);
 
-/* пункт в боковом меню: только для модераторов */
+/* плитка на странице «Ещё»: только для модераторов */
 function syncMenu(){
-  const d=document.getElementById('drawer');if(!d)return;
-  let b=d.querySelector('[data-modroom]');
+  const t=document.getElementById('tiles');if(!t)return;
+  let b=t.querySelector('[data-v="mod"]');
   if(!isMod){if(b)b.remove();return}
   if(b)return;
-  const pr=[...d.querySelectorAll('.mi')].find(x=>x.textContent.trim()==='Профиль');if(!pr)return;
-  b=document.createElement('button');b.className='mi';b.dataset.modroom='1';
-  b.innerHTML=ic('ok',17)+'Комната модераторов';
-  b.addEventListener('click',e=>{e.stopPropagation();document.body.classList.remove('menu');MS.show('mod')});
-  pr.before(b);
+  b=document.createElement('button');b.className='tile';b.dataset.v='mod';
+  b.innerHTML='<i>'+ic('ok',21)+'</i>Комната модераторов';
+  t.appendChild(b);
 }
 async function init(){
   const sb=SB_();if(!sb)return;
@@ -93,6 +94,8 @@ async function init(){
 }
 document.addEventListener('sb',()=>{init();const sb=SB_();if(sb)sb.auth.onAuthStateChange(()=>setTimeout(init,0))});
 if(SB_())init();
+/* на случай, если клиент появится позже */
+let initTry=0;const initT=setInterval(()=>{if(SB_()){clearInterval(initT);init()}else if(++initTry>50)clearInterval(initT)},200);
 
 async function load(){
   const sb=SB_();
@@ -130,7 +133,7 @@ function list(){
   const L=P.filter(x=>(tab==='n'?!x.gender:x.gender===tab)&&(!ql||((x.fio||'')+' '+(x.name||'')).toLowerCase().includes(ql)));
   document.getElementById('md-l').innerHTML=L.map(x=>{
     const b=B[x.id],nm=x.fio||x.name||'Без имени';
-    return `<div class="md-row"><span class="md-a" style="background-color:${col(x.name)};${x.avatar_url?`background-image:url('${esc(x.avatar_url)}')`:''}">${x.avatar_url?'':esc(ini(x.name))}</span><div class="md-i"><b>${esc(nm)}</b><small>${esc(x.name||'')}${b?` · <em>Бан ${b.until_at?'до '+dt(b.until_at):'навсегда'}: ${esc(b.reason||'')}</em>`:''}</small></div><div class="md-rel"><button class="md-ib" data-rm="${x.id}" aria-label="Ещё">${ic('dots')}</button>${menu===x.id?`<div class="md-pop"><button data-op="${x.id}">Открыть профиль</button>${b?`<button data-unban="${x.id}">${ic('ban')}Снять бан</button>`:`<button data-ban="${x.id}">${ic('ban')}Бан</button>`}<button class="rd" data-del="${x.id}">${ic('trash')}Удалить аккаунт</button></div>`:''}</div></div>`}).join('')||'<div class="md-e">Никого не найдено</div>';
+    return `<div class="md-row"><span class="md-a" style="background-color:${col(x.name)};${x.avatar_url?`background-image:url('${esc(x.avatar_url)}')`:''}">${x.avatar_url?'':esc(ini(x.name))}</span><div class="md-i"><b>${esc(nm)}</b><small>${esc(x.name||'')}${b?` · <em>Бан ${b.until_at?'до '+dt(b.until_at):'навсегда'}: ${esc(b.reason||'')}</em>`:''}</small></div><div class="md-rel"><button class="md-ib" data-rm="${x.id}" aria-label="Ещё">${ic('dots')}</button>${menu===x.id?`<div class="md-pop"><button data-op="${x.id}">Открыть профиль</button>${b?`<button data-unban="${x.id}">${ic('ban')}${unArm===x.id?'Точно снять бан?':'Снять бан'}</button>`:`<button data-ban="${x.id}">${ic('ban')}Бан</button>`}<button class="rd" data-del="${x.id}">${ic('trash')}Удалить аккаунт</button></div>`:''}</div></div>`}).join('')||'<div class="md-e">Никого не найдено</div>';
 }
 function reps(){
   const K={post:'Пост',comment:'Комментарий',profile:'Профиль'};
@@ -163,10 +166,14 @@ sec.addEventListener('click',async e=>{
   else if(b('[data-pws]')){view='pw';menu=null;draw()}
   else if(b('[data-bzs]')){view='biz';menu=null;draw()}
   else if(b('[data-back]')){view='list';draw()}
-  else if((x=b('[data-rm]'))){menu=menu===x.dataset.rm?null:x.dataset.rm;list()}
+  else if((x=b('[data-rm]'))){menu=menu===x.dataset.rm?null:x.dataset.rm;unArm=null;list()}
   else if((x=b('[data-op]'))){menu=null;list();MS.show('prof');if(window.PF)PF.open(x.dataset.op)}
   else if((x=b('[data-ban]'))){menu=null;list();banModal(x.dataset.ban)}
-  else if((x=b('[data-unban]'))){menu=null;list();unban(x.dataset.unban)}
+  else if((x=b('[data-unban]'))){
+    const id=x.dataset.unban;
+    if(unArm!==id){unArm=id;list();setTimeout(()=>{if(unArm===id){unArm=null;if(menu===id)list()}},4000);return}
+    unArm=null;menu=null;list();unban(id);
+  }
   else if((x=b('[data-del]'))){menu=null;list();delModal(x.dataset.del)}
   else if((x=b('[data-rdel]'))){const r=R.find(z=>z.id==x.dataset.rdel);if(r)repDel(r)}
   else if((x=b('[data-rban]'))){const r=R.find(z=>z.id==x.dataset.rban);if(r)banModal(r.target_user,r.id)}
@@ -215,14 +222,13 @@ function banModal(uid,rid){
   });
 }
 async function unban(uid){
-  if(!confirm('Снять бан?'))return;
   const r=await SB_().rpc('mod_unban',{p_user:uid});
   if(r.error)return note(r.error.message);
   note('Бан снят');load();
 }
 function delModal(uid){
   const x=PM[uid]||{};
-  const d=modal(`<h3 style="color:#e5314a">Удалить аккаунт?</h3><p class="md-p"><b>${esc(x.fio||x.name||'')}</b><br>Будут удалены аккаунт, посты и сообщения. Это нельзя отменить.</p><div class="md-er" id="md-er"></div><div class="md-bt"><button data-c>Отмена</button><button class="rd2" data-ok>Удалить навсегда</button></div>`);
+  const d=modal(`<h3 style="color:var(--rose)">Удалить аккаунт?</h3><p class="md-p"><b>${esc(x.fio||x.name||'')}</b><br>Будут удалены аккаунт, посты и сообщения. Это нельзя отменить.</p><div class="md-er" id="md-er"></div><div class="md-bt"><button data-c>Отмена</button><button class="rd2" data-ok>Удалить навсегда</button></div>`);
   d.addEventListener('click',async e=>{
     const bt=e.target.closest('button');if(!bt)return;
     if(bt.hasAttribute('data-c'))d.remove();
@@ -271,7 +277,7 @@ function repDel(r){
 /* общая кнопка «Пожаловаться» (и «Удалить» для модераторов) для постов, комментариев и профилей */
 window.MOD={menu(kind,id,uid,done){
   const T={post:'пост',comment:'комментарий',profile:'профиль'}[kind];
-  const d=modal(`<h3>Пожаловаться на ${T}</h3><p class="md-p">Опиши, что не так. Жалоба уйдёт модераторам.</p><textarea id="md-n" maxlength="500" placeholder="Что не так?"></textarea><div class="md-er" id="md-er"></div><div class="md-bt"><button data-c>Отмена</button><button class="ok" data-s>Отправить</button></div>${isMod&&kind!=='profile'?`<hr style="margin:14px 0;border:0;border-top:1px solid #eee"><h3 style="color:#e5314a">Удалить (модератор)</h3><textarea id="md-r" maxlength="300" placeholder="Причина удаления (обязательно)"></textarea><div class="md-er" id="md-er2"></div><button class="md-red" data-d>Удалить ${T}</button>`:''}`);
+  const d=modal(`<h3>Пожаловаться на ${T}</h3><p class="md-p">Опиши, что не так. Жалоба уйдёт модераторам.</p><textarea id="md-n" maxlength="500" placeholder="Что не так?"></textarea><div class="md-er" id="md-er"></div><div class="md-bt"><button data-c>Отмена</button><button class="ok" data-s>Отправить</button></div>${isMod&&kind!=='profile'?`<hr style="margin:14px 0;border:0;border-top:1px solid var(--ln)"><h3 style="color:var(--rose)">Удалить (модератор)</h3><textarea id="md-r" maxlength="300" placeholder="Причина удаления (обязательно)"></textarea><div class="md-er" id="md-er2"></div><button class="md-red" data-d>Удалить ${T}</button>`:''}`);
   d.addEventListener('click',async e=>{
     const bt=e.target.closest('button');if(!bt)return;
     if(bt.hasAttribute('data-c'))d.remove();
